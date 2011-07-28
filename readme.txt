@@ -3,7 +3,7 @@ Contributors: wiziapp
 Tags: Iphone, iphone app, appstore, App Store, native, ipod, ios
 Requires at least: 2.8
 Tested up to: 3.2
-Stable tag: v1.2.1c
+Stable tag: v1.2.2b
 License: GPLv2
 
 Turn your blog into a native iPhone app and be available on the App Store in just a few simple steps. Install now and see live simulation of your App.
