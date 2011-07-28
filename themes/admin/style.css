@@ -3,6 +3,7 @@
     height: 448px;
     width: 546px;
     overflow: auto;
+    z-index: 999;
 }
 .wiziapp_errors_container.s_container{
     background: url(@@@WIZIAPP_CDN@@@/images/cms/winSmall.png) no-repeat;

@@ -451,10 +451,34 @@ function wiziapp_activate_display(){
                 var overlayParams = {
                     top: 100,
                     left: (screen.width / 2) - ($box.outerWidth() / 2),
-                    mask: {
+                    /**mask: {
                         color: '#444444',
                         loadSpeed: 100,
                         opacity: 0.9
+                    },*/
+                    onClose: function(){
+                        jQuery("#wiziapp_error_mask").hide();
+                    },
+                    onBeforeLoad: function(){
+                        var $toCover = jQuery('#wpbody');
+                        var $mask = jQuery('#wiziapp_error_mask');
+                        if ( $mask.length == 0 ){
+                            $mask = jQuery('<div></div>').attr("id", "wiziapp_error_mask");
+                            jQuery("body").append($mask);
+                        }
+
+                        $mask.css({
+                            position:'absolute',
+                            top: $toCover.offset().top,
+                            left: $toCover.offset().left,
+                            width: $toCover.outerWidth(),
+                            height: $toCover.outerHeight(),
+                            display: 'block',
+                            opacity: 0.9,
+                            backgroundColor: '#444444'
+                        });
+
+                        $mask = $toCover = null;
                     },
                     // disable this for modal dialog-type of overlays
                     closeOnClick: false,
@@ -464,7 +488,10 @@ function wiziapp_activate_display(){
                     load: true
                 };
                 if ( !got_critical_errors ){
-                    overlayParams.onClose = startProcessing;
+                    overlayParams.onClose = function(){
+                        jQuery("#wiziapp_error_mask").hide();
+                        startProcessing();
+                    };
                 }
                 $box.overlay(overlayParams);
             }

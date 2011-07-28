@@ -13,20 +13,34 @@ class WiziappLoader
     private $defaultVersion = '1.2.0';
     private $version = WIZIAPP_P_VERSION;
     private $prefix = 'wiziapp';
-    
-    function __construct(){
-        // Make sure the include path is correct
-        $path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'blocks' . PATH_SEPARATOR;
-        $path .= dirname(__FILE__) . DIRECTORY_SEPARATOR . 'blocks' . DIRECTORY_SEPARATOR . 'components';
-        $path .= PATH_SEPARATOR . dirname(__FILE__) . DIRECTORY_SEPARATOR . 'classes';
-        set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
+    function __construct(){
+        $this->_checkSetIncludePath();
         // Register this class as autoloader for classes
         spl_autoload_register(array($this, 'loadClass'));
 
         $this->setVersion();
         $this->loadVersions();
         $this->load();
+    }
+
+    private function _checkSetIncludePath(){
+        /**
+         * Some plugins like wordpress-backup-to-dropbox version 0.8 might do something silly like:
+         * ini_set( 'include_path', dirname( __FILE__ ) . '/PEAR_Includes' . PATH_SEPARATOR . DEFAULT_INCLUDE_PATH );
+         * which will remove the include path from our path....
+         * so we need to run this check and set the path everytime just in case...
+         */
+        $currentPath = get_include_path();
+        $currentFilePath = dirname(__FILE__);
+        if ( strpos($currentPath, $currentFilePath) === FALSE ){
+            // Make sure the include path is correct
+            $path =  $currentFilePath . DIRECTORY_SEPARATOR . 'blocks' . PATH_SEPARATOR;
+            $path .= $currentFilePath . DIRECTORY_SEPARATOR . 'blocks' . DIRECTORY_SEPARATOR . 'components';
+            $path .= PATH_SEPARATOR . $currentFilePath . DIRECTORY_SEPARATOR . 'classes';
+
+            set_include_path($currentPath . PATH_SEPARATOR . $path);
+        }
     }
 
     protected function setVersion(){
@@ -43,6 +57,7 @@ class WiziappLoader
 
     protected function loadVersions(){
         if ( empty($this->versions) ){
+            $this->_checkSetIncludePath();
             $this->versions = require_once('version_routes.inc.php');
         }
     }
@@ -68,11 +83,12 @@ class WiziappLoader
     }
 
     public function loadClass($className){
+
         // Make sure the class is ours
         if ( stripos($className, $this->prefix) === 0 ){
             if ( !class_exists($className, FALSE)  && !interface_exists($className, FALSE) ){
+                $this->_checkSetIncludePath();
                 $vClassName = $this->getClassFileName($className);
-
                 /** @noinspection PhpIncludeInspection */
                 include($vClassName);
             }

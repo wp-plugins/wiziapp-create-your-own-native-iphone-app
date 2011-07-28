@@ -66,6 +66,12 @@ function wiziapp_generator_display(){
             padding: 25px 35px;
             width: 426px;
         }
+        #publish_modal .processing_message{
+            font-size: 17px;
+        }
+        #publish_modal .loading_indicator{
+            margin: 8px auto 2px;
+        }
         #create_account_modal_close{
             display: none;
             clear: both;

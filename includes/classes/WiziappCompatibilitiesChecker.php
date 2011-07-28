@@ -111,7 +111,7 @@ class WiziappCompatibilitiesChecker{
                 $message .= '<li>wp-content/plugins/wiziapp/cache</li>';
             }
 
-            $message .= '</ul>If you choose not to provide these permissions, all requests to your iPhone App will be made in real time, and you will not be able to enjoy the advantages of caching.';
+            $message .= '</ul>Though you may choose not to provide these permissions, this would mean that any requests by your iPhone App readers would be made in real time, which would deny you the advantages of caching.';
 
             // @todo format this i18n wordpress function usage to allow params and send the dir list as a parameter
             return new WiziappError('writing_permissions_error', __($message, 'wiziapp'));
@@ -123,7 +123,7 @@ class WiziappCompatibilitiesChecker{
     public function testDatabase(){
         /**
          * will be added later, the error message will be:
-         * Your WordPress installation does not have permission to create tables in your database. Please grant the WordPress user the required permissions, and try again.
+         * Your WordPress installation does not have permission to create tables in your database.
          */
     }
 
@@ -244,7 +244,7 @@ class WiziappCompatibilitiesChecker{
                     return new WiziappError('testing_connection_failed', __('Your host does not allow any kind of outgoing requests. WiziApp requires either HTTP Extension, cURL, Streams, or Fsockopen to be installed and enabled. Please contact your hosting provider to address this issue.', 'wiziapp'));
                 } else {
                     // The response wasn't in a json format
-                    return new WiziappError('testing_connection_failed', 'The API response is invalid');
+                    return new WiziappError('testing_connection_failed', 'The WiziApp plugin has encountered a problem. Please contact us at support@wiziapp.com to see how we can help you resolve this issue');
                 }
             } else {
                 // The response is ok, let's check when our server is saying
