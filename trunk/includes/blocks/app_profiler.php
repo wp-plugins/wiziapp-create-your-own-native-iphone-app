@@ -1,4 +1,5 @@
 <?php if (!defined('WP_WIZIAPP_BASE')) exit();
+// $_SERVER['SERVER_NAME']
 /**
 * Basic profiler log class for the wordpress plugin
 *
@@ -6,7 +7,7 @@
 * @subpackage Utils
 * @author comobix.com plugins@comobix.com
 *
-* @todo Add log files rotation managment
+* @todo Add log files rotation management
 */
 
 class WiziappProfiler {
@@ -15,30 +16,29 @@ class WiziappProfiler {
     *
     * @var boolean
     */
-    var $enabled    = WP_WIZIAPP_DEBUG;
+    var $enabled = WP_WIZIAPP_PROFILER;
 
     /**
     * writes a log message to the log file
     *
     * The messages sent to this method will be filtered according to their level
-    * if the level meets the trashold and the logging is enabled the message
+    * if the level meets the threshold and the logging is enabled the message
     * will be written to a log file. The method also receives the component
     * related to this log message to ease the reading of the log file itself
     * If you want to keep your sanity make sure to send this "optional" parameter
     *
-    * @param string $level The log message level
     * @param string $msg The log message
     * @param string $component The component related to this message
+    * @return boolean
     */
-    function write($msg, $component='')
-    {
-        if ($this->enabled === FALSE){
+    function write($msg, $component = '') {
+        if ($this->enabled === FALSE) {
             return FALSE;
         }
-        $path = dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
+        $path = dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR;
 
         $message  = '';
-        $filepath = $path.'profiler.log.php';
+        $filepath = $path . 'profiler.log.php';
         // Prevent direct access to the log, to avoid security issues
         if (!file_exists($filepath)){
             $message .= "<"."?php if (!defined('WP_WIZIAPP_BASE')) exit(); ?".">\n\n";
@@ -64,9 +64,9 @@ class WiziappProfiler {
 
 /**
 * One logger to rule them all...
-* @global WiziappLogm $GLOBALS['WiziappLog']
+* @global WiziappLog $GLOBALS['WiziappLog']
 */
 if (!isset($GLOBALS['WiziappProfiler'])) {
-    // Initate the Wiziapp Loggin Object
+    // Initiate the Wiziapp Login Object
     $GLOBALS['WiziappProfiler'] = new WiziappProfiler() ;
 }

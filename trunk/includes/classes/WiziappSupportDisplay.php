@@ -33,6 +33,7 @@ class WiziappSupportDisplay{
         #wiziapp_container{
             background: #fff;
             min-height: 500px;
+            position: relative;
         }
         #wiziapp_logo{
             float: left;
@@ -191,6 +192,13 @@ class WiziappSupportDisplay{
              display: none;
               z-index: 999;
          }
+         #wiziapp_env_indicator{
+             color: #0fb3fb;
+             font-size: 12px;
+             position: absolute;
+             top: 0px;
+             right: 25px;
+         }
         </style>
         <script type="text/javascript">
             jQuery(document).ready(function($){
@@ -272,6 +280,9 @@ class WiziappSupportDisplay{
                 </div>
                 <div class="clear"></div>
            </div>
+            <div id="wiziapp_env_indicator">
+                <?php echo WIZIAPP_ENV; ?> :: <?php echo WIZIAPP_VERSION; ?>
+            </div>
         </div>
         <?php
     }

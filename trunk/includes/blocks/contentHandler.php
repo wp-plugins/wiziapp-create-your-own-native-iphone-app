@@ -260,14 +260,18 @@ class WiziappContentHandler {
                     $style = '';
                     if (!empty($info['imageURL'])){
                         $style = "background-image: url({$this->_getAdminImagePath()}{$info['imageURL']}.png);";
-                    } 
+                    }
+
+                    if (strlen($info['title']) > 35) {
+                        $title = substr($info['title'], 0, 35) . '...';
+                    }
                     
                     $replaceCode = "<a href='" . $info['actionURL'] . "'><div class='audioCellItem'>
                             <div class='col1'>
                                 <div class='imageURL' style='{$style}'></div>
                             </div>
                             <div class='col2'>
-                                <p class='title'>{$info['title']}</p>
+                                <p class='title'>{$title}</p>
                                 <p class='duration'>{$info['duration']}</p>
                             </div>
                             <div class='col3'>
@@ -292,8 +296,8 @@ class WiziappContentHandler {
                 /**
                  * The content might have been inserted with ='' instead of =""
                  */
-                if ( !empty($replacements['find'][0]) ){
-                    $replacements['find'][] = str_replace('"', "'", $replacements['find'][0]);
+                if (!empty($element['original_code'])){
+                    $replacements['find'][] = str_replace('"', "'", $element['original_code']);
                     $replacements['replace'][] = $replaceCode;
                 }
 

@@ -192,6 +192,7 @@ function wiziapp_buildPagesListPage(){
     $pages = get_pages(array(
         'number' => $limitForRequest,
         'offset' => $offset,
+        'sort_column' => 'post_date',
     )); 
     
     $section = array(
@@ -1297,11 +1298,16 @@ function wiziapp_buildAboutScreen(){
         );
     }
 
+    $app_name = WiziappConfig::getInstance()->app_name;
+    if (strlen($app_name) > 20) {
+        $app_name = wiziapp_makeShortString($app_name, 20);
+    }
+
     $page = array(
-        'title' => WiziappConfig::getInstance()->app_name,
-        'version' =>  __('version').' '.WiziappConfig::getInstance()->version,
+        'title' => $app_name,
+        'version' =>  __('version') . ' ' . WiziappConfig::getInstance()->version,
         'imageURL' => WiziappConfig::getInstance()->getAppIcon(),
-        'aboutTitle' => __('About', 'wiziapp').' '.WiziappConfig::getInstance()->app_name,
+        'aboutTitle' => __('About', 'wiziapp') . ' ' . $app_name,
         'aboutContent' => WiziappConfig::getInstance()->getAppDescription(),
         //'actions' => $actions
         'actions' => array()

@@ -126,7 +126,7 @@
             window.wiziappCdn = "<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>";
         </script>
         <?php
-            $contentScript = WiziappConfig::getInstance()->getCdnServer() . '/scripts/api/1/apps/content.js?v=' . WIZIAPP_VERSION;
+            $contentScript = WiziappConfig::getInstance()->getCdnServer() . '/scripts/api/1/apps/content_'.WIZIAPP_VERSION.'.js';
             echo '<script type="text/javascript" src="' . $contentScript . '"></script>';
             wiziapp_get_footer();
         ?>

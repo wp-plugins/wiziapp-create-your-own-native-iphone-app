@@ -30,11 +30,11 @@ function wiziapp_setup_menu(){
         add_action('admin_notices', 'wiziapp_upgrade_check');
 
         if ( WiziappConfig::getInstance()->finished_processing === FALSE ){
-            add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', 'wiziapp_activate_display', $iconPath);    
-        } else if ($configured === FALSE){
-            add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', 'wiziapp_generator_display', $iconPath);
+            add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', 'wiziapp_activate_display', $iconPath);
         } else if ( $installer->needUpgrade() ){
             add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', 'wiziapp_upgrade_display', $iconPath);
+        } else if ($configured === FALSE){
+            add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', 'wiziapp_generator_display', $iconPath);
         } else { // We are installed and configured
             // add_submenu_page('wiziapp', __('dashboard'), __('dashboard'), 'administrator', 'wiziapp_dashboard_display', 'wiziapp_dashboard_display');
             add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', 'wiziapp_dashboard_display', $iconPath);
@@ -291,6 +291,9 @@ function wiziapp_includeGeneralDisplay($display_action, $includeSimOverlay = TRU
                                         opacity: 0.8
                                     },
                                     closeOnClick: true,
+                                    onClose: function(){
+                                        jQuery("#wiziappBoxWrapper").remove();
+                                    },
                                     load: true
                                 });
                             }
@@ -422,9 +425,9 @@ function wiziapp_version_check(){
             ?>
             <div id="wiziapp_upgrade_needed_message" class="updated fade">
                 <p style="line-height: 150%">
-                    An important update is available for Wiziapp Wordpress Plugin. 
+                    An important update is available for the WiziApp WordPress plugin.
                     <br />
-                    Make sure to update as soon as you can to enjoy the security, bug fixes and new features this update contain.
+                    Make sure to update as soon as possible, to enjoy the security, bug fixes and new features contained in this update.
                 </p>
                 <p>
                     <input id="wiziappHideUpgrade" type="button" class="button" value="Hide this message" />

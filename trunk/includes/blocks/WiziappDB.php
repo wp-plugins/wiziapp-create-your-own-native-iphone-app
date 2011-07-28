@@ -186,8 +186,7 @@ class WiziappDB implements WiziappIInstallable{
     function get_images_for_albums(){
         global $wpdb;
 
-        $where = ' WHERE c.attachment_type = ' . $this->media_types['image'];
-        $sql = $wpdb->prepare("SELECT c.id, c.original_code, c.attachment_info, c.content_id FROM {$this->media_table} AS c {$where}");
+        $sql = $wpdb->prepare("SELECT * FROM {$this->media_table} AS c WHERE c.attachment_type = %d AND (attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s)", $this->media_types["image"], '%data-wiziapp-cincopa-id%', '%data-wiziapp-nextgen-album-id%', '%data-wiziapp-nextgen-gallery-id%', '%data-wiziapp-pageflipbook-id%', '%wordpress-gallery-id%', '%data-wiziapp-id%');
         $GLOBALS['WiziappLog']->write('info', "About to run the sql: {$sql}", 'db.get_images_for_albums');
 
         $result = $wpdb->get_results($sql, ARRAY_A);
@@ -214,7 +213,7 @@ class WiziappDB implements WiziappIInstallable{
         global $wpdb;
 
         $where = "WHERE c.attachment_type = %d and c.attachment_info like %s and c.attachment_info like %s";
-        $equalKey = '%"' . $key . '":"' . $value . '"%';    
+        $equalKey = '%"' . $key . '":"' . $value . '"%';
         
         $unsafeSQL = "SELECT c.id, c.attachment_info, c.content_id FROM {$this->media_table} AS c {$where}";
         
@@ -467,7 +466,7 @@ class WiziappDB implements WiziappIInstallable{
                                          
         return FALSE;
     }
-    
+
     /**
     * Gets the total scanned videos count (Limited to 15)
     * 
@@ -497,6 +496,7 @@ class WiziappDB implements WiziappIInstallable{
                                 OR attachment_info LIKE '%data-wiziapp-nextgen-album-id%'
                                 OR attachment_info LIKE '%data-wiziapp-nextgen-gallery-id%'
                                 OR attachment_info LIKE '%data-wiziapp-pageflipbook-id%'
+                                OR attachment_info LIKE '%wordpress-gallery-id%'
                                 OR attachment_info LIKE '%data-wiziapp-id%'
                                 LIMIT 0, 15");
         $GLOBALS['WiziappLog']->write('info', "About to run the sql: {$sql}", 'db.get_albums_count');
