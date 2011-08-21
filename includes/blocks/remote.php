@@ -10,6 +10,7 @@
 * 
 */
 class WiziappRequestHandler {
+    private $errorReportingLevel = 0;
     /**
     * Simple PHP4 style constructor to add the required actions
     */
@@ -53,7 +54,30 @@ class WiziappRequestHandler {
             $this->_routeRequest($request);
         } 
     }
-    
+
+    public function handleGeneralError(){
+        $error = error_get_last();
+
+        if(($error['type'] === E_ERROR) || ($error['type'] === E_USER_ERROR)){
+            ob_end_clean();
+            $header = array(
+                'action' => 'handleGeneralError',
+                'status' => FALSE,
+                'code' => 500,
+                'message' => 'There was a critical error running the service',
+            );
+
+            $GLOBALS['WiziappLog']->write('Error', "Caught an error: ".print_r($error['message'], TRUE),
+                        "remote.WiziappRequestHandler.handleGeneralError");
+
+            if ( $this->errorReportingLevel !== 0 ){
+                $header['message'] = $error['message'];
+            }
+
+            echo json_encode(array('header' => $header));
+            exit();
+        }
+    }
     /*
     * serves as a routing table, if the incoming request has our 
     * prefix, check if we can handle the requested method, if so
@@ -67,14 +91,15 @@ class WiziappRequestHandler {
     * shouldn't ever be cached as a whole.
     */
     function _routeRequest($request){
-        error_reporting(0);
+        $this->errorReportingLevel = error_reporting(0);
+        register_shutdown_function(array($this, 'handleGeneralError'));
         
         $fullReq = explode('&', $request);
         $req = explode('/', $fullReq[0]);
     
         $service = $req[1];
         $action = $req[2];
-
+        
         if ($service == 'user'){
             if ($action == 'check' || $action == 'login'){
                 wiziapp_check_login();
@@ -106,6 +131,7 @@ class WiziappRequestHandler {
             $etagHeader = isset($_SERVER['HTTP_IF_NONE_MATCH'])?$_SERVER['HTTP_IF_NONE_MATCH']:'';
             $key .= str_replace(', ', '_', "{$httpXcept}_{$httpAccept}_{$etagHeader}");
             $key .= str_replace(',', '', $key);
+            $key .= WIZIAPP_P_VERSION;
             //if ( $cache->beginCache(md5($key)) ){
             if ($cache->beginCache(md5($key), array('duration'=>30))){
                 $output = $this->_routeContent($req);

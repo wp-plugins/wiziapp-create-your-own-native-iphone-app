@@ -136,7 +136,12 @@ function wiziapp_wordpress_filter($content){
                 }    
                 $imagesFromPost =& get_children('post_type=attachment&post_mime_type=image&post_parent=' . trim($postId[1], '"\\'));
             } else {
-                $imagesFromPost =& get_children('post_type=attachment&post_mime_type=image&post_parent=' . $post->ID);
+                if ($post) {
+                    $postId = $post->ID;
+                } else {
+                    $postId = $_REQUEST['pages'];
+                }
+                $imagesFromPost =& get_children('post_type=attachment&post_mime_type=image&post_parent=' . $postId);
             }
             
             if(stripos($match, 'include=')) {

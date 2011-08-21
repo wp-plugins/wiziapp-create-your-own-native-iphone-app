@@ -130,7 +130,7 @@ class WiziappImageGalleryCellItem extends WiziappLayoutComponent{
         $image = new WiziappImageHandler($this->image->imageURL);
         $size = WiziappConfig::getInstance()->getImageSize('images_thumb');
         //return $image->getResizedImageUrl($this->image->imageURL, $size['width'], $size['height']);
-        return $image->getResizedImageUrl($this->image->imageURL, $size['width'], 0);
+        return $image->getResizedImageUrl($this->image->imageURL, $size['width'], $size['width'], 'perspectiveResize', true);
         //return $this->image->thumbURL;
     }
     

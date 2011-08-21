@@ -54,37 +54,55 @@ class WiziappPhpThumbResizer{
             $GLOBALS['WiziappLog']->write('info', 'Before thumb resize: ' . $image, 'WiziappPhpThumbResizer.resize');             
             $thumb = PhpThumbFactory::create($image, $options);
             //$thumb->$type($width, $height);
-            if ($height == 0){
+            if ( $type == 'perspectiveResize' ){
                 $type = 'resize';
-                // Calc the new height based of the need to resize
                 $dim = $thumb->getCurrentDimensions();
                 $currWidth = $dim['width'];
                 $currHeight = $dim['height'];
-                
-                if ($currWidth > $width){
-                    $height = ($width / $currWidth) * $currHeight;
+                if ( $currWidth > $currHeight ){
+                    // This is a wide image, make sure the height will fit
+                    $width = ceil(($height / $currHeight) * $currWidth);
                 } else {
-                    $height = $currHeight;
+                    // This is a high image, make sure the width will fit
+                    $height = ceil(($width / $currWidth) * $currHeight);
+
                 }
-                
-                $GLOBALS['WiziappLog']->write('info', "Resizing from width: {$currWidth} to: {$width} and therefore from height: {$currHeight} to: {$height}", 
-                        'WiziappPhpThumbResizer.resize');
-            } elseif ($width == 0) {
-                $type = 'resize';
-                // Calc the new height based of the need to resize
-                $dim = $thumb->getCurrentDimensions();
-                $currWidth = $dim['width'];
-                $currHeight = $dim['height'];
-                
-                if ($currHeight > $height){
-                    $width = ($height / $currHeight) * $currWidth;
-                } else {
-                    $width = $currWidth;
+                $GLOBALS['WiziappLog']->write('info', "Resizing from width: {$currWidth} to: {$width} and from height: {$currHeight} to: {$height}",
+                            'WiziappPhpThumbResizer.resize');
+            } else {
+                if ($height == 0){
+                    $type = 'resize';
+                    // Calc the new height based of the need to resize
+                    $dim = $thumb->getCurrentDimensions();
+                    $currWidth = $dim['width'];
+                    $currHeight = $dim['height'];
+
+                    if ($currWidth > $width){
+                        $height = ($width / $currWidth) * $currHeight;
+                    } else {
+                        $height = $currHeight;
+                    }
+
+                    $GLOBALS['WiziappLog']->write('info', "Resizing from width: {$currWidth} to: {$width} and therefore from height: {$currHeight} to: {$height}",
+                            'WiziappPhpThumbResizer.resize');
+                } elseif ($width == 0) {
+                    $type = 'resize';
+                    // Calc the new height based of the need to resize
+                    $dim = $thumb->getCurrentDimensions();
+                    $currWidth = $dim['width'];
+                    $currHeight = $dim['height'];
+
+                    if ($currHeight > $height){
+                        $width = ($height / $currHeight) * $currWidth;
+                    } else {
+                        $width = $currWidth;
+                    }
+
+                    $GLOBALS['WiziappLog']->write('info', "Resizing from height: {$currHeight} to: {$height} and therefore from width: {$currWidth} to: {$width}",
+                            'WiziappPhpThumbResizer.resize');
                 }
-                
-                $GLOBALS['WiziappLog']->write('info', "Resizing from height: {$currHeight} to: {$height} and therefore from width: {$currWidth} to: {$width}", 
-                        'WiziappPhpThumbResizer.resize');
             }
+
             
             $thumb->$type($width, $height);
             

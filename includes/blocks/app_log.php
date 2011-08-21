@@ -74,7 +74,7 @@ class WiziappLog {
         if (!file_exists($filepath)){
             return false;
         }
-        if(filesize($filepath) > $this->max_size){
+        if(@filesize($filepath) > $this->max_size){
             return true;
         }else{
          return false;
@@ -89,7 +89,7 @@ class WiziappLog {
     private function getFilePath(){
         $filepath = $this->path . 'wiziapplog-' . date('Y-m-d') . '.log.php';
 
-        if(filesize($filepath) > $this->max_size){
+        if(@filesize($filepath) > $this->max_size){
             $file_indx = 1;
             $new_filepath = $this->path.'wiziapplog-' . date('Y-m-d') . '.log' . $file_indx . '.php';
             while ($this->toLarge($new_filepath)){
@@ -132,12 +132,18 @@ class WiziappLog {
     * @param string $component The component related to this message
     */
     function write($level = 'error', $msg, $component='') {
-        ob_start();
-        
-        clearstatcache(); // We need to clear the cache of the filesize function so that the size checks will work
+        /**
+         * NOTICE: Since this function is being run everywhere is, it might be run under the
+         * an output handling method that wraps the entire content to do one last search and replace
+         * like W3 total cache with cnd configured, they replace the hostname with the cdn host name
+         * From that reason, this function must never use output buffering
+         */
+        //ob_start();
+
+        @clearstatcache(); // We need to clear the cache of the filesize function so that the size checks will work
         
         if ($this->enabled === FALSE){
-            ob_end_clean();  
+            //ob_end_clean();
             return FALSE;
         }
         $this->deleteOldFiles();
@@ -146,7 +152,7 @@ class WiziappLog {
 
         // If the wanted level is above the trashold nothing to do
         if (!isset($this->levels[$level]) || ($this->levels[$level] > $this->threshold)){
-            ob_end_clean();  
+            //ob_end_clean();
             return FALSE;
         }
 
@@ -163,21 +169,21 @@ class WiziappLog {
 
         // If we can't open the file for appending there isn't much we can do
         if (!$fp = @fopen($filepath, 'ab')){
-            ob_end_clean();  
+            //ob_end_clean();
             return FALSE;
         }
 
         $date = date('Y-m-d H:i:s');
         $message .= "[$level][{$date}][$component]$msg\n";
 
-        flock($fp, LOCK_EX);
-        fwrite($fp, $message);
-        flock($fp, LOCK_UN);
-        fclose($fp);
+        @flock($fp, LOCK_EX);
+        @fwrite($fp, $message);
+        @flock($fp, LOCK_UN);
+        @fclose($fp);
 
         @chmod($filepath, 0666);
         
-        ob_end_clean();
+        //ob_end_clean();
         return TRUE;
     }
     

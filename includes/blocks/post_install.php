@@ -346,56 +346,80 @@ function wiziapp_activate_display(){
             margin: 15px 0px 9px 32px;
         }
 
+        #wiziapp_activation_container.no_js #wiziapp_js_disabled{
+            display: block;
+        }
+        #wiziapp_activation_container.no_js #wiziapp_js_enabled{
+            display: none;
+        }
+
+        #wiziapp_activation_container.js #wiziapp_js_disabled{
+            display: none;
+        }
+        #wiziapp_activation_container.js #wiziapp_js_enabled{
+            display: block;
+        }
     </style>
     <?php echo "{$errorsHtml}" ?>
-    <div id="wiziapp_activation_container">
-        <div id="just_a_moment"></div>
-        <p id="wizi_be_patient" class="text_label"><?php echo __('Please be patient while we generate your app. It may take several minutes.', 'wiziapp');?></p>
-        <div id="wizi_icon_wrapper">
-            <div id="wizi_icon_processing"></div>
-            <div id="current_progress_label" class="text_label"><?php echo __('Initializing...', 'wiziapp'); ?></div>
-        </div>
-        <div id="main_progress_bar_container">
-            <div id="main_progress_bar"></div>
-            <div id="main_progress_bar_bg"></div>
-        </div>
-        <p id="current_progress_indicator" class="text_label"></p>
-        
-        <p id="wiziapp_finalize_title" class="text_label"><?php echo __('Ready, if the wizard doesn\'t load itself in a couple of seconds click ', 'wiziapp'); ?><span id="finializing_activation"><?php echo __('here', 'wiziapp'); ?></span></p>
-        
-        <div id="error_activating" class="wiziapp_errors_container s_container hidden">
-            <div class="errors">
-                <div class="wiziapp_error">
-                    <?php echo __('There was an error loading the wizard, please contact support', 'wiziapp');?>
-                </div>
+    <div id="wiziapp_activation_container" class="no_js">
+        <div id="wiziapp_js_disabled">
+            <div id="js_error" class="wiziapp_errors_container s_container">
+                <div class="errors">
+                    <div class="wiziapp_error"><?php echo __('It appears that your browser is blocking the use of javascript. Please change your browser\'s settings and try again', 'wiziapp');?></div>
+               </div>
             </div>
         </div>
-        <div id="internal_error" class="wiziapp_errors_container s_container hidden">
-            <div class="errors">
-                <div class="wiziapp_error"><?php echo __('Connection error. Please try again.,', 'wiziapp');?></div>
+        <div id="wiziapp_js_enabled">
+            <div id="just_a_moment"></div>
+            <p id="wizi_be_patient" class="text_label"><?php echo __('Please be patient while we generate your app. It may take several minutes.', 'wiziapp');?></p>
+            <div id="wizi_icon_wrapper">
+                <div id="wizi_icon_processing"></div>
+                <div id="current_progress_label" class="text_label"><?php echo __('Initializing...', 'wiziapp'); ?></div>
+            </div>
+            <div id="main_progress_bar_container">
+                <div id="main_progress_bar"></div>
+                <div id="main_progress_bar_bg"></div>
+            </div>
+            <p id="current_progress_indicator" class="text_label"></p>
+
+            <p id="wiziapp_finalize_title" class="text_label"><?php echo __('Ready, if the wizard doesn\'t load itself in a couple of seconds click ', 'wiziapp'); ?><span id="finializing_activation"><?php echo __('here', 'wiziapp'); ?></span></p>
+
+            <div id="error_activating" class="wiziapp_errors_container s_container hidden">
+                <div class="errors">
+                    <div class="wiziapp_error">
+                        <?php echo __('There was an error loading the wizard, please contact support', 'wiziapp');?>
+                    </div>
+                </div>
+            </div>
+            <div id="internal_error" class="wiziapp_errors_container s_container hidden">
+                <div class="errors">
+                    <div class="wiziapp_error"><?php echo __('Connection error. Please try again.,', 'wiziapp');?></div>
+                    <div class="buttons">
+                        <a href="javscript:void(0);" class="retry_processing"><?php echo __('retry', 'wiziapp'); ?></a>
+                    </div>
+               </div>
+            </div>
+            <div id="internal_error_2" class="wiziapp_errors_container s_container hidden">
+                <div class="errors">
+                    <div class="wiziapp_error">
+                        <?php echo __('There were still errors contacting your server, please contact support', 'wiziapp');?>
+                    </div>
+                </div>
+            </div>
+            <div id="error_network" class="wiziapp_errors_container s_container hidden">
+                <div class="errors">
+                    <div class="wiziapp_error"><?php echo __('Connection error. Please try again.', 'wiziapp');?></div>
+                </div>
                 <div class="buttons">
                     <a href="javscript:void(0);" class="retry_processing"><?php echo __('retry', 'wiziapp'); ?></a>
                 </div>
-           </div>
-        </div>
-        <div id="internal_error_2" class="wiziapp_errors_container s_container hidden">
-            <div class="errors">
-                <div class="wiziapp_error">
-                    <?php echo __('There were still errors contacting your server, please contact support', 'wiziapp');?>
-                </div>
-            </div>
-        </div>
-        <div id="error_network" class="wiziapp_errors_container s_container hidden">
-            <div class="errors">
-                <div class="wiziapp_error"><?php echo __('Connection error. Please try again.', 'wiziapp');?></div>
-            </div>
-            <div class="buttons">
-                <a href="javscript:void(0);" class="retry_processing"><?php echo __('retry', 'wiziapp'); ?></a>
             </div>
         </div>
     </div>
 
     <script type="text/javascript">
+        document.getElementById('wiziapp_activation_container').className = 'js';
+        
         var can_run = <?php echo (empty($errorsHtml)) ? 'true' :'false'; ?>;
         var got_critical_errors = <?php echo ($checker->foundCriticalIssues()) ? 'true' :'false'; ?>;
         var post_ids = [<?php echo implode(',', $postsIds); ?>];
@@ -495,6 +519,27 @@ function wiziapp_activate_display(){
                 }
                 $box.overlay(overlayParams);
             }
+
+            // Google analytics - Should *always* be in the end
+            var _gaq = _gaq || [];
+            if (typeof(_gaq.splice) == 'function'){
+                _gaq.splice(0, _gaq.length);
+            }
+
+            var analytics_account = '<?php echo WiziappConfig::getInstance()->analytics_account; ?>';
+            var url = '<?php echo WiziappConfig::getInstance()->api_server; ?>';
+
+            _gaq.push(['_setAccount', analytics_account]);
+            _gaq.push(['_setDomainName', url.replace('api.', '.')]);
+            _gaq.push(['_setAllowLinker', true]);
+            _gaq.push(['_setAllowHash', false]);
+            _gaq.push(['_trackPageview', '/StartScanningGoal.php']);
+
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
         });
         
         function retryRequest(event){
@@ -514,11 +559,11 @@ function wiziapp_activate_display(){
 
             $el = null;
             return false;
-        }
+        };
 
         function retryingFailed(req, error){
             jQuery("#internal_error_2").show();
-        }
+        };
 
         function startProcessing(){
             if (page_ids.length > 0){
@@ -528,7 +573,7 @@ function wiziapp_activate_display(){
             } else {
                 requestFinalizingProcessing();
             }
-        }
+        };
 
         function wiziappRegisterAjaxErrorHandler(){
             jQuery.ajaxSetup({
@@ -613,7 +658,7 @@ function wiziapp_activate_display(){
             }
             
             return newArr;
-        }
+        };
         
         function requestPostProcessing(){
             var posts = post_ids.splice(0, batch_size);
@@ -696,18 +741,18 @@ function wiziapp_activate_display(){
                 * when entering the page again
                 */
                 if (noErrorPosts.length > 0){
-                    var params = {
+                    var params2 = {
                         action: 'wiziapp_batch_posts_processing',  
                         posts: noErrorPosts.join(','),
                         failed_post: data.post  
                     };
-                    jQuery.post(ajaxurl, params, handlePostProcessing, 'json');     
+                    jQuery.post(ajaxurl, params2, handlePostProcessing, 'json');
                 } else {
                     // Maybe there are more items in the queue
                     startProcessing();
                 }    
             }
-        }
+        };
         
         function requestPageProcessing(){
             var pages = page_ids.splice(0, batch_size);
@@ -748,18 +793,18 @@ function wiziapp_activate_display(){
                 * when entering this page again
                 */
                 if (noErrorPages.length > 0){
-                    var params = {
+                    var params2 = {
                         action: 'wiziapp_batch_pages_processing',  
                         pages: noErrorPages.join(','),
                         failed_page: data.page  
                     };
-                    jQuery.post(ajaxurl, params, requestPageProcessing, 'json');     
+                    jQuery.post(ajaxurl, params2, requestPageProcessing, 'json');
                 } else {
                     // Maybe there are more items in the queue
                     startProcessing();
                 }    
             }
-        }
+        };
         
         function requestFinalizingProcessing(){
             var params = {
@@ -780,25 +825,28 @@ function wiziapp_activate_display(){
                 // There was an error??
                 jQuery("#error_activating").show();
             }
-        }
 
-        // Google analytics - Should *always* be in the end
-        var _gaq = _gaq || [];
-        if ( typeof(_gaq.splice) == 'function' ){
-			_gaq.splice(0, _gaq.length);
-		}
+            // Google analytics
+            var _gaq = _gaq || [];
+            if (typeof(_gaq.splice) == 'function'){
+                _gaq.splice(0, _gaq.length);
+            }
 
-        _gaq.push(['_setAccount', 'UA-22328620-1']);       // TODO replace url with env param
-        _gaq.push(['_setDomainName', '.apptelecom.com']); //$settings['api_server']   //.replace('api.', '.')
-        _gaq.push(['_setAllowLinker', true]);
-        _gaq.push(['_setAllowHash', false]);
-        _gaq.push(['_trackPageview', '/StartScanningGoal.php']);
+            var analytics_account = '<?php echo WiziappConfig::getInstance()->analytics_account; ?>';
+            var url = '<?php echo WiziappConfig::getInstance()->api_server; ?>';
 
-        (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-        })();
+            _gaq.push(['_setAccount', analytics_account]);
+            _gaq.push(['_setDomainName', url.replace('api.', '.')]);
+            _gaq.push(['_setAllowLinker', true]);
+            _gaq.push(['_setAllowHash', false]);
+            _gaq.push(['_trackPageview', '/WizardStep-1Goal.php']);
+
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+        };
     </script>
     <?php    
 }

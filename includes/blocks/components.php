@@ -96,7 +96,9 @@ function wiziappGetSubCommentsCount($post_id, $comment_id){
 }
 
 function wiziapp_getPostThumbnail($post, $size, $limitSize){
-    return get_bloginfo('url') . "/?wiziapp/getthumb/{$post->ID}&width={$size['width']}&height={$size['height']}&limitWidth={$limitSize['height']}&limitHeight={$limitSize['height']}";
+    $thumb = get_bloginfo('url') . "/?wiziapp/getthumb/{$post->ID}&width={$size['width']}&height={$size['height']}&limitWidth={$limitSize['height']}&limitHeight={$limitSize['height']}";
+    $GLOBALS['WiziappLog']->write('info', "Requesting the post thumbnail url: {$thumb}", "wiziapp_getPostThumbnail");
+    return $thumb;
 }
 
 /**    
@@ -117,7 +119,7 @@ function wiziapp_getPostThumbnail($post, $size, $limitSize){
 
 function wiziapp_doPostThumbnail($post, $size, $limitSize){
     $foundImage = FALSE;
-    $GLOBALS['WiziappLog']->write('info', "Getting the post thumbnail: {$post}", "wiziapp_doPostThumbnail");  
+    $GLOBALS['WiziappLog']->write('info', "Getting the post thumbnail: {$post}", "wiziapp_doPostThumbnail");
     @include_once(ABSPATH . 'wp-includes/post-thumbnail-template.php');
     if(function_exists('get_the_post_thumbnail')){ //first we try to get the wordpress post thumbnail
         $GLOBALS['WiziappLog']->write('debug', "The blog supports post thumbnails", "wiziapp_doPostThumbnail");
@@ -132,7 +134,7 @@ function wiziapp_doPostThumbnail($post, $size, $limitSize){
     if (!$foundImage){ // if no wordpress thumbnail, we take the thumb from a gallery
         if ( !wiziapp_tryGalleryThumbnail($post, $size, $limitSize, $singles) ){
             // if no thumb from a gallery, we take the thumb from a video
-            if ( !wiziapp_tryVideoThumbnail($post, $size, $limitSize) ){
+            if ( !wiziapp_tryVideoThumbnail($post, $size) ){
                 // if no thumb from a video, we take the thumb from a single image
                 $foundImage = wiziapp_trySingleImageThumbnail($singles, $size, $limitSize);
             }
@@ -149,14 +151,17 @@ function wiziapp_doPostThumbnail($post, $size, $limitSize){
 function wiziapp_tryWordpressThumbnail($post, $size, $limitSize) {
     $showedImage = FALSE;
     $post_thumbnail_id = get_post_thumbnail_id($post);
+    $GLOBALS['WiziappLog']->write('info', "Got WP FEATURED IMAGE thumbnail id: {$post_thumbnail_id} for post: {$post}", "wiziapp_tryWordpressThumbnail");
     $wpSize = array(
         $size['width'],
         $size['height'],
     ); 
-    $image = wp_get_attachment_image_src($post_thumbnail_id, $wpSize); 
+    $image = wp_get_attachment_image_src($post_thumbnail_id, $wpSize);
+    $GLOBALS['WiziappLog']->write('info', "Got WP FEATURED IMAGE attachment: {$image} for post: {$post}", "wiziapp_tryWordpressThumbnail");
     //$image = wp_get_attachment_image_src($post_thumbnail_id);
     $showedImage = wiziapp_processImageForThumb($image[0], $size, $limitSize);
-    
+
+    $GLOBALS['WiziappLog']->write('info', "Found and will use WP FEATURED IMAGE thumbnail: {$showedImage} for post: {$post}", "wiziapp_tryWordpressThumbnail");
     return $showedImage;
 }
 
@@ -176,23 +181,27 @@ function wiziapp_tryGalleryThumbnail($post, $size, $limitSize, &$singles) {
             $info = json_decode($media['attachment_info']);
             if (!isset($info->metadata)){ // Single image
                 if ($singlesCount < WiziappConfig::getInstance()->max_thumb_check){
+                    $GLOBALS['WiziappLog']->write('info', "Found SINGLE IMAGE {$attributes->src} for post: {$post}", "wiziapp_tryGalleryThumbnail");
                     $singles[] = $attributes->src;                                            
                     ++$singlesCount;   
                 }
             } else {
                 if ($galleryCount < WiziappConfig::getInstance()->max_thumb_check){
                     if ($showedImage = wiziapp_processImageForThumb($attributes->src, $size, $limitSize)){
+                        $GLOBALS['WiziappLog']->write('info', "Found and will use GALLERY thumbnail: {$showedImage} for post: {$post}", "wiziapp_tryGalleryThumbnail");
                         return $showedImage;
                     }
                     ++$galleryCount;
                 }
             }
         }
+    } else {
+        $GLOBALS['WiziappLog']->write('info', "No GALLERY/SINGLE IMAGE found for post: {$post}", "wiziapp_tryGalleryThumbnail");
     }
     return $showedImage;
 }
 
-function wiziapp_tryVideoThumbnail($post, $size, $limitSize) {
+function wiziapp_tryVideoThumbnail($post, $size) {
     $showedImage = FALSE;
     $post_media = $GLOBALS['WiziappDB']->find_post_media($post, 'video');
     if(!empty($post_media)){
@@ -201,8 +210,10 @@ function wiziapp_tryVideoThumbnail($post, $size, $limitSize) {
         if(intval($info->bigThumb->width) >= ($size['width'] * 0.8)){
             $image = new WiziappImageHandler($info->bigThumb->url);
             $showedImage = $image->wiziapp_getResizedImage($size['width'], $size['height'], 'adaptiveResize', true);
-            
+            $GLOBALS['WiziappLog']->write('info', "Found and will use VIDEO thumbnail: {$showedImage}", "wiziapp_tryVideoThumbnail");
         }
+    } else {
+        $GLOBALS['WiziappLog']->write('info', "No VIDEO found for post: {$post}", "wiziapp_tryVideoThumbnail");
     }
     return $showedImage;
 }
@@ -217,6 +228,7 @@ function wiziapp_trySingleImageThumbnail($singles, $size, $limitSize) {
         if(intval($width) >= $limitSize['width'] && intval($height) >= $limitSize['height']){
             if(intval($width) >= ($size['width'] * 0.8) && intval($height) >= ($size['height'] * 0.8)){
                 $showedImage = wiziapp_processImageForThumb($single, $size, $limitSize);
+                $GLOBALS['WiziappLog']->write('info', "Found and will use SINGLE IMAGE thumbnail: {$showedImage}", "wiziapp_trySingleImageThumbnail");
             }
         }            
     }

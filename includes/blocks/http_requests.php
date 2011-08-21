@@ -43,7 +43,13 @@ function wiziapp_http_request($params, $path, $method = 'POST', $headers = array
     
     $GLOBALS['WiziappLog']->write('debug', "Contacting wiziapp server with headers: " . print_r($headers, TRUE) . " and params: " . print_r($params, TRUE), 
                                         "http_requests.wiziapp_http_request");
-                                        
+
+    if ( $method == 'POST' && empty($params) ){
+        $params = array(
+            'ts' => time(),
+        );
+    }
+
 	$request = new WP_Http();
     $params = array(
 		'method'    => $method,

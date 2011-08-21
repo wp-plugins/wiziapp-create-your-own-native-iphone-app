@@ -7,7 +7,7 @@
 
 /**
 * Sets up the admin menu according to the application configuration state.
-* for a fully installed app we show a full menu but untill then 
+* for a fully installed app we show a full menu but until then
 * way make things more complicated for the user
 */
 function wiziapp_setup_menu(){
@@ -54,6 +54,18 @@ function wiziapp_setup_menu(){
         add_submenu_page('wiziapp', __('Support'), __('Support'), 'administrator',
                              'wiziapp_support_display', 'wiziapp_support_display');
     }
+    
+    global $submenu;
+    if ($submenu['wiziapp'][2][0] == 'My Account') {
+        if ($submenu['wiziapp'][0][0] == 'Create your App') {
+            array_shift($submenu['wiziapp']);
+        }
+    } else {
+        $submenu['wiziapp'][0][0] = __('Create your App');
+        $submenu['wiziapp'][0][1] = __('administrator');
+        $submenu['wiziapp'][0][2] = __('admin.php?page=wiziapp');
+        $submenu['wiziapp'][0][3] = __('Create your App');
+    }
 }
 
 function wiziapp_dashboard_display(){
@@ -83,7 +95,7 @@ function wiziapp_support_display(){
 }
 
 function wiziapp_includeGeneralDisplay($display_action, $includeSimOverlay = TRUE){
-    $response = wiziapp_http_request(array(), '/generator/getToken?app_id=' . WiziappConfig::getInstance()->app_id, 'GET');
+    $response = wiziapp_http_request(array(), '/generator/getToken?app_id=' . WiziappConfig::getInstance()->app_id, 'POST');
     if ( is_wp_error($response) ) {
         /**
         * @todo get the design for the failure screen
@@ -402,7 +414,7 @@ function wiziapp_version_check(){
         if ( empty(WiziappConfig::getInstance()->wiziapp_avail_version) ){
             WiziappConfig::getInstance()->wiziapp_avail_version = WIZIAPP_P_VERSION;
         }
-        $response = wiziapp_http_request(array(), '/cms/version', 'GET');
+        $response = wiziapp_http_request(array(), '/cms/version', 'POST');
         if ( !is_wp_error($response) ) {    
             $vResponse = json_decode($response['body'], TRUE);
             if ( !empty($vResponse) ){
@@ -427,7 +439,7 @@ function wiziapp_version_check(){
                 <p style="line-height: 150%">
                     An important update is available for the WiziApp WordPress plugin.
                     <br />
-                    Make sure to update as soon as possible, to enjoy the security, bug fixes and new features contained in this update.
+                    Make sure to <a href="plugins.php">update</a> as soon as possible, to enjoy the security, bug fixes and new features contained in this update.
                 </p>
                 <p>
                     <input id="wiziappHideUpgrade" type="button" class="button" value="Hide this message" />
@@ -478,7 +490,7 @@ function wiziapp_config_notice(){
                 <strong><?php echo __('ERROR', 'wiziapp'); ?></strong><?php echo __(' - There was a problem activating the wiziapp plugin', 'wiziapp'); ?>
             </p>
             <p>
-                <?php echo __('Please try to reactivate the plugin via the plugins page and if the error persisits please contact support', 'wiziapp')?>
+                <?php echo __('Please try to reactivate the plugin via the plugins page and if the error persists please contact support', 'wiziapp')?>
             </p>
         </div>
         <?php
@@ -486,25 +498,6 @@ function wiziapp_config_notice(){
         if (!isset(WiziappConfig::getInstance()->wiziapp_showed_config_once) ||
                 WiziappConfig::getInstance()->wiziapp_showed_config_once !== TRUE){
             ?>
-                <!--Google analytics-->
-                <script type="text/javascript">
-                    var _gaq = _gaq || [];
-                    _gaq.splice(0, _gaq.length);
-                    var url = location.host;
-                    _gaq.push(['_setAccount', 'UA-22328620-1']);
-                    _gaq.push(['_setDomainName', url.replace('www.', '.')]);
-                    _gaq.push(['_setAllowLinker', true]);
-                    _gaq.push(['_setAllowHash', false]);
-                    _gaq.push(['_trackPageview', '/WiziappDownloadFunnel.php']);
-                    _gaq.push(['_trackPageview', '/ActivePluginGoal.php']);
-                
-                    (function() {
-                        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-                        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-                        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-                    })();
-                </script>
-                
                 <div id="message" class="updated fade" style="font-size: 1.1em">
                     <p>
                         <span style="font-weight: bolder;">WiziApp</span> automatically turns your WordPress blog into a native iPhone app. 
@@ -547,7 +540,30 @@ function wiziapp_config_notice(){
                     });    
                 });
                 </script>
-            </div>    
+            </div>
+
+            <!--Google analytics-->
+            <script type="text/javascript">
+                var _gaq = _gaq || [];
+                if (typeof(_gaq.splice) == 'function'){
+                    _gaq.splice(0, _gaq.length);
+                }
+                var analytics_account = '<?php echo WiziappConfig::getInstance()->analytics_account; ?>';
+                var url = '<?php echo WiziappConfig::getInstance()->api_server; ?>';
+
+                _gaq.push(['_setAccount', analytics_account]);
+                _gaq.push(['_setDomainName', url.replace('api.', '.')]);
+                _gaq.push(['_setAllowLinker', true]);
+                _gaq.push(['_setAllowHash', false]);
+                _gaq.push(['_trackPageview', '/WiziappDownloadFunnel.php']);
+                _gaq.push(['_trackPageview', '/ActivePluginGoal.php']);
+
+                (function() {
+                    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                })();
+            </script>
         <?php
     }
 }

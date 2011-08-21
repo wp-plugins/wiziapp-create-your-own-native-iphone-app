@@ -48,7 +48,7 @@ class WiziappConfig implements WiziappIInstallable{
     private $saveAsBulk = FALSE;
 
     private $name = 'wiziapp_settings';
-    private $internalVersion = 0.3;
+    private $internalVersion = 0.4;
 
     private static $_instance = null;
 
@@ -90,6 +90,10 @@ class WiziappConfig implements WiziappIInstallable{
 
         // save the updated options
         $this->options['options_version'] = $this->internalVersion;
+
+        $this->options['wiziapp_avail_version'] = WIZIAPP_P_VERSION;
+        $this->options['show_need_upgrade_msg'] = TRUE;
+        
         return $this->save();
     }
 
@@ -228,6 +232,15 @@ class WiziappConfig implements WiziappIInstallable{
 
     public function getAppIcon(){
         $url = $this->options['app_icon'];
+
+        if ( strpos($url, 'http') !== 0){
+            $url = 'https://'.$this->options['api_server'].$url;
+        }
+        return $url;
+    }
+
+    public function getIconUrl(){
+        $url = $this->options['icon_url'];
 
         if ( strpos($url, 'http') !== 0){
             $url = 'https://'.$this->options['api_server'].$url;
