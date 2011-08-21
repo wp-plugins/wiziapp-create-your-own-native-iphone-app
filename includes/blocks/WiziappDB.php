@@ -63,7 +63,7 @@ class WiziappDB implements WiziappIInstallable{
     * @param integer $id the id of the page
     * @param string $media_type the media type to retrieve
     * 
-    * @returns mixed $result an array containing the results of the search or false if none
+    * @return mixed $result an array containing the results of the search or false if none
     */
     function find_page_media($id, $media_type){
         return $this->find_content_media($id, $this->types['page'], $this->media_types[$media_type]);
@@ -77,7 +77,7 @@ class WiziappDB implements WiziappIInstallable{
     * @param integer $id the id of the post
     * @param string $media_type the media type to retrieve
     * 
-    * @returns mixed $result an array containing the results of the search or false if none
+    * @return mixed $result an array containing the results of the search or false if none
     */
     function find_post_media($id, $media_type){
         return $this->find_content_media($id, $this->types['post'], $this->media_types[$media_type]);
@@ -91,7 +91,7 @@ class WiziappDB implements WiziappIInstallable{
     * @param string $media_type the media type
     * @param array $data the data gathered on the media
     * @param string $html the html representing the original html element
-    * @returns mixed $result the id of the media if saved, false if there was a problem
+    * @return mixed $result the id of the media if saved, false if there was a problem
     */
     function update_post_media($post_id, $media_type, $data, $html){
         return $this->update_content_media($post_id, $this->types["post"], 
@@ -106,7 +106,7 @@ class WiziappDB implements WiziappIInstallable{
     * @param string $media_type the media type
     * @param array $data the data gathered on the media
     * @param string $html the html representing the original html element
-    * @returns mixed $result the id of the media if saved, false if there was a problem
+    * @return mixed $result the id of the media if saved, false if there was a problem
     */
     function update_page_media($page_id, $media_type, $data, $html){
         return $this->update_content_media($page_id, $this->types["page"], 
@@ -120,7 +120,7 @@ class WiziappDB implements WiziappIInstallable{
     * @param string $type the the type of the content
     * @param string $media_type the type of the media
     * 
-    * @returns mixed $result an array containing the results of the search or false if none
+    * @return mixed $result an array containing the results of the search or false if none
     */
     function find_content_media($id, $type, $media_type) {
         global $wpdb;
@@ -240,6 +240,7 @@ class WiziappDB implements WiziappIInstallable{
         return FALSE;           
         
     }
+
     function get_media_metadata_not_equal($media_type='image', $keys=array()){
         $media_type_id = $this->media_types[$media_type];
         
@@ -280,7 +281,7 @@ class WiziappDB implements WiziappIInstallable{
     * 
     * @param string $media_type can be image/video/audio
     * @param array $keys a list of keys to extract from the metadata
-    * 
+    * @param string $operand the query operand
     * @return array $metadata the metadata array is build from an associative array of media_id->metadata for the media
     */
     function get_media_metadata($media_type = 'image', $keys = array(), $operand = 'and'){
@@ -324,7 +325,7 @@ class WiziappDB implements WiziappIInstallable{
     }
     
     /**
-    * Updates the content media in the database. Sicne the html might change we have no way to
+    * Updates the content media in the database. Since the html might change we have no way to
     * validate if the record exists or not, therefore the records for the content must be deleted 
     * before being sent to this method. this method only adds to the database.
     * 
@@ -336,7 +337,7 @@ class WiziappDB implements WiziappIInstallable{
     * @param array $data the data we collected on the media
     * @param string $html the original html code that resulted in this media 
     * 
-    * @returns mixed $result the id of the media if saved, false if there was a problem
+    * @return mixed $result the id of the media if saved, false if there was a problem
     */
     function update_content_media($content_id, $type, $media_type, $data, $html){
         //$media = $this->find_content_media($content_id, $type, $media_type);
@@ -364,14 +365,16 @@ class WiziappDB implements WiziappIInstallable{
         for($a = 0, $total = count($items); $a < $total; ++$a){
             $obj = $items[$a]['obj'];
             $html = $items[$a]['html'];
-            $sql .= "(" . $content_id . "," . $this->types[$content_type] . ",'" . $html . "','" . json_encode($obj) . "'," . 
+            $sql .= "(" . $content_id . "," . $this->types[$content_type] . ",'" . $html . "','" . json_encode($obj) . "'," .
                     $this->media_types[$media_type] . ",'" . date('Y-m-d H:i:s') . "','" . date('Y-m-d H:i:s') . "'),";
         }
         $sql = substr_replace($sql, "", -1);
-        
+
+        // "Escape % signs, since we are not adding params... every % signs in our string is literal...
+        $sql = str_replace('%', '%%', $sql);
         $query = $wpdb->prepare($sql);    
         
-        $GLOBALS['WiziappLog']->write('info', "About to run the sql: {$sql}", 'db.add_content_medias');
+        $GLOBALS['WiziappLog']->write('info', "About to run the sql: {$query}", 'db.add_content_medias');
         
         $added = $wpdb->query($query);
 
@@ -382,7 +385,7 @@ class WiziappDB implements WiziappIInstallable{
         $id = (int) $wpdb->insert_id;
         return $id;
     }
-    
+
     /**
     * Preforms the media saving in the database. Adds a new record to the media
     * table according to the received information
@@ -391,7 +394,8 @@ class WiziappDB implements WiziappIInstallable{
     * @param string $type the type of the content
     * @param string $media_type the media type
     * @param array $media_info the data we collected on the media
-    * @param string $html the original html code that resulted in this media 
+    * @param string $html the original html code that resulted in this media
+    * @return integer $id the added media id
     */
     function add_content_media($content_id, $type, $media_type, $media_info, $html){
         global $wpdb;
@@ -429,8 +433,10 @@ class WiziappDB implements WiziappIInstallable{
     
     /**
     * gets all the videos in the blog regardless of their related content
-    * 
-    * @returns mixed $result an array containing the results of the search or false if none
+    *
+    * @param integer $offset the query offset
+    * @param integer $limit the query limit
+    * @return mixed $result an array containing the results of the search or false if none
     */
     function get_all_videos($offset = 0, $limit = 0){
         global $wpdb;
@@ -450,7 +456,7 @@ class WiziappDB implements WiziappIInstallable{
     /**
     * gets all the images in the blog regardless of their related content
     * 
-    * @returns mixed $result an array containing the results of the search or false if none
+    * @return mixed $result an array containing the results of the search or false if none
     */
     function get_all_images(){
         global $wpdb;
@@ -548,8 +554,10 @@ class WiziappDB implements WiziappIInstallable{
     
     /**
     * gets all the audio in the blog regardless of their related content
-    * 
-    * @returns mixed $result an array containing the results of the search or false if none
+    *
+    * @param integer $offset the query offset
+    * @param integer $limit the query limit
+    * @return mixed $result an array containing the results of the search or false if none
     */
     function get_all_audios($offset = 0, $limit = 0){
         global $wpdb;
@@ -570,7 +578,7 @@ class WiziappDB implements WiziappIInstallable{
     * get a specific video by it's id
     * 
     * @param integer $id the video id
-    * @returns mixed $result an array containing the record of the search as an associative array or false if none
+    * @return mixed $result an array containing the record of the search as an associative array or false if none
     */
     function get_videos_by_id($id){
         global $wpdb;
@@ -591,7 +599,7 @@ class WiziappDB implements WiziappIInstallable{
     * gets all the videos and audio found in the specified content id
     * 
     * @param integer $content_id the content id
-    * @returns mixed $result an array (fields: id, original_code, attachment_info) containing the results of the search or false if none
+    * @return mixed $result an array (fields: id, original_code, attachment_info) containing the results of the search or false if none
     * @todo add paging support to the get_content_special_elements() method  (offset & limit)
     */
     function get_content_special_elements($content_id){
@@ -613,7 +621,7 @@ class WiziappDB implements WiziappIInstallable{
     * Gets all the images found in the specified content id
     * 
     * @param integer $content_id the content id
-    * @returns mixed $result an array (fields: id, original_code, attachment_info) containing the results of the search or false if none
+    * @return mixed $result an array (fields: id, original_code, attachment_info) containing the results of the search or false if none
     * @todo add paging support to the get_content_images() method  (offset & limit)
     */
     function get_content_images($content_id){

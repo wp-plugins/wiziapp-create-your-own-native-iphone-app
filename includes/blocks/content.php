@@ -152,13 +152,19 @@ function wiziapp_save_content($id, $type="post"){
 
     // Handle the special content processing 
     $content = wiziapp_process_content($content);
+
+    // Support for the videozoom plugin, we want to show the video from the top of the post
+    $post_custom = get_post_custom($id);
+    if ($post_custom && $post_custom['wpzoom_post_embed_code']) {
+        $content = $post_custom['wpzoom_post_embed_code'][0] . '<br />' . $content;
+    }
     
     // Remove the existing media related to this post to avoid having duplicates and unrelated leftovers
     $GLOBALS['WiziappDB']->delete_content_media($id, $type);                 
     
     // Extract the media items with the media extractor
     $extractor = new WiziappMediaExtractor($content);
-    
+
     // Save the images
     $images = $extractor->getImages();
     wiziapp_saveMediaDetails('image', $images, $id, $type);

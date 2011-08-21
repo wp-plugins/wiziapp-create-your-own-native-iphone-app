@@ -18,7 +18,7 @@ class WiziappCache{
      */
     private $prefix;
     /**
-     * path to dirctory with cache files
+     * path to directory with cache files
      * @var string
      */
     private $fileDir = '/tmp/';
@@ -29,7 +29,7 @@ class WiziappCache{
 //    private $default_options = array('duration'=>3600);
     private $default_options = array('duration'=>60);
     /**
-     * Stack of caches for nesting cashe
+     * Stack of caches for nesting cache
      * @var array
      */
     private $cache_stack = array();

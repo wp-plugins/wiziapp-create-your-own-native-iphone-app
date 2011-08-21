@@ -108,6 +108,12 @@ class WiziappImageHandler {
             $url = $this->imageFile;
             if (strpos($this->imageFile, get_bloginfo('wpurl')) === 0){
                 $url = str_replace(get_bloginfo('wpurl'), WIZI_ABSPATH, $url);
+                // Make sure we can read it like this
+                if ( !file_exists($url) ){
+                    if ( ini_get('allow_url_fopen') == '1' ){
+                        $url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl'), $url);
+                    }
+                }
             }
             $url = $this->handler->resize($url, $cacheFile, $width, $height, $type, $allow_up, $this->checkPath());
             $GLOBALS['WiziappLog']->write('debug', "After resizing image: " . $this->imageFile, "image_resizing.getResizedImage");
@@ -144,6 +150,13 @@ class WiziappImageHandler {
         $calcResize = TRUE; // Try to calc the size of the image, unless remote and allow_url_fopen is off
         if ( strpos($imagePath, get_bloginfo('wpurl')) === 0 ){
             $imagePath = str_replace(get_bloginfo('wpurl'), WIZI_ABSPATH, $imagePath);
+            // Make sure we can read this image file, if the filename is with special encoding, the os might not find it...
+            if ( !file_exists($imagePath) ){
+                if ( ini_get('allow_url_fopen') != '1' ){
+                    $calcResize = FALSE;
+                }
+                $imagePath = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl'), $imagePath);
+            }
         } else {
             // The image is not local, if allow_url_fopen is off throw an alert
             if ( ini_get('allow_url_fopen') != '1' ){
@@ -175,7 +188,7 @@ class WiziappImageHandler {
     }
     
     /**
-    * Check which implementaion is available on this server
+    * Check which implementation is available on this server
     * Fallback to wiziapp global services if nothing local was found
     */
     private function _checkImp(){

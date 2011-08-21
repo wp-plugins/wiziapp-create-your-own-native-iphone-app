@@ -195,6 +195,10 @@ class WiziappContentHandler {
 
         if ($imagesElements !== FALSE){
             foreach($imagesElements as $image){
+                // Load the image to the DOM processing
+                $dom = new WiziappDOMLoader($image['original_code'], get_bloginfo('charset'));
+                $imageDOM = $dom->getBody();
+
                 $GLOBALS['WiziappLog']->write('info', ">>> About to replace :: {$image['original_code']}", '_getImagesReplacementCode');
                 $replacements['find'][] = $image['original_code'];
                 
@@ -203,6 +207,10 @@ class WiziappContentHandler {
                 $attachInfo = json_decode($image['attachment_info'], TRUE);
                 foreach($attachInfo['attributes'] as $attrName => $attrValue){
                     $value = str_replace('\\', '/', $attrValue);
+                    if ( in_array($attrName, array('src', 'title', 'alt')) ){
+                        $value = $imageDOM[0]['img']['attributes'][$attrName];
+                        $attachInfo['attributes'][$attrName] = $value;
+                    }
                     $newImage .= " {$attrName}=\"{$value}\"";
                 }
                 
@@ -245,6 +253,10 @@ class WiziappContentHandler {
             'find' => array(),
             'replace' => array(),
         );
+        $replacements2 = array(
+            'find' => array(),
+            'replace' => array(),
+        );
 
         $specialElements = $GLOBALS['WiziappDB']->get_content_special_elements($post_id);
         if ($specialElements !== FALSE){
@@ -264,6 +276,8 @@ class WiziappContentHandler {
 
                     if (strlen($info['title']) > 35) {
                         $title = substr($info['title'], 0, 35) . '...';
+                    } else {
+                        $title = $info['title'];
                     }
                     
                     $replaceCode = "<a href='" . $info['actionURL'] . "'><div class='audioCellItem'>
@@ -279,7 +293,7 @@ class WiziappContentHandler {
                             </div>
                         </div></a>";
                 }
-                
+
                 if ($replaceCode) {
                     $replacements['find'][] = $element['original_code'];
                     $replacements['replace'][] = $replaceCode;
@@ -305,21 +319,67 @@ class WiziappContentHandler {
                 if (strpos($element['original_code'], '<iframe') === FALSE || (isset($_GET['sim']) && $_GET['sim'] == 1)){
                     if (strpos($element['original_code'], '&') !== FALSE){
                         $replacements['find'][] = str_replace('&', '&amp;', $element['original_code']);   
-                        $replacements['replace'][] = $replaceCode;   
+                        $replacements['replace'][] = $replaceCode;
+
+                        /**
+                         * The content might have been inserted with ='' instead of =""
+                         */
+                        if (!empty($element['original_code'])){
+                            $replacements['find'][] = str_replace('&', '&amp;', str_replace('"', "'", $element['original_code']));
+                            $replacements['replace'][] = $replaceCode;
+                        }
                     }
-                    
+
                     if (strpos($element['original_code'], '<img') !== FALSE){
                         $replacements['find'][] = str_replace(' />', '>', $element['original_code']);
-                        $replacements['replace'][] = $replaceCode;   
+                        $replacements['replace'][] = $replaceCode;
+
+                        /**
+                         * The content might have been inserted with ='' instead of =""
+                         */
+                        if (!empty($element['original_code'])){
+                            $replacements['find'][] = str_replace(' />', '>', str_replace('"', "'", $element['original_code']));
+                            $replacements['replace'][] = $replaceCode;
+                        }
                     }
-                    
+
                     /**
                     * The following is indeed ugly but for some reason sometimes we are getting </param> which mess up everything
                     */
                     if ( strpos($element['original_code'], '</param>') !== FALSE ){
+                        $matches = array();
+                        preg_match_all("{<param[^>]*>(.*?)</param>}", $element['original_code'], $matches);
+                        foreach ($matches[0] as $match) {
+                            $replacements2['find'][] = $match;
+                            $replacements2['replace'][] = str_replace('></param>', ' />', $match);
+                        }
+
+                        $element['original_code'] = str_replace($replacements2['find'], $replacements2['replace'], $element['original_code']);
+                        
+                        /**
+                         * The content might have been inserted with ='' instead of =""
+                         */
+                        if (!empty($element['original_code'])){
+                            $replacements['find'][] = str_replace('"', "'", str_replace('</param>', '', $element['original_code']));
+                            $replacements['replace'][] = $replaceCode;
+                        }
+
                         $replacements['find'][] = str_replace('</param>', '', $element['original_code']);
-                        $replacements['replace'][] = $replaceCode;   
+                        $replacements['replace'][] = $replaceCode;
                     }
+
+//                    if (strpos($element['original_code'], '</param>') !== FALSE) {
+//                        $matches = array();
+//                        preg_match_all("{<param[^>]*>(.*?)}", $element['original_code'], $matches);
+//
+//                        foreach ($matches[0] as $match) {
+//                            $replacements['find'][] = $match . '</param>';
+//                            $replacements['replace'][] = str_replace('>', ' />', $match);
+//
+//                            $replacements['find'][] = str_replace('"', "'", $match) . '</param>';
+//                            $replacements['replace'][] = str_replace('>', ' />', str_replace('"', "'", $match));
+//                        }
+//                    }
                 }
             }
         }
@@ -330,12 +390,19 @@ class WiziappContentHandler {
     function _getAdminImagePath(){
         return 'http://' . WiziappConfig::getInstance()->getCdnServer() . '/images/app/themes/' . WiziappConfig::getInstance()->wiziapp_theme_name . '/';
     }
+
+    function add_header_to_content($content) {
+        global $post;
+        return get_post_meta($post->ID, 'wpzoom_post_embed_code', true) . $content;
+    }
     
     function trigger_before_content($content){
         if ($this->inApp === TRUE) {   
             $GLOBALS['WiziappLog']->write('info', "Triggering before the content", 'trigger_before_content');
             $content = apply_filters('wiziapp_before_the_content', $content);
         }
+
+        $content = $this->add_header_to_content($content);
         return $content;
     }
     
@@ -367,14 +434,15 @@ class WiziappContentHandler {
             
             //Change Galleries to new view
             /**$GLOBALS['WiziappProfiler']->write("Getting the galleries code for post {$post->ID}", "convert_content");
-            $this->_getGaleriesReplacementCode($post->ID, &$content);
+            $this->_getGalleriesReplacementCode($post->ID, &$content);
             $GLOBALS['WiziappProfiler']->write("Done Getting the galleries code for post {$post->ID}", "convert_content");   
-//            $content = str_replace($galeriesCode['find'], $galeriesCode['replace'], $content);
+//            $content = str_replace($galleriesCode['find'], $galleriesCode['replace'], $content);
             */
             $GLOBALS['WiziappProfiler']->write("Getting the images code for post {$post->ID}", "convert_content");   
             // Add the content id to images
             $imagesCode = $this->_getImagesReplacementCode($post->ID);
             $content = str_replace('&amp;', '&', $content);
+            $content = str_replace('&#038;', '&', $content);
             $content = str_replace($imagesCode['find'], $imagesCode['replace'], $content);
             
             $GLOBALS['WiziappProfiler']->write("Done Getting the images code for post {$post->ID}", "convert_content");   

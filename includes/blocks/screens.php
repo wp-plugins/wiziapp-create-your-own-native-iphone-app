@@ -9,10 +9,7 @@
 /**
 * wiziapp_prepareCategoriesPage
 * 
-* Creates a screen with a flat list of categories, since wordpress
-* doesn't give us the ability to page the categories list in we are not implementing
-* that for now. the chance of a website containing too many categories is not that high
-* might add support for this in the future
+* Creates a screen with a flat list of categories.
 * 
 */
 function wiziapp_prepareCategoriesPage(){
@@ -29,6 +26,7 @@ function wiziapp_prepareCategoriesPage(){
         'number' => $limitForRequest,
         'offset' => $offset,
         'hierarchical' => FALSE,
+        'pad_counts' => 1,
     ));
     
     $index = 0;
@@ -404,7 +402,7 @@ function wiziapp_buildPostListPage($query = '', $title = '', $block, $just_retur
     wiziapp_load_template(dirname(__FILE__) . '/../../themes/iphone/index.php');
     
     /**
-    * Format the components in the appropiated screen format
+    * Format the components in the appropriated screen format
     */
     
     if ($show_more > 0){
@@ -819,24 +817,24 @@ function wiziapp_buildCategoryPage($category_id){
     $title = wiziapp_apply_request_title($cat->cat_name);
 
     $query = "cat={$category_id}&orderby=post_date&posts_per_page=" . $numberOfPosts . "&offset=" . $offset;
-    
-    // Find the total number of posts in the blog
+
+    // Find the total number of posts in the category
     $totalPostsInCat = $cat->count;
-    
+
     if ($totalPostsInCat < $offset) {
         echo json_encode(wiziapp_prepareSectionScreen(array(), $title, "List"));
         exit();
     }
-    
+
     if ($numberOfPosts < $totalPostsInCat) {
         $showMore = $totalPostsInCat - $numberOfPosts;
     } else {
         $showMore = FALSE;
     }
-    
+
     $posts = wiziapp_buildPostListPage($query, '', $screen_conf['items'], TRUE, $showMore, FALSE);
     $postsCount = count($posts);
-    $totalShownPosts = $totalPostsInCat - ($offset + $postsCount);
+    $totalShownPosts = $postsCount - ($offset + $postsCount);
     if ($totalShownPosts < $numberOfPosts) {
         $showMore = $totalShownPosts;
     } else {
@@ -1137,7 +1135,7 @@ function wiziapp_buildImagesGalleryByPost($post_id, $ids = false){
     }  */
     
     foreach($images as $image_info){
-        $attributes = json_decode($image_info['attachment_info'], TRUE);
+        //$attributes = json_decode($image_info['attachment_info'], TRUE);
         
         /**if(is_array($images_ids) && (!in_array($image_info['id'], $images_ids) && !in_array($attributes['metadata']['id'], $images_ids))){
             continue;
@@ -1149,7 +1147,10 @@ function wiziapp_buildImagesGalleryByPost($post_id, $ids = false){
             }
         }
 
-        $image = $attributes['attributes'];
+        //$image = $attributes['attributes'];
+        $dom = new WiziappDOMLoader($image_info['original_code'], get_bloginfo('charset'));
+        $imageDOM = $dom->getBody();
+        $image = $imageDOM[0]['img']['attributes'];
         
         $pid = $image_info['id'];
         $image['pid'] = $pid;
@@ -1306,7 +1307,7 @@ function wiziapp_buildAboutScreen(){
     $page = array(
         'title' => $app_name,
         'version' =>  __('version') . ' ' . WiziappConfig::getInstance()->version,
-        'imageURL' => WiziappConfig::getInstance()->getAppIcon(),
+        'imageURL' => WiziappConfig::getInstance()->getIconUrl(),
         'aboutTitle' => __('About', 'wiziapp') . ' ' . $app_name,
         'aboutContent' => WiziappConfig::getInstance()->getAppDescription(),
         //'actions' => $actions

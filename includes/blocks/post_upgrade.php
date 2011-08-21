@@ -167,7 +167,7 @@ function wiziapp_upgrade_display(){
     </style>
     <div id="wiziapp_activation_container">
         <div id="just_a_moment"></div>
-        <p id="wizi_be_patient" class="text_label"><?php echo __('Please be patient while we are upgrading your app. It may take several minutes.', 'wiziapp');?></p>
+        <p id="wizi_be_patient" class="text_label"><?php echo __('Please be patient while we upgrade the plugin. It may take several minutes.', 'wiziapp');?></p>
         <div id="wizi_icon_wrapper">
             <div id="wizi_icon_processing"></div>
             <div id="current_progress_label" class="text_label"><?php echo __('Initializing...', 'wiziapp'); ?></div>

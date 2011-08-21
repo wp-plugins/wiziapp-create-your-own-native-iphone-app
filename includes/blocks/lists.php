@@ -22,6 +22,7 @@ function wiziapp_getAllCategories(){
         'number' => $categoriesLimit,
         'offset' => $pageNumber * $categoriesLimit,
         'hide_empty' => FALSE,
+        'pad_counts' => 1,
     ));
     $categoriesSummary = array();
     foreach($categories as $category) {

@@ -21,7 +21,10 @@ class WiziappGalleries{
         );
 
         foreach ($images as $image) {
-            $album['images'][] = $image['info']->attributes->src;
+            $dom = new WiziappDOMLoader($image['original_code'], get_bloginfo('charset'));
+            $imageDOM = $dom->getBody();
+
+            $album['images'][] = $imageDOM[0]['img']['attributes']['src'];
         }
 
         return $album;

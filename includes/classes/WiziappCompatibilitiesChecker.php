@@ -169,7 +169,7 @@ class WiziappCompatibilitiesChecker{
 
     public function testAllowUrlFopen(){
         if ( ini_get('allow_url_fopen') != '1' ){
-            return new WiziappError('missing_php_requirements', __('Your host blocked the PHP directive allow_url_fopen. Wiziapp needs allow_url_fopen to use images that are hosted on other websites as thumbnails', 'wiziapp'));
+            return new WiziappError('missing_php_requirements', __('Your host is blocking the PHP directive allow_url_fopen, which is required by the WiziApp plugin in order to use images that are hosted on other websites as thumbnails. To allow this directive, edit your php.ini file, and replace "allow_url_fopen=Off" with "allow_url_fopen=On"', 'wiziapp'));
         }
 
         // If we got till here all is good

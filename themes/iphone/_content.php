@@ -34,7 +34,7 @@
                                 $GLOBALS['WiziappProfiler']->write('Before the thumb inside the post ' . $post->ID, 'theme._content');
                             ?>
                             <?php 
-                                set_time_limit(60); 
+                                @set_time_limit(60);
                                 $size = WiziappConfig::getInstance()->getImageSize('posts_thumb');
                                 $limitSize = WiziappConfig::getInstance()->getImageSize('limit_post_thumb');
                                 wiziapp_getPostThumbnail($post, $size, $limitSize);

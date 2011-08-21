@@ -83,7 +83,7 @@ function wiziapp_getDefaultConfig(){
         'app_name' => get_bloginfo('name'),
         'app_icon' => '',
         'version' => '0.2',
-        'icon_url' => '',
+        'icon_url' => '/images/app/themes/default/about-placeholder.png',
         
         // Screens titles
         'categories_title' => 'Categories',

@@ -17,14 +17,20 @@ class WiziappScreenConfiguration{
         //return $this->config[$screen][$this->layouts[$screen.'_'.$type]];
         global $wiziappLoader;
 
-        return $this->config[$wiziappLoader->getVersion()][$screen.'_'.$type];
+        $config = null;
+        if ( isset($this->config[$wiziappLoader->getVersion()]) ){
+            $config = $this->config[$wiziappLoader->getVersion()][$screen.'_'.$type];
+        } else {
+            $config = $this->config[WIZIAPP_P_VERSION][$screen.'_'.$type];
+        }
+        return $config;
     }
 }
 
 if ( ! isset($GLOBALS['WiziappScreens']) ) {
     /**
-     * Initate the Wiziapp Database Object, for later cache reasons
+     * Initiate the Wiziapp Database Object, for later cache reasons
      */
     unset($GLOBALS['WiziappScreens']);
-    $GLOBALS['WiziappScreens'] = new WiziappScreenConfiguration() ;
+    $GLOBALS['WiziappScreens'] = new WiziappScreenConfiguration();
 }    
