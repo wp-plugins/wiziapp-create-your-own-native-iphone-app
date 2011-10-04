@@ -51,7 +51,7 @@
     window.wiziappDebug = <?php echo (WP_WIZIAPP_DEBUG) ? "true" : "false"; ?>;
     window.simMode = <?php echo (isset($_GET['sim']) && $_GET['sim']) ? 'true' : 'false'; ?>;
     window.wiziappCdn = "<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>";
-    window.wiziappPostHeaders = <?php echo json_encode(wiziapp_content_get_video_headers(get_bloginfo('name'))); ?>;
+    window.wiziappPostHeaders = <?php echo json_encode(WiziappTheme::getVideoHeaders(get_bloginfo('name'))); ?>;
 </script>
 <?php
     $videoScript = WiziappConfig::getInstance()->getCdnServer() . '/scripts/api/1/apps/video.js?v=' . WIZIAPP_VERSION;

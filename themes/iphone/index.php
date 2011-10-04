@@ -1,9 +1,9 @@
 <?php  
-$GLOBALS['WiziappLog']->write('info', "Loaded index template", "themes.default.index");
+WiziappLog::getInstance()->write('info', "Loaded index template", "themes.default.index");
 /**
 * Get access to the globals
 */
-global $wiziapp_block, $cPage, $nextPost, $prevPost;   
+global $wiziapp_block, $cPage, $nextPost, $prevPost, $postsScreen;
 /**
 * Start wordpress loop, the condition for the loop was prepared in the screens functions
 */
@@ -15,9 +15,12 @@ if (have_posts()) :
     $injectLoadedScript = '<script type="text/javascript">WIZIAPP.doLoad();</script>';
     // Start capturing output from loop events
     ob_start();
-    while (have_posts()) : the_post(); 
+    while (have_posts()) : the_post();
+        // Save the Query object so no plugin can alter it...
+        $wpQueryObject = $GLOBALS['wp_query'];
+
         $GLOBALS['WiziappEtagOverride'] .= serialize($post);
-        $GLOBALS['WiziappLog']->write('info', "The id: {$post->ID}", "themes.default.index");
+        WiziappLog::getInstance()->write('info', "The id: {$post->ID}", "themes.default.index");
         
         if ( isset($GLOBALS['wp_posts_listed']) ){
             if ( in_array($post->ID, $GLOBALS['wp_posts_listed']) ){
@@ -36,17 +39,25 @@ if (have_posts()) :
         
         if ( WiziappConfig::getInstance()->usePostsPreloading() ){
             
-            $GLOBALS['WiziappLog']->write('info', "Preloading the posts", "themes.default.index");  
+            WiziappLog::getInstance()->write('info', "Preloading the posts", "themes.default.index");
             ob_start();
+            $obLevelStart = ob_get_level();
 
             include('_content.php');     
 
             $contents = ob_get_contents();
             // Inject the doLoad method to avoid timing issues when getting the post in this bundle 
             $contents = str_replace('</body>', $injectLoadedScript.'</body>', $contents);
-            ob_end_clean();    
+            $obLevelEnd = ob_get_level();
+            if ( $obLevelEnd == $obLevelStart ){
+                ob_end_clean();
+            }
         }
-        wiziapp_appendComponentByLayout($cPage, $wiziapp_block, $post->ID, $contents);
+        $postsScreen->appendComponentByLayout($cPage, $wiziapp_block, $post->ID, $contents);
+
+        // Reset the query back to what it should be
+        $GLOBALS['wp_query'] = $wpQueryObject;
+        //$wpCurrentPost = $wpQueryObject->current_post;
     endwhile;
     ob_end_clean(); // End capturing output from loop events
     // In case something in the template changed, add the modified date to the etag
@@ -54,5 +65,5 @@ if (have_posts()) :
     $GLOBALS['WiziappEtagOverride'] .= date("F d Y H:i:s.", filemtime(dirname(__FILE__).'/_content.php'));
     $GLOBALS['WiziappEtagOverride'] .= date("F d Y H:i:s.", filemtime(dirname(__FILE__).'/index.php'));
 else : 
-    $GLOBALS['WiziappLog']->write('error', "No posts???", "themes.default.index");
+    WiziappLog::getInstance()->write('error', "No posts???", "themes.default.index");
 endif; 

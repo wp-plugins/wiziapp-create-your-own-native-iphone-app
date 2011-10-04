@@ -176,7 +176,7 @@ h2.pageitem{
     position: relative;
     height: 80px;
     color: #4D5971;
-    font-family: Helvetica,Ariel;
+    font-family: Helvetica,Arial;
     /*font-size: 14px;    */
     font-size: 1em;
     cursor: pointer;
@@ -204,7 +204,7 @@ h2.pageitem{
     left: 110px;
     top: 19px;
     width: 170px;
-    font-family: Helvetica,Ariel;
+    font-family: Helvetica, Arial;
     /**font-size: 17px;*/
     font-size: 1.1em;
     font-weight: bolder;
@@ -226,6 +226,10 @@ h2.pageitem{
 .video_wrapper{
     position: relative;
     float: left;
+    clear: both;
+}
+.video_wrapper_sim{
+    position: relative;
     clear: both;
 }
 .video_effect{

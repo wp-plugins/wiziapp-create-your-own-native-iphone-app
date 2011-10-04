@@ -18,13 +18,13 @@ function wiziapp_get_nextgen_albums($existing_albums){
         $formatedAlbums = array();
 //        $ngg_galleries = $nggdb->find_all_galleries(); 
 
-        $metadata = $GLOBALS['WiziappDB']->get_media_metadata('image', array('nextgen-album-id'));
+        $metadata = WiziappDB::getInstance()->get_media_metadata('image', array('nextgen-album-id'));
         if ($metadata) {
             foreach($metadata as $media_id => $keys){
                 //if(!$albums_ids || !in_array($keys['nextgen-album-id'], $albums_ids)){
                     $album = $nggdb->find_album($keys['nextgen-album-id']);
                     //(empty($album->pageid)){
-                        $album->pageid = $GLOBALS['WiziappDB']->get_content_by_media_id($media_id);
+                        $album->pageid = WiziappDB::getInstance()->get_content_by_media_id($media_id);
                     //
                     $albums[]= $album;
                     //$albums_ids[] = $keys['nextgen-album-id'];
@@ -78,13 +78,13 @@ function wiziapp_get_nextgen_albums($existing_albums){
             }    
         }    
         // Go over all the galleries and make sure we didn't miss anything
-        $metadata = $GLOBALS['WiziappDB']->get_media_metadata('image', array('nextgen-gallery-id'));
+        $metadata = WiziappDB::getInstance()->get_media_metadata('image', array('nextgen-gallery-id'));
         if ($metadata) {
             foreach($metadata as $media_id => $keys){
                 //if(!$galleries_ids || !in_array($keys['nextgen-gallery-id'], $galleries_ids)){
                     $gallery = $nggdb->find_gallery($keys['nextgen-gallery-id']);
                     //if(empty($gallery->pageid)){
-                        $gallery->pageid = $GLOBALS['WiziappDB']->get_content_by_media_id($media_id);
+                        $gallery->pageid = WiziappDB::getInstance()->get_content_by_media_id($media_id);
                     //}
                     $ngg_galleries[] = $gallery;
                   //  $galleries_ids[] = $keys['nextgen-gallery-id'];
@@ -93,13 +93,13 @@ function wiziapp_get_nextgen_albums($existing_albums){
         }    
         if ($ngg_galleries) {
             foreach ($ngg_galleries as $gallery){
-                $GLOBALS['WiziappLog']->write('info', "Checking NextGEN galleries", 'nextgen_plugin.wiziapp_get_nextgen_albums');
+                WiziappLog::getInstance()->write('info', "Checking NextGEN galleries", 'nextgen_plugin.wiziapp_get_nextgen_albums');
                 if (!in_array($gallery->gid, $galleries)){
-                    $GLOBALS['WiziappLog']->write('info', "Checking if the gallery is published {$gallery->gid}", 
+                   WiziappLog::getInstance()->write('info', "Checking if the gallery is published {$gallery->gid}",
                                                   'nextgen_plugin.wiziapp_get_nextgen_albums');
                     // Make sure it is published 
                     if ($gallery->pageid != 0){
-                        $GLOBALS['WiziappLog']->write('info', "About to create a component for the gallery", 
+                        WiziappLog::getInstance()->write('info', "About to create a component for the gallery",
                                                       'nextgen_plugin.wiziapp_get_nextgen_albums');
                         $the_post = get_post($gallery->pageid);
                         $dateline = $the_post->post_date;
@@ -115,7 +115,7 @@ function wiziapp_get_nextgen_albums($existing_albums){
                         // Get the galleries, and
                         $gimages = $nggdb->get_gallery($gallery->gid);
                         $gimagesCount = count($gimages);
-                        $GLOBALS['WiziappLog']->write('info', "The total number of items in this gallery is:" . $gimagesCount, 
+                        WiziappLog::getInstance()->write('info', "The total number of items in this gallery is:" . $gimagesCount,
                                                       'nextgen_plugin.wiziapp_get_nextgen_albums');
                         $formatedAlbum['numOfImages'] = $gimagesCount;
                         $minimumForAppearInAlbums = WiziappConfig::getInstance()->count_minimum_for_appear_in_albums;
@@ -123,7 +123,7 @@ function wiziapp_get_nextgen_albums($existing_albums){
                         if ($formatedAlbum['numOfImages'] >= $minimumForAppearInAlbums){   
                             $previewImages = array_keys($gimages);
                             
-//                            $GLOBALS['WiziappLog']->write('info', "The preview images are: " . print_r($previewImages, TRUE), "nextgen_plugin.wiziapp_get_nextgen_albums");
+//                            WiziappLog::getInstance()->write('info', "The preview images are: " . print_r($previewImages, TRUE), "nextgen_plugin.wiziapp_get_nextgen_albums");
                             
                             $total = count($previewImages);
                             //$lastIndex = end($gimages)->pid;
@@ -152,7 +152,7 @@ function wiziapp_get_nextgen_albums($existing_albums){
             }
         }    
     } else {
-        $GLOBALS['WiziappLog']->write('error', "NextGEN plugin is not installed or not active", "nextgen_plugin.wiziapp_get_nextgen_albums");
+        WiziappLog::getInstance()->write('error', "NextGEN plugin is not installed or not active", "nextgen_plugin.wiziapp_get_nextgen_albums");
     }
 
     $results = $existing_albums;
@@ -177,20 +177,20 @@ function wiziapp_getAlbumFromNextGen($images, $item_id){
             $images = wiziapp_getImagesFromNextgenGallery(str_replace('g', '', $item_id));
         } else {
             $album = $nggdb->find_album($item_id);
-            $GLOBALS['WiziappLog']->write('info', "The NextGet album is " . print_r($album, TRUE), 
+            WiziappLog::getInstance()->write('info', "The NextGet album is " . print_r($album, TRUE),
                                           'nextgen_plugin.wiziapp_getAlbumFromNextGen');
             foreach($album->gallery_ids as $gallery_id){
                 $images = array_merge($images, wiziapp_getImagesFromNextgenGallery($gallery_id, $album));
             }            
         }   
     } else {
-        $GLOBALS['WiziappLog']->write('error', "NextGEN plugin is not installed or not active", 'screens.wiziapp_getAlbumFromNextGen');
+        WiziappLog::getInstance()->write('error', "NextGEN plugin is not installed or not active", 'screens.wiziapp_getAlbumFromNextGen');
     }
     return $images;    
 }
 
 function wiziapp_getImagesFromNextgenGallery($gallery_id, $album = FALSE){
-    $GLOBALS['WiziappLog']->write('info', "The NextGet gallery is {$gallery_id}", 'screens.wiziapp_getAlbumFromNextGen');
+    WiziappLog::getInstance()->write('info', "The NextGet gallery is {$gallery_id}", 'screens.wiziapp_getAlbumFromNextGen');
     global $nggdb;   
     $images = array();
     $ngImages = $nggdb->get_gallery($gallery_id);
@@ -202,9 +202,9 @@ function wiziapp_getImagesFromNextgenGallery($gallery_id, $album = FALSE){
         
         // Get the post id
         if (!$album){
-            $metadata = $GLOBALS['WiziappDB']->get_media_metadata_equal('image', 'nextgen-gallery-id', $gallery_id);
+            $metadata = WiziappDB::getInstance()->get_media_metadata_equal('image', 'nextgen-gallery-id', $gallery_id);
         } else {
-            $metadata = $GLOBALS['WiziappDB']->get_media_metadata_equal('image', 'nextgen-album-id', $album->id);
+            $metadata = WiziappDB::getInstance()->get_media_metadata_equal('image', 'nextgen-album-id', $album->id);
         }    
         if ( $metadata != FALSE ) {
 //            $postId = $metadata[key($metadata)]['content_id'];
@@ -259,9 +259,9 @@ function wiziapp_nextgenImagebrowserFilter($content){
                 $float = (empty($float) ? 'none' : $float[1]);
             }
             if ($float == 'center') {
-                $out = "<a href=\"{$image->imageURL}\"><img src=\"{$image->imageURL}\" width=\"$width\" height=\"$height\" class=\"aligncenter\"></a>";
+                $out = "<a href=\"{$image->imageURL}\"><img src=\"{$image->imageURL}\" width=\"$width\" height=\"$height\" alt=\"NextGen Image\" class=\"aligncenter\" /></a>";
             } else {
-                $out = "<a href=\"{$image->imageURL}\"><img src=\"{$image->imageURL}\" width=\"$width\" height=\"$height\" style=\"float: {$float};\"></a>";
+                $out = "<a href=\"{$image->imageURL}\"><img src=\"{$image->imageURL}\" width=\"$width\" height=\"$height\" alt=\"NextGen Image\" style=\"float: {$float};\" /></a>";
             }
             $content = str_replace($matches[0][$match_key], $out, $content);
         }
@@ -288,7 +288,7 @@ function wiziapp_nextgenImagebrowserFilter($content){
                     $height = $image->getNewHeight();
                     $size = wiziapp_getImageSize('multi_image');
                     $urlToDeviceSizedImage = $image->getResizedImageUrl($image->imageURL, $size['width'], $size['height'], 'resize'); */
-                    $out .= "<a href=\"{$image->imageURL}\" class=\"wiziapp_gallery wiziapp_nextgen_plugin\"><img src=\"{$image->imageURL}\" data-wiziapp-nextgen-gallery-id=\"{$gallery_id}\"></a>";
+                    $out .= "<a href=\"{$image->imageURL}\" class=\"wiziapp_gallery wiziapp_nextgen_plugin\"><img src=\"{$image->imageURL}\" data-wiziapp-nextgen-gallery-id=\"{$gallery_id}\" alt=\"NextGen Image\" /></a>";
                 }
                 $content = str_replace($matches[0][$match_key], $out, $content);
             }
@@ -319,7 +319,7 @@ function wiziapp_nextgenImagebrowserFilter($content){
                             $height = $image->getNewHeight(); */
                             
                             $out .= "<a href=\"{$image->imageURL}\" class=\"wiziapp_gallery wiziapp_nextgen_plugin\">" . 
-                                    "<img src=\"{$image->imageURL}\" data-wiziapp-nextgen-album-id=\"$album_id\"></a>";
+                                    "<img src=\"{$image->imageURL}\" data-wiziapp-nextgen-album-id=\"$album_id\" alt=\"NextGen Image\" /></a>";
                         }   
                     }
                 }

@@ -93,7 +93,7 @@ class WiziappVideoGalleryCellItem extends WiziappLayoutComponent{
     * @uses wiziapp_extractProviderFromVideoLink()
     */
     function get_provider_attr(){
-        return wiziapp_extractProviderFromVideoLink($this->data[0]['actionURL']);
+        return WiziappLinks::extractProviderFromVideoLink($this->data[0]['actionURL']);
     }
     
     /**
@@ -131,7 +131,7 @@ class WiziappVideoGalleryCellItem extends WiziappLayoutComponent{
     * @return the description of the component
     */
     function get_description_attr(){
-        return wiziapp_simplifyText($this->data[0]['description']);
+        return $this->simplifyText($this->data[0]['description']);
     }
     
     /**
@@ -155,7 +155,7 @@ class WiziappVideoGalleryCellItem extends WiziappLayoutComponent{
     function get_actionURL_attr(){
         //return 'cmd://javascript/playVid()';
         //return wiziapp_convertVideoActionToWebVideo($this->data[0]['actionURL']);
-        return wiziapp_getVideoPageLink($this->data[0]['id']);
+        return WiziappLinks::videoPageLink($this->data[0]['id']);
     }
     
     /**
@@ -165,6 +165,6 @@ class WiziappVideoGalleryCellItem extends WiziappLayoutComponent{
     * @uses wiziapp_buildVideoDetailsLink()
     */
     function get_detailsURL_attr(){
-        return  wiziapp_buildVideoDetailsLink($this->data[0]['id']);        
+        return  WiziappLinks::videoDetailsLink($this->data[0]['id']);
     }
 }

@@ -85,7 +85,7 @@ class WiziappImagesAlbumCellItem extends WiziappLayoutComponent{
     }
     
     function get_imageURL_attr(){
-        $GLOBALS['WiziappLog']->write('info', "The preview image is:" . $this->data[0]['images'][0], 
+        WiziappLog::getInstance()->write('info', "The preview image is:" . $this->data[0]['images'][0],
                         'imageGalleryCellItem.get_imageURL_attr');
         $image = new WiziappImageHandler($this->data[0]['images'][0]);
         $size = WiziappConfig::getInstance()->getImageSize('album_thumb');
@@ -111,9 +111,9 @@ class WiziappImagesAlbumCellItem extends WiziappLayoutComponent{
     function get_actionURL_attr(){
         $url = '';
         if ( $this->data[0]['plugin'] == 'bypost' ){
-            $url = wiziapp_buildPostImagesGalleryLink($this->data[0]['content_id']);
+            $url = WiziappLinks::postImagesGalleryLink($this->data[0]['content_id']);
         } else {
-            $url = wiziapp_buildPluginAlbumLink($this->data[0]['plugin'], $this->data[0]['id']);
+            $url = WiziappLinks::pluginAlbumLink($this->data[0]['plugin'], $this->data[0]['id']);
         }
         return $url;
     }   

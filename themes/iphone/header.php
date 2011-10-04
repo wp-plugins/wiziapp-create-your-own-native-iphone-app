@@ -9,7 +9,7 @@
     ?>
     <base href="<?php bloginfo('url'); ?>/" />
     <meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php bloginfo('charset'); ?>" />
-    <title><?php echo wiziapp_apply_request_title(wp_title('&laquo;', false, 'right').get_bloginfo('name')); ?></title>
+    <title dir="ltr"><?php echo WiziappTheme::applyRequestTitle(wp_title('&laquo;', false, 'right').get_bloginfo('name')); ?></title>
     <meta name="viewport" content="width=device-width,user-scalable=no" />
     <link rel="stylesheet" href="<?php bloginfo('stylesheet_url'); ?>" type="text/css" media="screen" />
     <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
