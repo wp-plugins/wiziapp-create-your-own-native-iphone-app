@@ -1,4 +1,4 @@
-﻿=== WiziApp – create your own native iphone app. ===
+=== WiziApp – create your own native iphone app. ===
 Contributors: wiziapp
 Tags: Iphone, iphone app, appstore, App Store, native, ipod, ios
 Requires at least: 2.8
