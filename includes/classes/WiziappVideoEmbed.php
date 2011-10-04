@@ -62,13 +62,17 @@ class WiziappVideoEmbed{
     }
 
     private function _getSimulatorCode($id, $thumbData){
-        $html = '<div class="video_wrapper_container">';
-        $html .= '<div class="video_wrapper" data-video="video_' . $id . '">
-                            <img src="' . $thumbData['url'] . '" height="' . $thumbData['height'] . '" width="' . $thumbData['width'] . '"/>
-                            <div class="video_effect"></div>
-                         </div>';
-        $html .= '</div>';
-
-        return $html;
+//        return '<div class="video_wrapper_container">
+//                    <div class="video_wrapper" data-video="video_' . $id . '">
+//                         <img src="' . $thumbData['url'] . '" height="' . $thumbData['height'] . '" width="' . $thumbData['width'] . '" alt="Video Thumbnail" />
+//                         <div class="video_effect"></div>
+//                    </div>
+//                </div>';
+        return '<div class="video_wrapper_container">
+                    <div class="video_wrapper_sim" data-video="video_' . $id . '">
+                         <img src="' . $thumbData['url'] . '" width="340" alt="Video Thumbnail" />
+                         <div class="video_effect"></div>
+                    </div>
+                </div>';
     }
 }

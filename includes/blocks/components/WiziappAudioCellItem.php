@@ -93,7 +93,9 @@ class WiziappAudioCellItem extends WiziappLayoutComponent{
     * @return the actionURL of the component
     */
     function get_actionURL_attr(){
-        return $this->data[0]['actionURL'];
+		$actionURL = WiziappLinks::fixAudioLink($this->data[0]['actionURL']);
+		
+        return $actionURL;
     }
     
 }

@@ -71,6 +71,6 @@ class WiziappMoreCellItem extends WiziappLayoutComponent{
     * @return the actionURL of the component
     */
     function get_actionURL_attr(){
-        return wiziapp_buildMoreLink($this->data[1]);
+        return WiziappLinks::moreLink($this->data[1]);
     }   
 }

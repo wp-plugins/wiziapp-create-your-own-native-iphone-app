@@ -244,6 +244,10 @@ margin: 0 5px;
     float: left;
     clear: both;
 }
+.video_wrapper_sim{
+    position: relative;
+    clear: both;
+}
 .video_effect{
     background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/cuts_play_med_on.png) no-repeat center center;
     position: absolute;

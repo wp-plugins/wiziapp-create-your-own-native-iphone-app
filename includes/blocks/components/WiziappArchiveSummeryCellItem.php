@@ -116,9 +116,9 @@ class WiziappArchiveSummeryCellItem extends WiziappLayoutComponent{
         $type = $this->data[2];
         $link = '';
         if ( $type == 'years' ){
-            $link = wiziapp_buildArchiveYearLink($this->data[0]);
+            $link = WiziappLinks::archiveYearLink($this->data[0]);
         } elseif ( $type == 'months' ) {
-            $link = wiziapp_buildArchiveMonthLink($this->data[3], $this->data[4]);
+            $link = WiziappLinks::archiveMonthLink($this->data[3], $this->data[4]);
         }
         return $link;
     }

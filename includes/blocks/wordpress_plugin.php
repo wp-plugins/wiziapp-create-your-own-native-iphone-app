@@ -14,8 +14,8 @@ function wiziapp_get_wordpress_albums($existing_albums){
     $albumsFromWordpress = array();
     $albums = array();
     
-    $data = $GLOBALS['WiziappDB']->get_media_metadata('image', array('wordpress-gallery-id'));
-    //$data = $GLOBALS['WiziappDB']->get_media_metadata_not_equal('image', array('cincopa-id'=>'', 'nextgen-gallery-id'=>'', 'nextgen-album-id'=>'', 'pageflipbook-id'=>''));
+    $data = WiziappDB::getInstance()->get_media_metadata('image', array('wordpress-gallery-id'));
+    //$data = WiziappDB::getInstance()->get_media_metadata_not_equal('image', array('cincopa-id'=>'', 'nextgen-gallery-id'=>'', 'nextgen-album-id'=>'', 'pageflipbook-id'=>''));
 
     if ($data !== FALSE){
         foreach($data as $content_id => $medias){
@@ -33,7 +33,7 @@ function wiziapp_get_wordpress_albums($existing_albums){
                 }
                 $imagesCount = count($images);
                 
-                $GLOBALS['WiziappLog']->write('info', "The Wordpress album ID is " . $content_id, 
+                WiziappLog::getInstance()->write('info', "The Wordpress album ID is " . $content_id,
                                           'wordpress_plugin.wiziapp_get_wordpress_albums');
                 $albumsFromWordpress[] = array('content_id' => $content_id, 'count' => $imagesCount, 'images' => $images);    
             }
@@ -73,9 +73,9 @@ function wiziapp_get_wordpress_album($images = array(), $postId = 0, $albumId = 
         return $images;
     }
         
-    $data = $GLOBALS['WiziappDB']->get_media_data('image', 'wordpress-gallery-id', $postId);
+    $data = WiziappDB::getInstance()->get_media_data('image', 'wordpress-gallery-id', $postId);
     if ($data !== FALSE){
-        $GLOBALS['WiziappLog']->write('info', "The Wordpress album is " . print_r($data[$postId], TRUE),
+        WiziappLog::getInstance()->write('info', "The Wordpress album is " . print_r($data[$postId], TRUE),
                                           'wordpress_plugin.wiziapp_get_wordpress_album');
         foreach ($data as $image){
             $encoding = get_bloginfo('charset');
@@ -183,8 +183,8 @@ function wiziapp_wordpress_filter($content){
                     // $link = wp_get_attachment_thumb_url($image->ID);
                     $link = wp_get_attachment_url($image->ID);
                     $html = '<a href="' . $link . '" class="wiziapp_gallery wiziapp_wordpress_plugin">';
-                    //$html .= '<img src="' . $link . '" data-wiziapp-id="' . $image->ID . '" wordpress-gallery-id="' . $post->ID . '" />';
-                    $html .= '<img src="' . $link . '" wordpress-gallery-id="' . $post->ID . '" />';
+                    //$html .= '<img src="' . $link . '" data-wiziapp-id="' . $image->ID . '" wordpress-gallery-id="' . $postId . '" />';
+                    $html .= '<img src="' . $link . '" wordpress-gallery-id="' . $postId . '" />';
                     $html .= '</a>';
                     $images .= $html;                
                 }

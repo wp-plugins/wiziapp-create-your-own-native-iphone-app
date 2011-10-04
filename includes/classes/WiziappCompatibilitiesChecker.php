@@ -18,6 +18,11 @@ class WiziappCompatibilitiesChecker{
             $html .= $php->getHTML();
         }
 
+        $db = $this->testDatabase();
+        if ( WiziappError::isError($db) ){
+            $html .= $db->getHTML();
+        }
+
         $token = $this->testToken();
         if ( WiziappError::isError($token) ){
             $html .= $token->getHTML();
@@ -37,6 +42,7 @@ class WiziappCompatibilitiesChecker{
         }
         return $html;
     }
+
     public function fullTestAsHtml(){
         $html = '';
 
@@ -89,8 +95,8 @@ class WiziappCompatibilitiesChecker{
         return $this->critical;
     }
 
-    public function testWritingPermissions(){
-        $logs = $GLOBALS['WiziappLog']->checkPath();
+    public function testWritingPermissions($return_as_html = true){
+        $logs = WiziappLog::getInstance()->checkPath();
 
         $cacheHandler = new WiziappCache();
         $cache = $cacheHandler->checkPath();
@@ -99,32 +105,42 @@ class WiziappCompatibilitiesChecker{
         $thumbs = $thumbsHandler->checkPath();
 
         if ( !$cache || !$logs || !$thumbs ){
-            $message = 'It seems that your server settings are blocking access to certain directories. The WiziApp plugin requires writing permissions to the following directories:<br /><ul>';
-            if ( !$cache ){
-                $message .= '<li>wp-content/uploads</li>';
+            if ($return_as_html) {
+                $message = 'It seems that your server settings are blocking access to certain directories. The WiziApp plugin requires writing permissions to the following directories:<br /><ul>';
+                if ( !$cache ){
+                    $message .= '<li>wp-content/uploads</li>';
+                }
+                 if ( !$logs ) {
+                     $message .= '<li>wp-content/plugins/wiziapp/logs</li>';
+                 }
+
+                if ( !$thumbs ){
+                    $message .= '<li>wp-content/plugins/wiziapp/cache</li>';
+                }
+
+                $message .= '</ul>Though you may choose not to provide these permissions, this would mean that any requests by your iPhone App readers would be made in real time, which would deny you the advantages of caching.';
+
+                // @todo format this i18n wordpress function usage to allow params and send the dir list as a parameter
+                return new WiziappError('writing_permissions_error', __($message, 'wiziapp'));
+            } else {
+                return FALSE;
             }
-             if ( !$logs ) {
-                 $message .= '<li>wp-content/plugins/wiziapp/logs</li>';
-             }
-
-            if ( !$thumbs ){
-                $message .= '<li>wp-content/plugins/wiziapp/cache</li>';
-            }
-
-            $message .= '</ul>Though you may choose not to provide these permissions, this would mean that any requests by your iPhone App readers would be made in real time, which would deny you the advantages of caching.';
-
-            // @todo format this i18n wordpress function usage to allow params and send the dir list as a parameter
-            return new WiziappError('writing_permissions_error', __($message, 'wiziapp'));
         }
 
         return TRUE;
     }
 
     public function testDatabase(){
-        /**
-         * will be added later, the error message will be:
-         * Your WordPress installation does not have permission to create tables in your database.
-         */
+        if ( !WiziappDB::getInstance()->isInstalled() ){
+            // Try to recover
+            WiziappDB::getInstance()->install();
+            if ( !WiziappDB::getInstance()->isInstalled() ){
+                $this->critical = TRUE;
+                return new WiziappError('database_error', __('Your WordPress installation does not have permission to create tables in your database.', 'wiziapp'));
+            }
+        }
+
+        return TRUE;
     }
 
     public function testToken(){
@@ -154,22 +170,60 @@ class WiziappCompatibilitiesChecker{
         return TRUE;
     }
 
-    public function testPhpGraphicRequirements(){
-        $errors = new WiziappError();
+    public function testWebServer($return_as_html = true){
+        if (isset($_SERVER['SERVER_SOFTWARE'])) { // Microsoft-IIS/x.x (Windows xxxx)
+            if (stripos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') === FALSE) {
+                return TRUE;
+            } else {
+                if ($return_as_html) {
+                    return new WiziappError('iis_server_found', __('It appears that your blog is running on an IIS server; the WiziApp plugin does not save logs in this architecture', 'wiziapp'));
+                } else {
+                    return FALSE;
+                }
+            }
+        } else {
+            if ($return_as_html) {
+                return new WiziappError('iis_server_found', __('It appears that your blog is running on an IIS server; the WiziApp plugin does not save logs in this architecture', 'wiziapp'));
+            } else {
+                return FALSE;
+            }
+        }
+    }
 
-        $gotGD =extension_loaded('gd');
+    public function testOperatingSystem(){
+        if (isset($_SERVER['SERVER_SOFTWARE'])) {
+            if (stripos($_SERVER['SERVER_SOFTWARE'], 'Win32') === FALSE) {
+                return 'Linux';
+            } else {
+                return 'Windows';
+            }
+        } else {
+            return 'Unknown';
+        }
+    }
+
+    public function testPhpGraphicRequirements($return_as_html = true){
+        $gotGD = extension_loaded('gd');
         $gotImagick = extension_loaded('imagick');
         if ( !$gotGD && !$gotImagick ){
-            return new WiziappError('missing_php_requirements', __('Wiziapp requires either the GD or the ImageMagick PHP extension to be installed on the server. Please contact your hosting provider to enable one of these extensions, otherwise the thumbnails will not function properly', 'wiziapp'));
+            if ($return_as_html) {
+                return new WiziappError('missing_php_requirements', __('Wiziapp requires either the GD or the ImageMagick PHP extension to be installed on the server. Please contact your hosting provider to enable one of these extensions, otherwise the thumbnails will not function properly', 'wiziapp'));
+            } else {
+                return FALSE;
+            }
         }
 
         // If we got till here all is good
         return TRUE;
     }
 
-    public function testAllowUrlFopen(){
+    public function testAllowUrlFopen($return_as_html = true){
         if ( ini_get('allow_url_fopen') != '1' ){
-            return new WiziappError('missing_php_requirements', __('Your host is blocking the PHP directive allow_url_fopen, which is required by the WiziApp plugin in order to use images that are hosted on other websites as thumbnails. To allow this directive, edit your php.ini file, and replace "allow_url_fopen=Off" with "allow_url_fopen=On"', 'wiziapp'));
+            if ($return_as_html) {
+                return new WiziappError('missing_php_requirements', __('Your host is blocking the PHP directive allow_url_fopen, which is required by the WiziApp plugin in order to use images that are hosted on other websites as thumbnails. To allow this directive, edit your php.ini file, and replace "allow_url_fopen=Off" with "allow_url_fopen=On"', 'wiziapp'));
+            } else {
+                return FALSE;
+            }
         }
 
         // If we got till here all is good
@@ -223,7 +277,8 @@ class WiziappCompatibilitiesChecker{
          * The post request must have a value to avoid issues with Content-Length  invalid and
          * 413 Request Entity Too Large as a result...
          */
-        $response = wiziapp_http_request(array('param'=>1), '/cms/checkUrl?url=' . urlencode($blogUrl), 'POST');
+        $r = new WiziappHTTPRequest();
+        $response = $r->api(array('param'=>1), '/cms/checkUrl?url=' . urlencode($blogUrl), 'POST');
         if ( is_wp_error($response) ) {
             // If we couldn't connect to the host, outbound connections might be blocked
             if ( "couldn't connect to host" == $response->get_error_message() ){

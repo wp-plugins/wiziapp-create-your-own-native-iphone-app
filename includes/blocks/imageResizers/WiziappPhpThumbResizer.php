@@ -27,15 +27,19 @@ class WiziappPhpThumbResizer{
         $basePath = dirname(__FILE__) . '/../../libs/';
         require_once $basePath . 'phpThumb/ThumbLib.inc.php';
         
-        $GLOBALS['WiziappLog']->write('info', 'Before thumb create: ' . $image, 'WiziappPhpThumbResizer.load');
+        WiziappLog::getInstance()->write('info', 'Before thumb create: ' . $image, 'WiziappPhpThumbResizer.load');
 
-        $thumb = PhpThumbFactory::create($image);         
-        $this->thumb = $thumb;
-        
-        $GLOBALS['WiziappLog']->write('info', 'After thumb create: ' . $image, 'WiziappPhpThumbResizer.load');
+        try {
+            $thumb = PhpThumbFactory::create($image);
+            $this->thumb = $thumb;
+            $size = $thumb->getCurrentDimensions();
+        } catch (Exception $e) {
+            WiziappLog::getInstance()->write('error', 'GD failed to create or get size of image for thumb, error: ' . $e->getMessage(), 'WiziappPhpThumbResizer.load');
+        }
+
+        WiziappLog::getInstance()->write('info', 'After thumb create: ' . $image . ' with size: ' . $size, 'WiziappPhpThumbResizer.load');
         
         if ($calc_size){
-            $size = $thumb->getCurrentDimensions();
             $this->newHeight = $size['height'];
             $this->newWidth = $size['width'];   
         }
@@ -51,7 +55,7 @@ class WiziappPhpThumbResizer{
         }
         
         try {
-            $GLOBALS['WiziappLog']->write('info', 'Before thumb resize: ' . $image, 'WiziappPhpThumbResizer.resize');             
+            WiziappLog::getInstance()->write('info', 'Before thumb resize: ' . $image, 'WiziappPhpThumbResizer.resize');
             $thumb = PhpThumbFactory::create($image, $options);
             //$thumb->$type($width, $height);
             if ( $type == 'perspectiveResize' ){
@@ -67,7 +71,7 @@ class WiziappPhpThumbResizer{
                     $height = ceil(($width / $currWidth) * $currHeight);
 
                 }
-                $GLOBALS['WiziappLog']->write('info', "Resizing from width: {$currWidth} to: {$width} and from height: {$currHeight} to: {$height}",
+                WiziappLog::getInstance()->write('info', "Resizing from width: {$currWidth} to: {$width} and from height: {$currHeight} to: {$height}",
                             'WiziappPhpThumbResizer.resize');
             } else {
                 if ($height == 0){
@@ -83,7 +87,7 @@ class WiziappPhpThumbResizer{
                         $height = $currHeight;
                     }
 
-                    $GLOBALS['WiziappLog']->write('info', "Resizing from width: {$currWidth} to: {$width} and therefore from height: {$currHeight} to: {$height}",
+                    WiziappLog::getInstance()->write('info', "Resizing from width: {$currWidth} to: {$width} and therefore from height: {$currHeight} to: {$height}",
                             'WiziappPhpThumbResizer.resize');
                 } elseif ($width == 0) {
                     $type = 'resize';
@@ -98,7 +102,7 @@ class WiziappPhpThumbResizer{
                         $width = $currWidth;
                     }
 
-                    $GLOBALS['WiziappLog']->write('info', "Resizing from height: {$currHeight} to: {$height} and therefore from width: {$currWidth} to: {$width}",
+                    WiziappLog::getInstance()->write('info', "Resizing from height: {$currHeight} to: {$height} and therefore from width: {$currWidth} to: {$width}",
                             'WiziappPhpThumbResizer.resize');
                 }
             }
@@ -122,10 +126,10 @@ class WiziappPhpThumbResizer{
                 $url = FALSE;
             }
 
-            $GLOBALS['WiziappLog']->write('info', 'After thumb resize: ' . $image, 'WiziappPhpThumbResizer.resize');
+            WiziappLog::getInstance()->write('info', 'After thumb resize: ' . $image, 'WiziappPhpThumbResizer.resize');
         }
         catch (Exception $e) {
-             $GLOBALS['WiziappLog']->write('error', 'Error resizing: ' . $e->getMessage(), 
+             WiziappLog::getInstance()->write('error', 'Error resizing: ' . $e->getMessage(),
                 'WiziappPhpThumbResizer.resize');
         }
         

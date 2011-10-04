@@ -71,7 +71,7 @@ class WiziappLinkCellItem extends WiziappLayoutComponent{
     * @return the actionURL of the component
     */
     function get_actionURL_attr(){
-        return wiziapp_buildExternalLink($this->data[0]->link_url);
+        return WiziappLinks::externalLink($this->data[0]->link_url);
     }
     
 }

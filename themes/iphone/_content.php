@@ -4,13 +4,14 @@
     // Before handing the content, make sure this post is scanned
     $processed = get_post_meta($post->ID, 'wiziapp_processed');
     if (empty($processed)){
-        wiziapp_save_post($post);
+        $ce = new WiziappContentEvents();
+        $ce->savePost($post);
     }
 ?>
         <div class="page_content">
             <div class="post">
                 <?php
-                    $pLink = wiziapp_buildPostLink($post->ID);
+                    $pLink = WiziappLinks::postLink($post->ID);
                 ?>
                 <h2 class="pageitem">
                     <a id="post_title" href="<?php echo $pLink ?>" rel="bookmark" title="<?php the_title(); ?>">
@@ -19,36 +20,36 @@
                 </h2>
                 <div class="pageitem">
                     <div class="single-post-meta-top">
-                        <div id="author_and_date"><span class="postDescriptionCellItem_author">By
-                            <a href="<?php echo wiziapp_buildAuthorLink($post->post_author); ?>">
-                            <?php the_author() ?>
-                            </a></span>&nbsp;<span class="postDescriptionCellItem_date"><?php echo wiziapp_formatDate($post->post_date); ?></span>
+                        <div id="author_and_date">
+                            <span class="postDescriptionCellItem_author">By
+                                <a href="<?php echo WiziappLinks::authorLink($post->post_author); ?>"><?php the_author(); ?></a>
+                            </span>&nbsp;<span class="postDescriptionCellItem_date"><?php echo WiziappTheme::formatDate($post->post_date); ?></span>
                         </div>
-                        <?php wiziapp_the_rating() ?>
+                        <?php //wiziapp_the_rating(); ?>
                     </div>
 
                     <div class="clear"></div>
                     <div class="post" id="post-<?php the_ID(); ?>">
                         <div id="singlentry">
                             <?php
-                                $GLOBALS['WiziappProfiler']->write('Before the thumb inside the post ' . $post->ID, 'theme._content');
+                                WiziappProfiler::getInstance()->write('Before the thumb inside the post ' . $post->ID, 'theme._content');
                             ?>
                             <?php 
                                 @set_time_limit(60);
                                 $size = WiziappConfig::getInstance()->getImageSize('posts_thumb');
                                 $limitSize = WiziappConfig::getInstance()->getImageSize('limit_post_thumb');
-                                wiziapp_getPostThumbnail($post, $size, $limitSize);
+                                WiziappThumbnailHandler::getPostThumbnail($post, $size, $limitSize);
                                 //wiziapp_getPostThumbnail($post, array('width'=>100, height=>100), $limitSize); 
                             ?>
                             <?php
-                                $GLOBALS['WiziappProfiler']->write('after the thumb inside the post ' . $post->ID, 'theme._content');
+                                WiziappProfiler::getInstance()->write('after the thumb inside the post ' . $post->ID, 'theme._content');
                             ?>
                             <?php
-                                $GLOBALS['WiziappProfiler']->write('Before the content inside the post ' . $post->ID, 'theme._content');
+                                WiziappProfiler::getInstance()->write('Before the content inside the post ' . $post->ID, 'theme._content');
                             ?>
-                            <?php global $more; $more = 1; the_content(); ?>
+                            <?php global $more; $more = -1; the_content(''); ?>
                             <?php
-                                $GLOBALS['WiziappProfiler']->write('After the content inside the post ' . $post->ID, 'theme._content');
+                                WiziappProfiler::getInstance()->write('After the content inside the post ' . $post->ID, 'theme._content');
                             ?>
                         </div>
                     </div>
@@ -57,8 +58,8 @@
                 <div class="clear"></div>
                 <ul class="wiziapp_bottom_nav">
                     <?php
-                        wiziapp_get_categories_nav();
-                        wiziapp_get_tags_nav();
+                        WiziappTheme::getCategoriesNav();
+                        WiziappTheme::getTagsNav();
                     ?>
                 </ul>
                 <div class="clear"></div>
@@ -115,9 +116,9 @@
                  */
             ?>
     
-            window.galleryPrefix = "<?php echo wiziapp_buildPostImagesGalleryLink($post->ID); ?>%2F";
+            window.galleryPrefix = "<?php echo WiziappLinks::postImagesGalleryLink($post->ID); ?>%2F";
             window.wiziappDebug = <?php echo (WP_WIZIAPP_DEBUG) ? "true" : "false"; ?>;
-            window.wiziappPostHeaders = <?php echo json_encode(wiziapp_content_get_post_headers(FALSE)); ?>;
+            window.wiziappPostHeaders = <?php echo json_encode(WiziappTheme::getPostHeaders(FALSE)); ?>;
             window.wiziappRatingUrl = '<?php echo get_bloginfo('url'); ?>/?wiziapp/getrate/post/<?php echo $post->ID ?>';
             window.wiziappCommentsCountUrl = '<?php echo get_bloginfo('url'); ?>/?wiziapp/post/<?php echo $post->ID?>/comments';
             window.multiImageWidthLimit = "<?php echo WiziappConfig::getInstance()->multi_image_width; ?>";

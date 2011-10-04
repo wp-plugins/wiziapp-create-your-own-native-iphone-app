@@ -208,12 +208,19 @@ class WiziappLayoutComponent{
             $methodName = "get_{$attrMap[$a]}_attr";
             if ( method_exists($this, $methodName) ){
                 $value = $this->$methodName();
-                //$GLOBALS['WiziappLog']->write('info', "Processing component, method: {$methodName} the value is: {$value}", "wiziappLayoutComponent.process");
+                //WiziappLog::getInstance()->write('info', "Processing component, method: {$methodName} the value is: {$value}", "wiziappLayoutComponent.process");
                 if ( $value !== null ){
-                  //  $GLOBALS['WiziappLog']->write('info', "Since it's not null we are setting it here", "wiziappLayoutComponent.process");
+                  //  WiziappLog::getInstance()->write('info', "Since it's not null we are setting it here", "wiziappLayoutComponent.process");
                     $this->attributes[$attrMap[$a]] = $this->$methodName();
                 }   
             }
         }
-    }                 
+    }
+
+    public function simplifyText($text){
+        $text = preg_replace('/<br\\s*?\/??>/i', "\n", $text);
+        $text = strip_tags($text);
+        $text = stripslashes($text);
+        return $text;
+    }
 }

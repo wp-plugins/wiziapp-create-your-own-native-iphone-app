@@ -4,7 +4,7 @@
         global $post;
         setup_postdata($post);
                             
-        wiziapp_content_get_post_headers(true);
+        WiziappTheme::getPostHeaders(true);
         echo ob_get_contents();
         ob_end_clean();
     

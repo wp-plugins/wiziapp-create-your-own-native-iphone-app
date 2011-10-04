@@ -142,16 +142,16 @@ class WiziappImageGalleryCellItem extends WiziappLayoutComponent{
     function get_relatedPostsURL_attr(){
         $url = '';
         if ( !empty($this->image->relatedPost) ) {
-            $url = wiziapp_buildPostLink($this->image->relatedPost);
+            $url = WiziappLinks::postLink($this->image->relatedPost);
         } 
         
         if ( empty($url) ){
             // Try to get a page link
-            $GLOBALS['WiziappLog']->write('info', "The image is: " . print_r($this->image, TRUE), 
+            WiziappLog::getInstance()->write('info', "The image is: " . print_r($this->image, TRUE),
                         'imageGalleryCellItem.get_relatedPostsURL_attr');
-            $url = wiziapp_buildPageLink($this->image->relatedPost);
+            $url = WiziappLinks::pageLink($this->image->relatedPost);
         }
-        $GLOBALS['WiziappLog']->write('info', "The url for the related posts is: {$url}", 
+        WiziappLog::getInstance()->write('info', "The url for the related posts is: {$url}",
                         'imageGalleryCellItem.get_relatedPostsURL_attr');
         return $url;
     }
