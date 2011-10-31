@@ -13,6 +13,22 @@ if (have_posts()) :
         $GLOBALS['WiziappEtagOverride'] = '';
     }
     $injectLoadedScript = '<script type="text/javascript">WIZIAPP.doLoad();</script>';
+    
+    // Force the head to run only once
+    if ( empty($GLOBALS['wpHeadHtml']) ){
+		ob_start();
+		wp_head();
+		$GLOBALS['wpHeadHtml'] = ob_get_contents();
+		ob_end_clean();
+	}
+    
+	if ( empty($GLOBALS['wpFooterHtml']) ){
+		ob_start();
+		wp_footer();
+		$GLOBALS['wpFooterHtml'] = ob_get_contents();
+		ob_end_clean();
+    }
+    
     // Start capturing output from loop events
     ob_start();
     while (have_posts()) : the_post();
@@ -51,6 +67,15 @@ if (have_posts()) :
             $obLevelEnd = ob_get_level();
             if ( $obLevelEnd == $obLevelStart ){
                 ob_end_clean();
+            } else if ( $obLevelEnd > $obLevelStart ){
+                // Someone opened a new output buffer cache that might mess up our loop, reset the buffer to what we need
+                while ( $obLevelEnd > $obLevelStart ){
+                    ob_end_clean();
+                    --$obLevelEnd;
+                }
+            } else {
+                // Someone closed it for us, just make sure it is cleaned
+                ob_clean();
             }
         }
         $postsScreen->appendComponentByLayout($cPage, $wiziapp_block, $post->ID, $contents);

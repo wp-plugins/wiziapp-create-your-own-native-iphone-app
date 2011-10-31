@@ -18,6 +18,12 @@ class WiziappContentHandler {
 
     private static $_instance = null;
 
+    private $originalTemplateDir = '';
+    private $originalTemplateDirUri = '';
+    private $originalStylesheetDir = '';
+    private $originalStylesheetDirUri = '';
+
+
     /**
     * Apply all of the classes hooks to the right requests,
     * we don't need to start this request every time, just when it is possibly needed
@@ -36,6 +42,17 @@ class WiziappContentHandler {
             add_filter('theme_root', array(&$this, 'theme_root'), 99);
             add_filter('theme_root_uri', array(&$this, 'theme_root_uri'), 99);
             add_filter('template', array(&$this, 'get_template'), 99);
+
+            add_filter( 'template_directory', array( &$this, 'save_template_directory' ), 1);
+			add_filter( 'template_directory_uri', array( &$this, 'save_template_directory_uri' ), 1);
+			add_filter( 'stylesheet_directory', array( &$this, 'save_stylesheet_directory' ), 1);
+			add_filter( 'stylesheet_directory_uri', array( &$this, 'save_stylesheet_directory_uri' ), 1);
+
+            add_filter( 'template_directory', array( &$this, 'reset_template_directory' ), 99);
+			add_filter( 'template_directory_uri', array( &$this, 'reset_template_directory_uri' ), 99);
+			add_filter( 'stylesheet_directory', array( &$this, 'reset_stylesheet_directory' ), 99);
+			add_filter( 'stylesheet_directory_uri', array( &$this, 'reset_stylesheet_directory_uri' ), 99);
+
             //add_filter('wp_head', array(&$this, 'do_head_section'), 99);
             add_filter('the_content', array(&$this, 'trigger_before_content'), 1);
             add_filter('the_content', array(&$this, 'convert_content'), 999);
@@ -97,11 +114,11 @@ class WiziappContentHandler {
     * 
     */
     function detectAccess(){
-        WiziappLog::getInstance()->write('debug', "Detecting access type", "WiziappContentHandler");
+        //WiziappLog::getInstance()->write('debug', "Detecting access type", "WiziappContentHandler");
         $appToken = isset($_SERVER['HTTP_APPLICATION']) ? $_SERVER['HTTP_APPLICATION'] : '';
         $udid = isset($_SERVER['HTTP_UDID']) ? $_SERVER['HTTP_UDID'] : '';
         
-        WiziappLog::getInstance()->write('debug', "The headers are: {$appToken} and {$udid}", "WiziappContentHandler");
+        //WiziappLog::getInstance()->write('debug', "The headers are: {$appToken} and {$udid}", "WiziappContentHandler");
         
         if (strpos($_SERVER['REQUEST_URI'], 'wiziapp/') !== FALSE){
             $this->inApp = TRUE;
@@ -126,7 +143,7 @@ class WiziappContentHandler {
                 }
             }
                 
-            WiziappLog::getInstance()->write('debug', "Didn't recognize the headers, normal browsing", "WiziappContentHandler");
+            //WiziappLog::getInstance()->write('debug', "Didn't recognize the headers, normal browsing", "WiziappContentHandler");
         } 
     }
     
@@ -483,11 +500,16 @@ class WiziappContentHandler {
 //            $content = str_replace($galleriesCode['find'], $galleriesCode['replace'], $content);
             */
             WiziappProfiler::getInstance()->write("Getting the images code for post {$post->ID}", "convert_content");
+            
             // Add the content id to images
             $imagesCode = $this->_getImagesReplacementCode($post->ID);
+
             $content = str_replace('&amp;', '&', $content);
             $content = str_replace('&#038;', '&', $content);
             $content = str_replace('&#8211;', '&ndash;', $content);
+//            $content = str_replace(' &gt;', '&gt;', $content);
+//            $content = str_replace(' &#062;', '&#062;', $content);
+            $content = str_replace('  >', '>', $content);
             $content = str_replace(' >', '>', $content);
             $content = str_replace($imagesCode['find'], $imagesCode['replace'], $content);
             
@@ -559,21 +581,81 @@ class WiziappContentHandler {
 
         $theme_root = $this->_get_plugin_dir();
         if ($this->inApp) {
-            $value = $theme_root . '/themes'; 
+            $value = trailingslashit($theme_root) . 'themes';
         } 
 
         return $value;
     }
-          
+
     function theme_root( $path ) {
         $this->detectAccess();
 
         $theme_root = $this->_get_plugin_dir();
         if ($this->inApp) {
-            $path = $theme_root . '/themes';
+            $path = trailingslashit($theme_root) . 'themes';
         } 
 
         return $path;
+    }
+
+    public function save_template_directory($val){
+        $this->originalTemplateDir = $val;
+
+        return $val;
+    }
+
+    public function reset_template_directory($val){
+        $this->detectAccess();
+        if ( $this->inApp ){
+            $val = $this->originalTemplateDir;
+        }
+
+        return $val;
+    }
+
+    public function save_template_directory_uri($val){
+        $this->originalTemplateDirUri = $val;
+
+        return $val;
+    }
+
+    public function reset_template_directory_uri($val){
+        $this->detectAccess();
+        if ( $this->inApp ){
+            $val = $this->originalTemplateDirUri;
+        }
+
+        return $val;
+    }
+
+    public function save_stylesheet_directory_uri($val){
+        $this->originalStylesheetDirUri = $val;
+
+        return $val;
+    }
+
+    public function reset_stylesheet_directory_uri($val){
+        $this->detectAccess();
+        if ( $this->inApp ){
+            $val = $this->originalStylesheetDirUri;
+        }
+
+        return $val;
+    }
+
+    public function save_stylesheet_directory($val){
+        $this->originalStylesheetDir = $val;
+
+        return $val;
+    }
+
+    public function reset_stylesheet_directory($val){
+        $this->detectAccess();
+        if ( $this->inApp ){
+            $val = $this->originalStylesheetDir;
+        }
+
+        return $val;
     }
           
     function theme_root_uri( $url ) {
@@ -589,7 +671,7 @@ class WiziappContentHandler {
     }
     
     function _get_plugin_dir(){
-        return dirname(__FILE__) . '/../../';
+        return trailingslashit(trailingslashit(dirname(__FILE__)) . trailingslashit('..') . trailingslashit('..'));
     }
 
     /**

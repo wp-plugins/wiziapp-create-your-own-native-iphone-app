@@ -22,7 +22,7 @@ class WiziappPagesScreen extends WiziappBaseScreen{
         $pages = get_pages(array(
             'number' => $limitForRequest,
             'offset' => $offset,
-            'sort_column' => 'post_date',
+            'sort_column' => 'menu_order',
         ));
 
         $section = array(

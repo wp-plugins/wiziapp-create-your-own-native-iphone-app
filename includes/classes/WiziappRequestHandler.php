@@ -16,13 +16,21 @@ class WiziappRequestHandler {
     */
     function WiziappRequestHandler() {
         add_action('parse_request', array(&$this, 'handleRequest'));
-        //add_action('init', array(&$this, 'logInitRequest'), 1);
+        add_action('init', array(&$this, 'logInitRequest'), 1);
     }
     
     function logInitRequest(){
-//        WiziappLog::getInstance()->write('info', "Got a request for the blog: ", "remote.WiziappRequestHandler.logInitRequest");
+        //WiziappLog::getInstance()->write('info', "Got a request for the blog: ", "remote.WiziappRequestHandler.logInitRequest");
+        $request = $_SERVER['QUERY_STRING'];
+        if (strpos($request, 'wiziapp/') !== FALSE){
+            global $restricted_site_access;
+            if ( !empty($restricted_site_access) ){
+                // Avoid site restrictions by restricted site access plugin, this plugin will prevent our hooks from running
+                remove_action('parse_request', array($restricted_site_access, 'restrict_access'), 1);
+            }
+        }
     }
-    
+
     /*
      * Intercept any incoming request to the blog, if the request is for our web services
      * which are identified by the wiziapp prefix pass it on to processing, if not 
@@ -45,6 +53,7 @@ class WiziappRequestHandler {
         
         //if (strpos($request, 'wiziapp/') === 0){
         if (($pos = strpos($request, 'wiziapp/')) !== FALSE){
+
             if ($pos != 0){
                 $request = substr($request, $pos);
             }            
@@ -78,6 +87,21 @@ class WiziappRequestHandler {
             echo json_encode(array('header' => $header));
             exit();
         }
+    }
+
+    protected function setUseCachedResponse(){
+        WiziappLog::getInstance()->write('info', "Nothing to output the app should use the cache",
+            "WiziappRequestHandler.setUseCachedResponse");
+        /**
+        * IIS needs us to be very specific
+        */
+        header('Content-Length: 0');
+        WiziappLog::getInstance()->write('info', "Sent the content-length",
+            "WiziappRequestHandler.setUseCachedResponse");
+
+        header("HTTP/1.1 304 Not Modified");
+        WiziappLog::getInstance()->write('info', "sent 304 Not Modified for the app",
+            "WiziappRequestHandler.setUseCachedResponse");
     }
     /*
     * serves as a routing table, if the incoming request has our 
@@ -139,24 +163,36 @@ class WiziappRequestHandler {
             //if ( $cache->beginCache(md5($key)) ){
             if ($cache->beginCache(md5($key), array('duration'=>30))){
                 $output = $this->_routeContent($req);
-                                
-                $cache->endCache($output);    
+
+                $cache->endCache($output);
                 
                 if (!$output){
-                    WiziappLog::getInstance()->write('info', "Nothing to output the app should use the cache",
-                        "WiziappRequestHandler._routeRequest");
-                    /**
-                    * IIS needs us to be very specific
-                    */
-                    header ('Content-Length: 0');
-                    WiziappLog::getInstance()->write('info', "Sent the content-length",
-                        "WiziappRequestHandler._routeRequest");
-                    
-                    header("HTTP/1.1 304 Not Modified");
-                    WiziappLog::getInstance()->write('info', "sent 304 Not Modified for the app",
-                        "WiziappRequestHandler._routeRequest");
-                }
+                    $this->setUseCachedResponse();
+                } else {
+					ob_end_flush();
+				}
+            } else {
+                /**
+                 * Since the etag is part of the request an the cache key,
+                 * If we got that right there is no need to return content
+                 */
+				if ( isset($_SERVER['HTTP_IF_NONE_MATCH']) ){
+					// Sent headers = 
+					$headersList = headers_list();
+					$etagSent = '';
+					$found = FALSE;
+					for($h=0,$total=count($headersList);$h<$total && !$found;++$h){
+						if ( strpos($headersList[$h], 'ETag:') === 0 ){
+							$etagSent = str_replace('ETag: ', '', $headersList[$h]);
+							$found = TRUE;
+						}
+					}
+					if ( $etagSent == $etagHeader ) {
+						$this->setUseCachedResponse();
+					}
+				}
             }
+
             
             /**
             * The content services are the only thing that will expose themselves and 
@@ -381,7 +417,7 @@ class WiziappRequestHandler {
                 
         }  */
         
-        $contents = ob_get_contents(); 
+        $contents = ob_get_clean();
         
         WiziappLog::getInstance()->write('info', "BTW the get params were:".print_r($_GET, TRUE), "WiziappRequestHandler._routeContent");
         if (isset($_GET['callback'])){
@@ -420,7 +456,7 @@ class WiziappRequestHandler {
             WiziappLog::getInstance()->write('info', "The headers do not match: " . trim(stripslashes($_SERVER['HTTP_IF_NONE_MATCH'])) .
                                           " and the etag was {$checksum}", "WiziappRequestHandler._routeContent");
         }
-        ob_end_clean();
+        //ob_end_clean();
         if ($shouldProcess){
             // Return the content
         //    if($encoding) 
@@ -438,8 +474,9 @@ class WiziappRequestHandler {
                 $contents = substr($contents, 0, $len); 
             } */
             echo $contents;
-        }      
-        //ob_end_clean();
+        } else {
+			ob_end_clean();
+		}     
         return TRUE;
     }
 

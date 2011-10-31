@@ -13,7 +13,7 @@ class WiziappAdminDisplay{
     */
     public function setup(){
         $configured = WiziappConfig::getInstance()->settings_done;
-		
+
         //$configured = FALSE;
         if (isset($_GET['wiziapp_configured']) && $_GET['wiziapp_configured'] == 1){
             $configured = TRUE;
@@ -26,7 +26,7 @@ class WiziappAdminDisplay{
         //if(current_user_can('administrator') && !empty($options['app_token'])) {
         if ( current_user_can('administrator') ) {
             add_action('admin_notices', array('WiziappAdminDisplay', 'configNotice'));
-            add_action('admin_notices', array('WiziappAdminDisplay', 'versionCheck'));
+            //add_action('admin_notices', array('WiziappAdminDisplay', 'versionCheck'));
             add_action('admin_notices', array('WiziappAdminDisplay', 'upgradeCheck'));
 
             if ( WiziappConfig::getInstance()->finished_processing === FALSE || is_null($configured) ){
@@ -57,7 +57,8 @@ class WiziappAdminDisplay{
         }
 
         global $submenu;
-        if ($submenu['wiziapp'][2][0] == 'My Account' || $submenu['wiziapp'][3][0] == 'My Account') {
+        if ((isset($submenu['wiziapp'][2][0]) && $submenu['wiziapp'][2][0] == 'My Account') ||
+        (isset($submenu['wiziapp'][3][0]) && $submenu['wiziapp'][3][0] == 'My Account')) {
             if ($submenu['wiziapp'][0][0] == 'Create your App') {
                 array_shift($submenu['wiziapp']);
             }
@@ -335,6 +336,27 @@ class WiziappAdminDisplay{
                         };
                     })();
                 </script>
+                <!--Google analytics-->
+                <script type="text/javascript">
+                    var _gaq = _gaq || [];
+                    if (typeof(_gaq.splice) == 'function'){
+                        _gaq.splice(0, _gaq.length);
+                    }
+                    var analytics_account = '<?php echo WiziappConfig::getInstance()->analytics_account; ?>';
+                    var url = '<?php echo WiziappConfig::getInstance()->api_server; ?>';
+
+                    _gaq.push(['_setAccount', analytics_account]);
+                    _gaq.push(['_setDomainName', url.replace('api.', '.')]);
+                    _gaq.push(['_setAllowLinker', true]);
+                    _gaq.push(['_setAllowHash', false]);
+                    _gaq.push(['_trackPageview', '/ActivePluginGoal.php']);
+
+                    (function() {
+                        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                    })();
+                </script>
                 <?php
             }
             ?>
@@ -431,28 +453,28 @@ class WiziappAdminDisplay{
 
             if ( $needShow ){
                 ?>
-                <div id="wiziapp_upgrade_needed_message" class="updated fade">
-                    <p style="line-height: 150%">
-                        An important update is available for the WiziApp WordPress plugin.
-                        <br />
-                        Make sure to <a href="plugins.php">update</a> as soon as possible, to enjoy the security, bug fixes and new features contained in this update.
-                    </p>
-                    <p>
-                        <input id="wiziappHideUpgrade" type="button" class="button" value="Hide this message" />
-                    </p>
-                    <script type="text/javascript">
-                    jQuery(document).ready(function(){
-                        jQuery("#wiziappHideUpgrade").click(function(){
-                            var params = {
-                                action: 'wiziapp_hide_upgrade_msg'
-                            };
-                            jQuery.post(ajaxurl, params, function(data){
-                                jQuery("#wiziapp_upgrade_needed_message").remove();
-                            });
-                        });
-                    });
-                    </script>
-                </div>
+<!--                <div id="wiziapp_upgrade_needed_message" class="updated fade">-->
+<!--                    <p style="line-height: 150%">-->
+<!--                        An important update is available for the WiziApp WordPress plugin.-->
+<!--                        <br />-->
+<!--                        Make sure to <a href="plugins.php">update</a> as soon as possible, to enjoy the security, bug fixes and new features contained in this update.-->
+<!--                    </p>-->
+<!--                    <p>-->
+<!--                        <input id="wiziappHideUpgrade" type="button" class="button" value="Hide this message" />-->
+<!--                    </p>-->
+<!--                    <script type="text/javascript">-->
+<!--                    jQuery(document).ready(function(){-->
+<!--                        jQuery("#wiziappHideUpgrade").click(function(){-->
+<!--                            var params = {-->
+<!--                                action: 'wiziapp_hide_upgrade_msg'-->
+<!--                            };-->
+<!--                            jQuery.post(ajaxurl, params, function(data){-->
+<!--                                jQuery("#wiziapp_upgrade_needed_message").remove();-->
+<!--                            });-->
+<!--                        });-->
+<!--                    });-->
+<!--                    </script>-->
+<!--                </div>-->
             <?php
             }
         }
@@ -519,28 +541,6 @@ class WiziappAdminDisplay{
                     });
                     </script>
                 </div>
-
-                <!--Google analytics-->
-                <script type="text/javascript">
-                    var _gaq = _gaq || [];
-                    if (typeof(_gaq.splice) == 'function'){
-                        _gaq.splice(0, _gaq.length);
-                    }
-                    var analytics_account = '<?php echo WiziappConfig::getInstance()->analytics_account; ?>';
-                    var url = '<?php echo WiziappConfig::getInstance()->api_server; ?>';
-
-                    _gaq.push(['_setAccount', analytics_account]);
-                    _gaq.push(['_setDomainName', url.replace('api.', '.')]);
-                    _gaq.push(['_setAllowLinker', true]);
-                    _gaq.push(['_setAllowHash', false]);
-                    _gaq.push(['_trackPageview', '/ActivePluginGoal.php']);
-
-                    (function() {
-                        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-                        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-                        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-                    })();
-                </script>
             <?php
         }
     }

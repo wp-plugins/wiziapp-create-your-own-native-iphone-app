@@ -32,12 +32,14 @@ function wiziapp_attach_hooks(){
     add_action('private_to_publish', array(&$ce, 'savePost'));
     add_action('future_to_publish', array(&$ce, 'savePost'));
     add_action('publish_to_publish', array(&$ce, 'savePost'));
-    
-    add_action('new_to_publish', array('WiziappPush','publishPost'));
-    add_action('pending_to_publish', array('WiziappPush','publishPost'));
-    add_action('draft_to_publish', array('WiziappPush','publishPost'));
-    add_action('private_to_publish', array('WiziappPush','publishPost'));
-    add_action('future_to_publish', array('WiziappPush','publishPost'));
+
+    if ( !empty(WiziappConfig::getInstance()->settings_done) ){
+        add_action('new_to_publish', array('WiziappPush','publishPost'));
+        add_action('pending_to_publish', array('WiziappPush','publishPost'));
+        add_action('draft_to_publish', array('WiziappPush','publishPost'));
+        add_action('private_to_publish', array('WiziappPush','publishPost'));
+        add_action('future_to_publish', array('WiziappPush','publishPost'));
+    }
     
     add_action('deleted_post', array(&$ce, 'deletePost'));
     add_action('trashed_post', array(&$ce, 'deletePost'));
@@ -58,9 +60,11 @@ function wiziapp_attach_hooks(){
     /**add_action('publish_post', array('WiziappContentEvents', 'savePost'));
     add_action('publish_post', 'wiziapp_publish_post');*/
 
-    add_action('wiziapp_daily_function_hook', array('WiziappPush', 'daily'));
-    add_action('wiziapp_weekly_function_hook', array('WiziappPush', 'weekly'));
-    add_action('wiziapp_monthly_function_hook', array('WiziappPush', 'monthly'));
+    if ( !empty(WiziappConfig::getInstance()->settings_done) ){
+        add_action('wiziapp_daily_function_hook', array('WiziappPush', 'daily'));
+        add_action('wiziapp_weekly_function_hook', array('WiziappPush', 'weekly'));
+        add_action('wiziapp_monthly_function_hook', array('WiziappPush', 'monthly'));
+    }
 
     // Handle installation functions
     register_deactivation_hook(WP_WIZIAPP_BASE, array('WiziappInstaller', 'uninstall'));

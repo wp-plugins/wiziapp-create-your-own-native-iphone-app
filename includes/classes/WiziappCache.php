@@ -3,7 +3,7 @@
 * @package WiziappWordpressPlugin
 * @subpackage Cache
 * @author comobix.com plugins@comobix.com
-* 
+*
 * @todo Split this to 3 classes: WiziappCache, WiziappFileCache, WiziappApcCache
 * @todo add support for memcache configuration, will require configuration, maybe from wordpress cache plugins?
 */
@@ -35,6 +35,8 @@ class WiziappCache{
     private $cache_stack = array();
 
     private $enabled = TRUE;
+
+	private $path = '';
 
     public function __construct() {
         // choose type of cache
@@ -114,9 +116,9 @@ class WiziappCache{
         $content = ob_get_clean();
         WiziappLog::getInstance()->write('info', "The content is: {$content}",
                                         "WiziappCache.endCache");
-                                        
+
         if ( $output ){
-            $this->outputContent($content, FALSE);   
+            $this->outputContent($content, FALSE);
         }
         if ( $this->enabled ) {
             $cache_info = array_pop($this->cache_stack);
@@ -132,51 +134,51 @@ class WiziappCache{
             }
         }
     }
-    
+
     private function outputContent($content, $should_descrypt = TRUE){
         if ( $should_descrypt ){
-            $content = unserialize($content);   
+            $content = unserialize($content);
         }
         /**
         * Gzip the output, support weird headers
         */
-        $encoding = false; 
+        $encoding = false;
         if ( isset($_SERVER["HTTP_ACCEPT_ENCODING"]) ){
-            $HTTP_ACCEPT_ENCODING = $_SERVER["HTTP_ACCEPT_ENCODING"]; 
+            $HTTP_ACCEPT_ENCODING = $_SERVER["HTTP_ACCEPT_ENCODING"];
             if ( isset($_SERVER["HTTP_X_CEPT_ENCODING"]) ){
                 $HTTP_ACCEPT_ENCODING = $_SERVER["HTTP_X_CEPT_ENCODING"];
             }
             if( headers_sent() ) {
-                $encoding = false; 
+                $encoding = false;
             } else if( strpos($HTTP_ACCEPT_ENCODING, 'x-gzip') !== false ) {
-                $encoding = 'x-gzip'; 
+                $encoding = 'x-gzip';
             } else if( strpos($HTTP_ACCEPT_ENCODING,'gzip') !== false ){
-                $encoding = 'gzip'; 
+                $encoding = 'gzip';
             }
-                
+
         }
-        if( $encoding ) { 
+        if( $encoding ) {
             /**
-            * Although gzip encoding is best handled by the zlib.output_compression 
+            * Although gzip encoding is best handled by the zlib.output_compression
             * Our clients sometimes send a different accpet encoding header like X-cpet-Encoding
-            * in that case the only way to catch it is to manually handle the compression 
+            * in that case the only way to catch it is to manually handle the compression
             * and headers check
             */
-            $len = strlen($content); 
-            header('Content-Encoding: '.$encoding); 
-            echo "\x1f\x8b\x08\x00\x00\x00\x00\x00"; 
-            $content = gzcompress($content, 9); 
-            $content = substr($content, 0, $len); 
-        } 
+            $len = strlen($content);
+            header('Content-Encoding: '.$encoding);
+            echo "\x1f\x8b\x08\x00\x00\x00\x00\x00";
+            $content = gzcompress($content, 9);
+            $content = substr($content, 0, $len);
+        }
         echo $content;
     }
-    
+
     private function outputHeaders($headers){
         if ( !empty($headers) ){
             $headers = unserialize($headers);
             for($h=0,$total=count($headers);$h<$total;++$h){
                 header($headers[$h]);
-            }   
+            }
         }
     }
 
@@ -195,11 +197,11 @@ class WiziappCache{
         if($this->fileCheckCache($key,$options)){
             // Output the headers for the cache
             $this->outputHeaders(@file_get_contents($this->fileDir.$this->headersKey($key)));
-            
+
             $contents = @file_get_contents($this->fileDir.$key);
-            
+
             $this->outputContent($contents);
-            
+
             /**if(!@readfile($this->fileDir.$key)){
                 throw new Exception('Can\'t read file :'.$this->fileDir.$key);
             }  */
@@ -254,9 +256,9 @@ class WiziappCache{
             // Output the headers for the cache
             $this->outputHeaders(apc_fetch($this->headersKey($key)));
             $content = apc_fetch($key,$bool);
-            
+
             if(!$bool){
-                throw new Exception(__('Can\'t fetch cache :', 'wiziapp').$key);   
+                throw new Exception(__('Can\'t fetch cache :', 'wiziapp').$key);
             } else {
                 $this->outputContent($content);
             }
@@ -287,7 +289,7 @@ class WiziappCache{
     }
 
     /**
-     * save content 
+     * save content
      * @param string $key
      * @param string $content
      * @param array $options
@@ -303,7 +305,7 @@ class WiziappCache{
                                         "WiziappCache.endCache");
             throw new Exception(__('Can\'t store content.', 'wiziapp'));
         }
-        
+
         if(!apc_store($key, $content,$options['duration'])){
             WiziappLog::getInstance()->write('error', "Cant save cache: {$key}",
                                         "WiziappCache.endCache");

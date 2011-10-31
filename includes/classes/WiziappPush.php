@@ -7,6 +7,9 @@
 
 class WiziappPush{
     public static function publishPost($post){
+        if ( empty(WiziappConfig::getInstance()->settings_done) ){
+            return;
+        }
         $post_id = $post->ID;
         // @todo Get this from the saved options
         $tabId = WiziappConfig::getInstance()->main_tab_index;

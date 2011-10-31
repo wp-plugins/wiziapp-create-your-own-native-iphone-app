@@ -37,6 +37,7 @@ class WiziappGalleries{
         $data = WiziappDB::getInstance()->get_images_for_albums();
 
         if ($data !== FALSE) {
+			$data = apply_filters('wiziapp_albums_exclude', $data);
             // We have images, now we need to sort them into albums if they fit the rules
             foreach ($data as $content_id => $images) {
                 $minimumForAppearInAlbums = WiziappConfig::getInstance()->count_minimum_for_appear_in_albums;

@@ -11,6 +11,9 @@ class WiziappUpgradeDisplay{
         WiziappLog::getInstance()->write('debug', "The upgrading is finished, letting the admin know",
                                             "post_upgrade.wiziapp_upgrading_finish");
 
+        $ch = new WiziappContentEvents();
+        $ch->updateCacheTimestampKey();
+
         // Send the profile again, and allow it to fail since it's just an update
         $cms = new WiziappCms();
         $cms->activate();
@@ -98,14 +101,14 @@ class WiziappUpgradeDisplay{
             }
 
             #just_a_moment{
-                background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/admin.apptelecom.com/public/images/cms/processingJustAmoment.png) no-repeat top center;
+                background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/processingJustAmoment.png) no-repeat top center;
                 width: 262px;
                 margin: 50px auto 17px;
                 height: 32px;
             }
 
             #wizi_icon_processing{
-                background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/admin.apptelecom.com/public/images/cms/wiziapp_processing_icon.png) no-repeat top center;
+                background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/wiziapp_processing_icon.png) no-repeat top center;
                 width: 135px;
                 height: 93px;
             }
@@ -142,7 +145,7 @@ class WiziappUpgradeDisplay{
                 left: 0px;
                 width: 100%;
                 height: 100%;
-                background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/admin.apptelecom.com/public/images/cms/progress_bar_bg.png) no-repeat;
+                background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/progress_bar_bg.png) no-repeat;
                 z-index: 2;
             }
             #main_progress_bar{

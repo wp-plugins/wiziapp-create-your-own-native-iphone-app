@@ -1,14 +1,14 @@
-<?php 
+<?php
 
-if (!defined('WP_WIZIAPP_BASE')) 
+if (!defined('WP_WIZIAPP_BASE'))
     exit();
 /**
 * This file contains functions that handle the content from the CMS
-* 
+*
 * @package WiziappWordpressPlugin
 * @subpackage Core
 * @author comobix.com plugins@comobix.com
-* 
+*
 */
 class WiziappContentEvents{
     public function savePost($post){
@@ -31,7 +31,7 @@ class WiziappContentEvents{
         $this->updateCacheTimestampKey();
         WiziappDB::getInstance()->delete_content_media($post_id, "post");
     }
-    
+
     public function recoverPost($post_id){
         $status = get_post_status($post_id);
         if ( $status == 'publish' ){
@@ -75,7 +75,7 @@ class WiziappContentEvents{
         $ch = WiziappContentHandler::getInstance();
         //$ch->forceInApp();
         $ch->setInSave();
-        
+
         // Remove the theme settings for now,
         $contentWidth = isset($GLOBALS['content_width']) ? $GLOBALS['content_width'] : null;
         $GLOBALS['content_width'] = 0;
@@ -143,7 +143,7 @@ class WiziappContentEvents{
 
         // Support for the videozoom plugin, we want to show the video from the top of the post
         $post_custom = get_post_custom($id);
-        if ($post_custom && $post_custom['wpzoom_post_embed_code']) {
+        if (isset($post_custom['wpzoom_post_embed_code']) && $post_custom['wpzoom_post_embed_code']) {
             $content = $post_custom['wpzoom_post_embed_code'][0] . '<br />' . $content;
         }
 

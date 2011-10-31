@@ -19,11 +19,14 @@ class WiziappTagsScreen extends WiziappBaseScreen{
         $limitForRequest = $tagLimit * 2;
         $offset = $tagLimit * $pageNumber;
 
-        $tags = get_tags(array(
+        //$tags = get_tags(array(
+        $tag_args = array(
             'number' => $limitForRequest,
             'offset' => $offset,
             'hierarchical' => FALSE,
-        ));
+        //));
+        );
+        $tags = get_tags(apply_filters('wiziapp_exclude_tags', $tag_args));
 
         $index = 0;
         foreach ($tags as $tag) {

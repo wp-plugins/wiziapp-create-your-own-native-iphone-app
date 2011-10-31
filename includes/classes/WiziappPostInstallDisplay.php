@@ -72,8 +72,13 @@ class WiziappPostInstallDisplay{
                                             "post_install.wiziapp_batch_posts_processing");
                 $GLOBALS['wiziapp_post'] = $id;
 
-                $ce = new WiziappContentEvents();
-                $ce->savePost($id);
+                if ( !empty($id) ){
+                    $ce = new WiziappContentEvents();
+                    $ce->savePost($id);
+                } else {
+                    WiziappLog::getInstance()->write('error', "Received an empty post id: {$id} inside the batch",
+                                            "post_install.wiziapp_batch_posts_processing");
+                }
 
                 WiziappLog::getInstance()->write('info', "Finished processing post: {$id} inside the batch",
                                             "post_install.wiziapp_batch_posts_processing");
@@ -115,8 +120,14 @@ class WiziappPostInstallDisplay{
                                             "post_install.wiziapp_batch_process_pages");
                 $GLOBALS['wiziapp_page'] = $id;
 
-                $ce = new WiziappContentEvents();
-                $ce->savePage($id);
+                if ( !empty($id) ){
+                    $ce = new WiziappContentEvents();
+                    $ce->savePage($id);
+                } else {
+                    WiziappLog::getInstance()->write('error', "Received an empty page id: {$id} inside the batch",
+                                            "post_install.wiziapp_batch_process_pages");
+                }
+
 
                 WiziappLog::getInstance()->write('info', "Finished processing page: {$id} inside the batch",
                                             "post_install.wiziapp_batch_process_pages");
@@ -181,7 +192,7 @@ class WiziappPostInstallDisplay{
 
     public function display(){
         global $wpdb;
-		
+
 		// Make sure we are installed....
 		if ( !WiziappConfig::getInstance()->isInstalled() ){
 			$installer = new WiziappInstaller();
