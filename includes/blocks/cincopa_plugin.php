@@ -19,7 +19,7 @@ function wiziapp_get_cincopa_albums($existing_albums){
     }
     
     $cincopaAlbums = array();
-    $metadata = $GLOBALS['WiziappDB']->get_media_metadata('image', array('cincopa-id'));
+    $metadata = WiziappDB::getInstance()->get_media_metadata('image', array('cincopa-id'));
     if ($metadata !== FALSE){
         foreach($metadata as  $media_id => $keys){
             $cincopaAlbums[$media_id] = $keys['cincopa-id'];
@@ -32,7 +32,7 @@ function wiziapp_get_cincopa_albums($existing_albums){
         $cincopaResponse = array();
         $processedAlbums = array();
         foreach($cincopaAlbums as $media_id=>$gallery){
-            $post_ID = $GLOBALS['WiziappDB']->get_content_by_media_id($media_id);
+            $post_ID = WiziappDB::getInstance()->get_content_by_media_id($media_id);
             if ( !isset($processedAlbums[$post_ID]) ){
                 $processedAlbums[$post_ID] = array();
             }
@@ -42,7 +42,6 @@ function wiziapp_get_cincopa_albums($existing_albums){
                 $dateline = $the_post->post_date;
                 $images_url = array();
                 
-                $json = array();
                 if ( !isset($cincopaResponse[$post_ID]) ){
                     $json = wiziapp_cincopaJson($gallery);
                     $cincopaResponse[$post_ID] = $json;    
@@ -101,14 +100,14 @@ function wiziapp_get_cincopa_album($images = array(), $albumId = 0, $postId = 0)
         $json = wiziapp_cincopaJson($albumId);
         
         // Get the post id
-        $metadata = $GLOBALS['WiziappDB']->get_media_metadata_equal('image', 'cincopa-id', $albumId);
+        $metadata = WiziappDB::getInstance()->get_media_metadata_equal('image', 'cincopa-id', $albumId);
         if ($metadata != FALSE) {
 //            $postId = $metadata[key($metadata)]['content_id'];
             $index = array_pop(array_keys($metadata));
             $postId = $metadata[$index]['content_id'];
         }
         
-        $GLOBALS['WiziappLog']->write('info', "The Cincopa album is " . print_r($json->items, TRUE), 
+        WiziappLog::getInstance()->write('info', "The Cincopa album is " . print_r($json->items, TRUE),
                                           'cincopa_plugin.wiziapp_get_cincopa_album');
         
         foreach ($json->items as $image){
@@ -149,7 +148,8 @@ function wiziapp_cincopa_filter($content){
             $out = $video_out = '';
 
 //            $xml_string = file_get_contents(wiziapp_cincopaUrl('rss') . urlencode($code));
-            $xml_string = wiziapp_general_http_request('', wiziapp_cincopaUrl('rss') . urlencode($code), 'GET');
+            $r = new WiziappHTTPRequest();
+            $xml_string = $r->external('', wiziapp_cincopaUrl('rss') . urlencode($code), 'GET');
             $xml_string = str_replace('jwplayer:', 'jwplayer_', $xml_string);
             $xml = simplexml_load_string($xml_string['body']);
 //            $images = wiziapp_cincopaJson($code);
@@ -181,7 +181,7 @@ function wiziapp_cincopa_filter($content){
                         $height = $image->getNewHeight(); */    
 
                         $out .= '<a href="' . $link . '" class="wiziapp_gallery wiziapp_cincopa_plugin">';
-                        $out .= '<img src="' . $link . '" data-wiziapp-cincopa-id="' . $code . '"' . $video_class . ' />';
+                        $out .= '<img alt="Cincopa Image" src="' . $link . '" data-wiziapp-cincopa-id="' . $code . '"' . $video_class . ' />';
                         $out .= '</a>';
                     }    
                             
@@ -232,8 +232,9 @@ function wiziapp_cincopaUrl($type = 'xml'){
  */
 function wiziapp_cincopaJson($albumId){
     $url = wiziapp_cincopaUrl('json') . urlencode($albumId);
-    $GLOBALS['WiziappLog']->write('info', "About to request a cincopa album with the url: {$url}", "wiziapp_get_cincopa_albums");
-    $content = wiziapp_general_http_request('', $url, 'GET');
+    WiziappLog::getInstance()->write('info', "About to request a cincopa album with the url: {$url}", "wiziapp_get_cincopa_albums");
+    $r = new WiziappHTTPRequest();
+    $content = $r->external('', $url, 'GET');
     $content = $content['body'];
     $content = str_replace(array("'"), array("\""), substr($content, 6, -1));
     $content = preg_replace('/([a-z_]*):"/', '"$1":"', $content);

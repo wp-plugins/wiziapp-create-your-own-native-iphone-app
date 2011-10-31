@@ -35,8 +35,9 @@ class WiziappLoader
         $currentFilePath = dirname(__FILE__);
         if ( strpos($currentPath, $currentFilePath) === FALSE ){
             // Make sure the include path is correct
-            $path =  $currentFilePath . DIRECTORY_SEPARATOR . 'blocks' . PATH_SEPARATOR;
-            $path .= $currentFilePath . DIRECTORY_SEPARATOR . 'blocks' . DIRECTORY_SEPARATOR . 'components';
+            $path =  $currentFilePath . DIRECTORY_SEPARATOR . 'blocks';
+            $path .= PATH_SEPARATOR . $currentFilePath . DIRECTORY_SEPARATOR . 'blocks' . DIRECTORY_SEPARATOR . 'components';
+            $path .= PATH_SEPARATOR . $currentFilePath . DIRECTORY_SEPARATOR . 'blocks' . DIRECTORY_SEPARATOR . 'screens';
             $path .= PATH_SEPARATOR . $currentFilePath . DIRECTORY_SEPARATOR . 'classes';
 
             set_include_path($currentPath . PATH_SEPARATOR . $path);
@@ -62,9 +63,6 @@ class WiziappLoader
         }
     }
     protected function load(){
-        /**
-        * @todo ticket #798 should be here
-        */
         if (is_dir(dirname(__FILE__) . "/blocks")){
             if ($func_dir = opendir(dirname(__FILE__) . "/blocks")){
                 while (($sub_dir = readdir($func_dir)) !== false){
@@ -79,7 +77,14 @@ class WiziappLoader
                     }
                 } 
             }
-        }      
+        }
+
+        $ch = WiziappContentHandler::getInstance(); // Needs to load every time
+
+        if ((strpos($_SERVER['QUERY_STRING'], 'wiziapp/')) !== FALSE){
+            // Start the request handler so it will register it's events.
+            $rh = new WiziappRequestHandler(); // Needs to load for the webservices
+        }
     }
 
     public function loadClass($className){

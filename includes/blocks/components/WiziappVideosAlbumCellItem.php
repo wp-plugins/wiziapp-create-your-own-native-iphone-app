@@ -110,6 +110,6 @@ class WiziappVideosAlbumCellItem extends WiziappLayoutComponent{
     * @return the actionURL of the component
     */
     function get_actionURL_attr(){
-        return wiziapp_buildPluginAlbumLink($this->data[0]['plugin'], $this->data[0]['id']);
+        return WiziappLinks::pluginAlbumLink($this->data[0]['plugin'], $this->data[0]['id']);
     }   
 }

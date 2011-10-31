@@ -28,8 +28,8 @@ class WiziappSupportDisplay{
         $showAllTabs = WiziappConfig::getInstance()->finished_processing && $configured;
 
         ?>
-        <script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
-        <style>
+        <script type="text/javascript" src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
+        <style type="text/css">
         #wiziapp_container{
             background: #fff;
             min-height: 500px;
@@ -45,27 +45,28 @@ class WiziappSupportDisplay{
         }
 
         #wiziapp_logo a img{
-            border: 0px none;
+            border: 0 none;
         }
         #wiziapp_header{
             clear: both;
             height: 62px;
             width: 875px;
             padding: 15px 10px 25px;
-            margin: 0px auto;
+            margin: 0 auto;
         }
         #wiziapp_container_content{
             width: 875px;
-            margin: 0px auto;
+            margin: 0 auto;
         }
         #wiziapp_header ul{
             list-style: none;
             height: 48px;
             width: 679px;
             background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/menu_shadow_line.jpg) no-repeat bottom center;
-            margin: 14px auto 0px;
-            padding: 0px;
+            margin: 14px auto 0;
+            padding: 0;
             float: right;
+            text-align: center;
         }
 
         #wiziapp_header li{
@@ -121,7 +122,7 @@ class WiziappSupportDisplay{
             width: 80px;
         }
         #wiziapp_container table thead{
-            background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/generator/main_sprite.png) no-repeat scroll 0px -349px;
+            background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/generator/main_sprite.png) no-repeat scroll 0 -349px;
         }
         #wiziapp_container table thead th{
             font-weight: normal;
@@ -153,7 +154,7 @@ class WiziappSupportDisplay{
         #wiziapp_container table .status_col div{
             height: 100%;
             width: 17px;
-            margin: 0px auto;
+            margin: 0 auto;
         }
         #wiziapp_container table .status_col .success{
             background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/V_Icon.png) no-repeat left center;
@@ -181,7 +182,7 @@ class WiziappSupportDisplay{
             display: none;
         }
          #wiziapp_container .wiziapp_error{
-            padding: 0px 10px 20px;
+            padding: 0 10px 20px;
             position: static;
             background: none transparent;
              width: auto;
@@ -196,7 +197,7 @@ class WiziappSupportDisplay{
              color: #0fb3fb;
              font-size: 12px;
              position: absolute;
-             top: 0px;
+             top: 0;
              right: 25px;
          }
         </style>
@@ -269,6 +270,7 @@ class WiziappSupportDisplay{
                                 echo $this->getStatusRow('WritingPermissions', 'Writing Permissions');
                                 echo $this->getStatusRow('PhpGraphicRequirements', 'GD / ImageMagick', 'v_odd');
                                 echo $this->getStatusRow('AllowUrlFopen', 'allow_url_fopen');
+                                echo $this->getStatusRow('WebServer', 'Web Server', 'v_odd');
                             ?>
                         </tbody>
                     </table>

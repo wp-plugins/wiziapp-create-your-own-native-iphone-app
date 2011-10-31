@@ -9,24 +9,31 @@
     ?>
     <base href="<?php bloginfo('url'); ?>/" />
     <meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php bloginfo('charset'); ?>" />
-    <title><?php echo wiziapp_apply_request_title(wp_title('&laquo;', false, 'right').get_bloginfo('name')); ?></title>
+    <title dir="ltr"><?php echo WiziappTheme::applyRequestTitle(wp_title('&laquo;', false, 'right').get_bloginfo('name')); ?></title>
     <meta name="viewport" content="width=device-width,user-scalable=no" />
     <link rel="stylesheet" href="<?php bloginfo('stylesheet_url'); ?>" type="text/css" media="screen" />
     <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
     <?php
-        wp_head();
+		wp_enqueue_script('jquery'); // Load jquery directly from wordpress
+		
+		if ( !empty($GLOBALS['wpHeadHtml']) ){
+			echo $GLOBALS['wpHeadHtml'];
+		} else {
+			wp_head();
+		}
         /**
          * When we are coming from a single post page we need to include the script as is, but in a
          * post list screen the application will search and replace the content of the @@@WORD@@@ with the
          * resource from the application configuration request
          */
-        if (!isset($GLOBALS['WiziappOverrideScripts']) || !$GLOBALS['WiziappOverrideScripts']) {
-            echo '<script type="text/javascript" src="' . WiziappConfig::getInstance()->getCdnServer() . '/assets/scripts"></script>';
+        //wp_enqueue_script('jquery'); // Load jquery directly from wordpress
+        //if (!isset($GLOBALS['WiziappOverrideScripts']) || !$GLOBALS['WiziappOverrideScripts']) {
+            echo '<script type="text/javascript" src="' . WiziappConfig::getInstance()->getCdnServer() . '/assets/scripts/lite"></script>';
             echo '<script type="text/javascript" src="' . WiziappConfig::getInstance()->getCdnServer() . '/scripts/jquery.mousewheel.min.js"></script>';
             echo '<script type="text/javascript" src="' . WiziappConfig::getInstance()->getCdnServer() . '/scripts/jScrollPane-1.2.3.min.js"></script>';
-        } else {
-            echo '@@@BASE@@@';
-        }
+        /**} /**else {
+            echo '@@@BASE@@@'; - Removed due to performance hit
+        }*/
     ?>
 
     <style type="text/css">
