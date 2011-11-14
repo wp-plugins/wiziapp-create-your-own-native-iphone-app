@@ -2,7 +2,7 @@
 /**
 * Lazy loading, load all of our classes, except for components that are only needed in screens
 * @todo Add some more auto loading functionality, no need to load everything everytime. keep in mind that php4 is still out there (pending refactoring the code to be classes only)
-* 
+*
 * @package WiziappWordpressPlugin
 * @author comobix.com plugins@comobix.com
 */
@@ -35,8 +35,9 @@ class WiziappLoader
         $currentFilePath = dirname(__FILE__);
         if ( strpos($currentPath, $currentFilePath) === FALSE ){
             // Make sure the include path is correct
-            $path =  $currentFilePath . DIRECTORY_SEPARATOR . 'blocks' . PATH_SEPARATOR;
-            $path .= $currentFilePath . DIRECTORY_SEPARATOR . 'blocks' . DIRECTORY_SEPARATOR . 'components';
+            $path =  $currentFilePath . DIRECTORY_SEPARATOR . 'blocks';
+            $path .= PATH_SEPARATOR . $currentFilePath . DIRECTORY_SEPARATOR . 'blocks' . DIRECTORY_SEPARATOR . 'components';
+            $path .= PATH_SEPARATOR . $currentFilePath . DIRECTORY_SEPARATOR . 'blocks' . DIRECTORY_SEPARATOR . 'screens';
             $path .= PATH_SEPARATOR . $currentFilePath . DIRECTORY_SEPARATOR . 'classes';
 
             set_include_path($currentPath . PATH_SEPARATOR . $path);
@@ -50,9 +51,9 @@ class WiziappLoader
             $this->version = $this->defaultVersion;
         }
     }
-    
+
     public function getVersion(){
-        return $this->version; 
+        return $this->version;
     }
 
     protected function loadVersions(){
@@ -62,9 +63,6 @@ class WiziappLoader
         }
     }
     protected function load(){
-        /**
-        * @todo ticket #798 should be here
-        */
         if (is_dir(dirname(__FILE__) . "/blocks")){
             if ($func_dir = opendir(dirname(__FILE__) . "/blocks")){
                 while (($sub_dir = readdir($func_dir)) !== false){
@@ -72,14 +70,21 @@ class WiziappLoader
                         if ( strpos($sub_dir, "_") !== 0){
                             $block = $this->getFilePath("/blocks/".$sub_dir);
                             if ( $block !== FALSE ){
-                                include_once dirname(__FILE__) . $block;       
+                                include_once dirname(__FILE__) . $block;
                             }
-                            
+
                         }
                     }
-                } 
+                }
             }
-        }      
+        }
+
+        $ch = WiziappContentHandler::getInstance(); // Needs to load every time
+
+        if (strpos($_SERVER['QUERY_STRING'], 'wiziapp/') !== FALSE){
+            // Start the request handler so it will register it's events.
+            $rh = new WiziappRequestHandler(); // Needs to load for the webservices
+        }
     }
 
     public function loadClass($className){
@@ -94,10 +99,10 @@ class WiziappLoader
             }
         }
     }
-    
+
     private function _getFromVersionConfig($type, $name){
         $version = $this->getVersion();
-        
+
         if ( isset($this->versions[$version]) ) {
             if ( isset($this->versions[$version][$type]) ) {
                 if ( isset($this->versions[$version][$type][$name]) ){
@@ -108,13 +113,13 @@ class WiziappLoader
                 }
             }
         }
-        return $name;      
+        return $name;
     }
-    
+
     protected function getFilePath($name){
         return $this->_getFromVersionConfig('core', $name);
     }
-    
+
     protected function getClassFileName($name){
         $result = $this->_getFromVersionConfig('classes', $name);
         if ( $result == $name ){
@@ -124,9 +129,9 @@ class WiziappLoader
         }
         return $result;
     }
-    
+
     protected function getFuncName($func){
-        return $this->_getFromVersionConfig('functions', $func);      
+        return $this->_getFromVersionConfig('functions', $func);
     }
 }
 

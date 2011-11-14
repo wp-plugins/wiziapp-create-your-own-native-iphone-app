@@ -99,16 +99,28 @@ class WiziappCommentCellItem extends WiziappLayoutComponent{
     * @return the numOfReplies of the component
     */
     function get_numOfReplies_attr(){
-        return wiziappGetSubCommentsCount($this->data[0]->comment_post_ID, $this->data[0]->comment_ID).__(' Replies', 'wiziapp');
+        return $this->getSubCommentsCount($this->data[0]->comment_post_ID, $this->data[0]->comment_ID).__(' Replies', 'wiziapp');
     }
-    
+
+    public function getSubCommentsCount($post_id, $comment_id){
+        global $wpdb;
+
+        $approved = "comment_approved = '1'";
+        $post_where = "comment_post_ID = '{$post_id}' AND comment_parent = '{$comment_id}' AND";
+        $count = $wpdb->get_var( "SELECT count(*) FROM $wpdb->comments WHERE $post_where $approved" );
+
+        return (int)$count;
+    }
+
     /**
     * Attribute getter method
     * 
     * @return the content of the component
     */
     function get_content_attr(){
-        return strip_tags($this->data[0]->comment_content);
+        $content = strip_tags($this->data[0]->comment_content);
+		$content = str_replace(array("\r\n", "\r"), " ", $content);
+        return $content;
     }
     
     /**
@@ -122,23 +134,24 @@ class WiziappCommentCellItem extends WiziappLayoutComponent{
     
     /**
     * Attribute getter method
-    * 
+    *
     * @return the imageURL of the component
     */
     function get_imageURL_attr(){
         $img = get_avatar($this->data[0], WiziappConfig::getInstance()->comments_avatar_height);
-        $imgArray = wiziapp_simpleHTML2Array($img);
-        $imageURL = $imgArray[0]['img']['#attributes']['src'];
+        $dom = new WiziappDOMLoader($img, get_bloginfo('charset'));
+        $imgArray = $dom->getBody();
+        $imageURL = $imgArray[0]['img']['attributes']['src'];
         return $imageURL;
     }
-    
+
     /**
     * Attribute getter method
     * 
     * @return the actionURL of the component
     */
     function get_actionURL_attr(){
-        return wiziapp_buildPostCommentSubCommentsLink($this->data[0]->comment_post_ID, $this->data[0]->comment_ID);
+        return WiziappLinks::postCommentSubCommentsLink($this->data[0]->comment_post_ID, $this->data[0]->comment_ID);
     }   
     
     /**

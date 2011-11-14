@@ -22,14 +22,14 @@ function wiziapp_get_pageflip_albums($existing_albums){
     }
     global $pageFlip;
     if(is_object($pageFlip) && is_a($pageFlip, 'pageFlip_plugin_base')){
-        $metadata = $GLOBALS['WiziappDB']->get_media_metadata('image', array('pageflipbook-id'));
+        $metadata = WiziappDB::getInstance()->get_media_metadata('image', array('pageflipbook-id'));
         foreach($metadata as $media_id => $keys){
             $galleries[$media_id] = $keys['pageflipbook-id'];
         }
 //        $galleries = array_unique($galleries);
         
         foreach($galleries as $media_id => $gallery){
-            $post_ID = $GLOBALS['WiziappDB']->get_content_by_media_id($media_id);
+            $post_ID = WiziappDB::getInstance()->get_content_by_media_id($media_id);
             $the_post = get_post($post_ID);
             $dateline = $the_post->post_date;
             $book = new Book($gallery);
@@ -75,15 +75,15 @@ add_filter('wiziapp_get_pageflip_album', 'wiziapp_get_pageflip_album', 10, 2);
  */
 function wiziapp_get_pageflip_album($images_external = array(), $albumId = 0, $postId = 0){
     global $pageFlip;
-    $GLOBALS['WiziappLog']->write('info', "Got a request for a pageflip album: " . print_r($albumId, TRUE), "wiziapp_get_pageflip_album");
+    WiziappLog::getInstance()->write('info', "Got a request for a pageflip album: " . print_r($albumId, TRUE), "wiziapp_get_pageflip_album");
     if(is_object($pageFlip) && is_a($pageFlip, 'pageFlip_plugin_base')){
-        $GLOBALS['WiziappLog']->write('info', "The album id is: {$albumId}", "wiziapp_get_pageflip_album");
+        WiziappLog::getInstance()->write('info', "The album id is: {$albumId}", "wiziapp_get_pageflip_album");
         if(empty($albumId)) {
             return $images_external;
         }    
         
         // Get the post id
-        $metadata = $GLOBALS['WiziappDB']->get_media_metadata_equal('image', 'pageflipbook-id', $albumId);
+        $metadata = WiziappDB::getInstance()->get_media_metadata_equal('image', 'pageflipbook-id', $albumId);
         if ($metadata != FALSE) {
             end($metadata);
             $postId = $metadata[key($metadata)]['content_id'];
@@ -108,7 +108,7 @@ function wiziapp_get_pageflip_album($images_external = array(), $albumId = 0, $p
 //            }
         }
     }
-    $GLOBALS['WiziappLog']->write('info', "About to return the images: " . print_r($images, TRUE), 
+    WiziappLog::getInstance()->write('info', "About to return the images: " . print_r($images, TRUE),
                                         "wiziapp_get_pageflip_album");
     return $images_external;
 }
@@ -154,7 +154,7 @@ function wpimage_pageflip_filter($content){
                 $sizeHtml = " width=\"{$width}\" height=\"{$height}\" "; */
                 
                 $out .= '<a href="' . $page->image . '" class="wiziapp_gallery wiziapp_pageflip_plugin"><img src="' . 
-                        $page->image . '" data-wiziapp-pageflipbook-id="' . $code . '"></a>';
+                        $page->image . '" alt="PageFlip Image" data-wiziapp-pageflipbook-id="' . $code . '" /></a>';
             }
             $content = str_replace($matches[0][$match_key], $out, $content);
         }

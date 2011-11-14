@@ -99,7 +99,7 @@ class WiziappCategoryCellItem extends WiziappLayoutComponent{
         } else {
             $name = $cat->name;
         }
-        return wiziapp_makeShortString($name, 22);
+        return WiziappHelpers::makeShortString($name, 22);
     }
     
     /**
@@ -131,11 +131,11 @@ class WiziappCategoryCellItem extends WiziappLayoutComponent{
         $link = '';
         $cat = $this->data[0];
         if ( $this->layout == 'L1' ){
-            $link = wiziapp_buildCategoryLink($cat->cat_ID);     
+            $link = WiziappLinks::categoryLink($cat->cat_ID);
         } elseif ($this->layout == 'L2' ){
-            $link = wiziapp_buildLinksByCategoryLink($cat->term_id);     
+            $link = WiziappLinks::linksByCategoryLink($cat->term_id);
         } elseif ( $this->layout == 'L3' ){
-            $link = wiziapp_buildTagLink($cat->term_id);     
+            $link = WiziappLinks::tagLink($cat->term_id);
         }
         return $link;
     }

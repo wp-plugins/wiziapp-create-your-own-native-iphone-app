@@ -9,8 +9,9 @@ class WiziappCms{
         $urlData = explode('://', $blogUrl);
 
         // Inform the admin server
-        $response = wiziapp_http_request($profile, '/cms/activate/' . $urlData[0] . '?url=' . urlencode($urlData[1]), 'POST');
-        $GLOBALS['WiziappLog']->write('info', "The response is " . print_r($response, TRUE), "cms.activate");
+        $r = new WiziappHTTPRequest();
+        $response = $r->api($profile, '/cms/activate/' . $urlData[0] . '?url=' . urlencode($urlData[1]), 'POST');
+        WiziappLog::getInstance()->write('info', "The response is " . print_r($response, TRUE), "cms.activate");
 
         if (!is_wp_error($response)) {
             $tokenResponse = json_decode($response['body'], TRUE);
@@ -119,7 +120,8 @@ class WiziappCms{
         $blogUrl = get_bloginfo('url');
         $urlData = explode('://', $blogUrl);
 
-        $response = wiziapp_http_request(array(), '/cms/deactivate?app_id=' . WiziappConfig::getInstance()->app_id . '&url=' . urlencode($urlData[1]), 'POST');
+        $r = new WiziappHTTPRequest();
+        $response = $r->api(array(), '/cms/deactivate?app_id=' . WiziappConfig::getInstance()->app_id . '&url=' . urlencode($urlData[1]), 'POST');
 
         $this->deleteUser();
     }
@@ -128,13 +130,13 @@ class WiziappCms{
         $userName = 'wiziapp';
         $userId = username_exists($userName);
         if (!$userId) {
-            $GLOBALS['WiziappLog']->write('error', "User " . $userName . " was not found, and therefore couldnt be deleted.", "install.delete_user_wiziapp");
+            WiziappLog::getInstance()->write('error', "User " . $userName . " was not found, and therefore couldnt be deleted.", "install.delete_user_wiziapp");
         } else {
             $userId = wp_delete_user($userId);
             if (!$userId) {
-                $GLOBALS['WiziappLog']->write('error', "Error deleting user " . $userName, "install.delete_user_wiziapp");
+                WiziappLog::getInstance()->write('error', "Error deleting user " . $userName, "install.delete_user_wiziapp");
             } else {
-                $GLOBALS['WiziappLog']->write('info', "User " . $userName . ' deleted successfuly.', "install.delete_user_wiziapp");
+                WiziappLog::getInstance()->write('info', "User " . $userName . ' deleted successfuly.', "install.delete_user_wiziapp");
             }
         }
     }
@@ -154,16 +156,16 @@ class WiziappCms{
             if (!$userId) {
                 $userId = wp_create_user($userName, $password); //wp_create_user($userName, $password, $user_email)
                 if (!$userId) {
-                    $GLOBALS['WiziappLog']->write('error', "Error creating user " . $userName, "install.register_user_wiziapp");
+                    WiziappLog::getInstance()->write('error', "Error creating user " . $userName, "install.register_user_wiziapp");
                 } else {
-                    $GLOBALS['WiziappLog']->write('info', "User " . $userName . " created successfuly.", "install.register_user_wiziapp");
+                    WiziappLog::getInstance()->write('info', "User " . $userName . " created successfuly.", "install.register_user_wiziapp");
                 }
             } else {
                 // Might be our user... should see if we can login with our password
                 $user = wp_authenticate($userName, $password);
                 if ( is_wp_error($user) ){
                     $password = 'ERROR';
-                    $GLOBALS['WiziappLog']->write('error', "User " . $userName . " already exists and was NOT created.", "install.register_user_wiziapp");
+                    WiziappLog::getInstance()->write('error', "User " . $userName . " already exists and was NOT created.", "install.register_user_wiziapp");
                 } 
             }
         }
@@ -181,17 +183,25 @@ class WiziappCms{
         * @todo check if wp_touch is installed and try to get it's configuration
         * for blog name and description
         */
+        $checker = new WiziappCompatibilitiesChecker();
+
         $profile = array(
             'cms' => 'wordpress',
-            'cms_version' => (float) substr($version, 0, strrpos($version, '.')),
+            'cms_version' => floatval($version),
             'name' => get_bloginfo('name'),
             'tag_line' => get_bloginfo('description'),
             'profile_data' => json_encode(array(
                 'plugins' => $this->getActivePlugins(),
                 'pages' => $this->getPagesList(),
                 'stats' => $this->getCMSProfileStats(),
+                'os' => $checker->testOperatingSystem(),
+                'write_permissions' => $checker->testWritingPermissions(false),
+                'gd_image_magick' => $checker->testPhpGraphicRequirements(false),
+                'allow_url_fopen' => $checker->testAllowUrlFopen(false),
+                'web_server' => $checker->testWebServer(false),
             )),
             'comment_registration' => get_option('comment_registration') ? 1 : 0,
+            'installation_source' => WiziappConfig::getInstance()->installation_source,
         );
 
         $profile = array_merge($profile, $this->registerUser());
@@ -246,14 +256,14 @@ class WiziappCms{
     * @return array $stats
     */
     protected  function getCMSProfileStats() {
-        $GLOBALS['WiziappLog']->write('info', "Getting the CMS profile", "wiziapp_getCMSProfileStats");
+        WiziappLog::getInstance()->write('info', "Getting the CMS profile", "wiziapp_getCMSProfileStats");
 
         $audiosAlbums = array();
         $playlists = array();
 
         ob_start();
     //    $imagesAlbums = apply_filters('wiziapp_images_albums_request', $imagesAlbums);
-        $imagesAlbums = $GLOBALS['WiziappDB']->get_albums_count();
+        $imagesAlbums = WiziappDB::getInstance()->get_albums_count();
         $audioAlbums = apply_filters('wiziapp_audios_albums_request', $audiosAlbums);
         $playlists = apply_filters('wiziapp_playlists_request', $playlists);
         ob_end_clean();
@@ -265,9 +275,9 @@ class WiziappCms{
         $numOfTags = count(get_tags(array(
             'number' => 15,
         )));
-        $postImagesAlbums = $GLOBALS['WiziappDB']->get_images_post_albums_count(5);
-        $videosCount = $GLOBALS['WiziappDB']->get_videos_count();
-        $postAudiosAlbums = $GLOBALS['WiziappDB']->get_audios_post_albums_count(2);
+        $postImagesAlbums = WiziappDB::getInstance()->get_images_post_albums_count(5);
+        $videosCount = WiziappDB::getInstance()->get_videos_count();
+        $postAudiosAlbums = WiziappDB::getInstance()->get_audios_post_albums_count(2);
         $linksCount = count(get_bookmarks(array(
             'limit' => 15,
         )));
@@ -283,7 +293,7 @@ class WiziappCms{
             'pluginPlaylists' => count($playlists),
             'linksCount' => $linksCount,
         );
-        $GLOBALS['WiziappLog']->write('info', "About to return the CMS profile: " . print_r($stats, TRUE), "wiziapp_getCMSProfileStats");
+        WiziappLog::getInstance()->write('info', "About to return the CMS profile: " . print_r($stats, TRUE), "wiziapp_getCMSProfileStats");
 
         return $stats;
     }

@@ -3,7 +3,12 @@
 class WiziappInstaller
 {
     public function needUpgrade(){
-        return (WiziappDB::getInstance()->needUpgrade() || WiziappConfig::getInstance()->needUpgrade());
+		if ( !WiziappDB::getInstance()->isInstalled() ){
+			// We are not installed, we don't have nothing to upgrade, we need a full scan...
+			return FALSE;
+		} else {
+			return (WiziappDB::getInstance()->needUpgrade() || WiziappConfig::getInstance()->needUpgrade());
+		}
     }
 
     public function upgradeDatabase(){
@@ -46,11 +51,8 @@ class WiziappInstaller
         $cms->activate();
     }
 
-    /**
-    * Revert the installation to remove everything the plugin added
-    */
-    public function uninstall(){
-        WiziappDB::getInstance()->uninstall();
+	protected static function doUninstall(){
+		WiziappDB::getInstance()->uninstall();
 
         // Remove scheduled tasks
         wp_clear_scheduled_hook('wiziapp_daily_function_hook');
@@ -73,7 +75,46 @@ class WiziappInstaller
         delete_option('wiziapp_last_processed');
 
         WiziappConfig::getInstance()->uninstall();
+	}
+	
+    /**
+    * Revert the installation to remove everything the plugin added
+    */
+    public function uninstall(){
+		if (function_exists('is_multisite') && is_multisite()) {
+			global $wpdb;
+			// check if it is a network de-activation - if so, run the de-activation function for each blog id
+			if (isset($_GET['networkwide']) && ($_GET['networkwide'] == 1)) {
+				$old_blog = $wpdb->blogid;
+				// Get all blog ids
+				$blogids = $wpdb->get_col($wpdb->prepare("SELECT blog_id FROM $wpdb->blogs"));
+				foreach ($blogids as $blog_id) {
+					switch_to_blog($blog_id);
+					self::doUninstall();
+				}
+				switch_to_blog($old_blog);
+				return;
+			}	
+		} else {
+			self::doUninstall();
+        }
     }
+    
+    public function deleteBlog($blog_id, $drop){
+		global $wpdb;
+		$switched = false;
+		$currentBlog = $wpdb->blogid;
+		if ( $blog_id != $currentBlog ) {
+			switch_to_blog($blog_id);
+			$switched = true;
+		}
+		
+		self::doUninstall();
+		
+		if ( $switched ) {
+			switch_to_blog($currentBlog);
+		}
+	}
 }
 
 // End of file
