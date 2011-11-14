@@ -7,6 +7,12 @@
 
 class WiziappPush{
     public static function publishPost($post){
+    	// Check, is the Post excluded by WiziApp Exclude plugin
+    	$post = apply_filters('exclude_wiziapp_push', $post);
+        if ( $post == NULL ){
+            return;
+        }
+
         if ( empty(WiziappConfig::getInstance()->settings_done) ){
             return;
         }

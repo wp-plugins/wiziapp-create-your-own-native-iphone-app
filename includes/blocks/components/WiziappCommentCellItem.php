@@ -118,7 +118,9 @@ class WiziappCommentCellItem extends WiziappLayoutComponent{
     * @return the content of the component
     */
     function get_content_attr(){
-        return strip_tags($this->data[0]->comment_content);
+        $content = strip_tags($this->data[0]->comment_content);
+		$content = str_replace(array("\r\n", "\r"), " ", $content);
+        return $content;
     }
     
     /**

@@ -12,19 +12,17 @@ class WiziappTagsScreen extends WiziappBaseScreen{
 
     public function run(){
         $screen_conf = $this->getConfig();
-    
+
         $page = array();
         $pageNumber = isset($_GET['wizipage']) ? $_GET['wizipage'] : 0;
         $tagLimit = WiziappConfig::getInstance()->tags_list_limit;
         $limitForRequest = $tagLimit * 2;
         $offset = $tagLimit * $pageNumber;
 
-        //$tags = get_tags(array(
         $tag_args = array(
             'number' => $limitForRequest,
             'offset' => $offset,
             'hierarchical' => FALSE,
-        //));
         );
         $tags = get_tags(apply_filters('wiziapp_exclude_tags', $tag_args));
 
@@ -45,7 +43,7 @@ class WiziappTagsScreen extends WiziappBaseScreen{
 
     public function runByPost($post_id){
         $screen_conf = $this->getConfig();
-    
+
         $page = array();
         $tags = get_the_tags($post_id);
 

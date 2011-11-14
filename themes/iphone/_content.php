@@ -107,7 +107,7 @@
                     </li>    
                 </ul>       
             </div>
-        </div>  
+        </div>
         <script type="text/javascript">
             <?php
                 /**
@@ -115,7 +115,7 @@
                  * and the simulator. The simulator is getting some special treatment to help capture links and such
                  */
             ?>
-    
+
             window.galleryPrefix = "<?php echo WiziappLinks::postImagesGalleryLink($post->ID); ?>%2F";
             window.wiziappDebug = <?php echo (WP_WIZIAPP_DEBUG) ? "true" : "false"; ?>;
             window.wiziappPostHeaders = <?php echo json_encode(WiziappTheme::getPostHeaders(FALSE)); ?>;
@@ -127,7 +127,5 @@
             window.wiziappCdn = "<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>";
         </script>
         <?php
-            $contentScript = WiziappConfig::getInstance()->getCdnServer() . '/scripts/api/1/apps/content_'.WIZIAPP_VERSION.'.js';
-            echo '<script type="text/javascript" src="' . $contentScript . '"></script>';
             wiziapp_get_footer();
         ?>

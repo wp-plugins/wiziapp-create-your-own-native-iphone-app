@@ -20,7 +20,7 @@ class WiziappContentEvents{
 
         $this->updateCacheTimestampKey();
 
-        if ($post->post_type == 'page') {
+        if (is_object($post) && property_exists($post, 'post_type') && $post->post_type == 'page') {
             $this->save($post_id, 'page');
         } else {
             $this->save($post_id, 'post');

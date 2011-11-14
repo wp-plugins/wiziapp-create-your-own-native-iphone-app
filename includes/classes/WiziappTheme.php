@@ -3,7 +3,7 @@
 * @package WiziappWordpressPlugin
 * @subpackage contentDisplay
 * @author comobix.com plugins@comobix.com
-* 
+*
 */
 
 class WiziappTheme{
@@ -20,7 +20,7 @@ class WiziappTheme{
     */
     public static function getPostHeaders($set_header=false){
         global $post;
-        if (!self::$postHeaders[$post->ID] ){
+        if (empty(self::$postHeaders[$post->ID])){
             self::$postHeaders[$post->ID] = self::doPostHeaders();
         }
         $headers = self::$postHeaders[$post->ID];
@@ -49,6 +49,8 @@ class WiziappTheme{
         if (isset($wp_query->posts[$wp_query->current_post - 1])){
             $prevPost = $wp_query->posts[$wp_query->current_post - 1];
             $prevURL = WiziappLinks::postLink($prevPost->ID);
+        } else {
+			$prevURL = '';
         }
 
         $authorId = $post->post_author;

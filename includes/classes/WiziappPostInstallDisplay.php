@@ -207,7 +207,7 @@ class WiziappPostInstallDisplay{
 
         $querystr = "
             SELECT DISTINCT(wposts.id), wposts.post_title
-            FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta
+            FROM $wpdb->posts wposts
             WHERE wposts.ID not in (SELECT post_id
                                     FROM $wpdb->postmeta
                                     WHERE meta_key = 'wiziapp_processed' AND meta_value = '1')
@@ -232,7 +232,7 @@ class WiziappPostInstallDisplay{
 
         $pagesQuery = "
             SELECT DISTINCT(wposts.id), wposts.post_title
-            FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta
+            FROM $wpdb->posts wposts
             WHERE wposts.ID not in (SELECT post_id
                                     FROM $wpdb->postmeta
                                     WHERE meta_key = 'wiziapp_processed' AND meta_value = '1')

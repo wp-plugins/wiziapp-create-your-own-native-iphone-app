@@ -84,6 +84,69 @@ class WiziappGeneratorDisplay{
                     padding: 25px 35px;
                     width: 426px;
                 }
+
+                #enter_license_modal{
+                    background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/popwin.png) no-repeat top left;
+                    height: 280px;
+                    width: 540px;
+                    font-size: 16px;
+                    padding: 0px;
+                }
+                #enter_license_modal .error{
+                    margin-left: 20px;
+                    background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/validetion_error_Icon.png) no-repeat left center;
+                    text-indent: 20px;
+                    color: #ff6161;
+                    clear: both;
+                }
+
+                #enter_license_modal .success{
+                    margin-left: 20px;
+                    background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/V_Icon.png) no-repeat left center;
+                    text-indent: 20px;
+                    clear: both;
+                }
+
+                #enter_license_modal .processing_message{
+                    font-size: 16px;
+                    margin-bottom: 20px;
+                }
+                #enter_license_modal input{
+                    background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/email.png) no-repeat top left;
+                    height: 31px;
+                    line-height: 31px;
+                    width: 203px;
+                    text-indent: 5px;
+                    float: left;
+                    margin: 0px 10px 0px 20px;
+                }
+
+                #enter_license_modal .wizi_button{
+                    background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/CancelBTN.png) no-repeat top left;
+                    height: 33px;
+                    width: 86px;
+                    text-align: center;
+                    line-height: 33px;
+                    float: left;
+                    text-decoration: none;
+                    text-transform: uppercase;
+                    color: #474747;
+                    font-size: 12px;
+                    font-weight: bold;
+                    margin: 0px 4px 0px 0px;
+                }
+                #enter_license_modal #submit_license{
+                    background: url("http://cdn.wiziapp.net/images/cms/retry_lb_BTN.png") no-repeat top left;
+                }
+                #enter_license_modal div.wrapper{
+                    margin: 46px 46px 25px;
+                }
+                #enter_license_modal h2{
+                    padding-left: 20px;
+                    margin-bottom:30px;
+                    color:#0fb3fb;
+                }
+
                 #publish_modal .processing_message{
                     font-size: 17px;
                 }
@@ -144,6 +207,8 @@ class WiziappGeneratorDisplay{
                                 jQuery('#general_error_modal').bind('closingReportForm', function(){
                                     jQuery(this).addClass('s_container');
                                 });
+
+                                jQuery('#submit_license').bind('click', registerLicense);
                             });
 
                             function wiziappReceiveMessage(event){
@@ -261,7 +326,7 @@ class WiziappGeneratorDisplay{
                                     $box
                                         .find('.error').hide().end()
                                         .find('.loading_indicator').show().end()
-                                        .find('.close').hide().end()
+                                        .find('.close:not(.nohide)').hide().end()
                                         .find('.processing_message').show().end();
 
                                     if (!$box.data("overlay")){
@@ -341,6 +406,38 @@ class WiziappGeneratorDisplay{
                                 return false;
                             };
 
+                            function registerLicense(event){
+                                //
+                                if ( jQuery(this).is('.pending') ){
+                                    return false;
+                                }
+                                jQuery(this).addClass('pending');
+
+                                jQuery('#enter_license_modal .error').hide();
+                                var key = jQuery('#enter_license_modal input').val();
+                                if ( key.length == 0 ){
+                                    jQuery(this).removeClass('pending');
+                                    return false;
+                                }
+
+                                var params = {
+                                    'action': 'wiziapp_register_license',
+                                    'key': key
+                                };
+
+                                jQuery.post(ajaxurl, params, function(data){
+                                    if ( data && data.header && data.header.status ){
+                                        // License updated, inform and reload
+                                        jQuery('#enter_license_modal .success').text('License key updated, please standby...').show();
+                                        top.document.location.reload(true);
+                                    } else {
+                                        // Error,
+                                        jQuery('#enter_license_modal .error').text('Invalid license key').show();
+                                    }
+                                    jQuery('#submit_license').removeClass('pending');
+                                }, 'json');
+                            };
+
                             function reportIssue(event){
                                 // Change the current box style so it will enable containing the report form
                                 event.preventDefault();
@@ -410,6 +507,20 @@ class WiziappGeneratorDisplay{
                     </div>
                     <div class="report_container hidden">
 
+                    </div>
+                </div>
+
+                <div class="processing_modal" id="enter_license_modal">
+                    <div class="wrapper">
+                        <h2>Enter license key</h2>
+                        <p class="processing_message">You can find your license key in the confirmation e-mail received after purchase</p>
+                        <p>
+                            <input type="text" name="license_key" size="20" maxlength="40" />
+                            <a class="wizi_button" id="submit_license" href="javascript:void(0);">Submit</a>
+                            <a class="wizi_button close nohide" href="javascript:void(0);">Cancel</a>
+                        </p>
+                        <p class="error" class="errorMessage hidden"></p>
+                        <p class="success" class="hidden"></p>
                     </div>
                 </div>
 

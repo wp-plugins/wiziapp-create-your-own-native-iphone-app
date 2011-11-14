@@ -1,9 +1,9 @@
-<?php  
+<?php
 /**
-* Handles the display of the application, checks if the request for the blog came from a 
+* Handles the display of the application, checks if the request for the blog came from a
 * supported known application and if so directs it to the CMS Plugin theme.
 * When displaying posts inside our templates makes sure to convert what is needed
-* 
+*
 * @package WiziappWordpressPlugin
 * @subpackage ContentDisplay
 * @author comobix.com plugins@comobix.com
@@ -13,7 +13,7 @@ class WiziappContentHandler {
     private $inApp;
     var $debug = FALSE;
     private $inSave = FALSE;
-    
+
     static $shouldDisplayAppstoreLinkFlag = TRUE;
 
     private static $_instance = null;
@@ -35,7 +35,7 @@ class WiziappContentHandler {
         add_action('plugins_loaded', array(&$this, 'detectAccess'), 99);
         add_action('plugins_loaded', array(&$this, 'avoidWpTouchIfNeeded'), 1);
 
-        if ( strpos($_SERVER['REQUEST_URI'], '/wp-admin') === false 
+        if ( strpos($_SERVER['REQUEST_URI'], '/wp-admin') === false
             && strpos($_SERVER['REQUEST_URI'], 'xmlrpc') === false) {
             // Don't change the template directory when in the admin panel
             add_filter('stylesheet', array(&$this, 'get_stylesheet'), 99);
@@ -64,7 +64,7 @@ class WiziappContentHandler {
                 header("Expires: " . gmdate("D, d M Y H:i:s", time() - 3600) . " GMT");
                 add_filter('admin_head', array(&$this, 'do_admin_head_section'), 99);
             }
-        }            
+        }
     }
 
     public function setInSave(){
@@ -89,6 +89,7 @@ class WiziappContentHandler {
         remove_filter("gettext", "ws_plugin__s2member_translation_mangler", 10, 3);
         remove_filter('the_content', 'shrsb_position_menu');
         remove_action('wp_head',   'dl_copyright_protection');
+        remove_action('wp_footer', 'thisismyurl_noframes_killframes');
     }
 
     public function forceInApp(){
@@ -109,61 +110,103 @@ class WiziappContentHandler {
         }
     }
     /**
-    * Detect if we have been access from the application, the application uses a pre-defined protocol for it's 
+    * Detect if we have been access from the application, the application uses a pre-defined protocol for it's
     * requests, so if something is not there its not the application.
-    * 
+    *
     */
     function detectAccess(){
         //WiziappLog::getInstance()->write('debug', "Detecting access type", "WiziappContentHandler");
         $appToken = isset($_SERVER['HTTP_APPLICATION']) ? $_SERVER['HTTP_APPLICATION'] : '';
         $udid = isset($_SERVER['HTTP_UDID']) ? $_SERVER['HTTP_UDID'] : '';
-        
+
         //WiziappLog::getInstance()->write('debug', "The headers are: {$appToken} and {$udid}", "WiziappContentHandler");
-        
+
         if (strpos($_SERVER['REQUEST_URI'], 'wiziapp/') !== FALSE){
             $this->inApp = TRUE;
-        } 
-        
+        }
+
         if ((!empty($appToken) && !empty($udid)) || $this->inApp){
             WiziappLog::getInstance()->write('debug', "In the application display", "WiziappContentHandler");
-            
+
             $this->setInApp();
         } else {
             $this->mobile = FALSE;
             $this->inApp = FALSE;
 
-            if (strstr($_SERVER['HTTP_USER_AGENT'], 'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'], 'iPod') || strstr($_SERVER['HTTP_USER_AGENT'], 'iPad')) {
-                if (WiziappContentHandler::$shouldDisplayAppstoreLinkFlag && WiziappConfig::getInstance()->appstore_url != '') {
-                    if (!isset($_COOKIE['WIZI_SHOW_APPSTORE_URL']) || $_COOKIE['WIZI_SHOW_APPSTORE_URL'] == 0){
-                        add_action('wp_head', array(&$this, 'displayAppstoreAppURL'), 1);
-                        WiziappContentHandler::$shouldDisplayAppstoreLinkFlag = FALSE;
-                        $timeout = time() + (60 * 60 * 24);
-                        setcookie("WIZI_SHOW_APPSTORE_URL", WiziappConfig::getInstance()->appstore_url_timeout, $timeout, "/");
+            if (isset($_SERVER['HTTP_USER_AGENT'])) {
+	            if (strstr($_SERVER['HTTP_USER_AGENT'], 'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'], 'iPod') || strstr($_SERVER['HTTP_USER_AGENT'], 'iPad')) {
+	                if (WiziappContentHandler::$shouldDisplayAppstoreLinkFlag && WiziappConfig::getInstance()->appstore_url != '') {
+	                    // moving the cookie check to the browser
+	                    //if (!isset($_COOKIE['WIZI_SHOW_APPSTORE_URL']) || $_COOKIE['WIZI_SHOW_APPSTORE_URL'] == 0){
+	                        add_action('wp_head', array(&$this, 'displayAppstoreAppURL'), 1);
+	                        WiziappContentHandler::$shouldDisplayAppstoreLinkFlag = FALSE;
+	                        /**$timeout = time() + (60 * 60 * 24);
+	                        setcookie("WIZI_SHOW_APPSTORE_URL", WiziappConfig::getInstance()->appstore_url_timeout, $timeout, "/");*/
+	                    //}
+	                }
+	            }
+			}
+
+            //WiziappLog::getInstance()->write('debug', "Didn't recognize the headers, normal browsing", "WiziappContentHandler");
+        }
+    }
+
+    function displayAppstoreAppURL () {
+        /**
+         * @todo move this to an external file
+         */
+        echo '<script type="text/javascript">
+                function wiziappGetCookie(c_name){
+                    var i,x,y,ARRcookies=document.cookie.split(";");
+                    for (i=0;i<ARRcookies.length;i++){
+                        x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+                        y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+                        x=x.replace(/^\s+|\s+$/g,"");
+                        if (x==c_name){
+                            return unescape(y);
+                        }
                     }
                 }
-            }
-                
-            //WiziappLog::getInstance()->write('debug', "Didn't recognize the headers, normal browsing", "WiziappContentHandler");
-        } 
-    }
-    
-    function displayAppstoreAppURL () {
-        echo '<script type="text/javascript">
-                var res = confirm("Download our free app from the AppStore");
-                if (res == true) { location.replace("' . WiziappConfig::getInstance()->appstore_url . '");}</script>';
+
+                function wiziappSetCookie(c_name,value,exdays){
+                    var exdate=new Date();
+                    exdate.setDate(exdate.getDate() + exdays);
+                    var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+                    document.cookie=c_name + "=" + c_value;
+                }
+
+                (function() {
+                    var appstoreUrl = "'.WiziappConfig::getInstance()->appstore_url.'";
+                    // Check if the cookie is there
+                    var cookieName = "WIZI_SHOW_APPSTORE_URL";
+                    var cookieExists = wiziappGetCookie(cookieName);
+
+                    if (cookieExists!=null && cookieExists!=""){
+                        // Already seens this nothing to show...
+                    } else {
+                        wiziappSetCookie(cookieName,appstoreUrl,60*60*24*7);
+                        cookieExists = wiziappGetCookie(cookieName);
+                        if ( cookieExists ){
+                            // We are able to create the cookie, so it is ok
+                            var res = confirm("Download our free app from the AppStore");
+                            if (res == true) { location.replace(appstoreUrl); }
+                        }
+                    }
+                })();
+            </script>';
     }
 
     /**
     * Handle the links converting, will convert images and post links according to
     * the app protocol.
-    *     
+    *
     * @param array $matches the array returned from preg_replace_callback
     * @return string the link found after converting to the app format
     */
     function _handle_links_converting($matches){
         $link = $matches[0];
         $url = $matches[2];
-        $post_id = url_to_postid($url);         
+        $post_id = url_to_postid($url);
         if ($post_id){
             if (strpos($url, 'page_id') !== false) {
                 $newUrl = WiziappLinks::pageLink($post_id);
@@ -177,14 +220,14 @@ class WiziappContentHandler {
             $link = str_replace($url, $newUrl, $link);
         } else {
             // If it is an image, convert to open image
-            if (    strpos($url, '.png') !== FALSE || 
-                    strpos($url, '.gif') !== FALSE || 
-                    strpos($url, '.jpg') !== FALSE || 
-                    strpos($url, '.jpeg') !== FALSE ){ 
+            if (    strpos($url, '.png') !== FALSE ||
+                    strpos($url, '.gif') !== FALSE ||
+                    strpos($url, '.jpg') !== FALSE ||
+                    strpos($url, '.jpeg') !== FALSE ){
                 $newUrl = WiziappLinks::linkToImage($url);
                 $partLink = substr($link, 0, strpos($link, '>'));
                 $secondPartLink = substr($link, strpos($link, '>'));
-                
+
                 $link = str_replace($url, $newUrl, $partLink) . $secondPartLink;
             }
         }
@@ -241,13 +284,13 @@ class WiziappContentHandler {
 
     /**
     * Get the images we scanned for this post and it's replacement code
-    * 
+    *
     * @param int $post_id the content id we are processing
     * @return array $replacements the array with the instructions for str_replace
     */
     function _getImagesReplacementCode($post_id){
         $imagesElements = WiziappDB::getInstance()->get_content_images($post_id);
-        $replacements = array(                                                  
+        $replacements = array(
             'find' => array(),
             'replace' => array(),
         );
@@ -260,7 +303,7 @@ class WiziappContentHandler {
 
                 WiziappLog::getInstance()->write('info', ">>> About to replace :: {$image['original_code']}", '_getImagesReplacementCode');
                 $replacements['find'][] = $image['original_code'];
-                
+
                 $newImage = '<img ';
                 WiziappLog::getInstance()->write('info', ">>> The image info :: " . print_r($image, TRUE), '_getImagesReplacementCode');
                 $attachInfo = json_decode($image['attachment_info'], TRUE);
@@ -272,38 +315,38 @@ class WiziappContentHandler {
                     }
                     $newImage .= " {$attrName}=\"{$value}\"";
                 }
-                
+
                 /**
                 * @todo Fix (remove) this once ticket 710 is fixed
                 */
                 global $thumbSize;
                 if (count($imagesElements) >= WiziappConfig::getInstance()->count_minimum_for_appear_in_albums) {
-                    $thumb = new WiziappImageHandler($attachInfo['attributes']['src']); 
+                    $thumb = new WiziappImageHandler($attachInfo['attributes']['src']);
                     $thumbSize = WiziappConfig::getInstance()->getImageSize('album_thumb');
                     $url = $thumb->getResizedImageUrl($attachInfo['attributes']['src'], $thumbSize['width'], $thumbSize['height']);
-                    $newImage .= " data-image-thumb=\"" . $url . "\"";   
+                    $newImage .= " data-image-thumb=\"" . $url . "\"";
                 }
-                
+
 //                $json = json_encode($image);
                 $id_code = " data-wiziapp-id=\"{$image['id']}\" ";
                 $newImage .= $id_code . ' />';
                 WiziappLog::getInstance()->write('info', ">>> with this:: {$newImage}", '_getImagesReplacementCode');
-                
+
                 // Wordpress save the image without closing /> so let's check this too
                 $replacements['find'][] = str_replace(' />', '>', $image['original_code']);
                 $replacements['replace'][] = $newImage;
                 // We have 2 find elements per image, so we need to replace, otherwise things gets buggy... :P
                 $replacements['replace'][] = $newImage;
-                
+
                 //$replacements['replace'][] = str_replace('/>', "{$id_code}/><!-- {$json} -->", $image['original_code']);
             }
         }
         return $replacements;
     }
-    
+
     /**
     * Get the videos and audio we scanned for this post and it's replacement code
-    * 
+    *
     * @param int $post_id the content id we are processing
     * @return array $replacements the array with the instructions for str_replace
     */
@@ -338,7 +381,7 @@ class WiziappContentHandler {
                     } else {
                         $title = $info['title'];
                     }
-                    
+
                     $replaceCode = "<a href='" . $info['actionURL'] . "'><div class='audioCellItem'>
                             <div class='col1'>
                                 <div class='imageURL' style='{$style}'></div>
@@ -377,7 +420,7 @@ class WiziappContentHandler {
 
                 if (strpos($element['original_code'], '<iframe') === FALSE || (isset($_GET['sim']) && $_GET['sim'] == 1)){
                     if (strpos($element['original_code'], '&') !== FALSE){
-                        $replacements['find'][] = str_replace('&', '&amp;', $element['original_code']);   
+                        $replacements['find'][] = str_replace('&', '&amp;', $element['original_code']);
                         $replacements['replace'][] = $replaceCode;
 
                         /**
@@ -414,7 +457,7 @@ class WiziappContentHandler {
                         }
 
                         $element['original_code'] = str_replace($replacements2['find'], $replacements2['replace'], $element['original_code']);
-                        
+
                         /**
                          * The content might have been inserted with ='' instead of =""
                          */
@@ -454,9 +497,9 @@ class WiziappContentHandler {
         global $post;
         return get_post_meta($post->ID, 'wpzoom_post_embed_code', true) . $content;
     }
-    
+
     function trigger_before_content($content){
-        if ($this->inApp === TRUE) {   
+        if ($this->inApp === TRUE) {
             WiziappLog::getInstance()->write('info', "Triggering before the content", 'trigger_before_content');
             $content = apply_filters('wiziapp_before_the_content', $content);
         }
@@ -466,15 +509,15 @@ class WiziappContentHandler {
         }
         return $content;
     }
-    
+
     /**
-    * Convert the known content to a predefined format used bu the application
+    * Convert the known content to a predefined format used by the application
     * called from 'the_content' filter of wordpress, running last.
-    * 
+    *
     * @see self::_handle_links_converting
     * @see self::_getImagesReplacementCode
     * @see self::_getSpecialComponentsCode
-    * 
+    *
     * @param string $content the initial content
     * @return string $content the processed content
     */
@@ -482,7 +525,7 @@ class WiziappContentHandler {
         global $post;
         WiziappLog::getInstance()->write('info', "In the_content filter callback the contentHandler", "convert_content");
 
-        if ($this->inApp === TRUE) {   
+        if ($this->inApp === TRUE) {
             WiziappLog::getInstance()->write('info', "Converting content like we are inside the app", "convert_content");
             // Get the html for the content after processing it with the DOM Loader
             //$encoding = get_bloginfo('charset');
@@ -492,7 +535,7 @@ class WiziappContentHandler {
             $body = $dom->getBody();
             $content = $dom->getNodeAsHTML($body);
             WiziappProfiler::getInstance()->write("Got the content from the DOM", "convert_content");*/
-            
+
             //Change Galleries to new view
             /**WiziappProfiler::getInstance()->write("Getting the galleries code for post {$post->ID}", "convert_content");
             $this->_getGalleriesReplacementCode($post->ID, &$content);
@@ -500,7 +543,7 @@ class WiziappContentHandler {
 //            $content = str_replace($galleriesCode['find'], $galleriesCode['replace'], $content);
             */
             WiziappProfiler::getInstance()->write("Getting the images code for post {$post->ID}", "convert_content");
-            
+
             // Add the content id to images
             $imagesCode = $this->_getImagesReplacementCode($post->ID);
 
@@ -512,22 +555,22 @@ class WiziappContentHandler {
             $content = str_replace('  >', '>', $content);
             $content = str_replace(' >', '>', $content);
             $content = str_replace($imagesCode['find'], $imagesCode['replace'], $content);
-            
+
             WiziappProfiler::getInstance()->write("Done Getting the images code for post {$post->ID}", "convert_content");
             //WiziappLog::getInstance()->write('info', "The content::" . $content, "convert_content");
-            
+
             // Handle special tags: video and audio
             WiziappProfiler::getInstance()->write("Getting the special elements code for post {$post->ID}", "convert_content");
             $specialCode = $this->_getSpecialComponentsCode($post->ID);
             $content = str_replace($specialCode['find'], $specialCode['replace'], $content);
             WiziappProfiler::getInstance()->write("Done Getting the special elements code for post {$post->ID}", "convert_content");
-            
+
             // Remove the remaining flash tags which are not supported on the iphone
-            
+
             // Handle links
             WiziappProfiler::getInstance()->write("Handling links for post {$post->ID}", "convert_content");
             $content = preg_replace_callback('/<a\s[^>]*href\s*=\s*([\"\']??)([^\" >]*?)\\1[^>]*>(.*)<\/a>/siU',
-                                             array(&$this, "_handle_links_converting"), $content);            
+                                             array(&$this, "_handle_links_converting"), $content);
             WiziappProfiler::getInstance()->write("Done Handling links for post {$post->ID}", "convert_content");
         }
 
@@ -536,9 +579,9 @@ class WiziappContentHandler {
     }
 
     function convert_categories_links($data1){
-        return $data1;    
+        return $data1;
     }
-    
+
     function do_head_section() {
         // Add our style sheets - no need anymore, or is there a need?
     }
@@ -562,27 +605,27 @@ class WiziappContentHandler {
     function get_stylesheet( $stylesheet ) {
         if ($this->inApp === TRUE) {
             $stylesheet = 'blank';
-        } 
+        }
         return $stylesheet;
     }
-          
+
     function get_template( $template ) {
         $this->detectAccess();
 
         if ($this->inApp) {
             $template = 'iphone';
-        } 
+        }
 
         return $template;
     }
-          
+
     function get_template_directory( $value ) {
         $this->detectAccess();
 
         $theme_root = $this->_get_plugin_dir();
         if ($this->inApp) {
             $value = trailingslashit($theme_root) . 'themes';
-        } 
+        }
 
         return $value;
     }
@@ -593,7 +636,7 @@ class WiziappContentHandler {
         $theme_root = $this->_get_plugin_dir();
         if ($this->inApp) {
             $path = trailingslashit($theme_root) . 'themes';
-        } 
+        }
 
         return $path;
     }
@@ -657,7 +700,7 @@ class WiziappContentHandler {
 
         return $val;
     }
-          
+
     function theme_root_uri( $url ) {
         $this->detectAccess();
 
@@ -665,11 +708,43 @@ class WiziappContentHandler {
             $dir = realpath($this->_get_plugin_dir());
             $url =str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $dir) . "/themes";
             $url = str_replace(DIRECTORY_SEPARATOR, '/', $url);
-        } 
+        }
 
         return $url;
     }
-    
+
+    public function registerPluginScripts(){
+        if ($this->inApp) {
+            $cdnUrl = WiziappConfig::getInstance()->getCdnServer();
+            wp_register_script('wiziapp_mousewheel',
+                $cdnUrl . '/scripts/jquery.mousewheel.min.js',
+                array('jquery'),
+                WIZIAPP_P_VERSION, TRUE );
+
+            wp_register_script('wiziapp_scrolling',
+                $cdnUrl . '/scripts/jScrollPane-1.2.3.min.js',
+                array('jquery'),
+                WIZIAPP_P_VERSION, TRUE );
+
+            wp_register_script('wiziapp_base_lite',
+                $cdnUrl . '/scripts/api/1/apps/scripts_lite.js',
+                array('jquery'),
+                WIZIAPP_P_VERSION, TRUE );
+
+            wp_register_script('wiziapp_content',
+                $cdnUrl . '/scripts/api/1/apps/content_'.WIZIAPP_VERSION.'.js',
+                array('jquery','wiziapp_base_lite'),
+                WIZIAPP_P_VERSION, TRUE );
+
+            wp_enqueue_script('jquery');
+            wp_enqueue_script('wiziapp_base_lite');
+            wp_enqueue_script('wiziapp_mousewheel');
+            wp_enqueue_script('wiziapp_scrolling');
+            wp_enqueue_script('wiziapp_content');
+        }
+
+    }
+
     function _get_plugin_dir(){
         return trailingslashit(trailingslashit(dirname(__FILE__)) . trailingslashit('..') . trailingslashit('..'));
     }

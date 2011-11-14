@@ -76,8 +76,10 @@ class WiziappRequestHandler {
                 'message' => 'There was a critical error running the service',
             );
 
-            WiziappLog::getInstance()->write('Error', "Caught an error: ".print_r($error, TRUE),
-                        "WiziappRequestHandler.handleGeneralError");
+            if(stripos($error['message'], 'Allowed memory size of ') === false) {
+                WiziappLog::getInstance()->write('Error', "Caught an error: " . print_r($error, TRUE),
+                            "WiziappRequestHandler.handleGeneralError");
+            }
 
             if ( $this->errorReportingLevel !== 0 ){
                 //$header['message'] = $error['message'];
@@ -136,6 +138,7 @@ class WiziappRequestHandler {
                 $this->runScreenBy('System', 'ForgotPassword', null);
             }   
         } elseif($service == 'content' || $service == 'search') {
+            ob_start();
             // Content requests should trigger a the caching
             $cache = new WiziappCache;
             $key = str_replace('/', '_', $request);

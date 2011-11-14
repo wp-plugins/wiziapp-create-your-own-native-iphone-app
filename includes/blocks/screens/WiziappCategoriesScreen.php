@@ -20,15 +20,13 @@ class WiziappCategoriesScreen extends WiziappBaseScreen{
         $limitForRequest = $catLimit * 2;
         $offset = $catLimit * $pageNumber;
 
-        //$categories = get_categories(array(
         $cat_args = array(
             'number' => $limitForRequest,
             'offset' => $offset,
             'hierarchical' => FALSE,
             'pad_counts' => 1,
-        //));
         );
-        $categories = get_categories(apply_filters('wiziapp_exclude_categories', $cat_args));
+		$categories = get_categories(apply_filters('wiziapp_exclude_categories', $cat_args));
 
         $index = 0;
         foreach ($categories as $cat) {
@@ -44,7 +42,7 @@ class WiziappCategoriesScreen extends WiziappBaseScreen{
 
         $this->output($this->prepare($page, $this->getTitle(), 'List', false, false, true));
     }
-    
+
     public function runByPost($post_id){
         $screen_conf = $this->getConfig();
 

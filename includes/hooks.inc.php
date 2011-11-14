@@ -2,9 +2,9 @@
 /**
 * our integration with the wordpress CMS.
 * this file attaches the plugin to events in wordpress by using filters and actions
-* 
+*
 * @todo Figure out which method is better, one place of inside the class like contentHandler
-* 
+*
 * @package WiziappWordpressPlugin
 * @author comobix.com plugins@comobix.com
 */
@@ -17,12 +17,12 @@ function wiziapp_attach_hooks(){
     //add_action('admin_menu', 'wiziapp_setup_menu');
     add_action('admin_menu', array('WiziappAdminDisplay', 'setup'));
 
-    /* Add a custom column to the users table to indicate that the user 
+    /* Add a custom column to the users table to indicate that the user
     * logged in from his mobile device via our app
     * NOTE: Some plugins might not handle other plugins columns very nicely and cause the data not to show...
     */
-    add_filter ('manage_users_columns', array('WiziappUserList', 'column'));
-    add_filter ('manage_users_custom_column', array('WiziappUserList', 'customColumn'), 10, 3);
+    add_filter('manage_users_columns', array('WiziappUserList', 'column'));
+    add_filter('manage_users_custom_column', array('WiziappUserList', 'customColumn'), 10, 3);
 
     add_filter('cron_schedules', array('wiziappCronSchedules','addSchedules'));
 
@@ -40,10 +40,10 @@ function wiziapp_attach_hooks(){
         add_action('private_to_publish', array('WiziappPush','publishPost'));
         add_action('future_to_publish', array('WiziappPush','publishPost'));
     }
-    
+
     add_action('deleted_post', array(&$ce, 'deletePost'));
     add_action('trashed_post', array(&$ce, 'deletePost'));
-    
+
     add_action('untrashed_post', array(&$ce, 'recoverPost'));
 
     add_action('created_term', array(&$ce, 'updateCacheTimestampKey'));
@@ -52,7 +52,7 @@ function wiziapp_attach_hooks(){
     * @todo add this function to allow updates and no new post was published notifications
     add_action('publish_to_publish', 'wiziapp_publish_updated_post');
     */
-    
+
     /**
     * Notice: publish_post might happen a few times, make sure we are only doing the action once
     * by removing the action once done
@@ -70,11 +70,11 @@ function wiziapp_attach_hooks(){
     register_deactivation_hook(WP_WIZIAPP_BASE, array('WiziappInstaller', 'uninstall'));
     register_activation_hook(WP_WIZIAPP_BASE, array('WiziappInstaller', 'install'));
     add_action('delete_blog', array('WiziappInstaller', 'deleteBlog'), 10, 2);
-    
+
     // Update the cache when the settings are changed
     //add_action('updated_option', array('WiziappContentEvents', 'triggerCacheUpdate'));
     //add_action('profile_update', array('WiziappContentEvents', 'triggerCacheUpdateByProfile'));
-    
+
     // add custom image size
     /**add_image_size('wiziapp-thumbnail', wiziapp_getThumbSize(), wiziapp_getThumbSize(), true );
     add_image_size('wiziapp-small-thumb', wiziapp_getSmallThumbWidth(), wiziapp_getSmallThumbHeight(), true );
@@ -98,6 +98,9 @@ function wiziapp_attach_hooks(){
     // admin
     add_action('wp_ajax_wiziapp_hide_verify_msg', array('WiziappAdminDisplay', 'hideVerifyMsg'));
     add_action('wp_ajax_wiziapp_hide_upgrade_msg', array('WiziappAdminDisplay', 'hideUpgradeMsg'));
+
+    // Wizard
+    add_action('wp_ajax_wiziapp_register_license', array('WiziappLicenseUpdater', 'register'));
 
     add_filter('wiziapp_3rd_party_plugin', array('WiziappApi', 'externalPluginContent'), 1, 3);
 }

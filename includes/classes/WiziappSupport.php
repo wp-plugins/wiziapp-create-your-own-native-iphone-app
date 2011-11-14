@@ -23,17 +23,20 @@ class WiziappSupport {
     public function listLogs(){
         if (is_dir($this->path) && is_readable($this->path)){
             if ($logsDir = opendir($this->path)){
+                $logs = array();
                 while (($log = readdir($logsDir)) !== false){
                     if (preg_match("/\.log(.)*\.php$/", $log) ){
                         $logs[] = array(
                             'name' => $log, 
-                            'date' => filemtime($this->path.$log),
-                            'size' => filesize($this->path.$log),
+                            'date' => filemtime($this->path . $log),
+                            'size' => filesize($this->path . $log),
                         );
                             
                     }
-                } 
-                $this->returnResults(array('logs'=>$logs), 'listLogs');
+                }
+                $this->array_sort($logs, 'name', 'date');
+                rsort($logs);
+                $this->returnResults(array('logs' => $logs), 'listLogs');
             } else {
                 $this->alert(500, "Could not open log directory", 'listLogs');
             }
@@ -98,5 +101,30 @@ class WiziappSupport {
         
         exit();
     }  
+
+    function array_sort_func($a,$b=NULL) {
+        static $keys;
+        if($b===NULL)
+            return $keys=$a;
+        foreach($keys as $k) {
+            if(@$k[0]=='!') {
+                $k=substr($k,1);
+                if(@$a[$k]!==@$b[$k]) {
+                    return strcmp(@$b[$k],@$a[$k]);
+                }
+            } else if(@$a[$k]!==@$b[$k]) {
+                return strcmp(@$a[$k],@$b[$k]);
+            }
+        }
+        return 0;
+    }
     
+    function array_sort(&$array) {
+        if(!$array)
+            return '';
+        $keys=func_get_args();
+        array_shift($keys);
+        $this->array_sort_func($keys);
+        usort($array,"array_sort_func");
+    }
 }

@@ -1,8 +1,8 @@
-<?php 
+<?php
 
-if (!defined('WP_WIZIAPP_BASE')) 
+if (!defined('WP_WIZIAPP_BASE'))
     exit();
-    
+
 /**
 * Basic log class for the wordpress plugin
 *
@@ -108,17 +108,17 @@ class WiziappLog {
          return false;
         }
     }
-    
+
     private function getFileNamePrefix(){
 		$prefix = 'wiziapplog-';
 		if (function_exists('is_multisite') && is_multisite()) {
 			global $wpdb;
 			$details = get_blog_details((int) $wpdb->blogid, true);
 			$msPath = str_replace(array('/', '.', ':'), '_', $details->siteurl);
-			
+
 			$prefix = $prefix . $msPath . '-';
 		}
-		
+
 		return $prefix;
 	}
 
@@ -126,7 +126,7 @@ class WiziappLog {
 //    when adding a new message
     private function getFilePath(){
 		$fileprefix = $this->getFileNamePrefix();
-		
+
         $filepath = $this->path . $fileprefix . date('Y-m-d') . '.log.php';
 
         if(@filesize($filepath) > $this->max_size){
@@ -183,7 +183,7 @@ class WiziappLog {
         //ob_start();
 
         @clearstatcache(); // We need to clear the cache of the file size function so that the size checks will work
-        
+
         if ($this->enabled === FALSE){
             //ob_end_clean();
             return FALSE;
@@ -223,27 +223,27 @@ class WiziappLog {
         @fclose($fp);
 
         @chmod($filepath, 0666);
-        
+
         //ob_end_clean();
         return TRUE;
     }
-    
+
     function writeServerConfiguration(){
         global $wpdb;
-    
+
         // mysql version
         $sqlversion = $wpdb->get_var("SELECT VERSION() AS version");
-    
+
         // sql mode
         $mysqlinfo = $wpdb->get_results("SHOW VARIABLES LIKE 'sql_mode'");
         if (is_array($mysqlinfo)){
-            $sql_mode = $mysqlinfo[0]->Value;   
+            $sql_mode = $mysqlinfo[0]->Value;
         }
-        
+
         if (empty($sql_mode)) {
             $sql_mode = 'Not Set';
-        }   
-        
+        }
+
         $config = array(
             'php_os' => PHP_OS,
             'sql version' => $sqlversion,
@@ -255,10 +255,10 @@ class WiziappLog {
             'memory_limit' => ini_get('memory_limit') ? ini_get('memory_limit') : 'NA',
             'memory_get_usage' => function_exists('memory_get_usage') ? round(memory_get_usage() / 1024 / 1024, 2).'MByte' : 'NA',
             'server config' => $_SERVER,
-            'display_errors' => ini_get('display_error'), 
-            'error_reporting' => ini_get('error_reporting'), 
+            'display_errors' => ini_get('display_error'),
+            'error_reporting' => ini_get('error_reporting'),
         );
-        
+
         return $config;
     }
 }

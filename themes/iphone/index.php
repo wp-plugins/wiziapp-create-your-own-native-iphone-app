@@ -13,7 +13,8 @@ if (have_posts()) :
         $GLOBALS['WiziappEtagOverride'] = '';
     }
     $injectLoadedScript = '<script type="text/javascript">WIZIAPP.doLoad();</script>';
-    
+
+    WiziappContentHandler::getInstance()->registerPluginScripts();
     // Force the head to run only once
     if ( empty($GLOBALS['wpHeadHtml']) ){
 		ob_start();
@@ -21,14 +22,14 @@ if (have_posts()) :
 		$GLOBALS['wpHeadHtml'] = ob_get_contents();
 		ob_end_clean();
 	}
-    
+
 	if ( empty($GLOBALS['wpFooterHtml']) ){
 		ob_start();
 		wp_footer();
 		$GLOBALS['wpFooterHtml'] = ob_get_contents();
 		ob_end_clean();
     }
-    
+
     // Start capturing output from loop events
     ob_start();
     while (have_posts()) : the_post();

@@ -2,7 +2,7 @@
 /**
 * Lazy loading, load all of our classes, except for components that are only needed in screens
 * @todo Add some more auto loading functionality, no need to load everything everytime. keep in mind that php4 is still out there (pending refactoring the code to be classes only)
-* 
+*
 * @package WiziappWordpressPlugin
 * @author comobix.com plugins@comobix.com
 */
@@ -51,9 +51,9 @@ class WiziappLoader
             $this->version = $this->defaultVersion;
         }
     }
-    
+
     public function getVersion(){
-        return $this->version; 
+        return $this->version;
     }
 
     protected function loadVersions(){
@@ -70,18 +70,18 @@ class WiziappLoader
                         if ( strpos($sub_dir, "_") !== 0){
                             $block = $this->getFilePath("/blocks/".$sub_dir);
                             if ( $block !== FALSE ){
-                                include_once dirname(__FILE__) . $block;       
+                                include_once dirname(__FILE__) . $block;
                             }
-                            
+
                         }
                     }
-                } 
+                }
             }
         }
 
         $ch = WiziappContentHandler::getInstance(); // Needs to load every time
 
-        if ((strpos($_SERVER['QUERY_STRING'], 'wiziapp/')) !== FALSE){
+        if (strpos($_SERVER['QUERY_STRING'], 'wiziapp/') !== FALSE){
             // Start the request handler so it will register it's events.
             $rh = new WiziappRequestHandler(); // Needs to load for the webservices
         }
@@ -99,10 +99,10 @@ class WiziappLoader
             }
         }
     }
-    
+
     private function _getFromVersionConfig($type, $name){
         $version = $this->getVersion();
-        
+
         if ( isset($this->versions[$version]) ) {
             if ( isset($this->versions[$version][$type]) ) {
                 if ( isset($this->versions[$version][$type][$name]) ){
@@ -113,13 +113,13 @@ class WiziappLoader
                 }
             }
         }
-        return $name;      
+        return $name;
     }
-    
+
     protected function getFilePath($name){
         return $this->_getFromVersionConfig('core', $name);
     }
-    
+
     protected function getClassFileName($name){
         $result = $this->_getFromVersionConfig('classes', $name);
         if ( $result == $name ){
@@ -129,9 +129,9 @@ class WiziappLoader
         }
         return $result;
     }
-    
+
     protected function getFuncName($func){
-        return $this->_getFromVersionConfig('functions', $func);      
+        return $this->_getFromVersionConfig('functions', $func);
     }
 }
 

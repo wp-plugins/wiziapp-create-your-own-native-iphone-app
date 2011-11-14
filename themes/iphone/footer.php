@@ -1,8 +1,9 @@
-<?php 
+<!-- Footer -->
+<?php
 	if ( !empty($GLOBALS['wpFooterHtml']) ){
 		echo $GLOBALS['wpFooterHtml'];
 	} else {
-		wp_footer(); 
+		wp_footer();
 	}
 ?>
 </body>

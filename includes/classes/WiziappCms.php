@@ -201,6 +201,7 @@ class WiziappCms{
                 'web_server' => $checker->testWebServer(false),
             )),
             'comment_registration' => get_option('comment_registration') ? 1 : 0,
+            'installation_source' => WiziappConfig::getInstance()->installation_source,
         );
 
         $profile = array_merge($profile, $this->registerUser());

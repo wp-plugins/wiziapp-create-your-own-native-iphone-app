@@ -9,7 +9,7 @@
  *
  * Images Usage Example:
     $images = array(
-        '1' => array(
+        array(
             'src' => 'http://www.yoursite.com/images/image01.png',  // Mandatory Field
             'alt' => 'Image Alt',
             'title' => 'Image Title',
@@ -18,39 +18,39 @@
             'css_class' => 'my_css_class_1 my_css_class_2',
             'gallery_id' => 'my_gallery_1'                          // Mandatory Field
         ),
-        '2' => array(
+        array(
             'src' => 'http://www.yoursite.com/images/image02.png',
             'gallery_id' => 'my_gallery_1'
         )
     );
-    $obj = apply_filters('wiziapp_3rd_party_plugin', '[your-shortcode]', 'image', $images);
+    $content = apply_filters('wiziapp_3rd_party_plugin', $content, 'image', $images);
  *
  *
  * Videos Usage Example:
     $videos = array(
-        '1' => array(
+        array(
             'src' => 'http://www.youtube.com/watch?v=2HZxF0naty4'   // Mandatory Field
         ),
-        '2' => array(
+        array(
             'src' => 'http://www.vimeo.com/7069913'
         )
     );
-    $obj = apply_filters('wiziapp_3rd_party_plugin', '[your-shortcode]', 'video', $videos);
+    $content = apply_filters('wiziapp_3rd_party_plugin', $content, 'video', $videos);
  *
  *
  * Audios Usage Example:
     $audios = array(
-        '1' => array(
+        array(
             'src' => 'http://www.yoursite.com/audios/pink_floyd-the_wall.mp3',   // Mandatory Field
             'title' => 'Pink Floyd - The Wall',                                  // Mandatory Field
             'duration' => '3:06'
         ),
-        '2' => array(
+        array(
             'src' => 'http://www.yoursite.com/audios/pink_floyd-wish_you_were_here.mp3',
             'title' => 'Pink Floyd - Wish you were here'
         )
     );
-    $obj = apply_filters('wiziapp_3rd_party_plugin', '[your-shortcode]', 'audio', $audios);
+    $content = apply_filters('wiziapp_3rd_party_plugin', $content, 'audio', $audios);
 */
 
 class WiziappApi extends WiziappMediaExtractor{
@@ -64,10 +64,16 @@ class WiziappApi extends WiziappMediaExtractor{
             if ($media_type == 'image') {
                 $wiziapp_images = '';
                 foreach($medias as $image){
-                    $wiziapp_images .= '<a href="' . $image['src'] . '" class="wiziapp_gallery external-gallery-id">
-                                           <img src="' . $image['src'] . '" alt="' . $image['alt'] . '" title="' . $image['title'] . '" width="' .
-                                           $image['width'] . '" height="' . $image['height'] . '" class="' . $image['css_class'] . '" external-gallery-id="' .
-                                           $image['gallery_id'] . '" /></a>';
+                	//return print_r($image);
+                    $wiziapp_images .= '<a href="' . $image['src'] . '" class="wiziapp_gallery external-gallery-id">' . PHP_EOL .
+                                           '<img src="' . $image['src'] . '" ' .
+										   (isset($image['alt'])    ? 'alt="' . $image['alt'] . '" ' : '') .
+                                           (isset($image['title'])  ? 'title="' . $image['title'] . '" ' : '') .
+                                           (isset($image['width'])  ? 'width="' . $image['width'] . '" ' : '') .
+                                           (isset($image['height']) ? 'height="' . $image['height'] . '" ' : '') .
+                                           (isset($image['class'])  ? 'class="' . $image['css_class'] . '" ' : '') .
+                                           'external-gallery-id="' . $image['gallery_id'] . '" />' . PHP_EOL .
+										'</a>' . PHP_EOL;
                 }
                 $content = $wiziapp_images;
             } else if ($media_type == 'video') {
@@ -86,6 +92,8 @@ class WiziappApi extends WiziappMediaExtractor{
                 $content = $wiziapp_audios;
             }
         }
+
         return $content;
     }
+
 }
