@@ -175,8 +175,8 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 /* End Scrolling */
 
 .pageitem .wiziAppMultiImage img{
-    margin: 0px;
-    border: 0px;
+    margin: 0;
+    border: 0;
 }
 .pageitem .wiziAppMultiImage a.multi span, .unsupported_video{
     background:none repeat scroll 0 0 #444444;
@@ -225,13 +225,27 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 /**                 COMMON STYLES               **/
 /*************************************************/
 /*************************************************/
-
-
+.wiziapp_pages_nav li{
+    height: 40px !important;
+    line-height:30px !important;
+}
+.wiziapp_pages_item{
+    height: 32px !important;
+}
+.wiziapp_pages_title {
+    height: 19px;
+    top: 8px;
+    width: 260px;
+    font-family: Helvetica, Arial;
+    font-size: 1.1em;
+    font-weight: bolder;
+    line-height: 17px;
+    margin: 0;
+}
 .wiziapp_bottom_nav{
-    padding: 6px 0px;
+    padding: 6px 0;
     list-style: none;
     display: block;
-    line-height: 18px;
     -webkit-tap-highlight-color: rgba(0,0,0,0);
     /**height:60px;*/
     line-height:60px;
@@ -241,7 +255,7 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 #singlentry .albums_list{
     height:80px;
     line-height:80px;
-    text-indent:0px;
+    text-indent:0;
     margin-bottom: 10px;
     margin-top: 10px;
     clear: both;
@@ -283,7 +297,7 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 .wiziapp_bottom_nav .wiziapp_sep_bar{
     background-color: #bbb;
     height: 1px;
-    padding: 0px;
+    padding: 0;
     max-width: 100%;
 }
 .wiziapp_bottom_nav li{

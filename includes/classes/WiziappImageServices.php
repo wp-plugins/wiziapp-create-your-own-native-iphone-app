@@ -5,6 +5,7 @@ class WiziappImageServices{
         $width = $_GET['width'];
          
         $image = new WiziappImageHandler($_GET['url']);
+        WiziappLog::getInstance()->write('info', 'Requesting image: '.$_GET['url'], 'WiziappImageServices.getByRequest');
         $image->wiziapp_getResizedImage($width, $_GET['height'], $_GET['type'], $_GET['allow_up']);
     }
 }

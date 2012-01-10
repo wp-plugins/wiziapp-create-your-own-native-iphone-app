@@ -14,6 +14,42 @@ class WiziappCommentsScreen extends WiziappBaseScreen{
 
     }
 
+    // Removes the actionUrl, the '>' image and the 'hand' cursor from comments that dont have descendants
+    function fixCommentsDisplay($allSection, $comments) {
+        $comments_count = count($comments);
+        $approved_comments_count = count($allSection['section']['items']);
+
+        for($j = 0; $j < $approved_comments_count; $j++) {
+            for($i = 0; $i < $comments_count; $i++) {
+                if (intval($comments[$i]->comment_parent) == $allSection['section']['items'][$j]['commentCellItem']['commentID']) {
+                    if (strpos($allSection['section']['items'][$j]['commentCellItem']['class'], 'comment-yes-action') === false) {
+                        $allSection['section']['items'][$j]['commentCellItem']['class'] = 'comment-yes-action ' . $allSection['section']['items'][$j]['commentCellItem']['class'];
+                    }
+                }
+            }
+        }
+        for($k = 0; $k < $approved_comments_count; $k++) {
+            if (strpos($allSection['section']['items'][$k]['commentCellItem']['class'], 'comment-yes-action') === false) {
+                $allSection['section']['items'][$k]['commentCellItem']['actionURL'] = '';
+                $allSection['section']['items'][$k]['commentCellItem']['class'] = 'comment-no-action ' . $allSection['section']['items'][$k]['commentCellItem']['class'];
+            }
+        }
+
+        return $allSection;
+    }
+
+    // Removes the actionUrl, the '>' image and the 'hand' cursor from parent comments, in its own screen
+    function clearCommentsDisplay($parentSection) {
+        $approved_comments_count = count($parentSection['section']['items']);
+
+        for($k = 0; $k < $approved_comments_count; $k++) {
+            $parentSection['section']['items'][$k]['commentCellItem']['actionURL'] = '';
+            //$parentSection['section']['items'][$k]['commentCellItem']['class'] = 'comment-no-action ' . $parentSection['section']['items'][$k]['commentCellItem']['class'];
+        }
+
+        return $parentSection;
+    }
+
     // @todo: Add paging support here
     public function runByPost($post_id){
         $screen_conf = $this->getConfig();
@@ -29,19 +65,21 @@ class WiziappCommentsScreen extends WiziappBaseScreen{
         );
 
         foreach($comments as $comment){
-    //        $comment_id = $comment->comment_ID;
+            //$comment_id = $comment->comment_ID;
             // Only add top level comments unless told otherwise
             if ( $comment->comment_parent == 0 ){
                 $this->appendComponentByLayout($allSection['section']['items'], $screen_conf['items'], $comment);
             }
-         }
+        }
 
-    //     $post = get_post($post_id);
-         //$title = str_replace('&amp;', '&', $post->post_title);
-         $title = __('Comments', 'wiziapp');
+        //$post = get_post($post_id);
+        //$title = str_replace('&amp;', '&', $post->post_title);
+        $title = __('Comments', 'wiziapp');
+        
+        //$allSection = $this->fixCommentsDisplay($allSection, $comments);
 
-         $screen = $this->prepareSection(array($allSection), $title, "List", false, false, 'comments_screen');
-         $this->output($screen);
+        $screen = $this->prepareSection(array($allSection), $title, "List", false, false, 'comments_screen');
+        $this->output($screen);
     }
 
     function runByComment($params){
@@ -58,7 +96,7 @@ class WiziappCommentsScreen extends WiziappBaseScreen{
                 'id'    => 'parent_comment',
                 'items' => array(),
             )
-         );
+        );
 
         $subCommentsSection = array(
             'section' => array(
@@ -66,7 +104,7 @@ class WiziappCommentsScreen extends WiziappBaseScreen{
                 'id'    => 'subComments',
                 'items' => array(),
             )
-         );
+        );
 
         $comment = get_comment($p_comment_id);
 
@@ -76,14 +114,19 @@ class WiziappCommentsScreen extends WiziappBaseScreen{
             if ( $comment->comment_parent == $p_comment_id ){
                 $this->appendComponentByLayout($subCommentsSection['section']['items'], $screen_conf['items'], $comment);
             }
-         }
+        }
 
-         //$post = get_post($post_id);
-         //$title = str_replace('&amp;', '&', $post->post_title);
-         $title = __("Comments", 'title');
+        //$post = get_post($post_id);
+        //$title = str_replace('&amp;', '&', $post->post_title);
+        $title = __("Comments", 'title');
 
-         $screen = $this->prepareSection(array($parentCommentSection, $subCommentsSection), $title, "List");
-         $this->output($screen);
+        // We will remove the display child elements from the parent, because we are watching them in this screen
+        
+        $parentCommentSection = $this->clearCommentsDisplay($parentCommentSection);
+        //$subCommentsSection = $this->fixCommentsDisplay($subCommentsSection, $comments);
+
+        $screen = $this->prepareSection(array($parentCommentSection, $subCommentsSection), $title, "List");
+        $this->output($screen);
     }
 
     function runByMyComments($author_id){
@@ -118,10 +161,10 @@ class WiziappCommentsScreen extends WiziappBaseScreen{
 
         foreach($comments as $comment){
             $this->appendComponentByLayout($page, $screen_conf['items'], $comment);
-         }
+        }
 
-         $title = __('My Comments', 'wiziapp');
+        $title = __('My Comments', 'wiziapp');
 
-         $this->output($this->prepare($page, $title, "List"));
+        $this->output($this->prepare($page, $title, "List"));
     }
 }

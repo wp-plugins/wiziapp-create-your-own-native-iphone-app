@@ -23,12 +23,12 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
     * @var array
     */
     var $attrMap = array(
-        'L1' => array('title', 'author', 'date', 'numOfComments', 'imageURL', 'actionURL', 'contents'),
-        'L2' => array('title', 'author', 'date', 'numOfComments', 'numOfUserComments', 'imageURL', 'actionURL', 'contents'),
-        'L3' => array('title', 'author', 'date', 'numOfComments', 'categories', 'imageURL', 'actionURL', 'contents'),
-        'L4' => array('title', 'date', 'numOfComments', 'imageURL', 'actionURL', 'contents'),
+        'L1' => array('title', 'author', 'date', 'numOfComments', 'pages', 'imageURL', 'actionURL', 'contents'),
+        'L2' => array('title', 'author', 'date', 'numOfComments', 'pages', 'numOfUserComments', 'imageURL', 'actionURL', 'contents'),
+        'L3' => array('title', 'author', 'date', 'numOfComments', 'pages', 'categories', 'imageURL', 'actionURL', 'contents'),
+        'L4' => array('title', 'date', 'numOfComments', 'pages', 'imageURL', 'actionURL', 'contents'),
         //'L5' => array('title', 'author', 'description', 'date', 'rating', 'imageURL', 'actionURL', 'contents'),
-        'L5' => array('title', 'author', 'date', 'rating', 'imageURL', 'actionURL', 'contents'),
+        'L5' => array('title', 'author', 'date', 'pages', 'rating', 'imageURL', 'actionURL', 'contents'),
         'L6' => 'L1',
         'L7' => array('title', 'imageURL', 'actionURL', 'contents'),
         'L8' => array('title', 'imageURL', 'actionURL'),
@@ -237,6 +237,10 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
         }*/
         $prefix = ' ';
         return "{$prefix}{$authorName}";
+    }
+
+    function get_pages_attr(){
+        return '';
     }
     
     /**

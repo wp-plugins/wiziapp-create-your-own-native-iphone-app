@@ -45,6 +45,9 @@ class WiziappGeneratorDisplay{
                     height:35px;
                     width:35px;
                 }
+                #wpadminbar{
+                    z-index: 99;
+                }
                 #wiziappBoxWrapper{
                     width: 390px;
                     height: 760px;
@@ -208,7 +211,7 @@ class WiziappGeneratorDisplay{
                                     jQuery(this).addClass('s_container');
                                 });
 
-                                jQuery('#submit_license').bind('click', registerLicense);
+                                <?php // jQuery('#submit_license').bind('click', registerLicense); ?>
                             });
 
                             function wiziappReceiveMessage(event){
@@ -406,6 +409,7 @@ class WiziappGeneratorDisplay{
                                 return false;
                             };
 
+                            <?php /**
                             function registerLicense(event){
                                 //
                                 if ( jQuery(this).is('.pending') ){
@@ -436,7 +440,7 @@ class WiziappGeneratorDisplay{
                                     }
                                     jQuery('#submit_license').removeClass('pending');
                                 }, 'json');
-                            };
+                            };*/ ?>
 
                             function reportIssue(event){
                                 // Change the current box style so it will enable containing the report form

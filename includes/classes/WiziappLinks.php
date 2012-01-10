@@ -148,7 +148,11 @@ class WiziappLinks{
             $url = $image->getResizedImageUrl($url, $size['width'], 0);
         } */
 
-        return "cmd://open/image/" . urlencode($url);
+        $part2 = strrchr($url, "/");
+        $pos = strpos  ( $url  , $part2);
+        $part1 = substr_replace ($url, "", $pos);
+
+        return "cmd://open/image/" . urlencode($part1) . $part2;
     }
 
     public static function convertVideoActionToWebVideo($actionURL){

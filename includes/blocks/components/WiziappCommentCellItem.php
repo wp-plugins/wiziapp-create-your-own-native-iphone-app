@@ -151,7 +151,11 @@ class WiziappCommentCellItem extends WiziappLayoutComponent{
     * @return the actionURL of the component
     */
     function get_actionURL_attr(){
-        return WiziappLinks::postCommentSubCommentsLink($this->data[0]->comment_post_ID, $this->data[0]->comment_ID);
+        if ( $this->getSubCommentsCount($this->data[0]->comment_post_ID, $this->data[0]->comment_ID) > 0 ){
+            return WiziappLinks::postCommentSubCommentsLink($this->data[0]->comment_post_ID, $this->data[0]->comment_ID);
+        } else {
+            return '';
+        }
     }   
     
     /**

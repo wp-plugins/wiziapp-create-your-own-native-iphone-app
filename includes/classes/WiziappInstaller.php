@@ -67,6 +67,10 @@ class WiziappInstaller
             // If it failed, it's ok... move on
         }
 
+        // Remove option of the "Wiziapp QR Code Widget" on it exist case.
+		if ( get_option( $wiziapp_qrcode_widget_option = 'widget_' . WiziappConfig::getInstance()->wiziapp_qrcode_widget_id_base ) ) {
+			delete_option( $wiziapp_qrcode_widget_option );
+		}
 
         // Remove all options - must be done last
         delete_option('wiziapp_screens');
@@ -76,7 +80,7 @@ class WiziappInstaller
 
         WiziappConfig::getInstance()->uninstall();
 	}
-	
+
     /**
     * Revert the installation to remove everything the plugin added
     */
@@ -94,12 +98,12 @@ class WiziappInstaller
 				}
 				switch_to_blog($old_blog);
 				return;
-			}	
+			}
 		} else {
 			self::doUninstall();
         }
     }
-    
+
     public function deleteBlog($blog_id, $drop){
 		global $wpdb;
 		$switched = false;
@@ -108,9 +112,9 @@ class WiziappInstaller
 			switch_to_blog($blog_id);
 			$switched = true;
 		}
-		
+
 		self::doUninstall();
-		
+
 		if ( $switched ) {
 			switch_to_blog($currentBlog);
 		}

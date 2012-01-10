@@ -23,6 +23,7 @@ class WiziappPagesScreen extends WiziappBaseScreen{
             'number' => $limitForRequest,
             'offset' => $offset,
             'sort_column' => 'menu_order',
+            'parent' => 0,
         ));
 
         $section = array(
@@ -44,7 +45,7 @@ class WiziappPagesScreen extends WiziappBaseScreen{
         foreach ($pages as $p) {
             $title = str_replace('&amp;', '&', $p->post_title);
             //if ( stripos($allowedPages, $title) !== FALSE ){
-            if (true){
+            if ($p->post_parent == 0){
                 $link = array(
                     'link_name' => $title,
                     'link_url' => WiziappLinks::pageLink($p->ID),

@@ -93,6 +93,7 @@ class WiziappAdminDisplay{
         $r = new WiziappHTTPRequest();
         $response = $r->api(array(), '/generator/getToken?app_id=' . WiziappConfig::getInstance()->app_id, 'POST');
         if ( is_wp_error($response) ) {
+            WiziappLog::getInstance()->write('ERROR', 'There was an error getting the token from the admin: '.print_r($response, TRUE), 'WiziappAdminDisplay.includeGeneralDisplay');
             /**
             * @todo get the design for the failure screen
             */
@@ -105,14 +106,19 @@ class WiziappAdminDisplay{
         $tokenResponse = json_decode($response['body'], TRUE);
         if (!$tokenResponse['header']['status']) {
             // There was a problem with the token
+            WiziappLog::getInstance()->write('ERROR', 'Got the token from the admin but something is not right::'.print_r($response, TRUE), 'WiziappAdminDisplay.includeGeneralDisplay');
             echo '<div class="error">' . $tokenResponse['header']['message'] . '</div>';
         } else {
+            WiziappLog::getInstance()->write('INFO', 'Got the token going to render the display', 'WiziappAdminDisplay.includeGeneralDisplay');
             $token = $tokenResponse['token'];
             $httpProtocol = 'https';
             if ( $includeSimOverlay ){
                 ?>
                 <script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
                 <style>
+                #wpadminbar{
+                    z-index: 99;
+                }
                 .overlay_close {
                     background-image:url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/generator/close.png);
                     position:absolute; right:-17px; top:-17px;
@@ -379,6 +385,7 @@ class WiziappAdminDisplay{
                 <?php
                     $iframeSrc = $httpProtocol . '://' . WiziappConfig::getInstance()->api_server . '/cms/controlPanel/' . $display_action . '?app_id=' .
                                 WiziappConfig::getInstance()->app_id . '&t=' . $token . '&v='.WIZIAPP_P_VERSION;
+                    WiziappLog::getInstance()->write('INFO', 'The iframe src is: '.$iframeSrc, 'WiziappAdminDisplay.includeGeneralDisplay');
                 ?>
 
                 <iframe id="wiziapp_frame" src=""
@@ -482,8 +489,9 @@ class WiziappAdminDisplay{
 
     public function upgradeCheck(){
         $installer = new WiziappInstaller();
+        $page = (isset($_GET['page'])) ? $_GET['page'] : '';
 
-        if ( $installer->needUpgrade() && $_GET['page'] != 'wiziapp' ){
+        if ( $installer->needUpgrade() && $page != 'wiziapp' ){
             ?>
             <div id="wiziapp_internal_upgrade_needed_message" class="updated fade">
                 <p style="line-height: 150%">

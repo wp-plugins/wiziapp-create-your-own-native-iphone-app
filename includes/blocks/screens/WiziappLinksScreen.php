@@ -40,6 +40,7 @@ class WiziappLinksScreen extends WiziappBaseScreen{
                 ));
 
                 foreach ($links as $link) {
+                    $link->link_name = str_replace('&amp;', '&', $link->link_name);
                     $this->appendComponentByLayout($section['section']['items'], $screen_conf['items'], $link);
                 }
                 $sections[] = $section;
@@ -65,6 +66,7 @@ class WiziappLinksScreen extends WiziappBaseScreen{
         ));
 
         foreach ($links as $link) {
+            $link->link_name = str_replace('&amp;', '&', $link->link_name);
             $this->appendComponentByLayout($page, $screen_conf['items'], $link);
         }
 

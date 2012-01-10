@@ -65,13 +65,7 @@ class WiziappImagesScreen extends WiziappBaseScreen{
         $screen_conf = $this->getConfig();
         $page = array();
 
-        if ($post->post_type == 'page') {
-            // Get all of the page images as stored on our table
-            $images = WiziappDB::getInstance()->find_page_media($post_id, 'image');
-        } else {
-            // Get all of the post images as stored on our table
-            $images = WiziappDB::getInstance()->find_post_media($post_id, 'image');
-        }
+        $images = WiziappDB::getInstance()->find_content_gallery_images($post_id);
 
         /**if ( ! function_exists('wp_load_image') ) {
             require_once ABSPATH . 'wp-admin/includes/image.php';
