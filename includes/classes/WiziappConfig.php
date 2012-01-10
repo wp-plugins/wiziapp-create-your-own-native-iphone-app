@@ -52,7 +52,7 @@ class WiziappConfig implements WiziappIInstallable{
 	private $saveAsBulk = FALSE;
 
 	private $name = 'wiziapp_settings';
-	private $internalVersion =  (int)(int)(int)(int)(int)${build_number};
+	private $internalVersion = 58;
 
 	private static $_instance = null;
 
