@@ -23,12 +23,12 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
     * @var array
     */
     var $attrMap = array(
-        'L1' => array('title', 'author', 'date', 'numOfComments', 'imageURL', 'actionURL', 'contents'),
-        'L2' => array('title', 'author', 'date', 'numOfComments', 'numOfUserComments', 'imageURL', 'actionURL', 'contents'),
-        'L3' => array('title', 'author', 'date', 'numOfComments', 'categories', 'imageURL', 'actionURL', 'contents'),
-        'L4' => array('title', 'date', 'numOfComments', 'imageURL', 'actionURL', 'contents'),
+        'L1' => array('title', 'author', 'date', 'numOfComments', 'pages', 'imageURL', 'actionURL', 'contents'),
+        'L2' => array('title', 'author', 'date', 'numOfComments', 'pages', 'numOfUserComments', 'imageURL', 'actionURL', 'contents'),
+        'L3' => array('title', 'author', 'date', 'numOfComments', 'pages', 'categories', 'imageURL', 'actionURL', 'contents'),
+        'L4' => array('title', 'date', 'numOfComments', 'pages', 'imageURL', 'actionURL', 'contents'),
         //'L5' => array('title', 'author', 'description', 'date', 'rating', 'imageURL', 'actionURL', 'contents'),
-        'L5' => array('title', 'author', 'date', 'rating', 'imageURL', 'actionURL', 'contents'),
+        'L5' => array('title', 'author', 'date', 'pages', 'rating', 'imageURL', 'actionURL', 'contents'),
         'L6' => 'L1',
         'L7' => array('title', 'imageURL', 'actionURL', 'contents'),
         'L8' => array('title', 'imageURL', 'actionURL'),
@@ -123,7 +123,8 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
     * @return the id rating the component
     */
     function get_rating_attr(){
-        return round(wiziapp_get_rating($this->data[0]));
+        //return round(wiziapp_get_rating($this->data[0]));
+        return 0;
     }
     
     /**
@@ -137,13 +138,10 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
             // No need for the full processing... can be quite expensive
             //$desc = wiziapp_process_content($this->post->post_content);
             
-            /**wiziapp_removeKnownfilters();
-            $desc = apply_filters('the_content', $this->post->post_content);*/
-            
             $desc = preg_replace('/\[(.*?)\]/', '', $this->post->post_content);
         }
         
-        return wiziapp_makeShortString(trim(strip_tags($desc)), 45);
+        return WiziappHelpers::makeShortString(trim(strip_tags($desc)), 45);
     }
     
     /**
@@ -165,7 +163,7 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
     * @return the contents of the component
     */
     function get_contents_attr(){
-        $value = array('headers' => wiziapp_content_get_post_headers(FALSE), 'data'=>'');    
+        $value = array('headers' => WiziappTheme::getPostHeaders(FALSE), 'data'=>'');
         $contents = $this->data[1];          
         if ( $contents != null ){
             $value['data'] = $contents;
@@ -186,7 +184,7 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
         $size = WiziappConfig::getInstance()->getImageSize($type);
         $limitSize = WiziappConfig::getInstance()->getImageSize('limit_post_thumb');
     
-        return wiziapp_getPostThumbnail($this->post, $size, $limitSize, FALSE);     
+        return WiziappThumbnailHandler::getPostThumbnail($this->post, $size, $limitSize, FALSE);
     }
     
     /**
@@ -213,7 +211,7 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
     * @return the date of the component
     */
     function get_date_attr(){
-        $dateStr = wiziapp_formatDate(strip_tags($this->post->post_date));
+        $dateStr = WiziappTheme::formatDate(strip_tags($this->post->post_date));
         //return '| '.$dateStr;
         return $dateStr;
         
@@ -240,6 +238,10 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
         $prefix = ' ';
         return "{$prefix}{$authorName}";
     }
+
+    function get_pages_attr(){
+        return '';
+    }
     
     /**
     * Attribute getter method
@@ -256,7 +258,7 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
     * @return the tile of the component
     */
     function get_title_attr(){
-        //return wiziapp_makeShortString(strip_tags($this->post->post_title), 28);
+        //return WiziappHelpers::makeShortString(strip_tags($this->post->post_title), 28);
         return strip_tags($this->post->post_title);
     }
     
@@ -267,6 +269,6 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
     */
     function get_actionURL_attr(){
         $post_id = $this->data[0];
-        return wiziapp_buildPostLink($post_id);
+        return WiziappLinks::postLink($post_id);
     }    
 }
