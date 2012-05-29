@@ -242,8 +242,8 @@ class WiziappSettingMetabox {
 			'wiziapp_is_user_chosen'  => ( isset( $metabox_setting['is_user_chosen']  ) && intval( $metabox_setting['is_user_chosen']  ) ) ? ' checked="checked"' : '',
 			'wiziapp_is_no_thumbnail' => ( isset( $metabox_setting['is_no_thumbnail'] ) && intval( $metabox_setting['is_no_thumbnail'] ) ) ? ' checked="checked"' : '',
 		);
-
-		require WIZI_ABSPATH.DIRECTORY_SEPARATOR.'wp-content'.DIRECTORY_SEPARATOR.'plugins'.DIRECTORY_SEPARATOR.'wiziapp-create-your-own-native-iphone-app'.DIRECTORY_SEPARATOR.'themes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'setting_metabox.php';
+		$path_to_view = realpath( dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'themes'.DIRECTORY_SEPARATOR.'admin' );
+		require $path_to_view.DIRECTORY_SEPARATOR.'setting_metabox.php';
 	}
 
 	private function _uptate_metabox_setting($post_id, array $data ) {
