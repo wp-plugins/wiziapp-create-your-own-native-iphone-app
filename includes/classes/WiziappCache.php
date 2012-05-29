@@ -145,8 +145,14 @@ abstract class WiziappCache {
 			* our clients sometimes send a different accept encoding header like X-cpet-Encoding
 			* In that case the only way to catch it is to manually handle the compression and headers check.
 			*/
+            $zlib = FALSE;
+            $iniValue = ini_get('zlib.output_compression');
+            if ( !empty($iniValue) ){
+                $zlib = TRUE;
+            }
+
 			// Don't gzip the content if it was warped with ob_gzhandler like done in WordPress Gzip Compression, ticket #623
-			if ( !in_array('ob_gzhandler', ob_list_handlers()) ){
+			if ( !in_array('ob_gzhandler', ob_list_handlers()) && !$zlib ){
 				$len = strlen($output['content']);
 				header('Content-Encoding: '.$output['encoding']);
 				echo "\x1f\x8b\x08\x00\x00\x00\x00\x00";
