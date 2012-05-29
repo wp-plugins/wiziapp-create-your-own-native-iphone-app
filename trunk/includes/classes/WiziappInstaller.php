@@ -77,6 +77,7 @@ class WiziappInstaller
         delete_option('wiziapp_components');
         delete_option('wiziapp_pages');
         delete_option('wiziapp_last_processed');
+        delete_option('wiziapp_featured_post');
 
         WiziappConfig::getInstance()->uninstall();
 	}

@@ -77,7 +77,8 @@ class WiziappListsServices{
 
 		global $wpdb;
 		$query =
-		"SELECT DISTINCT posts.post_author AS author_id, users.display_name AS name FROM " . $wpdb->posts . " AS posts " .
+		"SELECT DISTINCT posts.post_author AS author_id, users.display_name AS name " .
+		"FROM " . $wpdb->posts . " AS posts " .
 		"INNER JOIN " . $wpdb->users . " AS users ON posts.post_author = users.ID " .
 		"WHERE posts.post_type = 'post' AND " .
 		get_private_posts_cap_sql('post') . " " .

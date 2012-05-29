@@ -30,7 +30,7 @@ iframe, object, embed{
     max-width: 300px;
 }
 .wp-caption-text{
-    text-align: center; 
+    text-align: center;
     margin: 0px;
 }
 .vimeo_wrapper iframe{
@@ -94,9 +94,9 @@ iframe, object, embed{
 .scrollerjogbox {
     width: 4px;
     height: 4px;
-    top: auto; 
+    top: auto;
     left: auto;
-    bottom: 0px; 
+    bottom: 0px;
     right: 0px;
     background-color: transparent;
 }
@@ -113,7 +113,7 @@ iframe, object, embed{
 .jScrollPaneTrack {
     position: absolute;
     cursor: pointer;
-    right: 13px; 
+    right: 13px;
     top: 0;
     height: 100%;
     background-color: transparent;
@@ -125,7 +125,7 @@ iframe, object, embed{
     overflow: hidden;
     -moz-border-radius:8px;
     -webkit-border-radius: 8px;
-    -khtml-border-radius: 8px;      
+    -khtml-border-radius: 8px;
     border-radius: 8px;
 }
 .jScrollPaneDragTop {
@@ -358,7 +358,7 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     padding-bottom:10px;
     overflow: auto;
     position:relative;
-    
+
 /*    height: auto;*/
 
 }

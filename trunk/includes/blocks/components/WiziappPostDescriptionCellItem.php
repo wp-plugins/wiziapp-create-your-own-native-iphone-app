@@ -181,10 +181,8 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
         if ( isset($this->imageSizes[$this->layout]) ){
             $type = $this->imageSizes[$this->layout];
         }
-        $size = WiziappConfig::getInstance()->getImageSize($type);
-        $limitSize = WiziappConfig::getInstance()->getImageSize('limit_post_thumb');
     
-        return WiziappThumbnailHandler::getPostThumbnail($this->post, $size, $limitSize, FALSE);
+        return WiziappThumbnailHandler::getPostThumbnail($this->post, $type);
     }
     
     /**

@@ -287,7 +287,7 @@ class WiziappUpgradeDisplay{
 
 								if (typeof(data.post) == 'undefined'){
 									itemsStr = itemsStr.replace(data.page, '');
-									neededAction = 'wiziapp_batch_pages_processing';
+									neededAction = 'wiziapp_batch_process_pages';
 									type = 'pages';
 									failed = data.page;
 								} else {

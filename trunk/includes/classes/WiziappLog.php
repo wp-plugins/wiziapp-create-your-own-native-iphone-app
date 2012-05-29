@@ -80,7 +80,9 @@ final class WiziappLog {
 			$this->enabled = FALSE;
 		}
 
-		$this->threshold = intval(WiziappConfig::getInstance()->wiziapp_log_threshold);
+		if (isset(WiziappConfig::getInstance()->wiziapp_log_threshold)) {
+			$this->threshold = intval(WiziappConfig::getInstance()->wiziapp_log_threshold);
+		}
 	}
 
 	public function checkPath(){
@@ -205,7 +207,8 @@ final class WiziappLog {
 		if (!file_exists($filepath)){
 			$message .= "<?php if (!defined('WP_WIZIAPP_BASE')) exit(); ?" . ">\n\n";
 			$message .= print_r($this->writeServerConfiguration(), TRUE);
-			$message .= '==================================================================\n\n\n\n\n';
+			$message .= '==================================================================';
+			$message .= PHP_EOL . PHP_EOL;
 		}
 
 		// If we can't open the file for appending there isn't much we can do

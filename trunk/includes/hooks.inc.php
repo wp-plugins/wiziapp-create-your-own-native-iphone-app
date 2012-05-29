@@ -15,7 +15,14 @@ function wiziapp_attach_hooks(){
 	$ce = new WiziappContentEvents();
 
 	//add_action('admin_menu', 'wiziapp_setup_menu');
-	add_action('admin_menu', array('WiziappAdminDisplay', 'setup'));
+	add_action( 'admin_menu', array( 'WiziappAdminDisplay', 'setup' ) );
+
+	$setting_metabox = new WiziappSettingMetabox;
+	if ( is_admin() ) {
+		add_action( 'admin_init', array( $setting_metabox, 'admin_init' ) );
+	} else {
+		add_action( 'init', array( $setting_metabox, 'site_init' ) );
+	}
 
 	/* Add a custom column to the users table to indicate that the user
 	* logged in from his mobile device via our app
@@ -26,19 +33,23 @@ function wiziapp_attach_hooks(){
 
 	add_filter('cron_schedules', array('wiziappCronSchedules','addSchedules'));
 
-	add_action('new_to_publish', array(&$ce, 'savePost'));
+	add_action('new_to_publish', 	 array(&$ce, 'savePost'));
 	add_action('pending_to_publish', array(&$ce, 'savePost'));
-	add_action('draft_to_publish', array(&$ce, 'savePost'));
+	add_action('draft_to_publish', 	 array(&$ce, 'savePost'));
 	add_action('private_to_publish', array(&$ce, 'savePost'));
-	add_action('future_to_publish', array(&$ce, 'savePost'));
+	add_action('future_to_publish',  array(&$ce, 'savePost'));
 	add_action('publish_to_publish', array(&$ce, 'savePost'));
 
 	if ( !empty(WiziappConfig::getInstance()->settings_done) ){
-		add_action('new_to_publish', array('WiziappPush','publishPost'));
-		add_action('pending_to_publish', array('WiziappPush','publishPost'));
-		add_action('draft_to_publish', array('WiziappPush','publishPost'));
-		add_action('private_to_publish', array('WiziappPush','publishPost'));
-		add_action('future_to_publish', array('WiziappPush','publishPost'));
+		/*
+		add_action('new_to_publish', 	 array('WiziappPush', 'publishPost'));
+		add_action('pending_to_publish', array('WiziappPush', 'publishPost'));
+		add_action('draft_to_publish',   array('WiziappPush', 'publishPost'));
+		add_action('private_to_publish', array('WiziappPush', 'publishPost'));
+		add_action('future_to_publish',  array('WiziappPush', 'publishPost'));
+		*/
+
+		add_action( 'edit_post', array( 'WiziappPush', 'create_push_notification' ), 10, 2 );
 	}
 
 	add_action('deleted_post', array(&$ce, 'deletePost'));
@@ -89,19 +100,23 @@ function wiziapp_attach_hooks(){
 	 * Admin ajax hooks
 	 */
 	// Post install
-	add_action('wp_ajax_wiziapp_batch_posts_processing', array('WiziappPostInstallDisplay', 'batchPostsProcessing'));
-	add_action('wp_ajax_wiziapp_batch_process_pages', array('WiziappPostInstallDisplay', 'batchProcessPages'));
+	add_action('wp_ajax_wiziapp_batch_posts_processing',  array('WiziappPostInstallDisplay', 'batchPostsProcessing'));
+	add_action('wp_ajax_wiziapp_batch_process_pages', 	  array('WiziappPostInstallDisplay', 'batchProcessPages'));
 	add_action('wp_ajax_wiziapp_batch_processing_finish', array('WiziappPostInstallDisplay', 'batchProcessingFinish'));
-	add_action('wp_ajax_wiziapp_report_issue', array('WiziappPostInstallDisplay', 'reportIssue'));
+	add_action('wp_ajax_wiziapp_report_issue', 			  array('WiziappPostInstallDisplay', 'reportIssue'));
 
 	// Upgrade
-	add_action('wp_ajax_wiziapp_upgrade_database', array('WiziappUpgradeDisplay', 'upgradeDatabase'));
+	add_action('wp_ajax_wiziapp_upgrade_database', 		array('WiziappUpgradeDisplay', 'upgradeDatabase'));
 	add_action('wp_ajax_wiziapp_upgrade_configuration', array('WiziappUpgradeDisplay', 'upgradeConfiguration'));
-	add_action('wp_ajax_wiziapp_upgrading_finish', array('WiziappUpgradeDisplay', 'upgradingFinish'));
+	add_action('wp_ajax_wiziapp_upgrading_finish', 		array('WiziappUpgradeDisplay', 'upgradingFinish'));
 
 	// admin
-	add_action('wp_ajax_wiziapp_hide_verify_msg', array('WiziappAdminDisplay', 'hideVerifyMsg'));
-	add_action('wp_ajax_wiziapp_hide_upgrade_msg', array('WiziappAdminDisplay', 'hideUpgradeMsg'));
+	add_action('wp_ajax_wiziapp_hide_verify_msg', 		   array('WiziappAdminDisplay', 'hideVerifyMsg'));
+	add_action('wp_ajax_wiziapp_hide_upgrade_msg',		   array('WiziappAdminDisplay', 'hideUpgradeMsg'));
+	add_action('wp_ajax_wiziapp_hide_display_message_msg', array('WiziappAdminDisplay', 'hideDisplayMessageMsg'));
+
+	add_action('wp_ajax_wiziapp_push_message',  array( $setting_metabox, 'save_push_message' ) );
+	add_action('wp_ajax_wiziapp_use_thumbnail', array( $setting_metabox, 'use_post_thumbnail' ) );
 
 	// Wizard
 	add_action('wp_ajax_wiziapp_register_license', array('WiziappLicenseUpdater', 'register'));

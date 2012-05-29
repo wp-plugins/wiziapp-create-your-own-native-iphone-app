@@ -628,7 +628,7 @@ class WiziappPostInstallDisplay{
 
 								if (typeof(data.post) == 'undefined'){
 									itemsStr = itemsStr.replace(data.page, '');
-									neededAction = 'wiziapp_batch_pages_processing';
+									neededAction = 'wiziapp_batch_process_pages';
 									type = 'pages';
 									failed = data.page;
 								} else {
@@ -823,7 +823,7 @@ class WiziappPostInstallDisplay{
 					*/
 					if (noErrorPages.length > 0){
 						var params2 = {
-							action: 'wiziapp_batch_pages_processing',
+							action: 'wiziapp_batch_process_pages',
 							pages: noErrorPages.join(','),
 							failed_page: data.page
 						};

@@ -79,12 +79,12 @@ class WiziappContentEvents{
 		// Remove the theme settings for now,
 		$contentWidth = isset($GLOBALS['content_width']) ? $GLOBALS['content_width'] : null;
 		$GLOBALS['content_width'] = 0;
+
 		// We might need to remove some filters to be able to parse the content, if that is the case:
 		$content = apply_filters('wiziapp_before_the_content', $content);
 		$content = apply_filters('the_content', $content);
 
 		$filteredContent = ob_get_contents();
-
 		ob_end_clean();
 
 		$content = $filteredContent . $content;
@@ -271,4 +271,5 @@ class WiziappContentEvents{
 	public static function getCacheTimestampKey(){
 		return WiziappConfig::getInstance()->last_recorded_save;
 	}
+
 }

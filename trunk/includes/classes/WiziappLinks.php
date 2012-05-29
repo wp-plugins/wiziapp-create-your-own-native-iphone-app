@@ -10,9 +10,9 @@ class WiziappLinks{
         return 'nav://list/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/author/{$author_id}/posts");
     }
 
-    public static function postLink($post_id){
+    public static function postLink($post_id, $styling_page_links = ''){
         //return get_bloginfo('url')."/wiziapp/content/post/{$post_id}";
-        $link = urlencode(get_permalink($post_id));
+        $link = urlencode(get_permalink($post_id) . $styling_page_links);
         $url = '';
         if ( !empty($link) ){
             $url = "nav://post/{$link}";
@@ -49,7 +49,7 @@ class WiziappLinks{
     }
 
     public static function postCommentsLink($post_id){
-        //return 'nav://list/'.urlencode(get_bloginfo('url')."/wiziapp/content/list/post/{$post_id}/comments");
+        //return 'nav://list/'.urlencode(get_bloginfo('url')."/?wiziapp/content/list/post/{$post_id}/comments");
         return 'nav://comments/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/post/{$post_id}/comments");
     }
 
