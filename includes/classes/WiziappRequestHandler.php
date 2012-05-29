@@ -11,8 +11,10 @@
 */
 class WiziappRequestHandler {
 	private $errorReportingLevel = 0;
-
-	function __construct() {
+	/**
+	* Simple PHP4 style constructor to add the required actions
+	*/
+	function WiziappRequestHandler() {
 		add_action('parse_request', array(&$this, 'handleRequest'));
 		add_action('init', array(&$this, 'logInitRequest'), 1);
 	}
@@ -25,7 +27,6 @@ class WiziappRequestHandler {
 				// Avoid site restrictions by restricted site access plugin, this plugin will prevent our hooks from running
 				remove_action('parse_request', array($restricted_site_access, 'restrict_access'), 1);
 			}
-            remove_action('wp_head', array('anchor_utils', 'ob_start'), 10000);
 		}
 	}
 
@@ -114,8 +115,7 @@ class WiziappRequestHandler {
 			} elseif ($action == 'track') {
 				$parameter_key = (isset($req[3])) ? $req[3] : '';
 				$parameter_value = (isset($req[4])) ? $req[4] : '';
-				$cms_user_account_handler = new WiziappCmsUserAccountHandler;
-				$cms_user_account_handler->pushSubscription($parameter_key, $parameter_value);
+				WiziappCmsUserAccountHandler::pushSubscription($parameter_key, $parameter_value);
 			/*
 			} elseif ($action == 'register') {
 				$this->runScreenBy('System', 'Register', null);
@@ -202,7 +202,7 @@ class WiziappRequestHandler {
 			WiziappImageServices::getByRequest();
 			exit();
 		} elseif ($service == "getthumb") {
-			$wth = new WiziappThumbnailHandler($req[2]);
+			$wth = new WiziappThumbnailHandler($req[2], array('width'=>$_GET['width'], 'height'=>$_GET['height']), array('width'=>$_GET['limitWidth'], 'height'=>$_GET['limitHeight']));
 			$wth->doPostThumbnail();
 			exit();
 		} elseif($service == 'post') {
@@ -234,8 +234,6 @@ class WiziappRequestHandler {
 				$this->runService('System', 'listLogs');
 			} else if ( $action == 'getLog' ){
 				$this->runService('System', 'getLogFile', $req[3]);
-			} else if ( $action == 'msgUser' ){
-				$this->runService('System', 'displayUsersAdminMessage');
 			}
 		}
 	}

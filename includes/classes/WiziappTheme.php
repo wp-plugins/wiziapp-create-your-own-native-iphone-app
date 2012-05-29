@@ -62,7 +62,9 @@ class WiziappTheme{
 
 		$totalComments = $post->comment_count;
 		$postDate = WiziappTheme::formatDate(strip_tags($post->post_date));
-		$imageURL = WiziappThumbnailHandler::getPostThumbnail($post, 'posts_thumb');
+		$limitSize = WiziappConfig::getInstance()->getImageSize('limit_post_thumb');
+		$size = WiziappConfig::getInstance()->getImageSize('posts_thumb');
+		$imageURL = WiziappThumbnailHandler::getPostThumbnail($post, $size, $limitSize, FALSE);
 
 		$c = new WiziappPostDescriptionCellItem('L1', array(), FALSE);
 		$default_class = $c->getDefaultClass();

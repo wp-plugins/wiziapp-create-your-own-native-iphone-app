@@ -97,8 +97,8 @@ class WiziappGeneratorDisplay{
                 }
                 #enter_license_modal .error{
                     margin-left: 20px;
-                    padding-left: 20px;
                     background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/validetion_error_Icon.png) no-repeat left center;
+                    text-indent: 20px;
                     color: #ff6161;
                     clear: both;
                 }
@@ -125,7 +125,7 @@ class WiziappGeneratorDisplay{
                 }
 
                 #enter_license_modal .wizi_button{
-                    background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/CancelBTN.png) no-repeat top left !important;
+                    background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/CancelBTN.png) no-repeat top left;
                     height: 33px;
                     width: 86px;
                     text-align: center;
@@ -211,7 +211,7 @@ class WiziappGeneratorDisplay{
                                     jQuery(this).addClass('s_container');
                                 });
 
-                                jQuery('#submit_license').bind('click', registerLicense);
+                                <?php // jQuery('#submit_license').bind('click', registerLicense); ?>
                             });
 
                             function wiziappReceiveMessage(event){
@@ -409,6 +409,7 @@ class WiziappGeneratorDisplay{
                                 return false;
                             };
 
+                            <?php /**
                             function registerLicense(event){
                                 //
                                 if ( jQuery(this).is('.pending') ){
@@ -435,11 +436,11 @@ class WiziappGeneratorDisplay{
                                         top.document.location.reload(true);
                                     } else {
                                         // Error,
-                                        jQuery('#enter_license_modal .error').text(data.header.message).show();
+                                        jQuery('#enter_license_modal .error').text('Invalid license key').show();
                                     }
                                     jQuery('#submit_license').removeClass('pending');
                                 }, 'json');
-                            };
+                            };*/ ?>
 
                             function reportIssue(event){
                                 // Change the current box style so it will enable containing the report form

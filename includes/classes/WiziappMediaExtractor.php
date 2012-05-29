@@ -200,18 +200,13 @@ class WiziappMediaExtractor{
 
 	function _handleYouTubeVideo($src){
 		$obj = array();
-		$is_youtube_playlist = FALSE;
 
 		// Cut the parameters
 		if (strpos($src, '&') !== FALSE){
-			if ( strpos($src, '/embed') !== FALSE && strpos($src, '/embed/videoseries') === FALSE ) {			
+			if ( strpos($src, '/embed') !== FALSE ){
 				$startPos = strpos($src, '/embed')+strlen('/embed')+1;
 				$endPos = strpos($src, '?') - $startPos;
 				$youTubeId = substr($src, $startPos, $endPos);
-			} elseif ( strpos($src, '/embed/videoseries') !== FALSE ) {
-				$is_youtube_playlist = TRUE;
-				parse_str( parse_url( $src, PHP_URL_QUERY ) );
-				$youTubeId = str_ireplace('PL', '', $list);
 			} else {
 				$tmp = substr($src, 0, strpos($src, '&'));
 				$youTubeId = str_replace('http://www.youtube.com/v/', '', $tmp);
@@ -236,27 +231,24 @@ class WiziappMediaExtractor{
 		/**
 		* Get the information about the video from the formal API
 		*/
-		if ($is_youtube_playlist) {
-			$apiUrl = "http://gdata.youtube.com/feeds/api/playlists/";
+		$apiUrl = "http://gdata.youtube.com/feeds/api/videos/";
+		if (strpos($youTubeId, '?') === FALSE){
 			$apiUrl .= $youTubeId . "?alt=json";
 		} else {
-			$apiUrl = "http://gdata.youtube.com/feeds/api/videos/";
-			if (strpos($youTubeId, '?') === FALSE){
-				$apiUrl .= $youTubeId . "?alt=json";
-			} else {
-				$apiUrl .= $youTubeId . "&alt=json";
-			}
+			$apiUrl .= $youTubeId . "&alt=json";
 		}
 
 		$r = new WiziappHTTPRequest();
 		$response = $r->external(array(), $apiUrl, 'GET', array());
-		if ( ! is_wp_error($response) ) {
+		if (!is_wp_error($response)) {
 			$json = $response['body'];
 			$youTubeResponse = json_decode($json, TRUE);
-			if ( is_array($youTubeResponse) && isset($youTubeResponse['entry']) ) {
+			if (is_array($youTubeResponse)){
 				$movie = $youTubeResponse['entry'];
-				// $thumbsCount = count($movie['media$group']['media$thumbnail']);
-				// $bigThumbElement = $movie['media$group']['media$thumbnail'][$thumbsCount - 1];
+//                WiziappLog::getInstance()->write('INFO', ">>> Got YouTube response: " . print_r($youTubeResponse, TRUE), "_handleYouTubeVideo");
+
+				//$thumbsCount = count($movie['media$group']['media$thumbnail']);
+//                $bigThumbElement = $movie['media$group']['media$thumbnail'][$thumbsCount - 1];
 				$bigThumbElement = $movie['media$group']['media$thumbnail'][0];
 
 				$youTubeShortId = $youTubeId;
@@ -277,19 +269,13 @@ class WiziappMediaExtractor{
 						'description' => str_replace('&amp;', '&', $movie['content']['$t']),
 						'duration' => $movie['media$group']['yt$duration']['seconds'],
 						'actionURL' => WiziappLinks::videoLink('youtube', $youTubeShortId,
-							'http://www.youtube.com/watch?v=' . $youTubeShortId . '&fmt=18'),
+													'http://www.youtube.com/watch?v=' . $youTubeShortId . '&fmt=18'),
 					);
 				}
-			} else {
-				return NULL;
 			}
-		} else {
-			return NULL;
 		}
-
 		return $obj;
 	}
-
 	/**
 	* @todo Convert this to a plugin friendly hook.... should use filters
 	*

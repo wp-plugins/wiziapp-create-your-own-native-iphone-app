@@ -42,10 +42,4 @@ return array(
 
         ),
     ),
-       
-    '1.3.0' => array(
-        'classes' => array(
-
-        ),
-    ),
 );

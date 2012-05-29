@@ -1,51 +1,41 @@
 <?php
 
-class WiziappLicenseUpdater {
+class WiziappLicenseUpdater{
+	public function register(){
+		$success = FALSE;
+		$licenseKey = $_POST['key'];
 
-	public function register() {
-		$message = 'Invalid license key';
-
-		try {
-			if ( empty( $_POST['key'] ) ) {
-				throw new Exception('Key is not sent');
-			}
-
+		if ( !empty($licenseKey) ){
 			// We have a license, try to inform the admin
 			$r = new WiziappHTTPRequest();
-			$params = array( 'key' => $_POST['key'], );
+			$params = array(
+				'key' => $licenseKey,
+			);
 			$response = $r->api($params, '/cms/license?app_id=' . WiziappConfig::getInstance()->app_id, 'POST');
-
 			if ( is_wp_error($response) ) {
-				throw new Exception('There was a problem trying to register the license: '.print_r($response, TRUE));
+				WiziappLog::getInstance()->write('ERROR', 'There was a problem trying to register the license: '.print_r($response, TRUE), 'WiziappLicenseUpdater.register');
+			} else {
+				$result = json_decode($response['body'], TRUE);
+				if ( $result ){
+					if ( $result['header']['status'] ){
+						$success = TRUE;
+					} else {
+						WiziappLog::getInstance()->write('ERROR', 'The admin returned an error: '.print_r($response, TRUE), 'WiziappLicenseUpdater.register');
+					}
+				} else {
+					WiziappLog::getInstance()->write('ERROR', 'There was an error parsing the results: '.print_r($response, TRUE), 'WiziappLicenseUpdater.register');
+				}
 			}
-
-			$result = json_decode($response['body'], TRUE);
-
-			if ( ! ( $result && isset( $result['header']['status'] ) && isset( $result['header']['message'] ) ) ) {
-				throw new Exception('There was a problem trying to register the license: '.print_r($response, TRUE));
-			}
-
-			if ( ! $result['header']['status'] ) {
-				preg_match('@^xxxxx([a-z\s\.\,]+)xxxxx@i', $result['header']['message'], $matches);
-				$message = ( isset( $matches[1] ) ) ? $matches[1] : $message;
-
-				throw new Exception($result['header']['message']);
-			}
-
-			$success = TRUE;
-		} catch (Exception $e) {
-			WiziappLog::getInstance()->write('ERROR', $e->getMessage(), 'WiziappLicenseUpdater.register');
-			$success = FALSE;
 		}
 
 		$header = array(
 			'action' => 'registerLicense',
 			'status' => $success,
 			'code' => $success ? 200 : 500,
-			'message' => $message,
+			'message' => '',
 		);
 
-		echo json_encode( array( 'header' => $header ) );
+		echo json_encode(array('header' => $header));
 		exit;
 	}
 }
