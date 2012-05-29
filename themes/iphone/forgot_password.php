@@ -44,7 +44,7 @@
                 <p class="message register"><?php echo $_SESSION['wiziapp_message'];unset($_SESSION['wiziapp_message']); ?></p>
                 <p class="message"><?php echo __('Please enter your username or e-mail address. You will receive a new password via e-mail.', 'wiziapp'); ?></p>
                 <div id="registration">
-                <form name="lostpasswordform" id="lostpasswordform" action="<?php bloginfo('url');?>/wiziapp/user/forgot_pass" method="post">
+                <form name="lostpasswordform" id="lostpasswordform" action="<?php bloginfo('url');?>/?wiziapp/user/forgot_pass" method="post">
                     <div class="border">
                         <label for="user_login_fgt"><?php echo __('Username or E-mail:', 'wiziapp'); ?></label>
                         <input type="email" name="user_login" id="user_login_fgt" class="input" value="" size="20" tabindex="10" />

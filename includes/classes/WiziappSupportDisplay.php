@@ -262,6 +262,9 @@ class WiziappSupportDisplay{
 					<li class="wiziapp_header_link">
 						<a rel="wiziapp_my_account_display" href="/cms/controlPanel/myAccount">My Account</a>
 					</li>
+					<li class="wiziapp_header_link">
+						<a rel="wiziapp_settings_display" href="/cms/controlPanel/settings">Settings</a>
+					</li>
 					<?php } ?>
 					<li class="wiziapp_header_link active <?php echo ($showAllTabs) ? '' : 'single'; ?>">
 						<a rel="wiziapp_support_display" href="/cms/controlPanel/support">Support</a>

@@ -34,6 +34,13 @@ class WiziappSystemServices{
 		exit;
 	}
 
+	public function displayUsersAdminMessage() {
+		$this->checkSystemAuth();
+
+		WiziappConfig::getInstance()->wiziapp_admin_messages_subject = $_POST['subject'];
+		WiziappConfig::getInstance()->wiziapp_admin_messages_message = $_POST['message'];
+	}
+
 	public function updateThumbsConfiguration(){
 		$this->checkSystemAuth();
 
@@ -46,7 +53,7 @@ class WiziappSystemServices{
 
 		if ( !$thumbs ){
 			$status = FALSE;
-			$message = 'Unable to decode thumbs configuraiton: '.$thumbsJson;
+			$message = 'Unable to decode thumbs configuration: '.$thumbsJson;
 		} else {
 			WiziappConfig::getInstance()->startBulkUpdate();
 			// The request must be with the exact keys
@@ -110,11 +117,17 @@ class WiziappSystemServices{
 	 */
 	public function updateConfiguration(){
 		$this->checkSystemAuth();
-
 		$status = FALSE;
-
 		$key = $_POST['key'];
-		$value = $_POST['value'];
+
+		if ( in_array($key, WiziappConfig::getInstance()->integer_values) ) {
+			$value = intval($_POST['value']);
+		} elseif ( $key === 'push_message' ) {
+			preg_match('/^[A-Z\d\!\.\,\s]{10,105}/i', $_POST['value'], $matches);
+			$value = $matches[0];
+		} else {
+			$value = $_POST['value'];
+		}
 
 		if ( isset(WiziappConfig::getInstance()->$key) ){
 			$status = WiziappConfig::getInstance()->saveUpdate($key, $value);

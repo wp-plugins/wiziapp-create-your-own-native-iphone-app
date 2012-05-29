@@ -34,10 +34,10 @@ class WiziappLinksScreen extends WiziappBaseScreen{
                         'items' => array(),
                     )
                 );
-                $links = get_bookmarks(array(
-                    'limit' => $cat->count,
-                    'category' => $cat->term_id,
-                ));
+				$links = get_bookmarks(apply_filters('widget_links_args', array(
+							'limit' => $cat->count,
+							'category' => $cat->term_id,
+						)));
 
                 foreach ($links as $link) {
                     $link->link_name = str_replace('&amp;', '&', $link->link_name);

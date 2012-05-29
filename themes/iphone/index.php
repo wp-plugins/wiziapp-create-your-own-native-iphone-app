@@ -103,5 +103,5 @@ if (have_posts()) :
 	$GLOBALS['WiziappEtagOverride'] .= date("F d Y H:i:s.", filemtime(dirname(__FILE__).'/_content.php'));
 	$GLOBALS['WiziappEtagOverride'] .= date("F d Y H:i:s.", filemtime(dirname(__FILE__).'/index.php'));
 else :
-	WiziappLog::getInstance()->write('ERROR', "No posts???", "themes.default.index");
+	WiziappLog::getInstance()->write('ERROR', "No posts???", "themes.iphone.index");
 endif;

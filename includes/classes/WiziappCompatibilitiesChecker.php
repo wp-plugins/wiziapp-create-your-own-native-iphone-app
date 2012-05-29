@@ -265,8 +265,6 @@ class WiziappCompatibilitiesChecker{
 	 */
 	public function testConnection(){
 		$this->testedConnection = TRUE;
-		// Get the blog address
-		$blogUrl = get_bloginfo('url');
 
 		/**
 		 * Send a request to the admin to check access to this address
@@ -277,38 +275,48 @@ class WiziappCompatibilitiesChecker{
 		 * 413 Request Entity Too Large as a result...
 		 */
 		$r = new WiziappHTTPRequest();
-		$response = $r->api(array('param'=>1), '/cms/checkUrl?url=' . urlencode($blogUrl), 'POST');
+		$response = $r->api(array('url' => urlencode(home_url()),), '/cms/checkUrl', 'POST');
+
 		if ( is_wp_error($response) ) {
 			// If we couldn't connect to the host, outbound connections might be blocked
 			if ( "couldn't connect to host" == $response->get_error_message() ){
 				$this->critical = TRUE;
 				$this->hadConnectionError = TRUE;
-				return new WiziappError('testing_connection_failed', __('It seems that your server is blocked from issuing outgoing requests to our server. Please make sure your firewall and any other security measures enable outgoing connections.', 'wiziapp'));
-			} else {
-				return new WiziappError($response->get_error_code(), $response->get_error_message());
-			}
-		} else {
-			// The request worked, but was our server able to contact our url?
-			$checkResult = json_decode($response['body']);
-			if ( empty($checkResult) ){
-				if ( isset($response['response']) && isset($response['response']['code'])
-					 && $response['response']['code'] === FALSE ){
-					$this->critical = TRUE;
-					$this->hadConnectionError = TRUE;
-					return new WiziappError('testing_connection_failed', __('Your host does not allow any kind of outgoing requests. WiziApp requires either HTTP Extension, cURL, Streams, or Fsockopen to be installed and enabled. Please contact your hosting provider to address this issue.', 'wiziapp'));
-				} else {
-					// The response wasn't in a json format
-					return new WiziappError('testing_connection_failed', 'The WiziApp plugin has encountered a problem. Please contact us at support@wiziapp.com to see how we can help you resolve this issue');
-				}
-			} else {
-				// The response is ok, let's check when our server is saying
-				if ( !$checkResult->header->status ){
-					return new WiziappError('testing_connection_failed', $checkResult->header->message);
-				}
-			}
+				
+				return new WiziappError(
+				'testing_connection_failed', 
+				__('It seems that your server is blocked from issuing outgoing requests to our server. Please make sure your firewall and any other security measures enable outgoing connections.', 'wiziapp')
+				);
+			} 
+
+			return new WiziappError($response->get_error_code(), $response->get_error_message());
+		} 
+		
+		// The request worked, but was our server able to contact our url?
+		$checkResult = json_decode($response['body']);
+		
+		if ( empty($checkResult) ) {
+			if ( isset($response['response']) && isset($response['response']['code']) && $response['response']['code'] === FALSE ) {
+				$this->critical = TRUE;
+				$this->hadConnectionError = TRUE;
+
+				return new WiziappError(
+					'testing_connection_failed', 
+					__('Your host does not allow any kind of outgoing requests. WiziApp requires either HTTP Extension, cURL, Streams, or Fsockopen to be installed and enabled. Please contact your hosting provider to address this issue.', 'wiziapp')
+				);
+			} 
+
+			// The response wasn't in a json format
+			return new WiziappError('testing_connection_failed', 'The WiziApp plugin has encountered a problem. Please contact us at support@wiziapp.com to see how we can help you resolve this issue');
+		} 
+		
+		// The response is ok, let's check when our server is saying
+		if ( ! $checkResult->header->status ){
+			return new WiziappError('testing_connection_failed', $checkResult->header->message);
 		}
 
 		// If we made it this far, all is good
 		return TRUE;
 	}
+
 }

@@ -29,7 +29,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		/**
 		* Handle paging
 		*/
-		$page = isset($_GET['wizipage'])?$_GET['wizipage']:0;
+		$page = isset($_GET['wizipage']) ? $_GET['wizipage'] : 0;
 
 		$query = array(
 			'orderby' => 'post_date',
@@ -57,13 +57,15 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		}
 
 		/**
-		*  Only show the first section on the first request (main page)
+		* Only show the first section on the first request (main page)
 		* the rest of the requests needs to update the recent section
 		*/
-		if (empty($page) || $page == 0){
+		if ( empty($page) || $page == 0 ) {
+			$wiziapp_featured_post = WiziappSettingMetabox::get_wiziapp_featured_post();
+
 			$firstQuery = array(
 				'posts_per_page'      => 1,
-				'post__in'            => get_option('sticky_posts'),
+				'post__in'            => ( $wiziapp_featured_post !== '' ) ? array($wiziapp_featured_post) : get_option('sticky_posts'),
 				'ignore_sticky_posts' => 1,
 				'orderby'             => 'post_date'
 			);
@@ -81,7 +83,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
             $stickPosts = get_option('sticky_posts');
             $stickPostsCount = count($stickPosts);
             if ( $stickPostsCount > 1 ){
-                $postsIncludedAnyway = $stickPostsCount - 1;
+                $postsIncludedAnyway = $stickPostsCount - 1 + intval( $wiziapp_featured_post !== '' );
                 $query['posts_per_page'] = $query['posts_per_page'] - $postsIncludedAnyway;
             }
             /**if ( $stickPostsCount > 1 ){

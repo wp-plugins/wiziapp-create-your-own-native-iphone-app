@@ -21,11 +21,11 @@
 								'sort_column' => 'menu_order',
                                 'exclude_tree' => 1,
 							));
-                            
-							if ($subPages) {
-								// @todo change the pages to not be related to the post description cell item since it doesn't make sense
-								?>
-								<div class="postDescriptionCellItem_pages">
+
+                            if ($subPages) {
+                                // @todo change the pages to not be related to the post description cell item since it doesn't make sense
+                                ?>
+                                <div class="postDescriptionCellItem_pages">
 									<ul class="wiziapp_bottom_nav wiziapp_pages_nav albums_list">
 										<?php foreach ($subPages as $subPage) { ?>
                                             <?php if ($subPage->post_parent == $post->ID) { ?>
@@ -67,22 +67,18 @@
 						<div id="singlentry">
 							<?php
 								WiziappProfiler::getInstance()->write('Before the thumb inside the post ' . $post->ID, 'theme._content');
-							?>
-							<?php
+
 								@set_time_limit(60);
-								$size = WiziappConfig::getInstance()->getImageSize('posts_thumb');
-								$limitSize = WiziappConfig::getInstance()->getImageSize('limit_post_thumb');
-								WiziappThumbnailHandler::getPostThumbnail($post, $size, $limitSize);
-								//wiziapp_getPostThumbnail($post, array('width'=>100, height=>100), $limitSize);
-							?>
-							<?php
+								WiziappThumbnailHandler::getPostThumbnail($post, 'posts_thumb');
+
 								WiziappProfiler::getInstance()->write('after the thumb inside the post ' . $post->ID, 'theme._content');
-							?>
-							<?php
 								WiziappProfiler::getInstance()->write('Before the content inside the post ' . $post->ID, 'theme._content');
-							?>
-							<?php global $more; $more = -1; the_content(''); ?>
-							<?php
+
+								global $more;
+								$more = -1;
+
+								the_content('');
+
 								WiziappProfiler::getInstance()->write('After the content inside the post ' . $post->ID, 'theme._content');
 							?>
 						</div>

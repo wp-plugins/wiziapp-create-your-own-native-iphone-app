@@ -43,7 +43,7 @@
             <div class="post">
                 <p class="message register"><?php echo $_SESSION['wiziapp_message'];unset($_SESSION['wiziapp_message']); ?></p>
                 <div id="registration">
-                <form name="registerform" id="registerform" action="<?php bloginfo('url');?>/wiziapp/user/register" method="post">
+                <form name="registerform" id="registerform" action="<?php bloginfo('url');?>/?wiziapp/user/register" method="post">
                     <div class="border">
                         <label for="user_login">User Name:</label>
                         <input type="text" name="user_login" id="user_login" class="input" value="" size="20" tabindex="10" />
