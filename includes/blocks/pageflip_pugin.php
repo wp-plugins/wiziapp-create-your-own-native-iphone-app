@@ -7,7 +7,7 @@
 */
 
 // Enable the page flip albums in the albums screen
-add_filter('wiziapp_albums_request', 'wiziapp_get_pageflip_albums', 10);
+// add_filter('wiziapp_albums_request', 'wiziapp_get_pageflip_albums', 10);
 /**
  * get albums from pageflip
  * @param array $existing_albums - albums
@@ -65,7 +65,7 @@ function wiziapp_get_pageflip_albums($existing_albums){
 }
 
 
-add_filter('wiziapp_get_pageflip_album', 'wiziapp_get_pageflip_album', 10, 2);
+// add_filter('wiziapp_get_pageflip_album', 'wiziapp_get_pageflip_album', 10, 2);
 /**
  * get all images in album (plugin pageflip)
  * @param array $images - images
@@ -113,7 +113,7 @@ function wiziapp_get_pageflip_album($images_external = array(), $albumId = 0, $p
 	return $images_external;
 }
 
-add_filter('wiziapp_before_the_content', 'wpimage_pageflip_filter', 1);
+// add_filter('wiziapp_before_the_content', 'wpimage_pageflip_filter', 1);
 /**
  * find all images on page from pageflip and replace it by <a><img></a>
  * @param string $content - content of post
