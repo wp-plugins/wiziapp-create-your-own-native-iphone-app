@@ -15,6 +15,7 @@ Turn your blog into a native iPhone app and be available on the App Store in jus
 WiziApp is a plugin that turns your WordPress powered site into a native iPhone App. Imagine, your personal site, can now be searched, found and downloaded through the App Store by avid fans worldwide!
 [Take the tour](http://www.wiziapp.com/tour) for more information.
 
+[vimeo http://vimeo.com/20107122]
 
 = Customize and simulate your App =
 
