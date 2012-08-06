@@ -56,6 +56,17 @@ class WiziappRequestHandler {
 
 			$request = str_replace('?', '&', $request);
 
+			//check udid
+			$udid = isset( $_SERVER['HTTP_UDID'] ) ? $_SERVER['HTTP_UDID'] : '';
+			$wus =  new WiziappUserServices();
+			if (!$wus->checkUdid($udid)){
+				// if doesn't exist - add it
+				$wus->newUdidUser($udid);
+			}
+
+			//TODO -
+			// 4. store push settings... where is it done?
+
 			$this->_routeRequest($request);
 		}
 	}

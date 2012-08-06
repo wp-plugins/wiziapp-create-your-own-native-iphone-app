@@ -2,28 +2,31 @@
 
 class WiziappInstaller
 {
-    public function needUpgrade(){
-		if ( !WiziappDB::getInstance()->isInstalled() ){
-			// We are not installed, we don't have nothing to upgrade, we need a full scan...
-			return FALSE;
-		} else {
-			return (WiziappDB::getInstance()->needUpgrade() || WiziappConfig::getInstance()->needUpgrade());
+    public function needUpgrade() {
+		/*
+		if ( ! WiziappDB::getInstance()->isInstalled() ) {
+		// We are not installed, we don't have nothing to upgrade, we need a full scan...
+		return FALSE;
 		}
+		*/
+		
+		return ( WiziappDB::getInstance()->needUpgrade() || WiziappConfig::getInstance()->needUpgrade() );
     }
 
-    public function upgradeDatabase(){
+    public function upgradeDatabase() {
         $upgraded = TRUE;
-        if ( WiziappDB::getInstance()->needUpgrade() ){
+
+        if ( WiziappDB::getInstance()->needUpgrade() ) {
             $upgraded = WiziappDB::getInstance()->upgrade();
         }
 
         return $upgraded;
     }
 
-    public function upgradeConfiguration(){
+    public function upgradeConfiguration() {
         $upgraded = TRUE;
 
-        if ( WiziappConfig::getInstance()->needUpgrade() ){
+        if ( WiziappConfig::getInstance()->needUpgrade() ) {
             $upgraded = WiziappConfig::getInstance()->upgrade();
         }
 
@@ -49,6 +52,9 @@ class WiziappInstaller
         // Activate the blog with the global services
         $cms = new WiziappCms();
         $cms->activate();
+
+        $restoreHandler = new WiziappUserServices();
+        $restoreHandler->restoreUserData();
     }
 
 	protected static function doUninstall(){

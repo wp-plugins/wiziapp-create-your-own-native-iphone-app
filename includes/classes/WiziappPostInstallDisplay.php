@@ -183,9 +183,7 @@ class WiziappPostInstallDisplay{
 
 		ob_start();
 		$report->render();
-		$content = ob_get_contents();
-
-		ob_end_clean();
+		$content = ob_get_clean();
 		echo $content;
 		exit();
 	}

@@ -84,8 +84,7 @@ class WiziappContentEvents{
 		$content = apply_filters('wiziapp_before_the_content', $content);
 		$content = apply_filters('the_content', $content);
 
-		$filteredContent = ob_get_contents();
-		ob_end_clean();
+		$filteredContent = ob_get_clean();
 
 		$content = $filteredContent . $content;
 		$content = str_replace(']]>', ']]&gt;', $content);
@@ -110,6 +109,37 @@ class WiziappContentEvents{
 			// No point in scanning saving the post if we are not fully installed
 			return FALSE;
 		}
+
+                if (is_rtl()){
+                    WiziappConfig::getInstance()->saveUpdate('rtl',1);
+                    WiziappLog::getInstance()->write('INFO', "set RTL true", "WiziappContentEvents.save");
+
+                    //save to server
+                    $r = new WiziappHTTPRequest();
+                    $params['rtl']=1;
+                    $jsonParams = array(
+                        'params' => json_encode($params)
+                    );
+
+                    $app_id = WiziappConfig::getInstance()->app_id;
+                    $url = '/application/'. $app_id . '/setRtl';
+                    $response = $r->api($jsonParams, $url , 'POST');
+
+                    WiziappLog::getInstance()->write('DEBUG', "The response is " . print_r($response, TRUE), "WiziappUserServices.updateWiziappServer");
+                    if (is_wp_error($response)) {
+                        WiziappLog::getInstance()->write('INFO', "failed to updated server config", "WiziappContentEvents.save");
+                    }
+                    $tokenResponse = json_decode($response['body'], TRUE);
+                    if (empty($tokenResponse) || ! $tokenResponse['header']['status']) {
+                        WiziappLog::getInstance()->write('INFO', "empty token updating server config", "WiziappContentEvents.save");
+                    } else {
+                        WiziappLog::getInstance()->write('INFO', "success updating server config", "WiziappContentEvents.save");
+                    }
+
+                } else {
+                    WiziappLog::getInstance()->write('INFO', "left RTL false", "WiziappContentEvents.save");
+                }
+
 		global $more;
 
 		$more = 1;

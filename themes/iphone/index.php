@@ -16,16 +16,14 @@ if ( empty($GLOBALS['wpHeadHtml']) ){
     WiziappLog::getInstance()->write('INFO', 'Getting the template header', 'themes.default.index');
     ob_start();
     wp_head();
-    $GLOBALS['wpHeadHtml'] = ob_get_contents();
-    ob_end_clean();
+    $GLOBALS['wpHeadHtml'] = ob_get_clean();
 }
 
 if ( empty($GLOBALS['wpFooterHtml']) ){
     WiziappLog::getInstance()->write('INFO', 'Getting the template footer', 'themes.default.index');
     ob_start();
     wp_footer();
-    $GLOBALS['wpFooterHtml'] = ob_get_contents();
-    ob_end_clean();
+    $GLOBALS['wpFooterHtml'] = ob_get_clean();
 }
 wp_reset_query();
 WiziappLog::getInstance()->write('INFO', 'Wordpress loop reset', 'themes.default.index');

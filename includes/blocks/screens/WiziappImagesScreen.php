@@ -88,10 +88,11 @@ class WiziappImagesScreen extends WiziappBaseScreen{
             $dom = new WiziappDOMLoader($image_info['original_code'], get_bloginfo('charset'));
             $imageDOM = $dom->getBody();
             $image = $imageDOM[0]['img']['attributes'];
+            WiziappLog::getInstance()->write('INFO', "image object: " . print_r($image, true), 'WiziappImageScreen');
 
             $pid = $image_info['id'];
             $image['pid'] = $pid;
-            $image['description'] = '';
+            $image['description'] = $this->getImageDescription($image['title'], $post_id);
             $image['alttext'] = $image['title'];
             $image['imageURL'] = $image['src'];
             $image['relatedPost'] = $post_id;
@@ -108,5 +109,26 @@ class WiziappImagesScreen extends WiziappBaseScreen{
          $screen['screen']['default'] = 'grid';
          $screen['screen']['sub_type'] = 'image';
          $this->output($screen);
+    }
+    
+    public function getImageDescription($title, $post_id){
+        if ( $images = get_children(array(
+            'post_parent' => $post_id,
+            'post_type' => 'attachment',
+            'numberposts' => -1,
+            'order' => 'ASC',
+            'orderby' => 'ID',
+            'post_mime_type' => 'image',)))
+	{
+            foreach( $images as $image ) {
+                if ($title == $image->post_title){
+                    return $image->post_excerpt; // caption
+                    //return $image->post_content; //description
+                }
+            }
+	} else {
+		return false;
+	}
+        return '';
     }
 }

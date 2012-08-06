@@ -91,6 +91,8 @@ class WiziappSettingMetabox {
 
 	public function exclude_posts($query_request) {
 		$excluded_posts_ids = WiziappDB::getInstance()->set_exclude_query();
+                $currentExcluded = $query_request->get('post__not_in');
+                $excluded_posts_ids = array_merge($excluded_posts_ids,$currentExcluded);
 		$query_request->set( 'post__not_in', $excluded_posts_ids );
 
 		return $query_request;
@@ -183,9 +185,9 @@ class WiziappSettingMetabox {
 		if ( ( $hook === 'post.php' && $is_request_edit_post ) || ( $hook === 'post-new.php' ) ) {
 			wp_enqueue_script( 'jquery.tools', 'http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js' );
 			wp_enqueue_style(  'wiziapp_metabox', $this->_plugin_dir_url . '/themes/admin/wiziapp_metabox.css' );
-			wp_enqueue_script( 'wiziapp_metabox', $this->_plugin_dir_url . '/themes/admin/wiziapp_metabox.js', 'jquery.tools' );
+			wp_enqueue_script( 'wiziapp_metabox', $this->_plugin_dir_url . '/themes/admin/wiziapp_metabox.js', array('jquery.tools') );
 		} elseif ($hook === 'media-upload-popup') {
-			wp_enqueue_script( 'wiziapp_metabox', $this->_plugin_dir_url . '/themes/admin/media_upload_popup.js', 'jquery' );
+			wp_enqueue_script( 'wiziapp_metabox', $this->_plugin_dir_url . '/themes/admin/media_upload_popup.js', array('jquery') );
 		}
 	}
 
@@ -235,7 +237,7 @@ class WiziappSettingMetabox {
 			'wizi_included_site'  => ( intval( $post->wizi_included_site )  || $is_new_post )  ? ' checked="checked"' : '',
 			'wizi_included_app'   => ( intval( $post->wizi_included_app )   || $is_new_post )  ? ' checked="checked"' : '',
 			'wizi_published_push' => ( intval( $post->wizi_published_push ) || $is_new_post )  ? ' checked="checked"' : '',
-			'wizi_updated_push'   => ( intval( $post->wizi_updated_push )   || $is_new_post )  ? ' checked="checked"' : '',
+			//'wizi_updated_push'   => ( intval( $post->wizi_updated_push )   || $is_new_post )  ? ' checked="checked"' : '',
 
 			'wiziapp_featured_post' => ( self::get_wiziapp_featured_post() === $post->ID ) ? ' checked="checked"' : '',
 
