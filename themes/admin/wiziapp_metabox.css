@@ -91,9 +91,12 @@ div.wiziapp_manage_thumbnail p {
 #wiziapp_upload_thumbnail + p {
 	height: 17px;
 }
+/*
+Must be permanently shown
 #wiziapp_upload_thumbnail + p * {
-	display: none;
+display: none;
 }
+*/
 div.wiziapp_manage_thumbnail input {
 	margin: 2px 4px 0 4px;
 	vertical-align: top;

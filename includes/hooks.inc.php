@@ -51,6 +51,8 @@ function wiziapp_attach_hooks(){
 
 		add_action( 'edit_post', array( 'WiziappPush', 'create_push_notification' ), 10, 2 );
 	}
+        
+        add_action( 'edit_post', array( &$ce, 'updateCacheTimestampKey' ) );
 
 	add_action('deleted_post', array(&$ce, 'deletePost'));
 	add_action('trashed_post', array(&$ce, 'deletePost'));

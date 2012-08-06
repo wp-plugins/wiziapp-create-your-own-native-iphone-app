@@ -44,6 +44,7 @@
  * @property string  $wiziapp_admin_messages_message
  * @property integer $thumb_min_size
  * @property integer $display_download_from_appstore
+ * @property integer $rtl
  * @property integer $wiziapp_log_threshold
  * @property integer $notify_on_new_page
  * @property integer $notify_on_new_post
@@ -59,13 +60,14 @@ class WiziappConfig implements WiziappIInstallable {
 
 	private $name = 'wiziapp_settings';
 
-	private $internalVersion =  59;
+	private $internalVersion =  60;
 
 	private static $_instance = null;
 
 	public $integer_values = array(
 		'thumb_min_size',
 		'display_download_from_appstore',
+                'rtl',
 		'notify_on_new_post',
 		'notify_on_new_page',
 	);
@@ -101,7 +103,7 @@ class WiziappConfig implements WiziappIInstallable {
 		 // Add here the keys to reset to the default value;
 		$resetOptions = array();
 		// Add here the keys add with the default value, if they don't already exists;
-		$addOptions = array('notify_on_new_page', 'push_message', 'wiziapp_admin_messages_subject', 'wiziapp_admin_messages_message', 'display_download_from_appstore', 'thumb_min_size',);
+		$addOptions = array('notify_on_new_page', 'push_message', 'wiziapp_admin_messages_subject', 'wiziapp_admin_messages_message', 'display_download_from_appstore', 'rtl', 'thumb_min_size',);
 		// Add here the keys to remove from the options array;
 		$removeOptions = array('limit_post_thumb_height', 'limit_post_thumb_width', 'nofity_on_new_page',);
 
@@ -314,6 +316,7 @@ class WiziappConfig implements WiziappIInstallable {
 			// Control Panel - Settings
 			'thumb_min_size' => 150,
 			'display_download_from_appstore' => 1,
+                        'rtl' => 0,
 
 			'comments_avatar_height' => 58,
 			'comments_avatar_width' => 58,
@@ -350,6 +353,7 @@ class WiziappConfig implements WiziappIInstallable {
 			'zebra_lists' => TRUE,
 			'theme_name' => 'iphone',
 			'wiziapp_theme_name' => 'default',
+                        'wiziapp_rtl_theme_name' => 'rtl',
 
 			// app
 			'app_description' => 'Here you will see the description about your app. You will be able to provide the description in the app store information form (step 3).',

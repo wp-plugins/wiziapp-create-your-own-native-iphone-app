@@ -20,9 +20,16 @@
 						$("#wp-content-media-buttons a.thickbox").trigger("click");
 				});
 
+				$("#wiziapp_is_no_thumbnail").click(function() {
+						$("#wiziapp_is_user_chosen").removeAttr("checked");
+				});
+
+				/*
+				// Need no. Permanently shown already.
 				if ( $("#wiziapp_post_thumbnail_preview img").height() > 10 ) {
-					$("#wiziapp_upload_thumbnail + p *").show(0);
+				$("#wiziapp_upload_thumbnail + p *").show(0);
 				}
+				*/
 		});
 
 		var wiziapp_push_save_result;

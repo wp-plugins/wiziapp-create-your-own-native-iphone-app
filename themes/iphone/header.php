@@ -24,7 +24,10 @@
 	<style type="text/css">
 		<?php
 			$baseCssFileName = dirname(__FILE__) . '/style.css';
-			$cssFileName = dirname(__FILE__) . '/' . WiziappConfig::getInstance()->wiziapp_theme_name . '.css';
+//                        $themeName = is_rtl() ? WiziappConfig::getInstance()->wiziapp_rtl_theme_name : WiziappConfig::getInstance()->wiziapp_theme_name;
+                        $themeName = (WiziappConfig::getInstance()->rtl == 0) ? WiziappConfig::getInstance()->wiziapp_theme_name : WiziappConfig::getInstance()->wiziapp_rtl_theme_name;
+                        WiziappLog::getInstance()->write('DEBUG', "themeName: $themeName", 'header.code');
+			$cssFileName = dirname(__FILE__) . '/' . $themeName . '.css';
 
 			$baseFile = file_get_contents($baseCssFileName);
 			$file = file_get_contents($cssFileName);

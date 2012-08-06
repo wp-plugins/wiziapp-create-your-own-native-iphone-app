@@ -52,14 +52,16 @@ class WiziappThumbnailHandler{
 			if ( ! $foundImage) {
 				// if no wordpress thumbnail, we take the thumb from a gallery
 				$foundImage = $this->_tryGalleryThumbnail();
-				if ( ! $foundImage ) {
-					// if no thumb from a gallery, we take the thumb from a video
-					$foundImage = $this->_tryVideoThumbnail();
-					if ( !$foundImage ) {
-						// if no thumb from a video, we take the thumb from a single image
-						$foundImage = $this->_trySingleImageThumbnail();
-					}
-				}
+			}
+
+			if ( ! $foundImage ) {
+				// if no thumb from a gallery, we take the thumb from a video
+				$foundImage = $this->_tryVideoThumbnail();
+			}
+
+			if ( !$foundImage ) {
+				// if no thumb from a video, we take the thumb from a single image
+				$foundImage = $this->_trySingleImageThumbnail();
 			}
 		}
 
@@ -67,7 +69,6 @@ class WiziappThumbnailHandler{
 			// If we reached this point we couldn't find a thumbnail.... Throw 404
 			header("HTTP/1.0 404 Not Found");
 		}
-		return;
 	}
 
 	private function _tryWordpressThumbnail() {

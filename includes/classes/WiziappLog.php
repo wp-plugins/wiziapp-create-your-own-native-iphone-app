@@ -79,10 +79,11 @@ final class WiziappLog {
 		if (!$this->checkPath() || $this->isIIS()){
 			$this->enabled = FALSE;
 		}
-
+		/*
 		if (isset(WiziappConfig::getInstance()->wiziapp_log_threshold)) {
-			$this->threshold = intval(WiziappConfig::getInstance()->wiziapp_log_threshold);
+		$this->threshold = intval(WiziappConfig::getInstance()->wiziapp_log_threshold);
 		}
+		*/
 	}
 
 	public function checkPath(){

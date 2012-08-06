@@ -32,8 +32,9 @@ class WiziappDB implements WiziappIInstallable{
 	public $media_types = array('image' => 1, 'video' => 2, 'audio' => 3);
 
 	private $media_table = 'wiziapp_content_media';
+        private $user_table = 'wiziapp_user_info';
 
-	private $internal_version = '0.2';
+	private $internal_version = '0.6';
 
 	private static $_instance = null;
 
@@ -152,8 +153,10 @@ class WiziappDB implements WiziappIInstallable{
 	*/
 	function find_content_gallery_images($id) {
 		global $wpdb;
-
-		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.content_id = %d AND c.attachment_type = %d AND (attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s)", $id, 1, '%data-wiziapp-cincopa-id%', '%data-wiziapp-nextgen-album-id%', '%data-wiziapp-nextgen-gallery-id%', '%data-wiziapp-pageflipbook-id%', '%wordpress-gallery-id%', '%external-gallery-id%', '%data-wiziapp-id%');
+                $query = "SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.content_id = %d
+                            AND c.attachment_type = %d";
+                //$query .= " AND (attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s)";
+		$sql = $wpdb->prepare($query, $id, 1 /*, '%data-wiziapp-cincopa-id%', '%data-wiziapp-nextgen-album-id%', '%data-wiziapp-nextgen-gallery-id%', '%data-wiziapp-pageflipbook-id%', '%wordpress-gallery-id%', '%external-gallery-id%', '%data-wiziapp-id%'*/);
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.find_content_gallery_images');
 		$result = $wpdb->get_results($sql, ARRAY_A);
 
@@ -214,7 +217,7 @@ class WiziappDB implements WiziappIInstallable{
 	function get_images_for_albums() {
 		global $wpdb;
 
-		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d AND (attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s)", $this->media_types["image"], '%data-wiziapp-cincopa-id%', '%data-wiziapp-nextgen-album-id%', '%data-wiziapp-nextgen-gallery-id%', '%data-wiziapp-pageflipbook-id%', '%wordpress-gallery-id%', '%external-gallery-id%', '%data-wiziapp-id%');
+		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d AND (attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s) LIMIT 0, 2000", $this->media_types["image"], '%data-wiziapp-cincopa-id%', '%data-wiziapp-nextgen-album-id%', '%data-wiziapp-nextgen-gallery-id%', '%data-wiziapp-pageflipbook-id%', '%wordpress-gallery-id%', '%external-gallery-id%', '%data-wiziapp-id%');
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_images_for_albums');
 
 		$result = $wpdb->get_results($sql, ARRAY_A);
@@ -469,7 +472,7 @@ class WiziappDB implements WiziappIInstallable{
 	function get_all_videos($offset = 0, $limit = 0) {
 		global $wpdb;
 
-		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d LIMIT %d, %d", $this->media_types["video"], $offset, $limit);
+		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d ORDER BY `id` DESC LIMIT %d, %d", $this->media_types["video"], $offset, $limit);
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_all_videos');
 		$result = $wpdb->get_results($sql, ARRAY_A);
 
@@ -754,6 +757,31 @@ class WiziappDB implements WiziappIInstallable{
 				WiziappLog::getInstance()->write('ERROR', $create_table_errors, 'WiziappDB.install');
 			}
 
+                  $userSql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}{$this->user_table} (
+                        `id` int(11) NOT NULL AUTO_INCREMENT,
+                        `udid` varchar(72) NOT NULL,
+                        `appId` int(8) NOT NULL DEFAULT 0,
+                        `wp_user_id` bigint(20) unsigned,
+                        `username` varchar(50),
+                        `password` varchar(64),
+                        `authors` text,
+                        `categories` text,
+                        `tags` text,
+			`created_at` DATETIME NULL ,
+			`updated_at` DATETIME NULL ,
+                        PRIMARY KEY (`id`),
+                        UNIQUE KEY `udid` (`udid`),
+                        KEY `appId` (`appId`,`username`)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
+
+                  	$create_table_errors = '';
+			ob_start();
+			dbDelta($userSql);
+			$create_table_errors = ob_get_clean();
+			if ( $create_table_errors != '' ) {
+				WiziappLog::getInstance()->write('ERROR', $create_table_errors, 'WiziappDB.install');
+			}
+
 		// To add the "Exclude fields" and the "Push fields" to Posts table
 		foreach ( $this->_added_columns as $columns_pair ) {
 			try {
@@ -788,6 +816,7 @@ class WiziappDB implements WiziappIInstallable{
 		global $wpdb;
 
 		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$this->media_table}");
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$this->user_table}");
 
 		if ( ! ( defined('EICONTENT_EXCLUDE_BASENAME') && is_plugin_active( EICONTENT_EXCLUDE_BASENAME ) ) ) {
 			// To remove the "Exclude fields" from the Posts table, if another plugin, "Exclude", is not activated
@@ -816,8 +845,14 @@ class WiziappDB implements WiziappIInstallable{
 	 * For now a simple diff that is handled by the install anyway is fine.
 	 */
 	 public function upgrade() {
+	 	 global $wpdb;
+
 		// Delete "iphone_post_thumb" Custom Fields from "wp_postmeta" table. The fields was removed on version 1.3.0c
-		if ( ! $wpdb->query( "DELETE FROM " . $wpdb->postmeta . " WHERE meta_key = 'iphone_post_thumb_0' OR meta_key = 'iphone_post_thumb_1'" ) ) {
+		$is_delete_error =
+		! $wpdb->query( "DELETE FROM " . $wpdb->postmeta . " WHERE meta_key = 'iphone_post_thumb_0' OR meta_key = 'iphone_post_thumb_1'" ) &&
+		! empty($wpdb->last_error);
+
+		if ($is_delete_error) {
 			WiziappLog::getInstance()->write('ERROR', $wpdb->last_error, 'WiziappDB.install');
 		}
 
