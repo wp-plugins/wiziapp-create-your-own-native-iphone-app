@@ -525,14 +525,13 @@ class WiziappAdminDisplay {
 		$page = (isset($_GET['page'])) ? $_GET['page'] : '';
 
 		if ( $installer->needUpgrade() && $page != 'wiziapp' ){
+			$wiziapp_admin_page = get_admin_url().'admin.php?page=wiziapp';
 		?>
-		<div id="wiziapp_internal_upgrade_needed_message" class="updated fade">
-			<p style="line-height: 150%">
-				WiziApp needs one more step to finish the upgrading process, click <a href="admin.php?page=wiziapp">here</a> to upgrade your database.
-				<br />
-				Make sure to update as soon as you can to enjoy the security, bug fixes and new features this update contain.
-			</p>
-		</div>
+		<script type="text/javascript">
+			/* <![CDATA[ */
+			window.location = '<?php echo $wiziapp_admin_page; ?>';
+			/* ]]> */
+		</script>
 		<?php
 		}
 	}
