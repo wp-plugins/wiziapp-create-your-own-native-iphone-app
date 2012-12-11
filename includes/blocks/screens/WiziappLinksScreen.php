@@ -49,7 +49,7 @@ class WiziappLinksScreen extends WiziappBaseScreen{
 
         $this->output($this->prepare($sections, $this->getTitle(), 'List', true));
     }
-    
+
     public function runByCategory($cat_id){
         $screen_conf = $this->getConfig();
 
@@ -76,6 +76,6 @@ class WiziappLinksScreen extends WiziappBaseScreen{
         $page = $pager->extractCurrentPage($page);
         $pager->addMoreCell(__("Load %s more items", 'wiziapp'), $page);
 
-        $this->output($this->prepare($page, $this->getTitle(), 'List', false, false, true));
+        $this->output($this->prepare($page, $this->getTitle(), 'List', false, false, true), array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/links/categories'), 'text' => $this->getTitle('categories')));
     }
 }

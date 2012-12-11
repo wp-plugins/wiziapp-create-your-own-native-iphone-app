@@ -22,25 +22,25 @@ h2.pageitem{
     direction: rtl;
     unicode-bidi: embed;
 }
+#singlentry{
+    direction: rtl;
+    overflow: hidden;
+}
 
 #post_title{
     direction: rtl;
     unicode-bidi: embed;
     text-decoration: none;
-    /**font-size: 17px;*/
     font-size: 1.2em;
     font-weight: bold;
 }
+
 .page_content{
     direction: rtl;
     unicode-bidi: embed;
     width: 300px;
     margin: 5px auto;
     word-wrap: break-word;
-}
-
-.pageitem div{
-    /*max-width: 300px;*/
 }
 
 .pageitem input{
@@ -56,16 +56,15 @@ h2.pageitem{
 }
 
 .wiziapp_star_on{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/cuts_rate1.png) no-repeat 0px 0px;
+    background: url(images/default/cuts_rate1.png) no-repeat 0px 0px;
 }
 .wiziapp_star_off{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/cuts_rate2.png) no-repeat 0px 0px;
+    background: url(images/default/cuts_rate2.png) no-repeat 0px 0px;
 }
 
 #author_and_date{
     display: block;
     float: left;
-    /** font-size: 12px;*/
     font-size: 0.9em;
 }
 .single-post-meta-top{
@@ -76,9 +75,8 @@ h2.pageitem{
     -webkit-tap-highlight-color: rgba(0,0,0,0);
     display: block;
     height: 100%;
-    /**font-size: 17px;*/
     font-size: 1.1em;
-    background: transparent url(@@@WIZIAPP_CDN@@@/images/simulator/more_cell_item.png) no-repeat scroll 96% center;
+    background: transparent url(images/simulator/more_cell_item.png) no-repeat scroll 96% center;
 }
 .wiziapp_footer_links .title{
     font-weight: bolder;
@@ -87,31 +85,22 @@ h2.pageitem{
 }
 
 #wiziapp_comment_footer_link .title{
-    background: url("@@@WIZIAPP_CDN@@@/images/app/themes/default/icon-com.png") no-repeat scroll left center transparent;
-    /**font-size: 17px;*/
+    background: url("images/default/icon-com.png") no-repeat scroll left center transparent;
 }
 #wizapp_cats_footer_link .title{
-    background: url("@@@WIZIAPP_CDN@@@/images/app/themes/default/icon-cat.png") no-repeat scroll left center transparent;
-    /**font-size: 17px;*/
+    background: url("images/default/icon-cat.png") no-repeat scroll left center transparent;
 }
 #wizapp_tags_footer_link .title{
-    background: url("@@@WIZIAPP_CDN@@@/images/app/themes/default/icon-tag.png") no-repeat scroll left center transparent;
-    /**font-size: 17px;*/
-}
-
-.wiziapp_bottom_nav li{
-    /**background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/chrome-back.png) repeat-y 0px -2px;*/
+    background: url("images/default/icon-tag.png") no-repeat scroll left center transparent;
 }
 
 .wiziapp_bottom_nav li:first-child{
-
     border-bottom: 0px solid;
 }
 
 .wiziapp_bottom_nav li:last-child{
     border-bottom: 1px solid;
 }
-
 
 /* Start Multi Image */
 
@@ -121,11 +110,11 @@ h2.pageitem{
 
 /* End Multi Image */
 /* Start AudioCellItem */
+
 .audioCellItem{
     height: 70px;
     width: 300px;
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/chrome-back.png) no-repeat 0px 0px;
-    /**font-size: 13px;*/
+    background: url(images/default/chrome-back.png) no-repeat 0px 0px;
     font-size: 0.9em;
     position: relative;
     margin: 10px 0px;
@@ -143,7 +132,7 @@ h2.pageitem{
 
 .audioCellItem .col1 .imageURL{
     margin: 5px;
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/cuts_sound.png) no-repeat;
+    background: url(images/default/cuts_sound.png) no-repeat;
     width: 60px;
     height: 60px;
 }
@@ -172,7 +161,7 @@ h2.pageitem{
     left: 220px;
 }
 .audioCellItem .playButton{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/classic/cuts_play_med_off.png) no-repeat;
+    background: url(images/classic/cuts_play_med_off.png) no-repeat;
     width: 50px;
     height: 50px;
     margin: 10px;
@@ -180,7 +169,7 @@ h2.pageitem{
 /* End AudioCellItem */
 
 /* Start Album cell item */
-.album_item{
+.album_item, .wiziapp_pages_item{
     clear: both;
     font-weight: normal;
     line-height: 17px;
@@ -188,7 +177,6 @@ h2.pageitem{
     height: 80px;
     color: #4D5971;
     font-family: Helvetica,Arial;
-    /*font-size: 14px;    */
     font-size: 1em;
     cursor: pointer;
     margin:3px;
@@ -207,7 +195,7 @@ h2.pageitem{
     left: 8px;
     top: 0;
     width: 91px;
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/image-frame.png) center center no-repeat;
+    background: url(images/default/image-frame.png) center center no-repeat;
     position: absolute;
 }
 .album_item_title {
@@ -216,7 +204,6 @@ h2.pageitem{
     top: 19px;
     width: 170px;
     font-family: Helvetica, Arial;
-    /**font-size: 17px;*/
     font-size: 1.1em;
     font-weight: bolder;
     line-height: 17px;
@@ -228,12 +215,12 @@ h2.pageitem{
     left: 110px;
     top: 44px;
     width: 170px;
-    /*font-size: 12px;*/
     font-size: 0.9em;
     line-height: 12px;
 }
 
 /* End Album cell Item */
+
 .video_wrapper{
     position: relative;
     float: left;
@@ -244,15 +231,17 @@ h2.pageitem{
     clear: both;
 }
 .video_effect{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/cuts_play_med_on.png) no-repeat center center;
+    background: url(images/default/cuts_play_med_on.png) no-repeat center center;
     position: absolute;
     top: 0px; left: 0px;
     width: 100%;
     height: 100%;
 }
+
 /*Registration page*/
+
 .registration{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/chrome-back.png) no-repeat scroll;
+    background: url(images/default/chrome-back.png) no-repeat scroll;
     padding-top:10px;
 }
 #registration{
@@ -292,16 +281,14 @@ h2.pageitem{
     width: 130px;
 }
 #registration input#submit{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/cuts_signup.png) no-repeat center center;
+    background: url(images/default/cuts_signup.png) no-repeat center center;
     color: white;
     font-weight: bold;
     width: 81px;
     height: 31px;
 }
 #registration input#submit_long{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/cuts_signup.png) no-repeat center center;
-/*    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/button_long.png) no-repeat center center;*/
-/*    background: url(http://externaldev.apptelecom.com/wordpress/wp-content/plugins/wiziapp/themes/default/button_long.png) no-repeat center center;*/
+    background: url(images/default/cuts_signup.png) no-repeat center center;
     color: white;
     font-weight: bold;
     width: 158px;
@@ -314,18 +301,20 @@ h2.pageitem{
     margin:0 auto;
     width:225px;
 }
+
 /*End registration page*/
+
 .pageitem .table_wrapper_top{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/cms/chart_back_top.png) repeat-x;
+    background: url(images/default/chart_back_top.png) repeat-x;
     height: 5px;
     width: 310px;
 }
 .pageitem .table_wrapper_content{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/cms/chart_back_bg.png) repeat;
+    background: url(images/default/chart_back_bg.png) repeat;
     width: 310px;
 }
 .pageitem  .table_wrapper_footer{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/default/cms/chart_back_bottom.png) repeat-x;
+    background: url(images/default/chart_back_bottom.png) repeat-x;
     height: 5px;
     width: 310px;
 }

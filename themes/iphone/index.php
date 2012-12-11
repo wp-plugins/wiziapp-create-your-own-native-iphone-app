@@ -11,20 +11,6 @@ global $wiziapp_block, $cPage, $nextPost, $prevPost, $postsScreen, $wiziappQuery
 */
 WiziappContentHandler::getInstance()->registerPluginScripts();
 WiziappLog::getInstance()->write('INFO', 'Registered scripts', 'themes.default.index');
-// Force the head to run only once
-if ( empty($GLOBALS['wpHeadHtml']) ){
-    WiziappLog::getInstance()->write('INFO', 'Getting the template header', 'themes.default.index');
-    ob_start();
-    wp_head();
-    $GLOBALS['wpHeadHtml'] = ob_get_clean();
-}
-
-if ( empty($GLOBALS['wpFooterHtml']) ){
-    WiziappLog::getInstance()->write('INFO', 'Getting the template footer', 'themes.default.index');
-    ob_start();
-    wp_footer();
-    $GLOBALS['wpFooterHtml'] = ob_get_clean();
-}
 wp_reset_query();
 WiziappLog::getInstance()->write('INFO', 'Wordpress loop reset', 'themes.default.index');
 query_posts($wiziappQuery);
@@ -37,7 +23,6 @@ if (have_posts()) :
 	if (!isset($GLOBALS['WiziappEtagOverride'])){
 		$GLOBALS['WiziappEtagOverride'] = '';
 	}
-	$injectLoadedScript = '<script type="text/javascript">WIZIAPP.doLoad();</script>';
 
 	// Start capturing output from loop events
 	ob_start();
@@ -73,8 +58,6 @@ if (have_posts()) :
 			include('_content.php');
 
 			$contents = ob_get_contents();
-			// Inject the doLoad method to avoid timing issues when getting the post in this bundle
-			$contents = str_replace('</body>', $injectLoadedScript.'</body>', $contents);
 			$obLevelEnd = ob_get_level();
 			if ( $obLevelEnd == $obLevelStart ){
 				ob_end_clean();

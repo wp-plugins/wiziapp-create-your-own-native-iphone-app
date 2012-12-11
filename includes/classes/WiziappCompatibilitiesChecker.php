@@ -103,30 +103,31 @@ class WiziappCompatibilitiesChecker{
 		$thumbsHandler = new WiziappImageHandler();
 		$thumbs = $thumbsHandler->checkPath();
 
-		if ( !$is_cache_enabled || !$logs || !$thumbs ){
-			if ($return_as_html) {
-				$message = 'It seems that your server settings are blocking access to certain directories. The WiziApp plugin requires writing permissions to the following directories:<br /><ul>';
-				if ( ! $is_cache_enabled ){
-					$message .= '<li>wp-content/uploads</li>';
-				}
-				 if ( !$logs ) {
-					 $message .= '<li>wp-content/plugins/wiziapp/logs</li>';
-				 }
-
-				if ( !$thumbs ){
-					$message .= '<li>wp-content/plugins/wiziapp/cache</li>';
-				}
-
-				$message .= '</ul>Though you may choose not to provide these permissions, this would mean that any requests by your iPhone App readers would be made in real time, which would deny you the advantages of caching.';
-
-				// @todo format this i18n wordpress function usage to allow params and send the dir list as a parameter
-				return new WiziappError('writing_permissions_error', __($message, 'wiziapp'));
-			} else {
-				return FALSE;
-			}
+		if ( $is_cache_enabled && $logs && $thumbs ){
+			return TRUE;
 		}
 
-		return TRUE;
+		if ( ! $return_as_html){
+			return FALSE;
+		}
+
+		$message = 'It seems that your server settings are blocking access to certain directories. The WiziApp plugin requires writing permissions to the following directories:<br /><ul>';
+
+		if ( ! $is_cache_enabled ){
+			$message .= '<li>wp-content/uploads</li>';
+		}
+		if ( ! $logs ) {
+			$message .= '<li>wp-content/plugins/wiziapp/logs</li>';
+		}
+
+		if ( ! $thumbs ){
+			$message .= '<li>wp-content/plugins/wiziapp/cache</li>';
+		}
+
+		$message .= '</ul>Though you may choose not to provide these permissions, this would mean that any requests by your iPhone App readers would be made in real time, which would deny you the advantages of caching.';
+
+		// @todo format this i18n wordpress function usage to allow params and send the dir list as a parameter
+		return new WiziappError('writing_permissions_error', __($message, 'wiziapp'));
 	}
 
 	public function testDatabase(){
@@ -282,34 +283,34 @@ class WiziappCompatibilitiesChecker{
 			if ( "couldn't connect to host" == $response->get_error_message() ){
 				$this->critical = TRUE;
 				$this->hadConnectionError = TRUE;
-				
+
 				return new WiziappError(
-				'testing_connection_failed', 
+				'testing_connection_failed',
 				__('It seems that your server is blocked from issuing outgoing requests to our server. Please make sure your firewall and any other security measures enable outgoing connections.', 'wiziapp')
 				);
-			} 
+			}
 
 			return new WiziappError($response->get_error_code(), $response->get_error_message());
-		} 
-		
+		}
+
 		// The request worked, but was our server able to contact our url?
 		$checkResult = json_decode($response['body']);
-		
+
 		if ( empty($checkResult) ) {
 			if ( isset($response['response']) && isset($response['response']['code']) && $response['response']['code'] === FALSE ) {
 				$this->critical = TRUE;
 				$this->hadConnectionError = TRUE;
 
 				return new WiziappError(
-					'testing_connection_failed', 
+					'testing_connection_failed',
 					__('Your host does not allow any kind of outgoing requests. WiziApp requires either HTTP Extension, cURL, Streams, or Fsockopen to be installed and enabled. Please contact your hosting provider to address this issue.', 'wiziapp')
 				);
-			} 
+			}
 
 			// The response wasn't in a json format
 			return new WiziappError('testing_connection_failed', 'The WiziApp plugin has encountered a problem. Please contact us at support@wiziapp.com to see how we can help you resolve this issue');
-		} 
-		
+		}
+
 		// The response is ok, let's check when our server is saying
 		if ( ! $checkResult->header->status ){
 			return new WiziappError('testing_connection_failed', $checkResult->header->message);

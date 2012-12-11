@@ -63,6 +63,7 @@ class WiziappCategoriesScreen extends WiziappBaseScreen{
 
         $pager->addMoreCell(__("Load %s more items", 'wiziapp'), $page);
 
-        $this->output($this->prepare($page, $this->getTitle(), 'List'));
+        $post = get_post($post_id);
+        $this->output($this->prepare($page, $this->getTitle(), 'List'), array('url' => WiziappLinks::postLink($post_id), 'text' => $post->post_title));
     }
 }

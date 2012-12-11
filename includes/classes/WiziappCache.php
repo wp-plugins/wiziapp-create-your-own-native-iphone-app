@@ -32,7 +32,7 @@ abstract class WiziappCache {
 	* Choose type of the Cache
 	*/
 	public static function getCacheInstance( array $options = array()) {
-		if (function_exists('apc_exists')) {
+		if ( function_exists('apc_exists') && WiziappConfig::getInstance()->wiziapp_cache_enabled ) {
 			return new WiziappCacheAPC($options);
 		} else {
 			return new WiziappCacheFile($options);
@@ -155,9 +155,7 @@ abstract class WiziappCache {
 			if ( !in_array('ob_gzhandler', ob_list_handlers()) && !$zlib ){
 				$len = strlen($output['content']);
 				header('Content-Encoding: '.$output['encoding']);
-				echo "\x1f\x8b\x08\x00\x00\x00\x00\x00";
-				$output['content'] = gzcompress($output['content'], 9);
-				$output['content'] = substr($output['content'], 0, $len);
+				$output['content'] = gzencode($output['content'], 9);
 			}
 		}
 

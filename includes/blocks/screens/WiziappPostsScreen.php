@@ -7,12 +7,13 @@
 */
 
 class WiziappPostsScreen extends WiziappBaseScreen{
+	// Yes, I know this is an ugly hack, but it's the most non-destructive way to pass this info
+	static public $postLinkAdd = false;
+
 	protected $name = 'posts';
 	protected $type = 'list';
 
-	public function run(){
-
-	}
+	public function run(){}
 
 	public function runByRecent(){
 		$screen_conf = $this->getConfig();
@@ -37,7 +38,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		);
 
 		if ( !empty($page) ){
-            $query['pageOffset'] = $query['offset'] = (($numberOfPosts * $page));
+            $query['pageOffset'] = $query['offset'] = ( $numberOfPosts * $page );
 		} else {
             $query['pageOffset'] = $query['offset'] = 0;
             $query['posts_per_page'] = $numberOfPosts - 1; // Remove one for the featured post
@@ -61,11 +62,9 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		* the rest of the requests needs to update the recent section
 		*/
 		if ( empty($page) || $page == 0 ) {
-			$wiziapp_featured_post = WiziappSettingMetabox::get_wiziapp_featured_post();
-
 			$firstQuery = array(
 				'posts_per_page'      => 1,
-				'post__in'            => ( $wiziapp_featured_post !== '' ) ? array($wiziapp_featured_post) : get_option('sticky_posts'),
+				'post__in'            => get_option('sticky_posts'),
 				'ignore_sticky_posts' => 1,
 				'orderby'             => 'post_date'
 			);
@@ -127,6 +126,8 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 	}
 
 	function runByAuthor($author_id){
+		self::$postLinkAdd = 'author='.urlencode($author_id);
+
 		$numberOfPosts = WiziappConfig::getInstance()->posts_list_limit;
 		$screen_conf = $this->getConfig('author_list');
 
@@ -147,6 +148,8 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 	}
 
 	function runByIds($ids){
+		self::$postLinkAdd = 'favorites=true';
+
 		if ( !is_array($ids) ){
 			$ids = explode(",", $ids);
 		}
@@ -160,21 +163,26 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 	}
 
 	function runByAttachment($attachment_id){
+		self::$postLinkAdd = 'from_attachment_id='.urlencode($attachment_id);
+
 		$screen_conf = $this->getConfig();
 
 		$image = get_post($attachment_id);
 		$query = array("post__in" => array($image->post_parent), "orderby"=>"none"); // The oderby none is available only from wordpress 2.8
 		$page = $this->build($query, '', $screen_conf['items'], TRUE);
 
-		$this->output($this->prepare($page, __('Related Posts', 'wiziapp'), 'list', false, false, false));
+		$this->output($this->prepare($page, __('Related Posts', 'wiziapp'), 'list', false, false, false), array('url' => 'nav://page/'.urlencode(get_attachment_link($attachment_id)), 'text' => $image->post_title));
 	}
 
 	function runByTag($tag_id){
+		self::$postLinkAdd = 'tag='.urlencode($tag_id);
+
 		$screen_conf = $this->getConfig();
 
 		$pageNumber = isset($_GET['wizipage']) ? $_GET['wizipage'] : 0;
 		$numberOfPosts = WiziappConfig::getInstance()->posts_list_limit;
 		$offset = $numberOfPosts * $pageNumber;
+		$back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/tags'), 'text' => $this->getTitle('tags'));
 
 		$tag = get_tag($tag_id);
 		$title = WiziappTheme::applyRequestTitle("{$tag->name}");
@@ -184,7 +192,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		$totalPostsInTag = $tag->count;
 
 		if ($totalPostsInTag < $offset) {
-			$this->output($this->prepareSection(array(), $title, "List"));
+			$this->output($this->prepareSection(array(), $title, "List"), $back);
 			return;
 		}
 
@@ -218,10 +226,12 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 			)
 		);
 
-		$this->output($this->prepareSection($section, $title, "List"));
+		$this->output($this->prepareSection($section, $title, "List"), $back);
 	}
 
 	function runByCategory($category_id){
+		self::$postLinkAdd = 'cat='.urlencode($category_id);
+
 		$screen_conf = $this->getConfig();
 
 		$pageNumber = isset($_GET['wizipage']) ? $_GET['wizipage'] : 0;
@@ -230,6 +240,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 
 		$cat = get_category($category_id);
 		$title = WiziappTheme::applyRequestTitle($cat->cat_name);
+		$back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/categories'), 'text' => $this->getTitle('categories'));
 
 		$query = "cat={$category_id}&orderby=post_date&posts_per_page=" . $numberOfPosts . "&offset=" . $offset;
 
@@ -237,7 +248,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		$totalPostsInCat = $cat->count;
 
 		if ($totalPostsInCat < $offset) {
-			$this->output($this->prepareSection(array(), $title, "List"));
+			$this->output($this->prepareSection(array(), $title, "List"), $back);
 			return;
 		}
 
@@ -261,7 +272,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 			)
 		);
 
-		$this->output($this->prepareSection($section, $title, "List"));
+		$this->output($this->prepareSection($section, $title, "List"), $back);
 	}
 
 	// @todo: Add paging support here
@@ -269,6 +280,8 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		$year = $params[0];
 		$month = $params[1];
 		$day = $params[2];
+
+		self::$postLinkAdd = 'year='.urlencode($year).'&monthnum='.urlencode($month).'&day='.urlencode($day);
 
 		global $wp_locale;
 		$screen_conf = $this->getConfig('archived_list');
@@ -278,7 +291,9 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		$query = "orderby=modified&posts_per_page={$numberOfPosts}&monthnum={$month}&year={$year}&day={$day}";
 
 		$title = sprintf(__('%3$d %1$s %2$d'), $wp_locale->get_month($month), $year, $day);
-		$this->build($query, $title, $screen_conf['items']);
+		$cPage = $this->build($query, $title, $screen_conf['items'], true);
+		$back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/archive/'.$year.'/'.$month), 'text' => sprintf(__('%1$s %2$d'), $wp_locale->get_month($month), $year));
+		$this->output($this->prepare($cPage, $title, 'list', false, true), $back);
 	}
 
 	function runByMonth($params){
@@ -286,6 +301,8 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		$month = $params[1];
 		global $wp_locale;
 		$screen_conf = $this->getConfig('archived_list');
+
+		self::$postLinkAdd = 'year='.urlencode($year).'&monthnum='.urlencode($month);
 
 		$numberOfPosts = WiziappConfig::getInstance()->posts_list_limit;
 
@@ -300,11 +317,15 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 
 		$title = sprintf(__('%1$s %2$d'), $wp_locale->get_month($month), $year);
 
-		$this->build($query, $title, $screen_conf['items'], false, $pager->leftToShow);
+		$cPage = $this->build($query, $title, $screen_conf['items'], true, $pager->leftToShow);
+		$back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/archive/'.$year), 'text' => $year);
+		$this->output($this->prepare($cPage, $title, 'list', false, true), $back);
 	}
 
 	// @todo: Add paging support here
 	function runByAuthorCommented($author_id){
+		self::$postLinkAdd = 'commented='.urlencode($author_id);
+
 		$numberOfPosts = WiziappConfig::getInstance()->comments_list_limit;
 
 		$screen_conf = $this->getConfig('commented_list');
@@ -351,7 +372,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 
 		 $title = __('My Commented Posts', 'wiziapp');
 
-		 $this->output($this->prepare($page, $title, "List"));
+		 $this->output($this->prepare($page, $title, "List"), array('url' => false, 'text' => false));
 	}
 	/**
 	* Used as an alternative recent page only for supported layouts
@@ -394,7 +415,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		$this->output($this->prepare($page, $title, 'List', false, false, true));
 	}
 
-	function build($query = '', $title = '', $block, $just_return = false, $show_more = false, $display_more_item = true){
+	function build($query, $title, $block, $just_return = false, $show_more = false, $display_more_item = true){
 		/**
 		* Use the power of wordpress loop by passing the post component building to a template
 		*/
@@ -407,7 +428,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 
 		$postsScreen = $this;
         $wiziappQuery = $query;
-		WiziappTemplateHandler::load(dirname(__FILE__) . '/../../../themes/iphone/index.php');
+		WiziappTemplateHandler::load(WIZI_DIR_PATH . 'themes/iphone/index.php');
 
 		/**
 		* Format the components in the appropriated screen format
@@ -441,17 +462,15 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 			 $GLOBALS['WiziappEtagOverride'] .= serialize($moreComponent);
 		}
 
-		//$pager = new WiziappPagination(count($cPage), appcom_getAppPostListLimit());
-	//    $cPage = $pager->extractCurrentPage($cPage);
-	//
-	//    $pager->addMoreCell(__("Load %s more items", 'wiziapp'), $cPage);
+		// $pager = new WiziappPagination(count($cPage), appcom_getAppPostListLimit());
+		// $cPage = $pager->extractCurrentPage($cPage);
+		// $pager->addMoreCell(__("Load %s more items", 'wiziapp'), $cPage);
 
 		if ($just_return){
 			WiziappLog::getInstance()->write('INFO', 'About to return the posts section', 'wiziappPostsScreen.build');
 			return $cPage;
 		}
 
-		$this->output($this->prepare($cPage, $title, 'list', false, true));
+		$this->output($this->prepare($cPage, $title, 'list', false, true), array('url' => false, 'text' => false));
 	}
 }
-

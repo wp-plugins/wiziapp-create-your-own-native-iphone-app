@@ -1,58 +1,60 @@
 <?php
 /**
- * @property integer $categories_list_limit
- * @property integer $posts_list_limit
- * @property integer $comments_list_limit
- * @property integer $links_list_limit
- * @property integer $pages_list_limit
- * @property integer $tags_list_limit
- * @property integer $authors_list_limit
- * @property integer $videos_list_limit
- * @property integer $audios_list_limit
- * @property integer $comments_avatar_height // Replace the comments_avatar_size
- * @property integer $post_processing_batch_size
- * @property integer $search_limit
- * @property string  $sep_color
- * @property integer $main_tab_index
- * @property string  $api_server
- * @property boolean $configured
- * @property integer $app_id
- * @property string  $app_token
- * @property string  $app_name
- * @property string  $version
- * @property string  $appstore_url
- * @property boolean $app_live
- * @property integer $appstore_url_timeout
- * @property boolean $allow_grouped_lists
- * @property boolean $zebra_lists
- * @property string  $wiziapp_theme_name
- * @property integer $count_minimum_for_appear_in_albums
- * @property integer $multi_image_height
- * @property integer $multi_image_width
- * @property integer $max_thumb_check
- * @property boolean $settings_done
- * @property boolean $finished_processing
- * @property integer $last_version_checked_at
- * @property string  $wiziapp_avail_version
- * @property boolean $show_need_upgrade_msg
- * @property string  $last_version_shown
- * @property boolean $wiziapp_showed_config_once
- * @property boolean $email_verified
- * @property boolean $show_email_verified_msg
- * @property integer $last_recorded_save
- * @property string  $wiziapp_admin_messages_subject
- * @property string  $wiziapp_admin_messages_message
- * @property integer $thumb_min_size
- * @property integer $display_download_from_appstore
- * @property integer $rtl
- * @property integer $wiziapp_log_threshold
- * @property integer $notify_on_new_page
- * @property integer $notify_on_new_post
- * @property integer $push_message
- */
+* @property integer $categories_list_limit
+* @property integer $posts_list_limit
+* @property integer $comments_list_limit
+* @property integer $links_list_limit
+* @property integer $pages_list_limit
+* @property integer $tags_list_limit
+* @property integer $authors_list_limit
+* @property integer $videos_list_limit
+* @property integer $audios_list_limit
+* @property integer $comments_avatar_height // Replace the comments_avatar_size
+* @property integer $post_processing_batch_size
+* @property integer $search_limit
+* @property string  $sep_color
+* @property integer $main_tab_index
+* @property string  $api_server
+* @property boolean $configured
+* @property integer $app_id
+* @property string  $app_token
+* @property string  $app_name
+* @property string  $version
+* @property string  $appstore_url
+* @property string  playstore_url
+* @property boolean $app_live
+* @property integer $appstore_url_timeout
+* @property boolean $allow_grouped_lists
+* @property boolean $zebra_lists
+* @property string  $wiziapp_theme_name
+* @property integer $count_minimum_for_appear_in_albums
+* @property integer $multi_image_height
+* @property integer $multi_image_width
+* @property integer $max_thumb_check
+* @property boolean $settings_done
+* @property boolean $finished_processing
+* @property integer $last_version_checked_at
+* @property string  $wiziapp_avail_version
+* @property boolean $show_need_upgrade_msg
+* @property string  $last_version_shown
+* @property boolean $wiziapp_showed_config_once
+* @property boolean $email_verified
+* @property boolean $show_email_verified_msg
+* @property integer $last_recorded_save
+* @property boolean $webapp_installed
+* @property string  $wiziapp_admin_messages_subject
+* @property string  $wiziapp_admin_messages_message
+* @property integer $thumb_min_size
+* @property integer $display_download_from_appstore
+* @property integer $rtl
+* @property integer $wiziapp_log_threshold
+* @property integer $notify_on_new_page
+* @property integer $notify_on_new_post
+* @property integer $push_message
+*/
 // As long as we are supporting php < 5.3 we shouldn't extent the singleton class
 //class WiziappConfig extends WiziappSingleton implements WiziappIInstallable{
-class WiziappConfig implements WiziappIInstallable {
+class WiziappConfig implements WiziappIInstallable{
 
 	private $options = array();
 
@@ -60,22 +62,22 @@ class WiziappConfig implements WiziappIInstallable {
 
 	private $name = 'wiziapp_settings';
 
-	private $internalVersion =  60;
+	private $internalVersion =  61;
 
 	private static $_instance = null;
 
 	public $integer_values = array(
 		'thumb_min_size',
 		'display_download_from_appstore',
-                'rtl',
+		'rtl',
 		'notify_on_new_post',
 		'notify_on_new_page',
 	);
 
 	/**
-	 * @static
-	 * @return WiziappConfig
-	 */
+	* @static
+	* @return WiziappConfig
+	*/
 	public static function getInstance() {
 		if( is_null(self::$_instance) ) {
 			self::$_instance = new WiziappConfig();
@@ -98,28 +100,28 @@ class WiziappConfig implements WiziappIInstallable {
 
 	public function upgrade() {
 		/**
-		 * This is depended per version, each version might remove or add values...
-		 */
-		 // Add here the keys to reset to the default value;
+		* This is depended per version, each version might remove or add values...
+		*/
+		// Add here the keys to reset to the default value;
 		$resetOptions = array();
 		// Add here the keys add with the default value, if they don't already exists;
-		$addOptions = array('notify_on_new_page', 'push_message', 'wiziapp_admin_messages_subject', 'wiziapp_admin_messages_message', 'display_download_from_appstore', 'rtl', 'thumb_min_size',);
+		$addOptions = array('playstore_url',);
 		// Add here the keys to remove from the options array;
-		$removeOptions = array('limit_post_thumb_height', 'limit_post_thumb_width', 'nofity_on_new_page',);
+		$removeOptions = array();
 
 		$newDefaults = $this->getDefaultConfig();
-        foreach($addOptions as $optionName) {
-            if ( !isset($this->options[$optionName]) ) {
-                $this->options[$optionName] = $newDefaults[$optionName];
-            }
-        }
+		foreach($addOptions as $optionName) {
+			if ( !isset($this->options[$optionName]) ) {
+				$this->options[$optionName] = $newDefaults[$optionName];
+			}
+		}
 
 		foreach($resetOptions as $optionName) {
 			$this->options[$optionName] = $newDefaults[$optionName];
 		}
 
 		foreach($removeOptions as $optionName) {
-		   unset($this->options[$optionName]);
+			unset($this->options[$optionName]);
 		}
 
 		// save the updated options
@@ -203,10 +205,10 @@ class WiziappConfig implements WiziappIInstallable {
 		$saved = FALSE;
 
 		//if ( isset($this->options[$option]) ) {
-			$this->options[$option] = $value;
-			if ( !$this->saveAsBulk ) {
-				$saved = $this->save();
-			}
+		$this->options[$option] = $value;
+		if ( !$this->saveAsBulk ) {
+			$saved = $this->save();
+		}
 		//}
 
 		return $saved;
@@ -220,17 +222,17 @@ class WiziappConfig implements WiziappIInstallable {
 		}
 	}
 
-   public function getImageSize($type) {
-		if ( !isset($this->options[$type . '_width']) || !isset($this->options[$type . '_height']) ) {
+	public function getImageSize($type) {
+		if ( ! isset($this->options[$type . '_width']) || ! isset($this->options[$type . '_height']) ) {
 			throw new WiziappUnknownType('Clone is not allowed.');
-	   }
+		}
 
 		$size = array(
 			'width' => $this->options[$type . '_width'],
 			'height' => $this->options[$type . '_height'],
 		);
 		return $size;
-   }
+	}
 
 	public function getScreenTitle($screen) {
 		$title = '';
@@ -256,7 +258,9 @@ class WiziappConfig implements WiziappIInstallable {
 
 		$headers = array(
 			'Application' => $app_token,
-			'wiziapp_version' => WIZIAPP_P_VERSION
+			'wiziapp_version' => WIZIAPP_P_VERSION,
+			'app_version' => 2,
+			'udid' => 'wordpress-cms',
 		);
 
 		if ( !empty($this->options['api_key']) ) {
@@ -316,7 +320,7 @@ class WiziappConfig implements WiziappIInstallable {
 			// Control Panel - Settings
 			'thumb_min_size' => 150,
 			'display_download_from_appstore' => 1,
-                        'rtl' => 0,
+			'rtl' => 0,
 
 			'comments_avatar_height' => 58,
 			'comments_avatar_width' => 58,
@@ -342,7 +346,7 @@ class WiziappConfig implements WiziappIInstallable {
 			'max_thumb_check' => 6,
 			'count_minimum_for_appear_in_albums' => 5,
 			//'minimum_width_for_appear_in_albums' => 90,
-	//        'minimum_height_for_appear_in_albums' => 90,
+			//        'minimum_height_for_appear_in_albums' => 90,
 
 			// API
 			'app_token' => '',
@@ -353,7 +357,7 @@ class WiziappConfig implements WiziappIInstallable {
 			'zebra_lists' => TRUE,
 			'theme_name' => 'iphone',
 			'wiziapp_theme_name' => 'default',
-                        'wiziapp_rtl_theme_name' => 'rtl',
+			'wiziapp_rtl_theme_name' => 'rtl',
 
 			// app
 			'app_description' => 'Here you will see the description about your app. You will be able to provide the description in the app store information form (step 3).',
@@ -384,7 +388,8 @@ class WiziappConfig implements WiziappIInstallable {
 			'finished_processing' => FALSE,
 			'configured' => FALSE,
 			'app_live' => FALSE,
-			'appstore_url' => '',
+			'appstore_url'  => '',
+			'playstore_url' => '',
 			'appstore_url_timeout' => 1, //How many days will pass before we will show the user the "download app from appstore" confirmation alert again, 0 will make it not display at all
 			'email_verified' => FALSE,
 			'show_email_verified_msg' => TRUE,
@@ -396,7 +401,10 @@ class WiziappConfig implements WiziappIInstallable {
 			// Wiziapp QR Code Widget
 			'wiziapp_qrcode_widget_id_base' => 'wiziapp_qr_code',
 			'wiziapp_qrcode_widget_name' => 'Wiziapp QR Code',
-			'wiziapp_qrcode_widget_decription' => '',
+			'wiziapp_qrcode_widget_decription' => 'Provide Wiziapp Application Download Link on the Blog Page by QR Code picture.',
+
+			// Webapp
+			'webapp_installed' => FALSE,
 		);
 
 		return array_merge($settings, $envSettings);

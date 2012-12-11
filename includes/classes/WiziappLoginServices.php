@@ -32,18 +32,18 @@ class WiziappLoginServices{
 			if ( is_wp_error($user) ){
 				$status = FALSE;
 			} else {
-                            // check if wiziapp_users has user info
-                            $wus = new WiziappUserServices();
-                            if (!$wus->checkUserId($udid)){
-                                // no user data yet - add 'em
-                                $wp_user_id = get_current_user_id(); //are we logged in yet?
-                                $params = array(
-                                    'wp_user_id' => $wp_user_id,
-                                    'username' => $username,
-                                    'password' => $password,
-                                );
-                                $wus->updateUserData($udid, $params);
-                            }
+                // check if wiziapp_users has user info
+                $wus = new WiziappUserServices();
+                if (!$wus->checkUserId($udid)){
+                    // no user data yet - add 'em
+                    $wp_user_id = get_current_user_id(); //are we logged in yet?
+                    $params = array(
+                        'wp_user_id' => $wp_user_id,
+                        'username' => $username,
+                        'password' => $password,
+                    );
+                    $wus->updateUserData($udid, $params);
+                }
 				/*
 				 * Notify the global admin of the CMS user id that is connected
 				 * to the device token

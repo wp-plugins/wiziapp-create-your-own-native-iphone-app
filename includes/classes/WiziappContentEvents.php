@@ -110,35 +110,35 @@ class WiziappContentEvents{
 			return FALSE;
 		}
 
-                if (is_rtl()){
-                    WiziappConfig::getInstance()->saveUpdate('rtl',1);
-                    WiziappLog::getInstance()->write('INFO', "set RTL true", "WiziappContentEvents.save");
+        if (is_rtl()){
+            WiziappConfig::getInstance()->saveUpdate('rtl',1);
+            WiziappLog::getInstance()->write('INFO', "set RTL true", "WiziappContentEvents.save");
 
-                    //save to server
-                    $r = new WiziappHTTPRequest();
-                    $params['rtl']=1;
-                    $jsonParams = array(
-                        'params' => json_encode($params)
-                    );
+            //save to server
+            $r = new WiziappHTTPRequest();
+            $params['rtl']=1;
+            $jsonParams = array(
+                'params' => json_encode($params)
+            );
 
-                    $app_id = WiziappConfig::getInstance()->app_id;
-                    $url = '/application/'. $app_id . '/setRtl';
-                    $response = $r->api($jsonParams, $url , 'POST');
+            $app_id = WiziappConfig::getInstance()->app_id;
+            $url = '/application/'. $app_id . '/setRtl';
+            $response = $r->api($jsonParams, $url , 'POST');
 
-                    WiziappLog::getInstance()->write('DEBUG', "The response is " . print_r($response, TRUE), "WiziappUserServices.updateWiziappServer");
-                    if (is_wp_error($response)) {
-                        WiziappLog::getInstance()->write('INFO', "failed to updated server config", "WiziappContentEvents.save");
-                    }
-                    $tokenResponse = json_decode($response['body'], TRUE);
-                    if (empty($tokenResponse) || ! $tokenResponse['header']['status']) {
-                        WiziappLog::getInstance()->write('INFO', "empty token updating server config", "WiziappContentEvents.save");
-                    } else {
-                        WiziappLog::getInstance()->write('INFO', "success updating server config", "WiziappContentEvents.save");
-                    }
+            WiziappLog::getInstance()->write('DEBUG', "The response is " . print_r($response, TRUE), "WiziappUserServices.updateWiziappServer");
+            if (is_wp_error($response)) {
+                WiziappLog::getInstance()->write('INFO', "failed to updated server config", "WiziappContentEvents.save");
+            }
+            $tokenResponse = json_decode($response['body'], TRUE);
+            if (empty($tokenResponse) || ! $tokenResponse['header']['status']) {
+                WiziappLog::getInstance()->write('INFO', "empty token updating server config", "WiziappContentEvents.save");
+            } else {
+                WiziappLog::getInstance()->write('INFO', "success updating server config", "WiziappContentEvents.save");
+            }
 
-                } else {
-                    WiziappLog::getInstance()->write('INFO', "left RTL false", "WiziappContentEvents.save");
-                }
+        } else {
+            WiziappLog::getInstance()->write('INFO', "left RTL false", "WiziappContentEvents.save");
+        }
 
 		global $more;
 
@@ -296,6 +296,22 @@ class WiziappContentEvents{
 
 	public function updateCacheTimestampKey(){
 		WiziappConfig::getInstance()->last_recorded_save = time();
+	}
+
+	/**
+	* Add the "RewriteCond" for the Wiziapp plugin,
+	* to avoid collision with the WP Super Cache plugin.
+	*
+	* @param array $condition_rules - The multiple "RewriteCond"-s of the WP Super Cache plugin, from his .htaccess file
+	*/
+	function add_wiziapp_condition( $condition_rules ) {
+		if ( ! is_array($condition_rules) ) {
+			return $condition_rules;
+		}
+
+		$condition_rules[] = 'RewriteCond %{QUERY_STRING} !^wiziapp*';
+
+		return $condition_rules;
 	}
 
 	public static function getCacheTimestampKey(){

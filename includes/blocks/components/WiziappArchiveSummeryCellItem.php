@@ -35,6 +35,17 @@ class WiziappArchiveSummeryCellItem extends WiziappLayoutComponent{
     * @var string
     */
     var $baseName = 'archiveSummeryCellItem';
+
+    public $htmlTemplate = '<li class="archiveSummeryCellItem __ATTR_class__ cellItem default">
+                            <a href="__ATTR_actionURL__" class="actionURL __ATTR_class__" data-transition="slide">
+                                <span class="attribute text_attribute imageURL __ATTR_classOf-imageURL__" data-image-src="__ATTR_imageURL__">
+                                    <img class="hidden" src="" data-class="__ATTR_classOf-imageURL__"/>
+                                </span>
+                                <span class="__ATTR_classOf-timeLabel__ timeLabel attribute text_attribute">__ATTR_timeLabel__</span>
+                                <span class="__ATTR_classOf-title__ title attribute text_attribute">__ATTR_title__</span>
+                                <span class="__ATTR_classOf-numOfPosts__ numOfPosts attribute text_attribute">__ATTR_numOfPosts__</span>
+                            </a>
+                            </li>';
     
     /**
     * constructor 

@@ -36,6 +36,16 @@ class WiziappImagesAlbumCellItem extends WiziappLayoutComponent{
 	*/
 	var $baseName = 'imagesAlbumCellItem';
 
+    public $htmlTemplate = '<li class="imagesAlbumCellItem cellItem default">
+                            <a href="__ATTR_actionURL__" class="actionURL __ATTR_class__" data-transition="slide">
+                                <span class="attribute text_attribute imageURL __ATTR_class___image" data-image-src="__ATTR_imageURL__">
+                                    <img class="hidden" src="" data-class="__ATTR_class___image"/>
+                                </span>
+                                <span class="__ATTR_classOf-title__ attribute text_attribute title">__ATTR_title__</span>
+                                <span class="__ATTR_classOf-numOfImages__ numOfImages attribute text_attribute">__ATTR_numOfImages__</span>
+                             </a>
+                            </li>';
+
 	/**
 	* constructor
 	*
@@ -111,7 +121,7 @@ class WiziappImagesAlbumCellItem extends WiziappLayoutComponent{
 	function get_actionURL_attr(){
 		$url = '';
 		if ( $this->data[0]['plugin'] == 'bypost' ){
-			$url = WiziappLinks::postImagesGalleryLink($this->data[0]['content_id']);
+			$url = WiziappLinks::postImagesGalleryLink($this->data[0]['content_id']).urlencode('&album=true');
 		} else {
 			$url = WiziappLinks::pluginAlbumLink($this->data[0]['plugin'], $this->data[0]['id']);
 		}

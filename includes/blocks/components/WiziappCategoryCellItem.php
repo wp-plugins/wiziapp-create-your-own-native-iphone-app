@@ -1,9 +1,9 @@
 <?php
 /**
 * The category cell item component
-* 
+*
 * The component knows how to return: title, numOfPosts, numOfLinks, actionURL
-* 
+*
 * @package WiziappWordpressPlugin
 * @subpackage UIComponents
 * @author comobix.com plugins@comobix.com
@@ -11,50 +11,61 @@
 class WiziappCategoryCellItem extends WiziappLayoutComponent{
     /**
     * The attribute map
-    * 
+    *
     * @var array
     */
     var $attrMap = array(
         'L1' => array('title', 'numOfPosts', 'actionURL'),
-        'L2' => array('title', 'numOfLinks', 'actionURL'),  
-        'L3' => array('title', 'actionURL'),
+        'L2' => array('title', 'numOfLinks', 'actionURL'),
+        'L3' => array('title', 'numOfPosts', 'actionURL'),
     );
-    
+
     /**
     * The css classes to attach to the component according to the layout
-    * 
+    *
     * @var mixed
     */
     var $layoutClasses = array(
-        //'L1' => 'category',
         'L1' => 'category',
         'L2' => 'category',
         'L3' => 'tag',
     );
-    
+
     /**
     * The base name of the component, the application knows the component by this name
-    * 
+    *
     * @var string
     */
     var $baseName = 'categoryCellItem';
-    
+
+    public $htmlTemplate = '';
+
      /**
-    * constructor 
-    * 
     * @uses WiziappLayoutComponent::init()
-    * 
+    *
     * @param string $layout the layout name
     * @param array $data the data the components relays on
     * @return WiziappCategoryCellItem
     */
-    function WiziappCategoryCellItem($layout='L1', $data){
-        parent::init($layout, $data);    
-    }
-    
+	function __construct($layout = 'L1', $data){
+		parent::init($layout, $data);
+
+		ob_start();
+		?>
+		<li class="cellItem">
+			<a class="__ATTR_class__" href="__ATTR_actionURL__" data-transition="slide">
+				<div class="title attribute text_attribute __ATTR_classOf-title__">__ATTR_title__</div>
+				<div class="numOfLinks attribute text_attribute __ATTR_classOf-numOfLinks__">__ATTR_numOfLinks__</div>
+				<div class="attribute text_attribute category_posts_number">__ATTR_numOfPosts__</div>
+			</a>
+		</li>
+		<?php
+		$this->htmlTemplate = ob_get_clean();
+	}
+
     /**
     * Attribute getter method
-    * 
+    *
     * @return the id of the component
     */
     function get_id_attr(){
@@ -65,30 +76,33 @@ class WiziappCategoryCellItem extends WiziappLayoutComponent{
         } else {
             $id = $cat->term_id;
         }
-        return "cat_{$id}";    
+        return "cat_{$id}";
     }
-    
-    
+
+
+	/**
+	* Attribute getter method
+	*
+	* @returns the css class of the component
+
+	function get_class_attr(){
+	$class = $this->layoutClasses[$this->layout];
+
+	if ( WiziappConfig::getInstance()->zebra_lists ){
+	// If the index was supplied and it is even alter the class
+	$index = $this->data[1];
+	if ( !empty($index) && $index%2 == 0){
+	$class = $class."_even";
+	}
+	}
+
+	return $class;
+	}
+	*/
+
     /**
     * Attribute getter method
-    * 
-    * @returns the css class of the component
-    */
-    function get_class_attr(){
-        $class = $this->layoutClasses[$this->layout];
-        if ( WiziappConfig::getInstance()->zebra_lists ){
-            // If the index was supplied and it is even alter the class
-            $index = $this->data[1];
-            if ( !empty($index) && $index%2 == 0){
-                $class = $class."_even";
-            }
-        }
-        return $class;
-    }
-    
-    /**
-    * Attribute getter method
-    * 
+    *
     * @return the title of the component
     */
     function get_title_attr(){
@@ -99,32 +113,32 @@ class WiziappCategoryCellItem extends WiziappLayoutComponent{
         } else {
             $name = $cat->name;
         }
-        return WiziappHelpers::makeShortString($name, 22);
+        return WiziappHelpers::makeShortString($name, 280);
     }
-    
+
     /**
     * Attribute getter method
-    * 
+    *
     * @return the numOfLinks of the component
     */
     function get_numOfLinks_attr(){
         $cat = $this->data[0];
         return "{$cat->count} ".__('links');
     }
-    
+
     /**
     * Attribute getter method
-    * 
+    *
     * @return the numOfPosts of the component
     */
     function get_numOfPosts_attr(){
         $cat = $this->data[0];
-        return "{$cat->category_count} ".__('posts');
+        return ( isset($cat->category_count) ? $cat->category_count : $cat->count ).' '.__('posts');
     }
-    
+
     /**
     * Attribute getter method
-    * 
+    *
     * @return the actionURL of the component
     */
     function get_actionURL_attr(){
@@ -139,5 +153,5 @@ class WiziappCategoryCellItem extends WiziappLayoutComponent{
         }
         return $link;
     }
-    
+
 }

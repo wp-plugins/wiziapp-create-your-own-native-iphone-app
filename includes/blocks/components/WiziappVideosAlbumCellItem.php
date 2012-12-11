@@ -37,7 +37,9 @@ class WiziappVideosAlbumCellItem extends WiziappLayoutComponent{
     * @var string
     */
     var $baseName = 'videosAlbumCellItem';
-   
+
+    private $htmlTemplate = '<li class="videosAlbumCellItem cellItem default"> <p class="attribute text_attribute title"></p> <div class="items_container placeholder"> <div class="attribute images" style="__ATTR_images__"></div> <div class="attribute images" style="__ATTR_images__"></div> <div class="attribute images" style="__ATTR_images__"></div> <div class="num_container"><div class="numOfVideos attribute text_attribute">__ATTR_numOfVideos__</div></div> </div> </li>';
+
     /**
     * constructor 
     * 

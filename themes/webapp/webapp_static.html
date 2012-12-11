@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US" manifest="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/resources/cache.manifest">
+	<head>
+		<title>Adi Local Dev Site | Just another WordPress site</title>
+		<meta charset="UTF-8" />
+
+		<link rel="shortcut icon" href="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/resources/icons/3c9ce68edd973e073352dd9ba6c1d06d_57.png" />
+		<meta name="viewport" content="width=device-width; initial-scale=1.0; user-scalable=0;">
+
+		<link rel="apple-touch-startup-image" href="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/resources/default.png">
+		<link rel="apple-touch-icon" href="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/resources/icons/3c9ce68edd973e073352dd9ba6c1d06d_57.png" />
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+		<link rel="profile" href="http://gmpg.org/xfn/11" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/style.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/resources/main.css" />
+		<link rel="pingback" href="http://blogs.wiziapp.net/xmlrpc.php" />
+
+		<link rel="stylesheet" href="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/jquery.mobile-1.1.1.css" />
+		<link rel="stylesheet" href="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/jquery.mobile.scrollview.css" />
+
+		<script type="text/javascript" src="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/resources/handshake.js"></script>
+		<script type="text/javascript" src="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/resources/config.js"></script>
+
+		<!-- wp_head start -->
+		<meta name='robots' content='noindex,nofollow' />
+		<script type="text/javascript">
+			function wiziappGetCookie(c_name){
+				var i,x,y,ARRcookies=document.cookie.split(";");
+				for (i=0;i<ARRcookies.length;i++){
+					x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+					y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+					x=x.replace(/^\s+|\s+$/g,"");
+					if (x==c_name){
+						return unescape(y);
+					}
+				}
+			}
+
+			function wiziappSetCookie(c_name,value,exdays){
+				var exdate=new Date();
+				exdate.setDate(exdate.getDate() + exdays);
+				var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+				document.cookie=c_name + "=" + c_value;
+			}
+
+			(function() {
+				var appstoreUrl = "http://adigabai.com";
+				// Check if the cookie is there
+				var cookieName = "WIZI_SHOW_APPSTORE_URL";
+				var cookieExists = wiziappGetCookie(cookieName);
+
+				if (cookieExists!=null && cookieExists!=""){
+					// Already seens this nothing to show...
+				} else {
+					wiziappSetCookie(cookieName,appstoreUrl,60*60*24*7);
+					cookieExists = wiziappGetCookie(cookieName);
+					if ( cookieExists ){
+						// We are able to create the cookie, so it is ok
+						var res = confirm("Download our free app from the AppStore");
+						if (res == true) { location.replace(appstoreUrl); }
+					}
+				}
+			})();
+		</script>
+
+		<link rel='stylesheet' id='admin-bar-css'  href='http://blogs.wiziapp.net/wp-includes/css/admin-bar.css?ver=20110622' type='text/css' media='all' />
+		<link rel='stylesheet' id='NextGEN-css'  href='http://blogs.wiziapp.net/wp-content/plugins/nextgen-gallery/css/nggallery.css?ver=1.0.0' type='text/css' media='screen' />
+		<link rel='stylesheet' id='shutter-css'  href='http://blogs.wiziapp.net/wp-content/plugins/nextgen-gallery/shutter/shutter-reloaded.css?ver=1.3.2' type='text/css' media='screen' />
+		<script type='text/javascript' src='http://blogs.wiziapp.net/wp-includes/js/l10n.js?ver=20101110'></script>
+		<script type='text/javascript'>
+			/* <![CDATA[ */
+			var shutterSettings = {
+				msgLoading: "L O A D I N G",
+				msgClose: "Click to Close",
+				imageCount: "1"
+			};
+			/* ]]> */
+		</script>
+		<script type='text/javascript' src='http://blogs.wiziapp.net/wp-content/plugins/nextgen-gallery/shutter/shutter-reloaded.js?ver=1.3.2'></script>
+		<script type='text/javascript' src='http://blogs.wiziapp.net/wp-includes/js/jquery/jquery.js?ver=1.6.1'></script>
+		<script type='text/javascript' src='http://blogs.wiziapp.net/wp-content/plugins/nextgen-gallery/js/jquery.cycle.all.min.js?ver=2.88'></script>
+		<script type='text/javascript' src='http://blogs.wiziapp.net/wp-content/plugins/nextgen-gallery/js/ngg.slideshow.min.js?ver=1.05'></script>
+		<script type='text/javascript' src='http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/scripts/jquery.easing.1.3.js?ver=1.2.6'></script>
+		<script type='text/javascript' src='http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/scripts/jquery.mobile-1.1.1.js?ver=1.2.6'></script>
+		<script type='text/javascript' src='http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/scripts/jquery.mobile.scrollview.js?ver=1.2.6'></script>
+		<script type='text/javascript' src='http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/scripts/scrollview.js?ver=1.2.6'></script>
+
+		<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://blogs.wiziapp.net/xmlrpc.php?rsd" />
+		<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://blogs.wiziapp.net/wp-includes/wlwmanifest.xml" />
+		<link rel='index' title='Adi Local Dev Site' href='http://blogs.wiziapp.net/' />
+		<meta name="generator" content="WordPress 3.2.1" />
+
+		<meta name='NextGEN' content='1.8.4' />
+		<style type="text/css" media="print">#wpadminbar { display:none; }</style>
+		<style type="text/css" media="screen">
+			html { margin-top: 28px !important; }
+			* html body { margin-top: 28px !important; }
+		</style>
+		<!-- wp_head end -->
+	</head>
+	<body class="home blog logged-in">
+		<div data-role="page" id="splash" data-fullscreen="true">
+			<div class="splash">
+				<img src="http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/resources/default.png" />
+			</div><!-- /content -->
+		</div><!-- /page -->
+
+		<div data-role="page">
+			<div data-role="header">
+				<h1>Page Title</h1>
+			</div><!-- /header -->
+
+			<div data-role="content">
+				<p>Page content goes here.</p>
+			</div><!-- /content -->
+
+			<div data-role="footer" class="nav-tabbar">
+				<div data-role="navbar" class="nav-tabbar" data-grid="d">
+					<ul>
+						<li><a href="http://blogs.wiziapp.net/?wiziapp/content/list/posts/recent&ap=1&output=html&fts/" id="t4838" data-icon="custom" data-page-type="list" class="ui-btn-active ui-state-persists" data-transition="fade">Latest</a></li>
+						<li><a href="http://blogs.wiziapp.net/?wiziapp/content/list/categories&ap=1&output=html&fts/" id="t4839" data-icon="custom" data-page-type="list"  data-transition="fade">Categories</a></li>
+						<li><a href="http://blogs.wiziapp.net/?wiziapp/content/list/pages&ap=1&output=html&fts/" id="t4840" data-icon="custom" data-page-type="list"  data-transition="fade">Pages</a></li>
+						<li><a href="search&ap=1&output=html&fts/" id="t4841" data-icon="custom" data-page-type="search"  data-transition="fade">Search</a></li>
+						<li><a href="#" id="more-tab" data-icon="custom" data-page-type="expendedList" data-transition="fade">More</a></li>
+					</ul>
+				</div><!-- /tabbar-->
+
+			</div>
+		</div><!-- /page -->
+
+		<script type="text/javascript">
+			jQuery(document).ready(function($) {
+				// iOS5
+				jQuery.mobile.touchOverflowEnabled = true;
+
+				//$('.nav-tabbar a').live('click', navigateToTabbar);
+				// Load the first screen
+				jQuery('.ui-btn-active:first').click();
+			});
+
+			jQuery(":jqmData(role='page')" ).live("pageshow", function(event) {
+				var $page = jQuery(this);
+				jQuery.each($page.find('.valign_attribute'), function(index, item){
+					var $el = jQuery(item);
+					var height = $el.css('height');
+					if ( height != "auto" ){
+						$el.css({
+							'line-height': parseInt($el.css('height')) + 'px'
+						});
+					}
+					$el = null;
+				});
+			});
+		</script>
+		<script type='text/javascript' src='http://blogs.wiziapp.net/wp-includes/js/admin-bar.js?ver=20110131'></script>
+	</body>
+</html>
+<style type="text/css">
+	#t4838 .ui-icon{background:url(http://cdn.wiziapp.net/images/app/tabicons/iconRecent_grey.png) 50% 50% no-repeat;}#t4838.ui-btn-active .ui-icon,#t4838.ui-btn-hover-a .ui-icon{background:url(http://cdn.wiziapp.net/images/app/tabicons/iconRecent_on.png) 50% 50% no-repeat;}#t4839 .ui-icon{background:url(http://cdn.wiziapp.net/images/app/tabicons/iconCategories_grey.png) 50% 50% no-repeat;}#t4839.ui-btn-active .ui-icon,#t4839.ui-btn-hover-a .ui-icon{background:url(http://cdn.wiziapp.net/images/app/tabicons/iconCategories_on.png) 50% 50% no-repeat;}#t4840 .ui-icon{background:url(http://cdn.wiziapp.net/images/app/tabicons/iconPages_grey.png) 50% 50% no-repeat;}#t4840.ui-btn-active .ui-icon,#t4840.ui-btn-hover-a .ui-icon{background:url(http://cdn.wiziapp.net/images/app/tabicons/iconPages_on.png) 50% 50% no-repeat;}#t4841 .ui-icon{background:url(http://cdn.wiziapp.net/images/app/tabicons/iconSearch_grey.png) 50% 50% no-repeat;}#t4841.ui-btn-active .ui-icon,#t4841.ui-btn-hover-a .ui-icon{background:url(http://cdn.wiziapp.net/images/app/tabicons/iconSearch_on.png) 50% 50% no-repeat;}#more-tab .ui-icon{background:url(http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/resources/icons/iconMore_grey.png) 50% 50% no-repeat;}#more-tab.ui-btn-active .ui-icon, #more-tab.ui-btn-hover-a .ui-icon{background:url(http://blogs.wiziapp.net/wp-content/plugins/wiziapp/themes/webapp/resources/icons/iconMore_on.png) 50% 50% no-repeat;}
+</style>

@@ -28,41 +28,29 @@ class WiziappThumbnailHandler{
 		WiziappLog::getInstance()->write('INFO', "Getting the post thumbnail: {$this->post}", "wiziapp_doPostThumbnail");
 		@include_once(ABSPATH . 'wp-includes/post-thumbnail-template.php');
 
-		$metabox_setting = get_post_meta( $this->post, 'wiziapp_metabox_setting', TRUE);
-		if ( isset($metabox_setting['is_user_chosen']) && intval( $metabox_setting['is_user_chosen'] ) ) {
-			// If Bloger self choose Image, from the Image to do Thumbnail
-			$image_id = ( isset( $metabox_setting['post_thumbnail'] ) ) ? intval( $metabox_setting['post_thumbnail'] ) : 0;
-			if ( $image_id ) {
-				$image_url = wp_get_attachment_url( $image_id );
-				if ( $image_url ) {
-					$foundImage = $this->_processImageForThumb($image_url);
-				}
+		if ( function_exists('get_the_post_thumbnail') ) {
+			//first we try to get the wordpress post thumbnail
+			WiziappLog::getInstance()->write('INFO', "The blog supports post thumbnails (get_the_post_thumbnail method exists)", "WiziappThumbnailHandler.doPostThumbnail");
+			if ( has_post_thumbnail($this->post) ) {
+				$foundImage = $this->_tryWordpressThumbnail();
 			}
 		} else {
-			if ( function_exists('get_the_post_thumbnail') ) {
-				//first we try to get the wordpress post thumbnail
-				WiziappLog::getInstance()->write('INFO', "The blog supports post thumbnails (get_the_post_thumbnail method exists)", "WiziappThumbnailHandler.doPostThumbnail");
-				if ( has_post_thumbnail($this->post) ) {
-					$foundImage = $this->_tryWordpressThumbnail();
-				}
-			} else {
-				WiziappLog::getInstance()->write('WARNING', "get_the_post_thumbnail method does not exists", "wiziapp_doPostThumbnail");
-			}
+			WiziappLog::getInstance()->write('WARNING', "get_the_post_thumbnail method does not exists", "wiziapp_doPostThumbnail");
+		}
 
-			if ( ! $foundImage) {
-				// if no wordpress thumbnail, we take the thumb from a gallery
-				$foundImage = $this->_tryGalleryThumbnail();
-			}
+		if ( ! $foundImage) {
+			// if no wordpress thumbnail, we take the thumb from a gallery
+			$foundImage = $this->_tryGalleryThumbnail();
+		}
 
-			if ( ! $foundImage ) {
-				// if no thumb from a gallery, we take the thumb from a video
-				$foundImage = $this->_tryVideoThumbnail();
-			}
+		if ( ! $foundImage ) {
+			// if no thumb from a gallery, we take the thumb from a video
+			$foundImage = $this->_tryVideoThumbnail();
+		}
 
-			if ( !$foundImage ) {
-				// if no thumb from a video, we take the thumb from a single image
-				$foundImage = $this->_trySingleImageThumbnail();
-			}
+		if ( ! $foundImage ) {
+			// if no thumb from a video, we take the thumb from a single image
+			$foundImage = $this->_trySingleImageThumbnail();
 		}
 
 		if ( ! $foundImage ) {

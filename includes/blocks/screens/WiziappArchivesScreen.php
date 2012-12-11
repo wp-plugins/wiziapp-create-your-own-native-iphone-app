@@ -100,6 +100,8 @@ class WiziappArchivesScreen extends WiziappBaseScreen{
 		}
 		$title = $year;
 
-		$this->output($this->prepareSection(array($allMonths), $title, "List", false, true));
+		$back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/archive'), 'text' => $this->getTitle('archive'));
+
+		$this->output($this->prepareSection(array($allMonths), $title, "List", false, true), $back);
 	}
 }

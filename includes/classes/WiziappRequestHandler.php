@@ -10,6 +10,7 @@
 *
 */
 class WiziappRequestHandler {
+
 	private $errorReportingLevel = 0;
 
 	function __construct() {
@@ -18,7 +19,6 @@ class WiziappRequestHandler {
 	}
 
 	function logInitRequest(){
-		//WiziappLog::getInstance()->write('INFO', "Got a request for the blog: ", "remote.WiziappRequestHandler.logInitRequest");
 		if (strpos($_SERVER['QUERY_STRING'], 'wiziapp/') !== FALSE){
 			global $restricted_site_access;
 			if ( !empty($restricted_site_access) ){
@@ -38,8 +38,11 @@ class WiziappRequestHandler {
 	* @params WP object  the main wordpress object is passed by reference
 	*/
 	function handleRequest($wp){
-		//function handleRequest(){
-		//$request = $_SERVER['REQUEST_URI'];
+		if ( WiziappContentHandler::getInstance()->is_show_download() ) {
+			$this->_routeRequest('wiziapp/content/downloadapp');
+			exit;
+		}
+
 		$request = $wp->request;
 		if (empty($request)){
 			// doesn't rewrite the requests, try to get the query string
@@ -49,7 +52,7 @@ class WiziappRequestHandler {
 		WiziappLog::getInstance()->write('DEBUG', "Got a request for the blog: ".print_r($request, TRUE),
 			"WiziappRequestHandler.handleRequest");
 
-		if (($pos = strpos($request, 'wiziapp/')) !== FALSE){
+		if ( ( $pos = strpos($request, 'wiziapp/') ) !== FALSE ){
 			if ($pos != 0){
 				$request = substr($request, $pos);
 			}
@@ -89,7 +92,6 @@ class WiziappRequestHandler {
 			}
 
 			if ( $this->errorReportingLevel !== 0 ){
-				//$header['message'] = $error['message'];
 				$header['message'] = implode('::', $error);
 			}
 
@@ -97,6 +99,10 @@ class WiziappRequestHandler {
 			exit();
 		}
 	}
+
+    function isAjaxRequest() {
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH']==='XMLHttpRequest';
+    }
 
 	/*
 	* Serves as a routing table, if the incoming request has our prefix,
@@ -127,10 +133,6 @@ class WiziappRequestHandler {
 				$parameter_value = (isset($req[4])) ? $req[4] : '';
 				$cms_user_account_handler = new WiziappCmsUserAccountHandler;
 				$cms_user_account_handler->pushSubscription($parameter_key, $parameter_value);
-			/*
-			} elseif ($action == 'register') {
-				$this->runScreenBy('System', 'Register', null);
-			*/
 			} elseif ($action == 'forgot_pass'){
 				$this->runScreenBy('System', 'ForgotPassword', null);
 			}
@@ -141,10 +143,6 @@ class WiziappRequestHandler {
 
 			// Prepare the Key to search the Content in Cache.
 			$key = str_replace('/', '_', $request);
-			/*
-			$qs = str_replace('&', '_', $_SERVER['QUERY_STRING']);
-			$key .= str_replace('=', '', $qs);
-			*/
 			if (function_exists('is_multisite') && is_multisite()) {
 				global $wpdb;
 				$key .= $wpdb->blogid;
@@ -181,6 +179,7 @@ class WiziappRequestHandler {
 				'content' => '',
 				'is_new_content' => '0',
 			);
+
 			$cache->getContent($output);
 
 			if ($output['content'] == '') {
@@ -203,8 +202,6 @@ class WiziappRequestHandler {
 			* if they weren't able to process the request due to missing parameters and such.
 			*/
 			exit();
-			// } elseif( $service == 'rate' ) {
-			// wiziapp_rate_content($req);
 		} elseif ($service == 'getrate') {
 			//wiziapp_the_rating_wrapper($req);
 			echo " "; // Currently disabled
@@ -213,17 +210,15 @@ class WiziappRequestHandler {
 			WiziappImageServices::getByRequest();
 			exit();
 		} elseif ($service == "getthumb") {
-			$wth = new WiziappThumbnailHandler($req[2]);
+			$wth = new WiziappThumbnailHandler($action);
 			$wth->doPostThumbnail();
 			exit();
 		} elseif($service == 'post') {
 			if ($req[3] == "comments") {
-				$this->runService('Comment', 'getCount', $req[2]);
+				$this->runService('Comment', 'getCount', $action);
 			}
 		} elseif($service == 'comment') {
 			$this->runService('Comment', 'add', $request);
-			/**} elseif ( $service == 'search' ){
-			$this->_routeContent($req); */
 		} elseif ($service == 'keywords') {
 			$this->runScreenBy('Search', 'Keywords', null);
 		} elseif ($service == 'system') {
@@ -248,6 +243,8 @@ class WiziappRequestHandler {
 			} else if ( $action == 'msgUser' ){
 				$this->runService('System', 'displayUsersAdminMessage');
 			}
+		} elseif ($service == 'external') {
+			$this->runScreenBy('External', 'Link', urldecode($req[2]));
 		}
 	}
 
@@ -258,10 +255,14 @@ class WiziappRequestHandler {
 		$output['headers'][] = 'Cache-Control: no-cache, must-revalidate';
 		$output['headers'][] = 'Expires: ' . gmdate("D, d M Y H:i:s", time() + (60 * 60 * 24)) . ' GMT';
 		$type = $req[2];
-		$id = $req[3];
 
 		if ( $type != 'video' ){
-			$output['headers'][] = 'Content-Type: application/json; charset: utf-8';
+			if ( WiziappContentHandler::getInstance()->isHTML() ){
+				// WebApp
+				$output['headers'][] = 'Content-Type: text/html; charset: utf-8';
+			} else {
+				$output['headers'][] = 'Content-Type: application/json; charset: utf-8';
+			}
 		} else {
 			$output['headers'][] = 'Content-Type: text/html; charset: utf-8';
 		}
@@ -274,7 +275,9 @@ class WiziappRequestHandler {
 			} elseif ($type == 'about'){
 				$this->runScreenBy('System', 'About', null);
 			} elseif ( $type == 'video' ){
-				$this->runScreenBy('Video', 'Id', $id);
+				$this->runScreenBy('Video', 'Id', $req[3]);
+			} elseif($type == "downloadapp"){
+				$this->runScreen('DownloadApp');
 			} elseif ($type == "list"){
 				$sub_type = $req[3];
 				WiziappLog::getInstance()->write('INFO', "Listing... The sub type is: {$sub_type}",
@@ -298,7 +301,8 @@ class WiziappRequestHandler {
 					$this->runScreen('Pages');
 				} elseif ($sub_type == "allpages"){
 					$this->runService('Lists', 'pages');
-				} elseif ($sub_type == "post") {  // list/post/{id}/comments
+				} elseif ($sub_type == "post"){
+					// list/post/{id}/comments
 					$show = $req[5];
 					if ($show == "comments"){
 						if (isset($req[6]) && $req[6] != 0){
@@ -324,7 +328,7 @@ class WiziappRequestHandler {
 				} elseif ($sub_type == "user"){
 					$show = $req[5];
 					if ($show == "comments"){
-						$this->runScreenBy('Posts', 'MyComments', $req[4]);
+						$this->runScreenBy('Comments', 'MyComments', $req[4]);
 					} elseif ($show == "commented"){
 						$this->runScreenBy('Posts', 'AuthorCommented', $req[4]);
 					}

@@ -21,28 +21,30 @@ class WiziappCacheFile extends WiziappCache
 		WiziappLog::getInstance()->write('INFO', "Did not find APC installed, using File caching", "WiziappCacheFile.__construct");
 
 		$uploads_dir = wp_upload_dir();
-		$fileDir = str_replace('WP_ROOT_PATH/wp-content/uploads', $uploads_dir['basedir'], $this->_fileDir);
+		$this->_fileDir = str_replace('WP_ROOT_PATH/wp-content/uploads', $uploads_dir['basedir'], $this->_fileDir);
 
-		if ( ! file_exists($fileDir)) {
-			if ( ! @mkdir($fileDir, 0777, true)) {
+		if ( ! file_exists($this->_fileDir)) {
+			if ( ! @mkdir($this->_fileDir, 0777, true)) {
+				WiziappLog::getInstance()->write('ERROR', 'Could not create the wiziapp file caching directory: '.$this->_fileDir, "WiziappCacheFile.__construct");
 				$this->_is_enabled = FALSE;
-				WiziappLog::getInstance()->write('ERROR', 'Could not create the wiziapp file caching directory: '.$fileDir, "WiziappCacheFile.__construct");
-				return;
 			}
-		} else {
-			if ( ! @is_readable($fileDir) || ! @is_writable($fileDir)) {
-				if ( ! @chmod($fileDir, 0777)) {
-					$this->_is_enabled = FALSE;
-					WiziappLog::getInstance()->write('ERROR', 'The upload directory exists, but its not readable or not writable: '.$fileDir, "WiziappCacheFile.__construct");
-					return;
-				}
+		} elseif ( ! @is_readable($this->_fileDir) || ! @is_writable($this->_fileDir)) {
+			if ( ! @chmod($this->_fileDir, 0777)) {
+				WiziappLog::getInstance()->write('ERROR', 'The upload directory exists, but its not readable or not writable: '.$this->_fileDir, "WiziappCacheFile.__construct");
+				$this->_is_enabled = FALSE;
 			}
 		}
 
-		$this->_fileDir = $fileDir;
+		if ( ! WiziappConfig::getInstance()->wiziapp_cache_enabled ) {
+			$this->_is_enabled = FALSE;
+		}
 	}
 
 	public function delete_old_files() {
+		if ( ! ( file_exists($this->_fileDir) && is_readable($this->_fileDir) && is_writable($this->_fileDir) ) ) {
+			return;
+		}
+
 		if ($handle = opendir($this->_fileDir))	{
 			// loop over the directory.
 			while (($file = readdir($handle)) !== false) {

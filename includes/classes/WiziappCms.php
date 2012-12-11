@@ -31,7 +31,7 @@ class WiziappCms {
 			WiziappConfig::getInstance()->app_token = $tokenResponse['plugin_token'];
 		}
 		$common_settings = array(
-			'app_id', 'main_tab_index', 'settings_done', 'app_live', 'app_description', 'appstore_url', 'app_icon', 'app_name', 'email_verified',
+			'app_id', 'main_tab_index', 'settings_done', 'app_live', 'app_description', 'appstore_url', 'playstore_url', 'app_icon', 'app_name', 'email_verified',
 			'thumb_min_size', 'display_download_from_appstore', 'notify_on_new_post', 'notify_on_new_page', 'push_message',
 		);
 		$this->_apply_setting($common_settings, $tokenResponse);

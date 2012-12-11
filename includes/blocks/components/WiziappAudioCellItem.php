@@ -33,7 +33,24 @@ class WiziappAudioCellItem extends WiziappLayoutComponent{
     * @var string
     */
     var $baseName = 'audioCellItem';
-    
+
+    public $htmlTemplate = '<li class="audioCellItem __ATTR_class__ cellItem default">
+                                <span class="attribute text_attribute imageURL __ATTR_classOf-imageURL__" data-image-src="__ATTR_imageURL__">
+                                    <img class="hidden" src="" data-class="__ATTR_classOf-imageURL__"/>
+                                </span>
+                                <span class="__ATTR_classOf-title__ title attribute text_attribute">__ATTR_title__</span>
+                                <span class="__ATTR_classOf-duration__ duration attribute text_attribute">__ATTR_duration__</span>
+                                <span class="audio_button_play audio_play button_attribute attribute" data-action="play_audio" data-audio-id="audio-obj-__ATTR_id__"></span>
+                                <span class="audio_button_stop audio_stop attribute" data-action="stop_audio" data-audio-id="audio-obj-__ATTR_id__"></span>
+                                <span class="audio_slider"></span>
+                                <span class="hidden">
+                                    <audio id="audio-obj-__ATTR_id__">
+                                      <source src="__ATTR_directActionURL__" type="audio/mp3" />
+                                      Your browser does not support the audio tag.
+                                    </audio>
+                                </span>
+                            </li>';
+
     /**
     * constructor 
     * 
@@ -96,6 +113,13 @@ class WiziappAudioCellItem extends WiziappLayoutComponent{
 		$actionURL = WiziappLinks::fixAudioLink($this->data[0]['actionURL']);
 		
         return $actionURL;
+    }
+
+    function get_directActionURL_attr(){
+        $actionURL = $this->get_actionURL_attr();
+        //cmd://open/audio/http%3A%2F%2Ftest.comobix.com%2Fblogtest5%2Fwp-content%2Fuploads%2F2011%2F05%2FGeorge-Thorogood-Bad-To-The-Bone.mp3
+        $actionURL = str_replace('cmd://open/audio/', '', $actionURL);
+        return rawurldecode($actionURL);
     }
     
 }

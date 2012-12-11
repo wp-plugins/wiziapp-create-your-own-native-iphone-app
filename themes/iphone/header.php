@@ -21,33 +21,11 @@
 			wp_head();
 		}
 	?>
-	<style type="text/css">
-		<?php
-			$baseCssFileName = dirname(__FILE__) . '/style.css';
-//                        $themeName = is_rtl() ? WiziappConfig::getInstance()->wiziapp_rtl_theme_name : WiziappConfig::getInstance()->wiziapp_theme_name;
-                        $themeName = (WiziappConfig::getInstance()->rtl == 0) ? WiziappConfig::getInstance()->wiziapp_theme_name : WiziappConfig::getInstance()->wiziapp_rtl_theme_name;
-                        WiziappLog::getInstance()->write('DEBUG', "themeName: $themeName", 'header.code');
-			$cssFileName = dirname(__FILE__) . '/' . $themeName . '.css';
-
-			$baseFile = file_get_contents($baseCssFileName);
-			$file = file_get_contents($cssFileName);
-			$css = $baseFile . $file;
-
-			// remove comments
-			$css = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $css);
-			// remove tabs, spaces, newlines, etc.
-			$css = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $css);
-			// Get CDN Server address
-			$cdnServer = WiziappConfig::getInstance()->getCdnServer();
-			$css = str_replace("@@@WIZIAPP_CDN@@@", $cdnServer, $css);
-
-			if ( isset($_GET['sim']) && isset($_GET['sim']) == 1 ) {
-				$css .= ' body{ overflow-y: hidden; }';
-			}
-
-			echo $css;
-		?>
-	</style>
+	<script type="text/javascript">
+		jQuery.mobile.autoInitializePage = false;
+	</script>
+	<link rel="stylesheet" href="<?php echo get_bloginfo('template_url').'/style.css'; ?>" type="text/css" />
+	<link rel="stylesheet" href="<?php echo get_bloginfo('template_url').'/' . WiziappConfig::getInstance()->wiziapp_theme_name . '.css'; ?>" type="text/css" />
 	<link id="themeCss" rel="stylesheet" href="https://<?php echo WiziappConfig::getInstance()->api_server . '/application/postViewCss/'.WiziappConfig::getInstance()->app_id.'?v=' . WIZIAPP_VERSION . '&c=' . (WiziappConfig::getInstance()->configured ? 1 : 0);  ?>" type="text/css" />
 </head>
 <body>

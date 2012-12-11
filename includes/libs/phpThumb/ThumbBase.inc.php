@@ -103,7 +103,7 @@ abstract class ThumbBase
 		$this->importedFunctions	= array();
 		$this->errorMessage			= null;
 		$this->hasError				= false;
-		$this->fileName				= $fileName;
+		$this->fileName				= urldecode($fileName);
 		$this->remoteImage			= false;
 		$this->isDataStream			= $isDataStream;
 		

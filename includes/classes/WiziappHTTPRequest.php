@@ -28,7 +28,7 @@ class WiziappHTTPRequest{
 		 * Wordpress 2.7 and above have a built in class for that.
 		 * Using it will let us be more flexible with our requirements.
 		 */
-		if(!class_exists('WP_Http', false)) {
+		if ( ! class_exists('WP_Http', false) ) {
 			include_once ABSPATH . WPINC . '/http.php';
 		}
 

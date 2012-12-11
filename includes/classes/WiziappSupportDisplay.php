@@ -286,11 +286,11 @@ class WiziappSupportDisplay{
 						</thead>
 						<tbody>
 							<?php
-								echo $this->getStatusRow('WritingPermissions', 'Writing Permissions');
-								echo $this->getStatusRow('PhpGraphicRequirements', 'GD / ImageMagick', 'v_odd');
-								echo $this->getStatusRow('AllowUrlFopen', 'allow_url_fopen');
-								echo $this->getStatusRow('WebServer', 'Web Server', 'v_odd');
-								echo $this->getStatusRow('Connection', 'Network Connection');
+								echo $this->_getStatusRow('WritingPermissions', 'Writing Permissions');
+								echo $this->_getStatusRow('PhpGraphicRequirements', 'GD / ImageMagick', 'v_odd');
+								echo $this->_getStatusRow('AllowUrlFopen', 'allow_url_fopen');
+								echo $this->_getStatusRow('WebServer', 'Web Server', 'v_odd');
+								echo $this->_getStatusRow('Connection', 'Network Connection');
 							?>
 						</tbody>
 					</table>
@@ -305,30 +305,47 @@ class WiziappSupportDisplay{
 		</div>
 		<?php
 	}
-	private function getStatusRow($check_name, $display_name, $extra_class = ''){
+
+	private function _getStatusRow($check_name, $display_name, $extra_class = ''){
 		$desc = '';
 		$passed = TRUE;
 
 		$testMethod = 'test'.$check_name;
 		$test = $this->checker->{$testMethod}();
+
 		if ( WiziappError::isError($test) ){
 			$passed = FALSE;
-			$desc .= $test->getHTML();
+			$desc = $test->getHTML();
 		}
 
-		$statusClass = ($passed) ? 'success' : 'failed';
-		$rowButtons = ($passed) ? '' : '<a href="" class="details">Details</a><span class="sep">&nbsp;|&nbsp;</span><a href="" class="retry">Retry</a>';
-
-		$html = "<tr class=\"{$extra_class}\">
-							<td class=\"v_first-col\">{$display_name}</td>
-							<td class=\"status_col\">
-								<div class=\"{$statusClass}\"></div>
-							</td>
-							<td>{$rowButtons}</td>
-						</tr>";
-		if ( !empty($desc) ){
-			$html .= '<tr class="details ' . $extra_class . '"><td colspan="3">' . $desc . '</td></tr>';
+		ob_start();
+		?>
+		<tr class="<?php echo $extra_class; ?>">
+			<td class="v_first-col"><?php echo $display_name; ?></td>
+			<td class="status_col">
+				<div class="<?php echo $passed ? 'success' : 'failed'; ?>"></div>
+			</td>
+			<td>
+				<?php
+					if ( ! $passed){
+					?>
+					<a href="" class="details">Details</a>
+					<span class="sep">&nbsp;|&nbsp;</span>
+					<a href="" class="retry">Retry</a>
+					<?php
+					}
+				?>
+			</td>
+		</tr>
+		<?php
+		if ( ! empty($desc) ){
+		?>
+		<tr class="details ' . $extra_class . '">
+			<td colspan="3"><?php echo $desc; ?></td>
+		</tr>
+		<?php
 		}
-		return $html;
+
+		return ob_get_clean();
 	}
 }

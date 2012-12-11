@@ -147,8 +147,3 @@ class WiziappListsServices{
 		echo json_encode(array('header' => $header, 'links' => $linksSummary, 'total'=>$total));
 	}
 }
-
-
-
-
-

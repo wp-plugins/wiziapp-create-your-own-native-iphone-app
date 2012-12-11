@@ -7,6 +7,7 @@
 */
 
 class WiziappBaseScreen{
+
 	protected $type = 'list';
 
 	protected $name = '';
@@ -35,11 +36,11 @@ class WiziappBaseScreen{
 		$key = $sections ? 'sections' : 'items';
 
 		$grouped = ($sections || $force_grouped) ? TRUE : FALSE;
-		$css_class_name = empty($css_class) ? (($grouped) ? 'screen' : 'flat_screen') : $css_class;
+		$css_class_name = empty($css_class) ? ( $grouped ? 'screen' : '' ) : $css_class;
 
 		if ($grouped){
 			// Verify that the app supports group, the theme might force everything to be not grouped
-			if (!WiziappConfig::getInstance()->allow_grouped_lists || $title == 'Links'){
+			if ( ! WiziappConfig::getInstance()->allow_grouped_lists || $title == 'Links' ){
 				$grouped = FALSE;
 			}
 		}
@@ -57,15 +58,101 @@ class WiziappBaseScreen{
 			)
 		);
 
-		if (!$hide_separator) {
+		if ( ! $hide_separator) {
 			$screen['screen']['separatorColor'] = WiziappConfig::getInstance()->sep_color;
 		}
 
 		return $screen;
 	}
 
-	public function output($screen_content){
-		echo json_encode($screen_content);
+	private function _hex2rgba($color){
+		if ($color[0] == '#'){
+			$color = substr($color, 1);
+		}
+		if (strlen($color) == 8){
+			$r = $color[0].$color[1];
+			$g = $color[2].$color[3];
+			$b = $color[4].$color[5];
+			$a = $color[6].$color[7];
+		} elseif (strlen($color) == 5) {
+			$r = $color[0].$color[0];
+			$g = $color[1].$color[1];
+			$b = $color[2].$color[2];
+			$a = $color[3].$color[4];
+		} else {
+			// Not the supported format
+			return $color;
+		}
+		$r = hexdec($r);
+		$g = hexdec($g);
+		$b = hexdec($b);
+
+		$a = round(hexdec($a) / 255, 1);
+		$rgba = "rgba({$r},{$g},{$b},{$a})";
+
+		return $rgba;
+	}
+
+	public function output($screen_content, $back_content = false){
+		if ( WiziappContentHandler::getInstance()->isHTML() ){
+			$components = '';
+			$gotItems = FALSE;
+			// $sep = '';
+
+			if ( $screen_content['screen']['type'] == 'list' ||
+				$screen_content['screen']['type'] == 'favorites_list' ||
+				$screen_content['screen']['type'] == 'gallery' ){
+
+				/*
+				if ( isset($screen_content['screen']['separatorColor']) ){
+				$sep = '<li class="sep" style="background-color: '.$this->_hex2rgba($screen_content['screen']['separatorColor']).';"></li>'.PHP_EOL;
+				}
+				*/
+
+				if ( empty($screen_content['screen']['items']) ){
+					// We have sections
+					if ( ! empty($screen_content['screen']['sections']) ){
+						for ($s = 0, $total = count($screen_content['screen']['sections']); $s < $total; ++$s){
+							$components .= '<ul data-role="listview">'.PHP_EOL;
+
+							if ( ! empty($screen_content['screen']['sections'][$s]['section']['title']) ){
+								$components .= '<li data-role="list-divider">'.$screen_content['screen']['sections'][$s]['section']['title'].'</li>'.PHP_EOL;
+							}
+
+							$components .= implode(PHP_EOL, $screen_content['screen']['sections'][$s]['section']['items']);
+							$components .= '</ul>'.PHP_EOL;
+
+							$gotItems = TRUE;
+						}
+					}
+				} else {
+					$components .= '<ul data-role="listview">'.PHP_EOL;
+					$components .= implode(PHP_EOL, $screen_content['screen']['items']);
+					$components .= '</ul>'.PHP_EOL;
+
+					$gotItems = TRUE;
+				}
+			} else {
+				// type == 'about'
+				$gotItems = TRUE;
+			}
+
+			if ( ! $gotItems ){
+				$screen_content['screen']['class'] = "{$screen_content['screen']['class']} {$screen_content['screen']['class']}_empty";
+			}
+
+			if ($back_content !== false && !isset($back_content['text'])){
+				$back_content['text'] = false;
+			}
+
+			// Generate full html page segment
+			global $tabBar;
+			$tabBar = new WiziappTabbarBuilder();
+			require(WIZI_DIR_PATH . 'themes/webapp/' . $screen_content['screen']['type'] . '_screen.php');
+		} else {
+			// Output the normal json
+			echo json_encode($screen_content);
+		}
 	}
 
 	/**

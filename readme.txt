@@ -3,7 +3,7 @@ Contributors: wiziapp
 Tags: IPhone, Mobile, iPhone app, wptouch, AppStore, App Store, iphone theme, mobile theme, mobile app, Apple, Smartphone
 Requires at least: 3.2
 Tested up to: 3.4
-Stable tag: v1.3.1c
+Stable tag: v2.0.0a
 License: GPLv2
 
 Turn your WordPress into a Mobile Native iPhone App and be available on the itunes App Store. Install now and see a live simulation of your iPhone App

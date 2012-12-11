@@ -88,6 +88,8 @@ class WiziappLayoutComponent{
 
 	var $attrIgnoreAddOverride = array();
 
+    public $htmlTemplate = '';
+
 	/**
 	* Initilize the component data and start the processing
 	*
@@ -115,13 +117,67 @@ class WiziappLayoutComponent{
 		return $this->valid;
 	}
 
+	private function processAttribute($matches){
+		$attrName = $matches[2];
+		if ( ! isset($matches[2]) ){
+			return '';
+		}
+
+		if ( isset($this->attributes[$attrName]) ){
+			return $this->attributes[$attrName];
+		}
+
+		if ( strpos($attrName, 'classOf-') === 0 ){
+			$attr = explode('-', $attrName);
+			$attrName = $attr[1];
+
+			if ( ! isset($this->attributes[$attrName]) ){
+				return 'hidden';
+			}
+
+			$webapp_postfix = '';
+			$postfix_condition =
+			( $this->attributes['class'] === 'featured_post' && $attrName === 'imageURL' ) ||
+			( $this->attributes['class'] === 'general_post' && $attrName === 'numOfComments' ) ||
+			$attrName === 'numOfPosts' ||
+			$attrName === 'title' ||
+			$attrName === 'date';
+			if ( isset($attr[2]) && $attr[2] === 'webapp' && $postfix_condition ){
+				$webapp_postfix = '_webapp';
+			}
+
+			if ( $attrName === 'imageURL' ){
+				$attrName = 'image';
+			}
+
+			return $this->attributes['class'].'_'.$attrName.$webapp_postfix;
+		}
+
+		$methodName = "get_{$attrName}_attr";
+		if ( method_exists($this, $methodName) ){
+			return $this->$methodName();
+		}
+
+		return '';
+	}
+
 	/**
 	* @returns array containing the processed component
 	*/
 	function getComponent(){
-		return array(
-			$this->baseName => $this->attributes,
-		);
+		if ( WiziappContentHandler::getInstance()->isHTML() ){
+            // webapp, load the array to the right template
+            $template = $this->htmlTemplate.PHP_EOL;
+            $regex = '/(__ATTR_)(.*?)(__)/';
+
+            return preg_replace_callback($regex,
+                    array($this, 'processAttribute'),
+                    $template);
+        } else {
+			return array(
+				$this->baseName => $this->attributes,
+			);
+        }
 	}
 
 	/**
@@ -159,10 +215,10 @@ class WiziappLayoutComponent{
 	function getThemeOverrides(){
 		if ( class_exists('WiziappComponentsConfiguration') ){
 			 $attrAdd = WiziappComponentsConfiguration::getInstance()->getAttrToAdd($this->baseName);
+
 			if ( isset($this->attrIgnoreAddOverride[$this->layout]) ){
 				foreach($attrAdd as $attr){
-					if ( !isset($this->attrIgnoreAddOverride[$this->layout][$attr])
-							|| $this->attrIgnoreAddOverride[$this->layout][$attr] ){
+					if ( ! isset( $this->attrIgnoreAddOverride[$this->layout][$attr] ) || $this->attrIgnoreAddOverride[$this->layout][$attr] ){
 						$this->themeAddAttr[] = $attr;
 					}
 				}
@@ -202,15 +258,15 @@ class WiziappLayoutComponent{
 		}
 
 		$layoutAttrMap = $this->applyThemeOverrides($layoutAttrMap);
-
 		$attrMap = array_merge($this->baseAttrMap, $layoutAttrMap);
+
 		for ( $a=0, $total=count($attrMap) ; $a < $total ; ++$a ){
 			$methodName = "get_{$attrMap[$a]}_attr";
+
 			if ( method_exists($this, $methodName) ){
 				$value = $this->$methodName();
-				//WiziappLog::getInstance()->write('INFO', "Processing component, method: {$methodName} the value is: {$value}", "wiziappLayoutComponent.process");
-				if ( $value !== null ){
-				  //  WiziappLog::getInstance()->write('INFO', "Since it's not null we are setting it here", "wiziappLayoutComponent.process");
+
+				if ( $value !== NULL ){
 					$this->attributes[$attrMap[$a]] = $this->$methodName();
 				}
 			}
