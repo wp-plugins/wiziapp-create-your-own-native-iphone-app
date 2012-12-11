@@ -33,7 +33,14 @@ class WiziappMoreCellItem extends WiziappLayoutComponent{
     * @var string
     */
     var $baseName = 'showMoreCellItem';
-   
+
+    public $htmlTemplate = '<li class="showMoreCellItem __ATTR_class__ cellItem default" data-icon="false">
+                            <a class="showMore actionURL full" href="__ATTR_actionURL__" rel="inlineUpdate">
+                                <span class="__ATTR_classOf-title__ title attribute text_attribute">__ATTR_title__</span>
+                                <span class="more_activity"></span>
+                            </a>
+                            </li>';
+
     /**
     * constructor 
     * 

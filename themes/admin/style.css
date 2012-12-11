@@ -1,12 +1,12 @@
 .wiziapp_errors_container{
-    background: url(@@@WIZIAPP_CDN@@@/images/cms/PopUpWin.png) no-repeat;
+    background: url(images/PopUpWin.png) no-repeat;
     height: 448px;
     width: 546px;
     overflow: auto;
     z-index: 999;
 }
 .wiziapp_errors_container.s_container{
-    background: url(@@@WIZIAPP_CDN@@@/images/cms/winSmall.png) no-repeat;
+    background: url(images/winSmall.png) no-repeat;
     height: 203px;
     width: 610px;
     overflow: auto;
@@ -30,7 +30,7 @@
 
 .wiziapp_errors_container .wiziapp_error{
     padding: 10px 10px 10px 30px;
-    background: url(@@@WIZIAPP_CDN@@@/images/cms/error_Icon.png) no-repeat left center;
+    background: url(images/error_Icon.png) no-repeat left center;
     border-bottom: 1px inset;
     height: auto;
     width: auto;
@@ -59,18 +59,18 @@
     line-height: 33px;
 }
 .wiziapp_errors_container .report_issue, #wiziapp_report_problem{
-    background: url(@@@WIZIAPP_CDN@@@/images/cms/ReportBTN.png) no-repeat left center;
+    background: url(images/ReportBTN.png) no-repeat left center;
     width: 164px;
 }
 
 .wiziapp_errors_container .retry_processing, #wiziapp_retry_compatibilities{
-    background: url(@@@WIZIAPP_CDN@@@/images/cms/RetryBTN.png) no-repeat left center;
+    background: url(images/RetryBTN.png) no-repeat left center;
     width: 77px;
 }
 .wiziapp_errors_container .buttons .retry_processing{
     color: #fff;
 }
 #wiziapp_close_compatibilities{
-    background: url(@@@WIZIAPP_CDN@@@/images/cms/CancelBTN.png) no-repeat left center;
+    background: url(images/CancelBTN.png) no-repeat left center;
     width: 86px;
 }

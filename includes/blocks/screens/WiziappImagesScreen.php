@@ -88,10 +88,12 @@ class WiziappImagesScreen extends WiziappBaseScreen{
             $dom = new WiziappDOMLoader($image_info['original_code'], get_bloginfo('charset'));
             $imageDOM = $dom->getBody();
             $image = $imageDOM[0]['img']['attributes'];
+            WiziappLog::getInstance()->write('INFO', "image object: " . print_r($image, true), 'WiziappImageScreen');
+            WiziappLog::getInstance()->write('INFO', "image_info : " . print_r($image_info, true), 'WiziappImageScreen');
 
             $pid = $image_info['id'];
             $image['pid'] = $pid;
-            $image['description'] = '';
+            $image['description'] = $this->getImageDescription($image['title'], $post_id, $image);
             $image['alttext'] = $image['title'];
             $image['imageURL'] = $image['src'];
             $image['relatedPost'] = $post_id;
@@ -102,11 +104,59 @@ class WiziappImagesScreen extends WiziappBaseScreen{
             $this->appendComponentByLayout($page, $screen_conf['items'], $image, true);
          }
 
+         if ( WiziappContentHandler::getInstance()->isHTML() ){
+            $page[] = '<li class="imageGalleryCellFinal"></li>';
+         }
+
          $title = str_replace('&amp;', '&', $post->post_title);
          $screen = $this->prepare($page, $title, 'gallery', false, true);
 
+         if ( isset($_GET['album']) ){
+            $back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/galleries'), 'text' => __(WiziappConfig::getInstance()->getScreenTitle('albums'), 'wiziapp'));
+         }
+         else{
+            $back = array('url' => WiziappLinks::postLink($post_id), 'text' => $title);
+         }
+
          $screen['screen']['default'] = 'grid';
          $screen['screen']['sub_type'] = 'image';
-         $this->output($screen);
+         $this->output($screen, $back);
+    }
+
+    public function getImageDescription($title, $post_id, $image){
+        $src = $image['src'];
+        //doesn't support nextgen galleries
+        if ( $images = get_children(array(
+            'post_parent' => $post_id,
+            'post_type' => 'attachment',
+            'numberposts' => -1,
+            'order' => 'ASC',
+            'orderby' => 'ID',
+            'post_mime_type' => 'image',)))
+	{
+            foreach( $images as $image ) {
+             WiziappLog::getInstance()->write('INFO', "image_info : " . print_r($image_info, true), 'WiziappImageScreen');
+             WiziappLog::getInstance()->write('INFO', "image: ". print_r($image,true), 'WiziappImageScreen');
+                if ($title == $image->post_title || $src == $image->guid){
+                    return $image->post_excerpt; // caption
+                    //return $image->post_content; //description
+                }
+            }
+        } elseif(isset($image['data-wiziapp-nextgen-gallery-id'])){ // it's a nextgen gallery
+            $galleryId = $image['data-wiziapp-nextgen-gallery-id'];
+            global $nggdb;
+            $images = array();
+            $ngImages = $nggdb->get_gallery($galleryId);
+            foreach($ngImages as $nggImage){
+                if (strpos($src,$nggImage->filename)){
+                    $desc = (strlen($nggImage->description)>0) ? $nggImage->description : $nggImage->alttext;
+                    return $desc;
+                }
+            }
+	} else {
+                WiziappLog::getInstance()->write('INFO', "no images found for {$post_id}", 'WiziappImageScreen');
+		return false;
+	}
+        return '';
     }
 }

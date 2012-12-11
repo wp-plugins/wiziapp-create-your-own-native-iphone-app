@@ -11,7 +11,7 @@ class WiziappAdminDisplay {
 	* for a fully installed app we show a full menu but until then
 	* way make things more complicated for the user
 	*/
-	public function setup() {
+	public function setup(){
 		$configured = WiziappConfig::getInstance()->settings_done;
 
 		//$configured = FALSE;
@@ -23,8 +23,8 @@ class WiziappAdminDisplay {
 
 		$installer = new WiziappInstaller();
 
-		// if (current_user_can('administrator') && !empty($options['app_token'])) {
-		if ( current_user_can('administrator') ) {
+		// if (current_user_can('administrator') && !empty($options['app_token'])){
+		if ( current_user_can('administrator') ){
 			add_action('admin_notices', array('WiziappAdminDisplay', 'configNotice'));
 			//add_action('admin_notices', array('WiziappAdminDisplay', 'versionCheck'));
 			add_action('admin_notices', array('WiziappAdminDisplay', 'upgradeCheck'));
@@ -32,12 +32,19 @@ class WiziappAdminDisplay {
 			// Add CSS and Javascript for the Wiziapp Activate notice on the Admin panel
 			add_action( 'admin_enqueue_scripts', array('WiziappAdminDisplay', 'styles_javascripts' ) );
 
-			if ( WiziappConfig::getInstance()->finished_processing === FALSE || is_null($configured) ) {
+			if ( WiziappConfig::getInstance()->finished_processing === FALSE || is_null($configured) ){
 				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappPostInstallDisplay', 'display'), $iconPath);
-			} else if ( $installer->needUpgrade() ){
+			} elseif ( $installer->needUpgrade() ){
 				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappUpgradeDisplay', 'display'), $iconPath);
-			} else if ($configured === FALSE){
-				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappGeneratorDisplay', 'display'), $iconPath);
+			} elseif ($configured === FALSE){
+				if (isset($_GET['wiziapp_reload_webapp'])) {
+					add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappWebappDisplay', 'display'), $iconPath);
+				}
+				else {
+					add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappGeneratorDisplay', 'display'), $iconPath);
+				}
+			} elseif (!WiziappConfig::getInstance()->webapp_installed){
+				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappWebappDisplay', 'display'), $iconPath);
 			} else {
 				// We are installed and configured
 				// add_submenu_page('wiziapp', __('dashboard'), __('dashboard'), 'administrator', 'wiziapp_dashboard_display', 'wiziapp_dashboard_display');
@@ -55,6 +62,9 @@ class WiziappAdminDisplay {
 					'wiziapp_my_account_display', array('WiziappAdminDisplay', 'myAccountDisplay'));
 				add_submenu_page('wiziapp', __('Settings'), __('Settings'), 'administrator',
 					'wiziapp_settings_display', array('WiziappAdminDisplay', 'settingsDisplay'));
+
+				add_submenu_page('wiziapp', __('Reactivate'), __('Reactivate'), 'administrator',
+					'wiziapp_webapp_display', array('WiziappWebappDisplay', 'display'));
 			}
 
 			$sd = new WiziappSupportDisplay();
@@ -64,8 +74,8 @@ class WiziappAdminDisplay {
 
 		global $submenu;
 		if ((isset($submenu['wiziapp'][2][0]) && $submenu['wiziapp'][2][0] == 'My Account') ||
-			(isset($submenu['wiziapp'][3][0]) && $submenu['wiziapp'][3][0] == 'My Account')) {
-			if ($submenu['wiziapp'][0][0] == 'Create your App') {
+			(isset($submenu['wiziapp'][3][0]) && $submenu['wiziapp'][3][0] == 'My Account')){
+			if ($submenu['wiziapp'][0][0] == 'Create your App'){
 				array_shift($submenu['wiziapp']);
 			}
 		} else {
@@ -98,7 +108,7 @@ class WiziappAdminDisplay {
 	protected static function includeGeneralDisplay($display_action, $includeSimOverlay = TRUE){
 		$r = new WiziappHTTPRequest();
 		$response = $r->api(array(), '/generator/getToken?app_id=' . WiziappConfig::getInstance()->app_id, 'POST');
-		if ( is_wp_error($response) ) {
+		if ( is_wp_error($response) ){
 			WiziappLog::getInstance()->write('ERROR', 'There was an error getting the token from the admin: '.print_r($response, TRUE), 'WiziappAdminDisplay.includeGeneralDisplay');
 			/**
 			* @todo get the design for the failure screen
@@ -110,7 +120,7 @@ class WiziappAdminDisplay {
 
 		// We are here, so all is good and the main services are up and running
 		$tokenResponse = json_decode($response['body'], TRUE);
-		if (!$tokenResponse['header']['status']) {
+		if (!$tokenResponse['header']['status']){
 			// There was a problem with the token
 			WiziappLog::getInstance()->write('ERROR', 'Got the token from the admin but something is not right::'.print_r($response, TRUE), 'WiziappAdminDisplay.includeGeneralDisplay');
 			echo '<div class="error">' . $tokenResponse['header']['message'] . '</div>';
@@ -141,211 +151,211 @@ class WiziappAdminDisplay {
 			</style>
 			<script type="text/javascript">
 				var WIZIAPP_HANDLER = (function(){
-						jQuery(document).ready(function(){
-								jQuery('.report_issue').click(reportIssue);
-								jQuery('.retry_processing').click(retryProcessing);
+					jQuery(document).ready(function(){
+						jQuery('.report_issue').click(reportIssue);
+						jQuery('.retry_processing').click(retryProcessing);
 
-								jQuery('#general_error_modal').bind('closingReportForm', function(){
-										jQuery(this).removeClass('s_container')
-								});
+						jQuery('#general_error_modal').bind('closingReportForm', function(){
+							jQuery(this).removeClass('s_container')
+						});
+					});
+
+					function wiziappReceiveMessage(event){
+						// Just wrap our handleRequest
+						if ( event.origin == '<?php echo "http://" . WiziappConfig::getInstance()->api_server ?>' ||
+							event.origin ==  '<?php echo "https://" . WiziappConfig::getInstance()->api_server ?>' ){
+							WIZIAPP_HANDLER.handleRequest(event.data);
+						}
+					};
+
+					if ( window.addEventListener ){
+						window.addEventListener("message", wiziappReceiveMessage, false);
+					}
+
+					function retryProcessing(event){
+						event.preventDefault();
+						document.location.reload(true);
+						return false;
+					};
+
+					function reportIssue(event){
+						// Change the current box style so it will enable containing the report form
+						event.preventDefault();
+						var $box = jQuery('#general_error_modal');
+						var $el = $box.find('.report_container');
+
+						var params = {
+							action: 'wiziapp_report_issue',
+							data: $box.find('.wiziapp_error').text()
+						};
+
+						$el.load(ajaxurl, params, function(){
+							var $mainEl = jQuery('#general_error_modal');
+							$mainEl
+							.removeClass('s_container')
+							.find(".errors_container").hide().end()
+							.find(".report_container").show().end();
+							$mainEl = null;
 						});
 
-						function wiziappReceiveMessage(event){
-							// Just wrap our handleRequest
-							if ( event.origin == '<?php echo "http://" . WiziappConfig::getInstance()->api_server ?>' ||
-								event.origin ==  '<?php echo "https://" . WiziappConfig::getInstance()->api_server ?>' ){
-								WIZIAPP_HANDLER.handleRequest(event.data);
+						var $el = null;
+						return false;
+					};
+
+					var actions = {
+						changeTab: function(params){
+							top.document.location.replace('<?php echo get_admin_url();?>admin.php?page='+params.page);
+						},
+						informGeneralError: function(params){
+							var $box = jQuery('#'+params.el);
+							$box
+							.find('.wiziapp_error').text(params.message).end();
+
+							if ( parseInt(params.retry) == 0 ){
+								$box.find('.retry_processing').hide();
+							} else {
+								$box.find('.retry_processing').show();
 							}
-						};
 
-						if ( window.addEventListener ){
-							window.addEventListener("message", wiziappReceiveMessage, false);
-						}
+							if ( parseInt(params.report) == 0 ){
+								$box.find('.report_issue').hide();
+							} else {
+								$box.find('.report_issue').show();
+							}
 
-						function retryProcessing(event){
-							event.preventDefault();
-							document.location.reload(true);
-							return false;
-						};
+							if (!$box.data("overlay")){
+								$box.overlay({
+									fixed: true,
+									top: 200,
+									left: (screen.width / 2) - ($box.outerWidth() / 2),
+									/**mask: {
+									color: '#fff',
+									loadSpeed: 200,
+									opacity: 0.1
+									},*/
+									// disable this for modal dialog-type of overlays
+									closeOnClick: false,
+									closeOnEsc: false,
+									// load it immediately after the construction
+									load: true,
+									onBeforeLoad: function(){
+										var $toCover = jQuery('#wpbody');
+										var $mask = jQuery('#wiziapp_error_mask');
+										if ( $mask.length == 0 ){
+											$mask = jQuery('<div></div>').attr("id", "wiziapp_error_mask");
+											jQuery("body").append($mask);
+										}
 
-						function reportIssue(event){
-							// Change the current box style so it will enable containing the report form
-							event.preventDefault();
-							var $box = jQuery('#general_error_modal');
-							var $el = $box.find('.report_container');
+										$mask.css({
+											position:'absolute',
+											top: $toCover.offset().top,
+											left: $toCover.offset().left,
+											width: $toCover.outerWidth(),
+											height: $toCover.outerHeight(),
+											display: 'block',
+											opacity: 0.9,
+											backgroundColor: '#444444'
+										});
 
-							var params = {
-								action: 'wiziapp_report_issue',
-								data: $box.find('.wiziapp_error').text()
-							};
-
-							$el.load(ajaxurl, params, function(){
-									var $mainEl = jQuery('#general_error_modal');
-									$mainEl
-									.removeClass('s_container')
-									.find(".errors_container").hide().end()
-									.find(".report_container").show().end();
-									$mainEl = null;
-							});
-
-							var $el = null;
-							return false;
-						};
-
-						var actions = {
-							changeTab: function(params){
-								top.document.location.replace('<?php echo get_admin_url();?>admin.php?page='+params.page);
-							},
-							informGeneralError: function(params){
-								var $box = jQuery('#'+params.el);
-								$box
-								.find('.wiziapp_error').text(params.message).end();
-
-								if ( parseInt(params.retry) == 0 ){
-									$box.find('.retry_processing').hide();
-								} else {
-									$box.find('.retry_processing').show();
-								}
-
-								if ( parseInt(params.report) == 0 ){
-									$box.find('.report_issue').hide();
-								} else {
-									$box.find('.report_issue').show();
-								}
-
-								if (!$box.data("overlay")){
-									$box.overlay({
-											fixed: true,
-											top: 200,
-											left: (screen.width / 2) - ($box.outerWidth() / 2),
-											/**mask: {
-											color: '#fff',
-											loadSpeed: 200,
-											opacity: 0.1
-											},*/
-											// disable this for modal dialog-type of overlays
-											closeOnClick: false,
-											closeOnEsc: false,
-											// load it immediately after the construction
-											load: true,
-											onBeforeLoad: function(){
-												var $toCover = jQuery('#wpbody');
-												var $mask = jQuery('#wiziapp_error_mask');
-												if ( $mask.length == 0 ){
-													$mask = jQuery('<div></div>').attr("id", "wiziapp_error_mask");
-													jQuery("body").append($mask);
-												}
-
-												$mask.css({
-														position:'absolute',
-														top: $toCover.offset().top,
-														left: $toCover.offset().left,
-														width: $toCover.outerWidth(),
-														height: $toCover.outerHeight(),
-														display: 'block',
-														opacity: 0.9,
-														backgroundColor: '#444444'
-												});
-
-												$mask = $toCover = null;
-											}
-									});
-								}
-								else {
-									$box.show();
-									$box.data("overlay").load();
-								}
-								$box = null;
-							},
-							showProcessing: function(params){
-								var $box = jQuery('#'+params.el);
-								$box
-								.find('.error').hide().end()
-								.find('.close').hide().end()
-								.find('.processing_message').show().end();
-
-								if ( !$box.data("overlay") ){
-									$box.overlay({
-											fixed: true,
-											top: 200,
-											left: (screen.width / 2) - ($box.outerWidth() / 2),
-											mask: {
-												color: '#444444',
-												loadSpeed: 200,
-												opacity: 0.9
-											},
-
-											// disable this for modal dialog-type of overlays
-											closeOnClick: false,
-											// load it immediately after the construction
-											load: true
-									});
-								}
-								else {
-									$box.show();
-									$box.data("overlay").load();
-								}
-
-								$box = null;
-							},
-							showSim: function(params){
-								var url = decodeURIComponent(params.url);
-								var $box = jQuery("#wiziappBoxWrapper");
-								if ( $box.length == 0 ){
-									$box = jQuery("<div id='wiziappBoxWrapper'><div class='close overlay_close'></div><iframe id='wiziappBox'></iframe>");
-									$box.find("iframe").attr('src', url+"&preview=1");
-
-									$box.appendTo(document.body);
-
-									$box.find("iframe").css({
-											'border': '0px none',
-											'height': '760px',
-											'width': '390px'
-									});
-
-									$box.overlay({
-											top: 20,
-											fixed: false,
-											mask: {
-												color: '#444',
-												loadSpeed: 200,
-												opacity: 0.8
-											},
-											closeOnClick: true,
-											onClose: function(){
-												jQuery("#wiziappBoxWrapper").remove();
-											},
-											load: true
-									});
-								}
-								else {
-									$box.show();
-									$box.data("overlay").load();
-								}
-
-								$box = null;
-							},
-							resizeGeneratorIframe: function(params){
-								jQuery("#wiziapp_frame").css({
-										'height': (parseInt(params.height) + 50) + 'px'
+										$mask = $toCover = null;
+									}
 								});
 							}
-						};
-
-						return {
-							handleRequest: function(q){
-								var paramsArray = q.split('&');
-								var params = {};
-								for ( var i = 0; i < paramsArray.length; ++i) {
-									var parts = paramsArray[i].split('=');
-									params[parts[0]] = decodeURIComponent(parts[1]);
-								}
-								if ( typeof(actions[params.action]) == "function" ){
-									actions[params.action](params);
-								}
-								params = q = paramsArray = null;
+							else {
+								$box.show();
+								$box.data("overlay").load();
 							}
-						};
+							$box = null;
+						},
+						showProcessing: function(params){
+							var $box = jQuery('#'+params.el);
+							$box
+							.find('.error').hide().end()
+							.find('.close').hide().end()
+							.find('.processing_message').show().end();
+
+							if ( !$box.data("overlay") ){
+								$box.overlay({
+									fixed: true,
+									top: 200,
+									left: (screen.width / 2) - ($box.outerWidth() / 2),
+									mask: {
+										color: '#444444',
+										loadSpeed: 200,
+										opacity: 0.9
+									},
+
+									// disable this for modal dialog-type of overlays
+									closeOnClick: false,
+									// load it immediately after the construction
+									load: true
+								});
+							}
+							else {
+								$box.show();
+								$box.data("overlay").load();
+							}
+
+							$box = null;
+						},
+						showSim: function(params){
+							var url = decodeURIComponent(params.url);
+							var $box = jQuery("#wiziappBoxWrapper");
+							if ( $box.length == 0 ){
+								$box = jQuery("<div id='wiziappBoxWrapper'><div class='close overlay_close'></div><iframe id='wiziappBox'></iframe>");
+								$box.find("iframe").attr('src', url+"&preview=1");
+
+								$box.appendTo(document.body);
+
+								$box.find("iframe").css({
+									'border': '0px none',
+									'height': '760px',
+									'width': '390px'
+								});
+
+								$box.overlay({
+									top: 20,
+									fixed: false,
+									mask: {
+										color: '#444',
+										loadSpeed: 200,
+										opacity: 0.8
+									},
+									closeOnClick: true,
+									onClose: function(){
+										jQuery("#wiziappBoxWrapper").remove();
+									},
+									load: true
+								});
+							}
+							else {
+								$box.show();
+								$box.data("overlay").load();
+							}
+
+							$box = null;
+						},
+						resizeGeneratorIframe: function(params){
+							jQuery("#wiziapp_frame").css({
+								'height': (parseInt(params.height) + 50) + 'px'
+							});
+						}
+					};
+
+					return {
+						handleRequest: function(q){
+							var paramsArray = q.split('&');
+							var params = {};
+							for ( var i = 0; i < paramsArray.length; ++i){
+								var parts = paramsArray[i].split('=');
+								params[parts[0]] = decodeURIComponent(parts[1]);
+							}
+							if ( typeof(actions[params.action]) == "function" ){
+								actions[params.action](params);
+							}
+							params = q = paramsArray = null;
+						}
+					};
 				})();
 			</script>
 			<!--Google analytics-->
@@ -363,10 +373,10 @@ class WiziappAdminDisplay {
 				_gaq.push(['_setAllowHash', false]);
 				_gaq.push(['_trackPageview', '/ActivePluginGoal.php']);
 
-				(function() {
-						var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-						ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-						var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				(function(){
+					var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 				})();
 			</script>
 			<?php
@@ -446,7 +456,7 @@ class WiziappAdminDisplay {
 			}
 			$r = new WiziappHTTPRequest();
 			$response = $r->api(array(), '/cms/version', 'POST');
-			if ( !is_wp_error($response) ) {
+			if ( !is_wp_error($response) ){
 				$vResponse = json_decode($response['body'], TRUE);
 				if ( !empty($vResponse) ){
 					WiziappConfig::getInstance()->wiziapp_avail_version = $vResponse['version'];
@@ -457,7 +467,7 @@ class WiziappAdminDisplay {
 		}
 
 		if ( WiziappConfig::getInstance()->wiziapp_avail_version != WIZIAPP_P_VERSION ){
-			if ( isset(WiziappConfig::getInstance()->show_need_upgrade_msg) && WiziappConfig::getInstance()->show_need_upgrade_msg === FALSE ) {
+			if ( isset(WiziappConfig::getInstance()->show_need_upgrade_msg) && WiziappConfig::getInstance()->show_need_upgrade_msg === FALSE ){
 				// The user choose to hide the version alert, but was the version alert for the version he saw?
 				if ( WiziappConfig::getInstance()->last_version_shown === WiziappConfig::getInstance()->wiziapp_avail_version ){
 					$needShow = FALSE;
@@ -493,7 +503,7 @@ class WiziappAdminDisplay {
 		}
 	}
 
-	public function displayMessageCheck() {
+	public function displayMessageCheck(){
 		if (WiziappConfig::getInstance()->wiziapp_admin_messages_subject != '' && WiziappConfig::getInstance()->wiziapp_admin_messages_message != ''){
 		?>
 		<div id="wiziapp_display_message_message" class="error fade">
@@ -540,10 +550,10 @@ class WiziappAdminDisplay {
 	/**
 	* Displays a notice for the user
 	*/
-	public function configNotice() {
+	public function configNotice(){
 		$show_notice_condition = ! isset( WiziappConfig::getInstance()->wiziapp_showed_config_once ) || WiziappConfig::getInstance()->wiziapp_showed_config_once !== TRUE;
 
-		if ( $show_notice_condition ) {
+		if ( $show_notice_condition ){
 		?>
 		<div id="wiziapp_active_notice" class="updated">
 			<div></div>
@@ -556,7 +566,7 @@ class WiziappAdminDisplay {
 		if (!WiziappConfig::getInstance()->email_verified &&
 			WiziappConfig::getInstance()->settings_done &&
 			WiziappConfig::getInstance()->show_email_verified_msg &&
-			WiziappConfig::getInstance()->finished_processing) {
+			WiziappConfig::getInstance()->finished_processing){
 		?>
 		<div id="wiziapp_email_verified_message" class="error fade">
 			<p style="line-height: 150%">
@@ -569,14 +579,14 @@ class WiziappAdminDisplay {
 			</p>
 			<script type="text/javascript">
 				jQuery(document).ready(function(){
-						jQuery("#wiziappHideVerify").click(function(){
-								var params = {
-									action: 'wiziapp_hide_verify_msg'
-								};
-								jQuery.post(ajaxurl, params, function(data){
-										jQuery("#wiziapp_email_verified_message").remove();
-								});
+					jQuery("#wiziappHideVerify").click(function(){
+						var params = {
+							action: 'wiziapp_hide_verify_msg'
+						};
+						jQuery.post(ajaxurl, params, function(data){
+							jQuery("#wiziapp_email_verified_message").remove();
 						});
+					});
 				});
 			</script>
 		</div>
@@ -584,12 +594,12 @@ class WiziappAdminDisplay {
 		}
 	}
 
-	public function styles_javascripts($hook) {
+	public function styles_javascripts($hook){
 		$print_js_condition =
 		$hook === 'plugins.php' && isset($_GET['activate']) && $_GET['activate'] === 'true' &&
 		( ! isset( WiziappConfig::getInstance()->wiziapp_showed_config_once ) || WiziappConfig::getInstance()->wiziapp_showed_config_once !== TRUE );
 
-		if ( $print_js_condition ) {
+		if ( $print_js_condition ){
 			$plugins_url = plugins_url( dirname( WP_WIZIAPP_BASE ) );
 			wp_enqueue_script( 'active_plugin_notice', $plugins_url . '/themes/admin/active_plugin_notice.js', 'jquery' );
 			wp_enqueue_style(  'active_plugin_notice', $plugins_url . '/themes/admin/active_plugin_notice.css' );

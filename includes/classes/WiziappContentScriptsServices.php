@@ -10,7 +10,7 @@ class WiziappContentScriptsServices{
         $lastModified = 0;
         // TODO: Add routing to the right app version scripts according to the requesting website page or udid
         // load the javascript needed for the webview
-        $dir = dirname(__FILE__) . '/../../themes/iphone/scripts/';
+        $dir = WIZI_DIR_PATH . 'themes/iphone/scripts/';
         $scripts = array('/content.js');
 
         $script = '';

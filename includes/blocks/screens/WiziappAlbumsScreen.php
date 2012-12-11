@@ -84,6 +84,6 @@ class WiziappAlbumsScreen extends WiziappBaseScreen{
 
 		$screen['screen']['default'] = 'grid';
 		$screen['screen']['sub_type'] = 'image';
-		$this->output($screen);
+		$this->output($screen, array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/galleries'), 'text' => __(WiziappConfig::getInstance()->getScreenTitle('albums'), 'wiziapp')));
 	}
 }

@@ -17,13 +17,18 @@ if (!defined('WP_WIZIAPP_BASE'))
 // As long as we are supporting php < 5.3 we shouldn't extent the singleton class
 //class WiziappDB extends WiziappSingleton implements WiziappIInstallable{
 class WiziappDB implements WiziappIInstallable{
+
+	private $media_table = 'wiziapp_content_media';
+	private $user_table = 'wiziapp_user_info';
+	private $internal_version = '0.7';
+	private static $_instance = null;
+
 	/**
 	* The possible types of the content
 	*
 	* @var mixed
 	*/
 	public $types = array('post' => 1, 'page' => 2, 'comment' => 3);
-
 	/**
 	* The possible types of the media we save
 	*
@@ -31,21 +36,21 @@ class WiziappDB implements WiziappIInstallable{
 	*/
 	public $media_types = array('image' => 1, 'video' => 2, 'audio' => 3);
 
-	private $media_table = 'wiziapp_content_media';
-
-	private $internal_version = '0.2';
-
-	private static $_instance = null;
-
 	private $_added_columns = array(
-		'exclude' => array( array( 'name' => 'wizi_included_site',  'comment' => 'Is Post included to Site', ), array( 'name' => 'wizi_included_app', 'comment' => 'Is Post included to WiziApp', ), ),
-		'push'	  => array( array( 'name' => 'wizi_published_push', 'comment' => 'Is Push send on Publish', ),  array( 'name' => 'wizi_updated_push', 'comment' => 'Is Push send on Update', ), ),
+		'exclude' => array(
+			array( 'name' => 'wizi_included_site',  'default' => 1, 'comment' => 'Is Post included to Site', ),
+			array( 'name' => 'wizi_included_app',   'default' => 1, 'comment' => 'Is Post included to WiziApp', ),
+		),
+		'push'	  => array(
+			array( 'name' => 'wizi_published_push', 'default' => 1, 'comment' => 'Is Push send on Publish', ),
+			array( 'name' => 'wizi_updated_push',   'default' => 0, 'comment' => 'Is Push send on Update', ),
+		),
 	);
 
 	/**
-	 * @static
-	 * @return WiziappDB
-	 */
+	* @static
+	* @return WiziappDB
+	*/
 	public static function getInstance() {
 		if( is_null(self::$_instance) ) {
 			self::$_instance = new WiziappDB();
@@ -102,7 +107,7 @@ class WiziappDB implements WiziappIInstallable{
 	*/
 	function update_post_media($post_id, $media_type, $data, $html) {
 		return $this->update_content_media($post_id, $this->types["post"],
-						$this->media_types[$media_type], $data, $html);
+			$this->media_types[$media_type], $data, $html);
 	}
 
 	/**
@@ -117,7 +122,7 @@ class WiziappDB implements WiziappIInstallable{
 	*/
 	function update_page_media($page_id, $media_type, $data, $html) {
 		return $this->update_content_media($page_id, $this->types["page"],
-						$this->media_types[$media_type], $data, $html);
+			$this->media_types[$media_type], $data, $html);
 	}
 
 	/**
@@ -153,7 +158,8 @@ class WiziappDB implements WiziappIInstallable{
 	function find_content_gallery_images($id) {
 		global $wpdb;
 
-		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.content_id = %d AND c.attachment_type = %d AND (attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s)", $id, 1, '%data-wiziapp-cincopa-id%', '%data-wiziapp-nextgen-album-id%', '%data-wiziapp-nextgen-gallery-id%', '%data-wiziapp-pageflipbook-id%', '%wordpress-gallery-id%', '%external-gallery-id%', '%data-wiziapp-id%');
+		$query = "SELECT * FROM ".$wpdb->prefix.$this->media_table." AS c WHERE c.content_id = %d AND c.attachment_type = %d";
+		$sql = $wpdb->prepare($query, $id, 1);
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.find_content_gallery_images');
 		$result = $wpdb->get_results($sql, ARRAY_A);
 
@@ -214,7 +220,7 @@ class WiziappDB implements WiziappIInstallable{
 	function get_images_for_albums() {
 		global $wpdb;
 
-		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d AND (attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s)", $this->media_types["image"], '%data-wiziapp-cincopa-id%', '%data-wiziapp-nextgen-album-id%', '%data-wiziapp-nextgen-gallery-id%', '%data-wiziapp-pageflipbook-id%', '%wordpress-gallery-id%', '%external-gallery-id%', '%data-wiziapp-id%');
+		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d AND (attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s OR attachment_info LIKE %s) LIMIT 0, 2000", $this->media_types["image"], '%data-wiziapp-cincopa-id%', '%data-wiziapp-nextgen-album-id%', '%data-wiziapp-nextgen-gallery-id%', '%data-wiziapp-pageflipbook-id%', '%wordpress-gallery-id%', '%external-gallery-id%', '%data-wiziapp-id%');
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_images_for_albums');
 
 		$result = $wpdb->get_results($sql, ARRAY_A);
@@ -371,12 +377,12 @@ class WiziappDB implements WiziappIInstallable{
 		//$media = $this->find_content_media($content_id, $type, $media_type);
 		$result = FALSE;
 		//if ( $media ) {
-			// Just update
-		  //  $id = $media->id;
-			//$result = $this->do_update_content_media($id, $data);
+		// Just update
+		//  $id = $media->id;
+		//$result = $this->do_update_content_media($id, $data);
 		//} else {
-			// Create
-			$result = $this->add_content_media($content_id, $type, $media_type, $data, $html);
+		// Create
+		$result = $this->add_content_media($content_id, $type, $media_type, $data, $html);
 		//}
 		return $result;
 	}
@@ -387,20 +393,26 @@ class WiziappDB implements WiziappIInstallable{
 
 		$sql = "INSERT INTO {$wpdb->prefix}{$this->media_table} (content_id, content_type, original_code, attachment_info, attachment_type, created_at, updated_at) VALUES ";
 
-//        $sql .= '(%d, %d, %s, %s, %d, %s, %s),';
+		//        $sql .= '(%d, %d, %s, %s, %d, %s, %s),';
 		$sql = substr_replace($sql, "", -1);
 
+		$params = array();
 		for($a = 0, $total = count($items); $a < $total; ++$a) {
 			$obj = $items[$a]['obj'];
 			$html = $items[$a]['html'];
-			$sql .= "(" . $content_id . "," . $this->types[$content_type] . ",'" . $html . "','" . json_encode($obj) . "'," .
-					$this->media_types[$media_type] . ",'" . date('Y-m-d H:i:s') . "','" . date('Y-m-d H:i:s') . "'),";
+			$sql .= '(%d, %d, %s, %s, %d, %s, %s),';
+			$params[] = $content_id;
+			$params[] = $this->types[$content_type];
+			$params[] = $html;
+			$params[] = json_encode($obj);
+			$params[] = $this->media_types[$media_type];
+			$params[] = date('Y-m-d H:i:s');
+			$params[] = date('Y-m-d H:i:s');
 		}
 		$sql = substr_replace($sql, "", -1);
 
-		// "Escape % signs, since we are not adding params... every % signs in our string is literal...
-		$sql = str_replace('%', '%%', $sql);
-		$query = $wpdb->prepare($sql);
+		array_unshift($params, $sql);
+		$query = call_user_func_array(array($wpdb, 'prepare'), $params);
 
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$query}", 'WiziappDB.add_content_medias');
 
@@ -430,8 +442,8 @@ class WiziappDB implements WiziappIInstallable{
 		//$wpdb->show_errors();
 
 		$sql = $wpdb->prepare(  "INSERT INTO {$wpdb->prefix}{$this->media_table} (content_id, content_type, original_code, attachment_info, attachment_type, created_at, updated_at)
-								VALUES (%d, %d, %s, %s, %d, %s, %s)",
-								$content_id, $type, $html, json_encode($media_info), $media_type, date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
+			VALUES (%d, %d, %s, %s, %d, %s, %s)",
+			$content_id, $type, $html, json_encode($media_info), $media_type, date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
 
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.add_content_media');
 		$added = $wpdb->query($sql);
@@ -451,12 +463,12 @@ class WiziappDB implements WiziappIInstallable{
 	* @param string $content_type the content type
 	*/
 	function delete_content_media($content_id, $content_type='post') {
-		  global $wpdb;
+		global $wpdb;
 
-		  $sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}{$this->media_table} WHERE content_id = %d AND content_type = %d", $content_id, $this->types[$content_type]);
-		  WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.delete_content_media');
+		$sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}{$this->media_table} WHERE content_id = %d AND content_type = %d", $content_id, $this->types[$content_type]);
+		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.delete_content_media');
 
-		  $wpdb->query($sql);
+		$wpdb->query($sql);
 	}
 
 	/**
@@ -469,7 +481,7 @@ class WiziappDB implements WiziappIInstallable{
 	function get_all_videos($offset = 0, $limit = 0) {
 		global $wpdb;
 
-		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d LIMIT %d, %d", $this->media_types["video"], $offset, $limit);
+		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d ORDER BY `id` DESC LIMIT %d, %d", $this->media_types["video"], $offset, $limit);
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_all_videos');
 		$result = $wpdb->get_results($sql, ARRAY_A);
 
@@ -510,7 +522,7 @@ class WiziappDB implements WiziappIInstallable{
 		global $wpdb;
 
 		$sql = $wpdb->prepare("SELECT COUNT(id) FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d LIMIT 0, 15",
-				$this->media_types["video"]);
+			$this->media_types["video"]);
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_videos_count');
 
 		return (int) $wpdb->get_var($sql);
@@ -525,15 +537,15 @@ class WiziappDB implements WiziappIInstallable{
 		global $wpdb;
 
 		$sql = $wpdb->prepare("SELECT COUNT(id)
-								FROM {$wpdb->prefix}{$this->media_table} AS c
-								WHERE attachment_info LIKE '%data-wiziapp-cincopa-id%'
-								OR attachment_info LIKE '%data-wiziapp-nextgen-album-id%'
-								OR attachment_info LIKE '%data-wiziapp-nextgen-gallery-id%'
-								OR attachment_info LIKE '%data-wiziapp-pageflipbook-id%'
-								OR attachment_info LIKE '%wordpress-gallery-id%'
-								OR attachment_info LIKE '%external-gallery-id%'
-								OR attachment_info LIKE '%data-wiziapp-id%'
-								LIMIT 0, 15");
+			FROM {$wpdb->prefix}{$this->media_table} AS c
+			WHERE attachment_info LIKE '%data-wiziapp-cincopa-id%'
+			OR attachment_info LIKE '%data-wiziapp-nextgen-album-id%'
+			OR attachment_info LIKE '%data-wiziapp-nextgen-gallery-id%'
+			OR attachment_info LIKE '%data-wiziapp-pageflipbook-id%'
+			OR attachment_info LIKE '%wordpress-gallery-id%'
+			OR attachment_info LIKE '%external-gallery-id%'
+			OR attachment_info LIKE '%data-wiziapp-id%'
+			LIMIT 0, 15");
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_albums_count');
 
 		return (int) $wpdb->get_var($sql);
@@ -550,11 +562,11 @@ class WiziappDB implements WiziappIInstallable{
 		global $wpdb;
 
 		$sql = $wpdb->prepare("SELECT COUNT(content_id) from
-								(SELECT COUNT(id) AS total, content_id
-								FROM {$wpdb->prefix}{$this->media_table} w
-								WHERE attachment_type = %d group by content_id) as totals
-								WHERE total > %d
-								LIMIT 0, 15", $this->media_types["image"], $image_in_album);
+			(SELECT COUNT(id) AS total, content_id
+			FROM {$wpdb->prefix}{$this->media_table} w
+			WHERE attachment_type = %d group by content_id) as totals
+			WHERE total > %d
+			LIMIT 0, 15", $this->media_types["image"], $image_in_album);
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_images_post_albums_count');
 
 		return (int) $wpdb->get_var($sql);
@@ -571,11 +583,11 @@ class WiziappDB implements WiziappIInstallable{
 		global $wpdb;
 
 		$sql = $wpdb->prepare("SELECT COUNT(content_id) from
-								(SELECT COUNT(id) AS total, content_id
-								FROM {$wpdb->prefix}{$this->media_table} w
-								WHERE attachment_type = %d group by content_id) as totals
-								WHERE total > %d
-								LIMIT 0, 15", $this->media_types["audio"], $audio_in_album);
+			(SELECT COUNT(id) AS total, content_id
+			FROM {$wpdb->prefix}{$this->media_table} w
+			WHERE attachment_type = %d group by content_id) as totals
+			WHERE total > %d
+			LIMIT 0, 15", $this->media_types["audio"], $audio_in_album);
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_audios_post_albums_count');
 
 		return (int) $wpdb->get_var($sql);
@@ -603,6 +615,16 @@ class WiziappDB implements WiziappIInstallable{
 		return FALSE;
 	}
 
+	function get_post_audios($post_id) {
+		global $wpdb;
+
+		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d AND content_id = %d", $this->media_types["audio"], $post_id);
+		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_post_audios');
+		$result = $wpdb->get_results($sql, ARRAY_A);
+
+		return ( empty($result) ) ? array() : $result;
+	}
+
 	/**
 	* get a specific video by it's id
 	*
@@ -622,6 +644,16 @@ class WiziappDB implements WiziappIInstallable{
 		}
 
 		return FALSE;
+	}
+
+	function get_post_videos($post_id) {
+		global $wpdb;
+
+		$sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$this->media_table} AS c WHERE c.attachment_type = %d AND content_id = %d", $this->media_types["video"], $post_id);
+		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_videos_by_id');
+		$result = $wpdb->get_results($sql, ARRAY_A);
+
+		return ( empty($result) ) ? array() : $result;
 	}
 
 	/**
@@ -657,7 +689,7 @@ class WiziappDB implements WiziappIInstallable{
 		global $wpdb;
 
 		$sql = $wpdb->prepare("SELECT id, original_code, attachment_type, attachment_info FROM {$wpdb->prefix}{$this->media_table} AS c
-								WHERE c.attachment_type = %d AND content_id = %d", $this->media_types['image'], $content_id);
+			WHERE c.attachment_type = %d AND content_id = %d", $this->media_types['image'], $content_id);
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_content_images');
 		$result = $wpdb->get_results($sql, ARRAY_A);
 
@@ -710,19 +742,19 @@ class WiziappDB implements WiziappIInstallable{
 	}
 
 	/**
-	 * IMPORTANT!!!
-	 * If you change the SQL in this method, or add new ones, make sure to update $this->internal_version.
-	 * This method will automatically run only once and when the internal_version is changed.
-	 *
-	 * @return bool
-	 */
+	* IMPORTANT!!!
+	* If you change the SQL in this method, or add new ones, make sure to update $this->internal_version.
+	* This method will automatically run only once and when the internal_version is changed.
+	*
+	* @return bool
+	*/
 	public function install() {
 		global $wpdb;
 
 		// Use wordpress dbDelta functionality
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-		 // Handle charset
+		// Handle charset
 		$charset_collate = '';
 		if (version_compare(mysql_get_server_info(), '4.1.0', '>=')) {
 			if (!empty($wpdb->charset))
@@ -733,26 +765,51 @@ class WiziappDB implements WiziappIInstallable{
 
 		// NOTE: Before changing the sql here read the function doc block...
 		$sql = "CREATE TABLE {$wpdb->prefix}{$this->media_table} (
-			id BIGINT(20) NOT NULL AUTO_INCREMENT ,
-			content_id BIGINT(20) NOT NULL ,
-			content_type INT(4) NOT NULL ,
-			original_code MEDIUMTEXT NOT NULL ,
-			attachment_info MEDIUMTEXT NOT NULL,
-			attachment_type INT(4) NOT NULL,
-			created_at DATETIME NULL ,
-			updated_at DATETIME NULL ,
-			PRIMARY KEY id (id),
-			KEY content_id (content_id)
-			) {$charset_collate} ENGINE=INNODB;";
+		id BIGINT(20) NOT NULL AUTO_INCREMENT ,
+		content_id BIGINT(20) NOT NULL ,
+		content_type INT(4) NOT NULL ,
+		original_code MEDIUMTEXT NOT NULL ,
+		attachment_info MEDIUMTEXT NOT NULL,
+		attachment_type INT(4) NOT NULL,
+		created_at DATETIME NULL ,
+		updated_at DATETIME NULL ,
+		PRIMARY KEY id (id),
+		KEY content_id (content_id)
+		) {$charset_collate} ENGINE=INNODB;";
 
-			// Note: dbDelta adds fields nicely but does not seem to remove them...
-			$create_table_errors = '';
-			ob_start();
-			dbDelta($sql);
-			$create_table_errors = ob_get_clean();
-			if ( $create_table_errors != '' ) {
-				WiziappLog::getInstance()->write('ERROR', $create_table_errors, 'WiziappDB.install');
-			}
+		// Note: dbDelta adds fields nicely but does not seem to remove them...
+		$create_table_errors = '';
+		ob_start();
+		dbDelta($sql);
+		$create_table_errors = ob_get_clean();
+		if ( $create_table_errors != '' ) {
+			WiziappLog::getInstance()->write('ERROR', $create_table_errors, 'WiziappDB.install');
+		}
+
+		$userSql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}{$this->user_table} (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`udid` varchar(72) NOT NULL,
+		`appId` int(8) NOT NULL DEFAULT 0,
+		`wp_user_id` bigint(20) unsigned,
+		`username` varchar(50),
+		`password` varchar(64),
+		`authors` text,
+		`categories` text,
+		`tags` text,
+		`created_at` DATETIME NULL ,
+		`updated_at` DATETIME NULL ,
+		PRIMARY KEY (`id`),
+		UNIQUE KEY `udid` (`udid`),
+		KEY `appId` (`appId`,`username`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
+
+		$create_table_errors = '';
+		ob_start();
+		dbDelta($userSql);
+		$create_table_errors = ob_get_clean();
+		if ( $create_table_errors != '' ) {
+			WiziappLog::getInstance()->write('ERROR', $create_table_errors, 'WiziappDB.install');
+		}
 
 		// To add the "Exclude fields" and the "Push fields" to Posts table
 		foreach ( $this->_added_columns as $columns_pair ) {
@@ -766,9 +823,9 @@ class WiziappDB implements WiziappIInstallable{
 				if ( ! $this->_is_post_altered($columns_pair, FALSE) ) {
 					// The "Exclude fields" is not added to Posts table yet
 					$sql_post =
-					"ALTER TABLE `" . $wpdb->posts . "` " .
-					"ADD COLUMN `" . $columns_pair[0]['name'] . "` TINYINT(1) UNSIGNED DEFAULT '1' NOT NULL COMMENT '" . $columns_pair[0]['comment'] . "', " .
-					"ADD COLUMN `" . $columns_pair[1]['name'] . "` TINYINT(1) UNSIGNED DEFAULT '1' NOT NULL COMMENT '" . $columns_pair[1]['comment'] . "';";
+					"ALTER TABLE `".$wpdb->posts."` ".
+					"ADD COLUMN `".$columns_pair[0]['name']."` TINYINT(1) UNSIGNED DEFAULT ".$columns_pair[0]['default']." NOT NULL COMMENT '".$columns_pair[0]['comment']."', ".
+					"ADD COLUMN `".$columns_pair[1]['name']."` TINYINT(1) UNSIGNED DEFAULT ".$columns_pair[1]['default']." NOT NULL COMMENT '".$columns_pair[1]['comment']."';";
 					if ( ! $wpdb->query( $sql_post ) ) {
 						throw new Exception('SQL: '.$sql_post.' '.$wpdb->last_error);
 					}
@@ -788,6 +845,7 @@ class WiziappDB implements WiziappIInstallable{
 		global $wpdb;
 
 		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$this->media_table}");
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$this->user_table}");
 
 		if ( ! ( defined('EICONTENT_EXCLUDE_BASENAME') && is_plugin_active( EICONTENT_EXCLUDE_BASENAME ) ) ) {
 			// To remove the "Exclude fields" from the Posts table, if another plugin, "Exclude", is not activated
@@ -810,19 +868,25 @@ class WiziappDB implements WiziappIInstallable{
 	}
 
 	/**
-	 * If there are any special upgrade between the versions this is the place to call them,
-	 * we can do this by adding methods like upgradeFrom0_1 and checking if the method exists
-	 *
-	 * For now a simple diff that is handled by the install anyway is fine.
-	 */
-	 public function upgrade() {
+	* If there are any special upgrade between the versions this is the place to call them,
+	* we can do this by adding methods like upgradeFrom0_1 and checking if the method exists
+	*
+	* For now a simple diff that is handled by the install anyway is fine.
+	*/
+	public function upgrade() {
+		global $wpdb;
+
 		// Delete "iphone_post_thumb" Custom Fields from "wp_postmeta" table. The fields was removed on version 1.3.0c
-		if ( ! $wpdb->query( "DELETE FROM " . $wpdb->postmeta . " WHERE meta_key = 'iphone_post_thumb_0' OR meta_key = 'iphone_post_thumb_1'" ) ) {
+		$is_delete_error =
+		! $wpdb->query( "DELETE FROM " . $wpdb->postmeta . " WHERE meta_key = 'iphone_post_thumb_0' OR meta_key = 'iphone_post_thumb_1'" ) &&
+		! empty($wpdb->last_error);
+
+		if ($is_delete_error) {
 			WiziappLog::getInstance()->write('ERROR', $wpdb->last_error, 'WiziappDB.install');
 		}
 
-		 return $this->install();
-	 }
+		return $this->install();
+	}
 
 	public function get_media_table() {
 		return $this->media_table;

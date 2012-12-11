@@ -23,6 +23,7 @@ class WiziappScreenConfiguration{
         } else {
             $config = $this->config[WIZIAPP_P_VERSION][$screen.'_'.$type];
         }
+
         return $config;
     }
 }

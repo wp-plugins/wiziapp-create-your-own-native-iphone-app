@@ -1,9 +1,9 @@
 <?php
 /**
- * @package WiziappWordpressPlugin
- * @subpackage Plugins
- * @author comobix.com plugins@comobix.com
- */
+* @package WiziappWordpressPlugin
+* @subpackage Plugins
+* @author comobix.com plugins@comobix.com
+*/
 
 add_filter('wiziapp_albums_request', 'wiziapp_get_wordpress_albums', 10);
 

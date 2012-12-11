@@ -17,13 +17,6 @@ function wiziapp_attach_hooks(){
 	//add_action('admin_menu', 'wiziapp_setup_menu');
 	add_action( 'admin_menu', array( 'WiziappAdminDisplay', 'setup' ) );
 
-	$setting_metabox = new WiziappSettingMetabox;
-	if ( is_admin() ) {
-		add_action( 'admin_init', array( $setting_metabox, 'admin_init' ) );
-	} else {
-		add_action( 'init', array( $setting_metabox, 'site_init' ) );
-	}
-
 	/* Add a custom column to the users table to indicate that the user
 	* logged in from his mobile device via our app
 	* NOTE: Some plugins might not handle other plugins columns very nicely and cause the data not to show...
@@ -40,17 +33,17 @@ function wiziapp_attach_hooks(){
 	add_action('future_to_publish',  array(&$ce, 'savePost'));
 	add_action('publish_to_publish', array(&$ce, 'savePost'));
 
-	if ( !empty(WiziappConfig::getInstance()->settings_done) ){
-		/*
-		add_action('new_to_publish', 	 array('WiziappPush', 'publishPost'));
-		add_action('pending_to_publish', array('WiziappPush', 'publishPost'));
-		add_action('draft_to_publish',   array('WiziappPush', 'publishPost'));
-		add_action('private_to_publish', array('WiziappPush', 'publishPost'));
-		add_action('future_to_publish',  array('WiziappPush', 'publishPost'));
-		*/
+	if ( strpos($_SERVER['REQUEST_URI'], 'wp-comments-post.php') !== FALSE && isset($_GET['output']) && $_GET['output'] == 'html' ) {
+		$comment_screen = new WiziappCommentsScreen();
+		add_action('set_comment_cookies', array(&$comment_screen, 'runBySelf'));
+		add_filter('wp_die_handler', array(&$comment_screen, 'set_error_function'), 1);
+	}
 
+	if ( !empty(WiziappConfig::getInstance()->settings_done) ){
 		add_action( 'edit_post', array( 'WiziappPush', 'create_push_notification' ), 10, 2 );
 	}
+
+	add_action( 'edit_post', array( &$ce, 'updateCacheTimestampKey' ) );
 
 	add_action('deleted_post', array(&$ce, 'deletePost'));
 	add_action('trashed_post', array(&$ce, 'deletePost'));
@@ -68,8 +61,13 @@ function wiziapp_attach_hooks(){
 	* Notice: publish_post might happen a few times, make sure we are only doing the action once
 	* by removing the action once done
 	*/
-	/**add_action('publish_post', array('WiziappContentEvents', 'savePost'));
-	add_action('publish_post', 'wiziapp_publish_post');*/
+	/*
+	add_action('publish_post', array('WiziappContentEvents', 'savePost'));
+	add_action('publish_post', 'wiziapp_publish_post');
+	*/
+
+	// hook to avoid the Collision with the WP Super Cache
+	add_filter('supercacherewriteconditions', array(&$ce, 'add_wiziapp_condition'));
 
 	if ( !empty(WiziappConfig::getInstance()->settings_done) ){
 		add_action('wiziapp_daily_function_hook', array('WiziappPush', 'daily'));
@@ -97,13 +95,24 @@ function wiziapp_attach_hooks(){
 	add_image_size('wiziapp-iphone', '320', '480', true);*/
 
 	/**
-	 * Admin ajax hooks
-	 */
+	* Admin ajax hooks
+	*/
 	// Post install
-	add_action('wp_ajax_wiziapp_batch_posts_processing',  array('WiziappPostInstallDisplay', 'batchPostsProcessing'));
-	add_action('wp_ajax_wiziapp_batch_process_pages', 	  array('WiziappPostInstallDisplay', 'batchProcessPages'));
-	add_action('wp_ajax_wiziapp_batch_processing_finish', array('WiziappPostInstallDisplay', 'batchProcessingFinish'));
-	add_action('wp_ajax_wiziapp_report_issue', 			  array('WiziappPostInstallDisplay', 'reportIssue'));
+	add_action('wp_ajax_wiziapp_batch_process_posts',	array('WiziappPostInstallDisplay', 'batchProcess_Posts'));
+	add_action('wp_ajax_wiziapp_batch_process_pages',	array('WiziappPostInstallDisplay', 'batchProcess_Pages'));
+	add_action('wp_ajax_wiziapp_batch_process_finish',	array('WiziappPostInstallDisplay', 'batchProcess_Finish'));
+	add_action('wp_ajax_wiziapp_report_issue',			array('WiziappPostInstallDisplay', 'reportIssue'));
+
+    // Web App
+	add_action('wp_ajax_wiziapp_update_handshake',		array('WiziappWebappDisplay', 'updateHandshake'));
+	add_action('wp_ajax_wiziapp_update_config',			array('WiziappWebappDisplay', 'updateConfig'));
+	add_action('wp_ajax_wiziapp_update_display',		array('WiziappWebappDisplay', 'updateDisplay'));
+    add_action('wp_ajax_wiziapp_update_effects',		array('WiziappWebappDisplay', 'updateEffects'));
+	add_action('wp_ajax_wiziapp_update_images',			array('WiziappWebappDisplay', 'updateImages'));
+    add_action('wp_ajax_wiziapp_update_icons',			array('WiziappWebappDisplay', 'updateIcons'));
+    add_action('wp_ajax_wiziapp_update_splash',			array('WiziappWebappDisplay', 'updateSplash'));
+    add_action('wp_ajax_wiziapp_update_manifest',		array('WiziappWebappDisplay', 'updateManifest'));
+    add_action('wp_ajax_wiziapp_install_webapp_finish', array('WiziappWebappDisplay', 'installFinish'));
 
 	// Upgrade
 	add_action('wp_ajax_wiziapp_upgrade_database', 		array('WiziappUpgradeDisplay', 'upgradeDatabase'));
@@ -114,9 +123,6 @@ function wiziapp_attach_hooks(){
 	add_action('wp_ajax_wiziapp_hide_verify_msg', 		   array('WiziappAdminDisplay', 'hideVerifyMsg'));
 	add_action('wp_ajax_wiziapp_hide_upgrade_msg',		   array('WiziappAdminDisplay', 'hideUpgradeMsg'));
 	add_action('wp_ajax_wiziapp_hide_display_message_msg', array('WiziappAdminDisplay', 'hideDisplayMessageMsg'));
-
-	add_action('wp_ajax_wiziapp_push_message',  array( $setting_metabox, 'save_push_message' ) );
-	add_action('wp_ajax_wiziapp_use_thumbnail', array( $setting_metabox, 'use_post_thumbnail' ) );
 
 	// Wizard
 	add_action('wp_ajax_wiziapp_register_license', array('WiziappLicenseUpdater', 'register'));
@@ -129,7 +135,6 @@ function wiziapp_attach_hooks(){
 		add_action( 'widgets_init', create_function( '', 'register_widget("WiziappQRCodeWidget");' ) );
 	}
 }
-
 
 if ( !defined('WP_WIZIAPP_HOOKS_ATTACHED') ) {
 	define('WP_WIZIAPP_HOOKS_ATTACHED', TRUE);

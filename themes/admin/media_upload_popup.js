@@ -61,7 +61,8 @@
 				window.parent.jQuery("#wiziapp_post_thumbnail_preview").html(image_element);
 				window.parent.jQuery("#wiziapp_is_user_chosen").attr("checked", "checked");
 				window.parent.jQuery("#wiziapp_is_no_thumbnail").removeAttr("checked");
-				window.parent.jQuery("#wiziapp_upload_thumbnail + p *").show(0);
+				// Need no. Permanently shown already.
+				// window.parent.jQuery("#wiziapp_upload_thumbnail + p *").show(0);
 			}
 		}
 

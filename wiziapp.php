@@ -4,7 +4,7 @@
 * Plugin Name: Wiziapp
 * Description: WiziApp automatically turns your WordPress blog into a native iPhone app. Customize the app to make it your own by using our friendly wizard.
 * Author: Wiziapp Solutions Ltd.
-* Version: v1.3.0f
+* Version: v2.0.0a
 * Author URI: http://www.wiziapp.com/
 */
 /**
@@ -16,22 +16,23 @@
 */
 
 // Run only once
-if (!defined('WP_WIZIAPP_BASE')) {
+if ( ! defined('WP_WIZIAPP_BASE') ) {
 	define('WP_WIZIAPP_BASE', plugin_basename(__FILE__));
 	define('WP_WIZIAPP_PROFILER', FALSE);
 	define('WIZI_ABSPATH', realpath(ABSPATH));
+	define( 'WIZI_DIR_PATH', dirname(__FILE__) . DIRECTORY_SEPARATOR );
 	define('WIZIAPP_ENV', 'prod'); // can be dev/test/prod
-	define('WIZIAPP_VERSION', 'v1.3.0f');   // MAKE SURE TO UPDATE BOTH THIS AND THE UPPER VALUE
-	define('WIZIAPP_P_VERSION', '1.3.0');   // The platform version
+	define('WIZIAPP_VERSION', 'v2.0.0a');   // MAKE SURE TO UPDATE BOTH THIS AND THE UPPER VALUE
+	define('WIZIAPP_P_VERSION', '2.0.0');   // The platform version
 
-	if (version_compare (PHP_VERSION, "5.2", ">=") && version_compare (get_bloginfo ("version"), "2.8.4", ">=")) {
+	if ( version_compare(PHP_VERSION, "5.2", ">=") && version_compare(get_bloginfo ("version"), "2.8.4", ">=") ) {
 		include dirname (__FILE__) . "/includes/classes/WiziappExceptions.php";
 		include dirname (__FILE__) . "/includes/blocks.inc.php";
 		include dirname (__FILE__) . "/includes/hooks.inc.php";
 	} elseif ( is_admin() ) {
-		if (!version_compare (PHP_VERSION, "5.2", ">=")) {
-			register_shutdown_function ('wiziapp_shutdownWrongPHPVersion');
-		} elseif (!version_compare (get_bloginfo ("version"), "2.8.4", ">=")) {
+		if ( ! version_compare (PHP_VERSION, "5.2", ">=") ) {
+			register_shutdown_function('wiziapp_shutdownWrongPHPVersion');
+		} elseif ( ! version_compare(get_bloginfo("version"), "2.8.4", ">=") ) {
 			register_shutdown_function ('wiziapp_shutdownWrongWPVersion');
 		}
 	}

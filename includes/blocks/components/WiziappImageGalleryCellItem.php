@@ -41,6 +41,14 @@ class WiziappImageGalleryCellItem extends WiziappLayoutComponent{
 	*/
 	var $baseName = 'imageGalleryCellItem';
 
+    public $htmlTemplate = '<li class="imageGalleryCellItem __ATTR_class__" data-icon="false" data-id="__ATTR_id__" data-related-posts="__ATTR_relatedPostsURL__">
+                            <a href="#image-__ATTR_id__" class="actionURL" data-transition="slide">
+                                <span class="attribute text_attribute imageURL __ATTR_class___image" data-image-src="__ATTR_thumbnailURL__">
+                                    <img class="hidden" src="" data-class="__ATTR_class___image" data-full="__ATTR_actionURL__"/>
+                                </span>
+                            </a>
+                            </li>';
+
 	/**
 	* constructor
 	*

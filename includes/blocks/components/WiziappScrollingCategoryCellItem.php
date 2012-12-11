@@ -33,7 +33,9 @@ class WiziappScrollingCategoryCellItem extends WiziappLayoutComponent{
     * @var string
     */
     var $baseName = 'scrollingCategoryCellItem';
-    
+
+    private $htmlTemplate = '<li class="scrollingCategoryCellItem cellItem default"><p class="title attribute text_attribute">__ATTR_title__</p> <div class="attribute system_attribute pageControl">__ATTR_pageControl__</div> <div class="attribute system_attribute scroll">__ATTR_scroll__</div> </li>';
+
      /**
     * constructor 
     * 

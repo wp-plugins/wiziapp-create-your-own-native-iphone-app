@@ -48,7 +48,11 @@ class WiziappLoader
 		if ( isset($_SERVER['HTTP_WIZIAPP_VERSION']) ){
 			$this->version = $_SERVER['HTTP_WIZIAPP_VERSION'];
 		} else {
-			$this->version = $this->defaultVersion;
+            if ( isset($_GET['wizi_ver']) ){
+                $this->version = $_GET['wizi_ver'];
+            } else {
+			// $this->version = $this->defaultVersion;
+            }
 		}
 	}
 
@@ -80,22 +84,25 @@ class WiziappLoader
 			}
 		}
 
-		$ch = WiziappContentHandler::getInstance(); // Needs to load every time
+		// Needs to load every time
+		$ch = WiziappContentHandler::getInstance();
 
-		if (strpos($_SERVER['QUERY_STRING'], 'wiziapp/') !== FALSE){
-			// Start the request handler so it will register it's events.
-			$rh = new WiziappRequestHandler(); // Needs to load for the webservices
-		}
+		// if (strpos($_SERVER['QUERY_STRING'], 'wiziapp/') !== FALSE){
+
+		// Start the request handler so it will register it's events.
+		$rh = new WiziappRequestHandler(); // Needs to load for the webservices
+
+		// }
 	}
 
 	public function loadClass($className){
 
 		// Make sure the class is ours
 		if ( stripos($className, $this->prefix) === 0 ){
-			if ( !class_exists($className, FALSE)  && !interface_exists($className, FALSE) ){
+			if ( ! class_exists($className, FALSE)  && ! interface_exists($className, FALSE) ){
 				$this->_checkSetIncludePath();
 				$vClassName = $this->getClassFileName($className);
-				/** @noinspection PhpIncludeInspection */
+				// @noinspection PhpIncludeInspection
 				@include($vClassName);
 			}
 		}

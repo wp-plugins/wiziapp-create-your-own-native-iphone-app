@@ -9,9 +9,10 @@
 * @author comobix.com plugins@comobix.com
 */
 class WiziappContentHandler {
-	var $mobile;
+	private $mobile;
 	private $inApp;
-	var $debug = FALSE;
+	private $_show_download_page = FALSE;
+	private $_is_access_checked = FALSE;
 	private $inSave = FALSE;
 
 	static $shouldDisplayAppstoreLinkFlag = TRUE;
@@ -23,20 +24,19 @@ class WiziappContentHandler {
 	private $originalStylesheetDir = '';
 	private $originalStylesheetDirUri = '';
 
-
 	/**
 	* Apply all of the classes hooks to the right requests,
 	* we don't need to start this request every time, just when it is possibly needed
 	*/
 	private function __construct() {
-		$this->mobile = false;
-		$this->inApp = false;
+		$this->mobile = FALSE;
+		$this->inApp  = FALSE;
 
 		add_action('plugins_loaded', array(&$this, 'detectAccess'), 99);
 		add_action('plugins_loaded', array(&$this, 'avoidWpTouchIfNeeded'), 1);
 
-		if ( strpos($_SERVER['REQUEST_URI'], '/wp-admin') === false
-			&& strpos($_SERVER['REQUEST_URI'], 'xmlrpc') === false) {
+		if ( strpos($_SERVER['REQUEST_URI'], '/wp-admin') === FALSE
+			&& strpos($_SERVER['REQUEST_URI'], 'xmlrpc') === FALSE) {
 			// Don't change the template directory when in the admin panel
 			add_filter('stylesheet', array(&$this, 'get_stylesheet'), 99);
 			add_filter('theme_root', array(&$this, 'theme_root'), 99);
@@ -58,7 +58,7 @@ class WiziappContentHandler {
 			add_filter('the_content', array(&$this, 'convert_content'), 999);
 			add_filter('the_category', array(&$this, 'convert_categories_links'), 99);
 		} else {
-			if (strpos($_SERVER['REQUEST_URI'], 'wiziapp') !== false) {
+			if (strpos($_SERVER['REQUEST_URI'], 'wiziapp') !== FALSE) {
 				// Avoid cache in the admin
 				header("Cache-Control: no-store, no-cache, must-revalidate");
 				header("Expires: " . gmdate("D, d M Y H:i:s", time() - 3600) . " GMT");
@@ -72,6 +72,18 @@ class WiziappContentHandler {
 		$this->removeKnownFilters();
 	}
 
+	public function isHTML() {
+		if ( $this->inApp ) {
+			return FALSE;
+		}
+
+		return $this->mobile;
+	}
+
+	public function is_show_download() {
+		return $this->_show_download_page;
+	}
+
 	public function isInApp() {
 		return $this->inApp;
 	}
@@ -79,7 +91,6 @@ class WiziappContentHandler {
 	public function isInSave() {
 		return $this->inSave;
 	}
-
 
 	/**
 	* We are doing some of the functionality ourselves so reduce the overhead...
@@ -116,90 +127,73 @@ class WiziappContentHandler {
 	* requests, so if something is not there its not the application.
 	*
 	*/
-	function detectAccess() {
-		//WiziappLog::getInstance()->write('INFO', "Detecting access type", "WiziappContentHandler");
+	public function detectAccess() {
+		if ( $this->_is_access_checked ) {
+			return;
+		}
+		$this->_is_access_checked = TRUE;
+
 		$appToken = isset($_SERVER['HTTP_APPLICATION']) ? $_SERVER['HTTP_APPLICATION'] : '';
 		$udid = isset($_SERVER['HTTP_UDID']) ? $_SERVER['HTTP_UDID'] : '';
-		$display_download_from_appstore = (bool) WiziappConfig::getInstance()->display_download_from_appstore;
 
-		//WiziappLog::getInstance()->write('DEBUG', "The headers are: {$appToken} and {$udid}", "WiziappContentHandler");
+		$this->mobile = FALSE;
+		$this->inApp  = FALSE;
 
 		if (strpos($_SERVER['REQUEST_URI'], 'wiziapp/') !== FALSE) {
 			$this->inApp = TRUE;
 		}
 
-		if ((!empty($appToken) && !empty($udid)) || $this->inApp) {
+		if ( isset($_GET['output']) && $_GET['output'] == 'html' ) {
+			$this->mobile = TRUE;
+			$this->inApp = FALSE;
+		}
+
+		if ( ( ! empty($appToken) && ! empty($udid) ) || $this->inApp ) {
 			WiziappLog::getInstance()->write('INFO', "In the application display", "WiziappContentHandler.detectAccess");
 
 			$this->setInApp();
-		} else {
-			$this->mobile = FALSE;
-			$this->inApp = FALSE;
+		} elseif ( isset($_SERVER['HTTP_USER_AGENT']) && WiziappConfig::getInstance()->webapp_installed && ! $this->_desktop_site_mode() ) {
+			add_filter('body_class', array($this, 'getDeviceClass'), 10, 1);
 
-			if (isset($_SERVER['HTTP_USER_AGENT']) && $display_download_from_appstore) {
-				$is_iPhone = stripos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X') !== FALSE;
-				$is_iPod   = stripos($_SERVER['HTTP_USER_AGENT'], 'iPod')   !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X') !== FALSE;
-				$is_other  = stripos($_SERVER['HTTP_USER_AGENT'], 'iPad')   !== FALSE || stripos($_SERVER['HTTP_USER_AGENT'], 'Android')  !== FALSE || stripos($_SERVER['HTTP_USER_AGENT'], 'webOS') !== FALSE;
-				if ( ($is_iPhone || $is_iPod) && ! $is_other ) {
-					if (WiziappContentHandler::$shouldDisplayAppstoreLinkFlag && WiziappConfig::getInstance()->appstore_url != '') {
-						// moving the cookie check to the browser
-						//if (!isset($_COOKIE['WIZI_SHOW_APPSTORE_URL']) || $_COOKIE['WIZI_SHOW_APPSTORE_URL'] == 0) {
-						add_action('wp_head', array(&$this, 'displayAppstoreAppURL'), 1);
-						WiziappContentHandler::$shouldDisplayAppstoreLinkFlag = FALSE;
-						/**$timeout = time() + (60 * 60 * 24);
-						setcookie("WIZI_SHOW_APPSTORE_URL", WiziappConfig::getInstance()->appstore_url_timeout, $timeout, "/");*/
-						//}
-					}
-				}
+			$is_iPhone	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPhone')  !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
+			$is_iPod	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPod')    !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
+			$is_android	= stripos($_SERVER['HTTP_USER_AGENT'], 'Android') !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'AppleWebKit') !== FALSE;
+			$is_windows	= stripos($_SERVER['HTTP_USER_AGENT'], 'Windows') !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'IEMobile')	   !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Phone') !== FALSE;
+			$is_iPad	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPad')    !== FALSE || stripos($_SERVER['HTTP_USER_AGENT'], 'webOS') 	   !== FALSE;
+
+			$store_url = '';
+			if ( ( $is_iPhone || $is_iPod ) && ! $is_iPad ) {
+				$this->mobile = 1;
+				$store_url = WiziappConfig::getInstance()->appstore_url;
+			} elseif ( $is_android ) {
+				$this->mobile = 2;
+				$store_url = WiziappConfig::getInstance()->playstore_url;
+			} elseif ( $is_windows ) {
+				$this->mobile = 3;
 			}
 
-			//WiziappLog::getInstance()->write('DEBUG', "Didn't recognize the headers, normal browsing", "WiziappContentHandler");
+			$is_suitable =
+			! ( isset($_COOKIE['WIZI_SHOW_STORE_URL']) && $_COOKIE['WIZI_SHOW_STORE_URL'] === '1' ) &&
+			! empty($store_url) &&
+			intval(WiziappConfig::getInstance()->display_download_from_appstore) === 1;
+			if ( $is_suitable ) {
+				setcookie('WIZI_SHOW_STORE_URL', '1', time() + 60*60*24*7);
+
+				if ( ! ( isset($_GET['androidapp']) && $_GET['androidapp'] === '1' ) ) {
+					$this->_show_download_page = TRUE;
+				}
+			}
 		}
 	}
 
-	function displayAppstoreAppURL () {
-		/**
-		* @todo move this to an external file
-		*/
-	?>
-	<script type="text/javascript">
-		function wiziappGetCookie(c_name) {
-			var i,x,y,ARRcookies=document.cookie.split(";");
-			for (i=0;i<ARRcookies.length;i++) {
-				x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
-				y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
-				x=x.replace(/^\s+|\s+$/g,"");
-				if (x==c_name) {
-					return unescape(y);
-				}
-			}
+	public function getDeviceClass($classes) {
+		if ( strstr($_SERVER['HTTP_USER_AGENT'], 'iPad') ) {
+			$classes[] = 'ipad_general';
+		} elseif ( strstr($_SERVER['HTTP_USER_AGENT'], 'iPhone') ) {
+			$classes[] = 'iphone_general';
 		}
 
-		function wiziappSetCookie(c_name,value,exdays) {
-			var exdate=new Date();
-			exdate.setDate(exdate.getDate() + exdays);
-			var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
-			document.cookie=c_name + "=" + c_value;
-		}
-
-		(function() {
-				// We show "Appstore URL" message, if "WIZI_SHOW_APPSTORE_URL" cookie not exist
-				if ( ! Boolean( wiziappGetCookie("WIZI_SHOW_APPSTORE_URL") ) ) {
-					wiziappSetCookie("WIZI_SHOW_APPSTORE_URL",1,7);
-
-					if ( Boolean( wiziappGetCookie("WIZI_SHOW_APPSTORE_URL") ) ) {
-						// We are able to create the cookie, so it is ok
-						var res = confirm("Download our App from the App Store");
-						if (res == true) {
-							// If user choose to see Appstore URL, show the message next after six months
-							wiziappSetCookie("WIZI_SHOW_APPSTORE_URL",1,30*6);
-							location.replace("<?php echo WiziappConfig::getInstance()->appstore_url; ?>");
-						}
-					}
-				}
-		})();
-	</script>';
-	<?php
+		return $classes;
 	}
 
 	/**
@@ -209,273 +203,31 @@ class WiziappContentHandler {
 	* @param array $matches the array returned from preg_replace_callback
 	* @return string the link found after converting to the app format
 	*/
-	function _handle_links_converting($matches) {
-		$link = $matches[0];
-		$url = $matches[2];
-		// To support "Styling Page-Links" feature - http://codex.wordpress.org/Styling_Page-Links
-		$styling_page_links = $matches[3];
+	function getNewURL($url) {
+		$styling_page_links = '';
+		if (preg_match('!&page=\d+!is', $url, $match)) {
+			$styling_page_links = $match[0];
+		}
 		$post_id = url_to_postid($url);
 		if ($post_id) {
 			$post = get_post($post_id);
-			$newUrl = '';
 			if ($post->post_type == 'page') {
-				$newUrl = WiziappLinks::pageLink($post_id);
+				return WiziappLinks::pageLink($post_id);
 			} elseif ($post->post_type == 'post') {
-				$newUrl = WiziappLinks::postLink($post_id, $styling_page_links);
+				return WiziappLinks::postLink($post_id, $styling_page_links);
 			}
-
-			if ($newUrl == '') {
-				$newUrl = $url;
-			}
-			$link = str_replace($url, $newUrl, $link);
 		} else {
 			// If it is an image, convert to open image
-			if (    strpos($url, '.png') !== FALSE ||
+			if (
+				strpos($url, '.png') !== FALSE ||
 				strpos($url, '.gif') !== FALSE ||
 				strpos($url, '.jpg') !== FALSE ||
-				strpos($url, '.jpeg') !== FALSE ) {
-				$newUrl = WiziappLinks::linkToImage($url);
-				$partLink = substr($link, 0, strpos($link, '>'));
-				$secondPartLink = substr($link, strpos($link, '>'));
-
-				$link = str_replace($url, $newUrl, $partLink) . $secondPartLink;
+				strpos($url, '.jpeg') !== FALSE
+			) {
+				return WiziappLinks::linkToImage($url);
 			}
 		}
-		return $link;
-	}
-	/**
-	 *
-	 * @param int $post_id the content id we are processing
-	 * @param string $content
-	 * @return array $replacements the array with the instructions for str_replace
-	 */
-	function _getGaleriesReplacementCode($post_id, $content) {
-		if ($content != "") { // This might happen in cases like an empty nextgen album (with no galleries)
-			$dom = new DOMDocument();
-			libxml_use_internal_errors(true);
-			@$dom->loadHTML($content); // Hide the errors
-
-			$loadingErrors = libxml_get_errors();
-			if ( count($loadingErrors) > 0 ) {
-				WiziappLog::getInstance()->write('WARNING', "After loading the DOM for post: {$post_id} the errors are:".print_r($loadingErrors, TRUE), "WiziappContentHandler._getGaleriesReplacementCode");
-			}
-			libxml_clear_errors();
-
-			$xpath = new DOMXPath($dom);
-			// $images = $xpath->query('//img/parent::*[not(text()) and count(*)=1]/parent::*[not(text()) and count(*)=1]/parent::*[not(text()) and count(*)=1]/parent::*[id]/child::*/child::*/child::*/child::img');
-			$images = $xpath->query('//p[not(text()) and count(*)=1]/a[not(text()) and count(*)=1]/img');
-			$galleries = array();
-			$nb = $images->length;
-			if ($nb > 0) {
-				for($pos=0; $pos<$nb; $pos++) {
-					$image = $images->item($pos);
-					$grand_parent = $image->parentNode->parentNode;
-					$prev_image = ($pos>0)?$images->item($pos-1):null;
-					if ($prev_image!= null && $grand_parent->isSameNode($prev_image->parentNode->parentNode->nextSibling)) {
-						$galleries[count($galleries)][]=$image;
-					} else {
-						$galleries[count($galleries)+1] = array($image);
-					}
-
-				}
-				foreach ($galleries as $gallery) {
-					$first_image = array_shift($gallery);
-					foreach ($gallery as $image) {
-						$ancor = $image->parentNode;
-						$first_image->parentNode->parentNode->appendChild($ancor);
-						// $image->parentNode->parentNode->removeChild($ancor);
-					}
-				}
-			}
-			/**$content = preg_replace('/^<!DOCTYPE.+?>/', '', str_replace( array('<html>', '</html>', '<body>', '</body>',
-			"\n", "\r"), array('', '', '', '', '', ''), $dom->saveHTML()));*/
-		}
-	}
-
-	/**
-	* Get the images we scanned for this post and it's replacement code
-	*
-	* @param int $post_id the content id we are processing
-	* @return array $replacements the array with the instructions for str_replace
-	*/
-	function _getImagesReplacementCode($post_id) {
-		$single_img_src = array();
-		$auxiliary = array(
-			'wordpress-gallery-id'			  => 1,
-			'data-wiziapp-cincopa-id'		  => 1,
-			'data-wiziapp-nextgen-gallery-id' => 1,
-		);
-		$imagesElements = WiziappDB::getInstance()->get_content_images($post_id);
-		$replacements = array(
-			'find' => array(),
-			'replace' => array(),
-		);
-
-		if ($imagesElements !== FALSE) {
-			foreach ($imagesElements as $image) {
-				// Load the image to the DOM processing
-				$dom = new WiziappDOMLoader($image['original_code'], get_bloginfo('charset'));
-				$imageDOM = $dom->getBody();
-
-				WiziappLog::getInstance()->write('INFO', ">>> About to replace :: {$image['original_code']}", 'WiziappContentHandler._getImagesReplacementCode');
-				$replacements['find'][] = $image['original_code'];
-
-				$newImage = '<img ';
-				WiziappLog::getInstance()->write('DEBUG', ">>> The image info :: " . print_r($image, TRUE), 'WiziappContentHandler._getImagesReplacementCode');
-				$attachInfo = json_decode($image['attachment_info'], TRUE);
-				foreach ($attachInfo['attributes'] as $attrName => $attrValue) {
-					$value = str_replace('\\', '/', $attrValue);
-					if ( in_array($attrName, array('src', 'title', 'alt')) ) {
-						$value = $imageDOM[0]['img']['attributes'][$attrName];
-						$attachInfo['attributes'][$attrName] = $value;
-
-						/**
-						* In the Gallery case, in entrance to a Post, need not to send the HTTP Request to all an Images of the Gallery.
-						* As we show a first Image of the Gallery only.
-						* So we change all "src" attributes of the Images to single first.
-						*/
-						if ( $attrName === 'src' ) {
-							$gallery_attribute = array_intersect_key( $attachInfo['attributes'], $auxiliary );
-							list( $gallery_name, $gallery_id ) = each( $gallery_attribute );
-
-							if ( $gallery_name != '' && ctype_alnum( $gallery_id ) ) {
-								if ( isset( $single_img_src[$gallery_name][$gallery_id] ) && $single_img_src[$gallery_name][$gallery_id] !== '' ) {
-									$value = $single_img_src[$gallery_name][$gallery_id];
-								} else {
-									$single_img_src[$gallery_name][$gallery_id] = $value;
-								}
-							}
-						}
-					}
-
-					$newImage .= " {$attrName}=\"{$value}\"";
-				}
-
-				/**
-				* @todo Fix (remove) this once ticket 710 is fixed
-				*/
-				global $thumbSize;
-				if (count($imagesElements) >= WiziappConfig::getInstance()->count_minimum_for_appear_in_albums) {
-					$thumb = new WiziappImageHandler($attachInfo['attributes']['src']);
-					$thumbSize = WiziappConfig::getInstance()->getImageSize('album_thumb');
-					$url = $thumb->getResizedImageUrl($attachInfo['attributes']['src'], $thumbSize['width'], $thumbSize['height']);
-					$newImage .= " data-image-thumb=\"" . $url . "\"";
-				}
-
-				$id_code = " data-wiziapp-id=\"{$image['id']}\" ";
-				$newImage .= $id_code . ' />';
-				WiziappLog::getInstance()->write('INFO', ">>> with this:: {$newImage}", 'WiziappContentHandler._getImagesReplacementCode');
-
-				// Wordpress save the image without closing /> so let's check this too
-				$replacements['find'][] = str_replace(' />', '>', $image['original_code']);
-				$replacements['replace'][] = $newImage;
-				// We have 2 find elements per image, so we need to replace, otherwise things gets buggy... :P
-				$replacements['replace'][] = $newImage;
-			}
-		}
-		return $replacements;
-	}
-
-	/**
-	* Get the videos and audio we scanned for this post and it's replacement code
-	*
-	* @param int $post_id the content id we are processing
-	* @return array $replacements the array with the instructions for str_replace
-	*/
-	function _getSpecialComponentsCode($post_id) {
-		$replacements = array(
-			'find' => array(),
-			'replace' => array(),
-			'regex' => array(
-				'find' => array(),
-				'replace' => array(),
-			),
-		);
-
-		$specialElements = WiziappDB::getInstance()->get_content_special_elements($post_id);
-		if ($specialElements !== FALSE) {
-			$ve = new WiziappVideoEmbed();
-			foreach ($specialElements as $element) {
-				$replaceRegex = '';
-				$info = json_decode($element['attachment_info'], TRUE);
-				if ($element['attachment_type'] == WiziappDB::getInstance()->media_types['video']) {
-					$replaceCode = $ve->getCode($info['actionURL'], $element['id'], $info['bigThumb']);
-
-					// Get the original code and extract the video url
-					$originalCode = $element['original_code'];
-					$originalMatches = array();
-					// Build the regex for the specific url
-					$replaceRegex = '/(src)=(\'|")([^"]+)(\'|")/';
-					preg_match($replaceRegex, $originalCode, $originalMatches);
-					if ( !empty($originalMatches) && !empty($originalMatches[3]) ) {
-						$origUrl = $originalMatches[3];
-						$origUrl = str_replace(array('/', '.', '?'), array('\/', '\.', '\?'), $origUrl);
-						if ( $replaceCode ) {
-							$replacements['regex']['find'][] = '/(<object[^>]*>)(.*?)'.$origUrl.'(.*?)(<\/object>)/si';
-							$replacements['regex']['replace'][] = $replaceCode;
-
-							$replacements['regex']['find'][] = '/(<iframe[^>]*'.$origUrl.'[^>]*(\/?)>)(.*?)(<\/iframe>)?/si';
-							$replacements['regex']['replace'][] = $replaceCode;
-						}
-					}
-				} else {
-					// audio should convert to a component
-					// @todo Add single component export from the simulator engine
-					$info['actionURL'] = str_replace('audio', 'video', $info['actionURL']);
-					$style = '';
-					if (!empty($info['imageURL'])) {
-						$style = "background-image: url({$this->_getAdminImagePath()}{$info['imageURL']}.png);";
-					}
-
-					if (strlen($info['title']) > 35) {
-						$title = substr($info['title'], 0, 35) . '...';
-					} else {
-						$title = $info['title'];
-					}
-
-					//$replaceCode = "<a href='" . $info['actionURL'] . "'><div class='audioCellItem'>
-					$actionURL = str_replace('cmd://open/video/', '', $info['actionURL']);
-					$actionURL = WiziappLinks::fixAudioLink($actionURL);
-					$actionURL = str_replace('cmd://open/audio/', 'cmd://open/video/', $actionURL);
-
-					$replaceCode =
-						"<a href='" . $actionURL . "'><div class='audioCellItem'>
-							<div class='col1'>
-								<div class='imageURL' style='{$style}'></div>
-							</div>
-							<div class='col2'>
-								<p class='title'>{$title}</p>
-								<p class='duration'>{$info['duration']}</p>
-							</div>
-							<div class='col3'>
-								<div class='playButton'></div>
-							</div>
-						</div></a>";
-
-					// Get the original code and extract the video url
-					$originalCode = $element['original_code'];
-					$originalMatches = array();
-					// Build the regex for the specific url
-					$replaceRegex = '/(href)=(\'|")([^"]+)(\'|")/';
-					preg_match($replaceRegex, $originalCode, $originalMatches);
-					if ( !empty($originalMatches) && !empty($originalMatches[3]) ) {
-						$origUrl = $originalMatches[3];
-						$origUrl = str_replace(array('/', '.', '?'), array('\/', '\.', '\?'), $origUrl);
-
-						$replacements['regex']['find'][] = '/(<a[^>]*'.$origUrl.'[^>]*>)(.*?)(<\/a>)/si';
-						$replacements['regex']['replace'][] = $replaceCode;
-
-					}
-				}
-
-				if ($replaceCode) {
-					$replacements['find'][] = $element['original_code'];
-					$replacements['replace'][] = $replaceCode;
-				}
-			}
-		}
-		WiziappLog::getInstance()->write('DEBUG', ">>> The replacement code is:" . print_r($replacements, TRUE), 'WiziappContentHandler._getSpecialComponentsCode');
-		return $replacements;
+		return $url;
 	}
 
 	function _getAdminImagePath() {
@@ -488,78 +240,528 @@ class WiziappContentHandler {
 	}
 
 	function trigger_before_content($content) {
-		if ($this->inApp === TRUE) {
+		if ($this->inApp || $this->mobile) {
 			WiziappLog::getInstance()->write('INFO', "Triggering before the content", 'WiziappContentHandler.trigger_before_content');
 			$content = apply_filters('wiziapp_before_the_content', $content);
 		}
 
-		if ($this->inApp === TRUE || $this->inSave === TRUE) {
+		if ($this->inApp || $this->inSave || $this->mobile) {
 			$content = $this->add_header_to_content($content);
 		}
 		return $content;
+	}
+
+	private function _handle_audio( & $html, $post_id) {
+		$audios_by_props = array();
+		$all_audios = $html->find('a');
+
+		foreach ($all_audios as $audio) {
+			if ( ! isset($audio->attr['href']) ) {
+				continue;
+			}
+
+			$key = md5($audio->attr['href']);
+			$audios_by_props[$key] = $audio;
+		}
+
+		$content_audios = WiziappDB::getInstance()->get_post_audios($post_id);
+		foreach ( $content_audios as $audio ) {
+			if ( ! isset($audio['attachment_info'])) {
+				continue;
+			}
+			$attachment_info = json_decode($audio['attachment_info'], true);
+
+			if ( ! isset($attachment_info['actionURL']) ) {
+				continue;
+			}
+			$url_parts = explode('/', $attachment_info['actionURL']);
+			$audio_href = urldecode($url_parts[4]);
+			$key = md5($audio_href);
+
+			if ( ! isset( $audios_by_props[ $key ] ) ) {
+				continue;
+			}
+
+			if ( empty($info['imageURL'])) {
+			$style = '';
+			} else {
+				$style = "background-image: url({$this->_getAdminImagePath()}{$info['imageURL']}.png);";
+			}
+
+			if (strlen($attachment_info['title']) > 35) {
+				$title = substr($attachment_info['title'], 0, 35) . '...';
+			} else {
+				$title = $attachment_info['title'];
+			}
+
+			ob_start();
+			?>
+			<a href="<?php echo $audio_href; ?>">
+				<div class='audioCellItem'>
+					<div class='col1'>
+						<div class="imageURL" style="<?php echo $style; ?>"></div>
+					</div>
+					<div class='col2'>
+						<p class="title"><?php echo $title; ?></p>
+						<p class="duration"><?php echo $attachment_info['duration']; ?></p>
+					</div>
+					<div class="col3">
+						<div class="playButton"></div>
+					</div>
+				</div>
+			</a>
+			<?php
+			$audios_by_props[ $key ]->outertext = ob_get_clean();
+		}
+	}
+
+	private function _handle_video( & $html, $post_id) {
+		$videos_by_props = array();
+		$all_videos = $html->find('iframe');
+
+		foreach ($all_videos as $video) {
+			if ( ! isset($video->attr['src']) ) {
+				continue;
+			}
+
+			$video_id_pattern = '/^http:\/\/(?:\w+\.)?(?:youtu|vimeo)[\w\/\.]*(?:\/|\?v=)([\w\-]+)/i';
+			preg_match($video_id_pattern, $video->attr['src'], $match);
+
+			if ( empty($match) || empty($match[1]) ) {
+				continue;
+			}
+
+			$videos_by_props[$match[1]] = $video;
+		}
+
+		$content_videos = WiziappDB::getInstance()->get_post_videos($post_id);
+		foreach ( $content_videos as $video ) {
+			if ( ! isset($video['attachment_info'])) {
+				continue;
+			}
+			$attachment_info = json_decode($video['attachment_info'], true);
+
+			if ( ! isset($attachment_info['actionURL']) ) {
+				continue;
+			}
+
+			$url_parts = explode('/', $attachment_info['actionURL']);
+
+			if ( ! isset( $videos_by_props[ $url_parts[5] ] ) && ( $url_parts[4] !== 'youtube' || $url_parts[4] !== 'vimeo' ) ) {
+				continue;
+			}
+
+			if ( $url_parts[4] === 'youtube' ) {
+				$url_parts[4] = 'video';
+				$video_url = 'http://www.youtube.com/watch?v=';
+			} elseif ( $url_parts[4] === 'vimeo' ) {
+				$video_url = 'http://vimeo.com/';
+			}
+
+			ob_start();
+			if ( isset($_GET['sim']) && $_GET['sim'] == 1 && isset($attachment_info['thumb']) ) {
+				?>
+				<div class="video_wrapper_container">
+					<div class="video_wrapper_sim" data-video="video_<?php echo $video['id']; ?>">
+						<img src="<?php echo $attachment_info['thumb']; ?>" width="340" alt="Video Thumbnail" />
+						<div class="video_effect"></div>
+					</div>
+				</div>
+				<?php
+			} else {
+				?>
+				<div class="<?php echo $url_parts[4]; ?>_wrapper data-wiziapp-iphone-support">
+				<?php
+				if ( WiziappContentHandler::getInstance()->isHTML() ) {
+					?>
+					<div class="iframe_protect_screen" style="position: absolute;" data-video-url="<?php echo home_url('?wiziapp/content/video/'.$video['id'].'&wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html'); ?>"></div>
+					<?php
+				}
+				 echo wp_oembed_get( $video_url.$url_parts[5], array('width' => 300, ) );
+				?>
+				</div>
+				<?php
+			}
+
+			$videos_by_props[ $url_parts[5] ]->outertext = ob_get_clean();
+		}
 	}
 
 	/**
 	* Convert the known content to a predefined format used by the application.
 	* Called from 'the_content' filter of wordpress, running last.
 	*
-	* @see self::_handle_links_converting
-	* @see self::_getImagesReplacementCode
-	* @see self::_getSpecialComponentsCode
-	*
 	* @param string $content the initial content
 	* @return string $content the processed content
 	*/
 	function convert_content($content) {
-		global $post;
 		WiziappLog::getInstance()->write('INFO', "In the_content filter callback the contentHandler", "WiziappContentHandler.convert_content");
+		if ( ! $this->inApp && ! $this->mobile) {
+			return $content;
+		}
+		WiziappLog::getInstance()->write('INFO', "Converting content like we are inside the app", "WiziappContentHandler.convert_content");
 
-		if ($this->inApp === TRUE) {
-			WiziappLog::getInstance()->write('INFO', "Converting content like we are inside the app", "WiziappContentHandler.convert_content");
-			WiziappProfiler::getInstance()->write("Getting the images code for post {$post->ID}", "WiziappContentHandler.convert_content");
+		global $post;
 
-			// Add the content id to images
-			$imagesCode = $this->_getImagesReplacementCode($post->ID);
+		ob_start();
+		wp_link_pages( array( 'before' => '<div class="page-link">' . __( 'Pages:', 'twentyten' ), 'after' => '</div>' ) );
+		$content .= ob_get_clean();
 
-			ob_start();
-			wp_link_pages( array( 'before' => '<div class="page-link">' . __( 'Pages:', 'twentyten' ), 'after' => '</div>' ) );
-			$content .= ob_get_clean();
+		WiziappProfiler::getInstance()->write("Content processing for post {$post->ID}", "WiziappContentHandler.convert_content");
+		$html = new simple_html_dom();
+		$html->load($content);
 
-			$content = str_replace('&amp;', '&', $content);
-			$content = str_replace('&#038;', '&', $content);
-			$content = str_replace('&#8211;', '&ndash;', $content);
-			// $content = str_replace(' &gt;', '&gt;', $content);
-			// $content = str_replace(' &#062;', '&#062;', $content);
-			$content = str_replace('  >', '>', $content);
-			$content = str_replace(' >', '>', $content);
-			$content = str_replace($imagesCode['find'], $imagesCode['replace'], $content);
+		// Handle Audio
+		WiziappProfiler::getInstance()->write("Getting the Audio elements code for post {$post->ID}", "WiziappContentHandler.convert_content");
+		$this->_handle_audio($html, $post->ID);
+		WiziappProfiler::getInstance()->write("Done Getting the Audio elements code for post {$post->ID}", "WiziappContentHandler.convert_content");
 
-			WiziappProfiler::getInstance()->write("Done Getting the images code for post {$post->ID}", "WiziappContentHandler.convert_content");
-			//WiziappLog::getInstance()->write('INFO', "The content::" . $content, "convert_content");
+		// Handle Video
+		WiziappProfiler::getInstance()->write("Getting the Video elements code for post {$post->ID}", "WiziappContentHandler.convert_content");
+		$this->_handle_video($html, $post->ID);
+		WiziappProfiler::getInstance()->write("Done Getting the Video elements code for post {$post->ID}", "WiziappContentHandler.convert_content");
 
-			// Handle special tags: video and audio
-			WiziappProfiler::getInstance()->write("Getting the special elements code for post {$post->ID}", "WiziappContentHandler.convert_content");
-			$specialCode = $this->_getSpecialComponentsCode($post->ID);
-			$content = str_replace($specialCode['find'], $specialCode['replace'], $content);
-			$newContent = preg_replace($specialCode['regex']['find'], $specialCode['regex']['replace'], $content);
+		// Reload DOM tree - Unfortunately, simple_html_dom doesn't update the DOM tree in response to changes
+		$content = $html->save();
+		$html->clear();
+		$html->load($content);
 
-			if ( !empty($newContent) ) {
-				$content = $newContent;
-			} else {
-				$lastError = preg_last_error();
-				if ( !empty($lastError) ) {
-					WiziappLog::getInstance()->write('ERROR', "There was an error replacing the codes: ({$lastError}): ".print_r($specialCode['regex'], TRUE), "WiziappContentHandler.convert_content");
+		// Handle images
+		WiziappProfiler::getInstance()->write("Getting the images code for post {$post->ID}", "WiziappContentHandler.convert_content");
+		$img_by_props = array();
+		$thumbnail_size = false;
+		$all_images = $html->find('img');
+		if (count($all_images) >= WiziappConfig::getInstance()->count_minimum_for_appear_in_albums) {
+			$thumbnail_size = WiziappConfig::getInstance()->getImageSize('album_thumb');
+		}
+		foreach ($all_images as $img) {
+			$key = json_encode(array(isset($img->src)?$img->src:false, isset($img->width)?$img->width:false, isset($img->height)?$img->height:false));
+			if (!isset($img_by_props[$key])) {
+				$img_by_props[$key] = array();
+			}
+			$img_by_props[$key][] = $img;
+			$handler = new WiziappImageHandler($img->src);
+			if ($thumbnail_size !== false) {
+				$img->setAttribute('data-image-thumb', $handler->getResizedImageUrl($img->src, $thumbnail_size['width'], $thumbnail_size['height']));
+			}
+			if (!isset($img->width) || !isset($img->height)) {
+				$handler->load();
+				if (!isset($img->width)) {
+					$img->width = $handler->getNewWidth();
+				}
+				if (!isset($img->height)) {
+					$img->height = $handler->getNewHeight();
 				}
 			}
-			WiziappProfiler::getInstance()->write("Done Getting the special elements code for post {$post->ID}", "WiziappContentHandler.convert_content");
+		}
+		$content_images = WiziappDB::getInstance()->get_content_images($post->ID);
+		if ($content_images) {
+			foreach ($content_images as $img) {
+				$attrs = json_decode($img['attachment_info'], true);
+				if (!is_array($attrs) || !isset($attrs['attributes']) || !is_array($attrs['attributes'])) {
+					continue;
+				}
+				$attrs = $attrs['attributes'];
+				$key = json_encode(array(isset($attrs['src'])?$attrs['src']:false, isset($attrs['width'])?$attrs['width']:false, isset($attrs['height'])?$attrs['height']:false));
+				if (!empty($img_by_props[$key])) {
+					$img_by_props[$key][0]->setAttribute('data-wiziapp-id', $img['id']);
+					array_shift($img_by_props[$key]);
+				}
+			}
+		}
+		WiziappProfiler::getInstance()->write("Done Getting the images code for post {$post->ID}", "WiziappContentHandler.convert_content");
 
-			// Handle links
-			WiziappProfiler::getInstance()->write("Handling links for post {$post->ID}", "WiziappContentHandler.convert_content");
-			$content = preg_replace_callback('/<a\s[^>]*href\s*=\s*([\"\']?)([^\" >]*(&page=\d+)|[^\" >]*)\\1[^>]*>(.*)<\/a>/si',
-				array(&$this, "_handle_links_converting"), $content);
-			WiziappProfiler::getInstance()->write("Done Handling links for post {$post->ID}", "WiziappContentHandler.convert_content");
+		// Handle images part 2 - Converts the known gallery structure images to a format our multi image component can handle
+		foreach ($html->find('.gallery br') as $tag) {
+			$tag->outertext = '';
+		}
+		foreach ($html->find('.gallery dl a') as $tag) {
+			$this->addClass($tag, 'wiziapp_gallery');
 		}
 
+		// Handle images part 3 - Detect multi-images
+		$multi_images = array();
+		$non_multi_images = array();
+		$last_add = null;
+		$prev = null;
+		foreach ($html->find('img') as $tag) {
+			$p = $tag->parent();
+			if (!$p || !$this->hasClass($p, 'wiziapp_gallery')) {
+				$non_multi_images[] = $tag;
+				continue;
+			}
+			if ($prev && $prev->parent()->nextSibling() == $p) {
+				$this->addClass($prev->parent(), 'multi');
+				$this->addClass($p, 'multi');
+				if ($prev != $last_add) {
+					$multi_images[] = array($prev, $tag);
+					$prev->parent()->setAttribute('data-multi-index', count($multi_images));
+				}
+				else {
+					$multi_images[count($multi_images)-1][] = $tag;
+				}
+				$p->setAttribute('data-multi-index', count($multi_images));
+				$last_add = $tag;
+			}
+			else if ($prev && $prev != $last_add) {
+				$non_multi_images[] = $prev;
+			}
+			$prev = $tag;
+		}
+		if ($prev && $prev != $last_add) {
+			$non_multi_images[] = $prev;
+		}
+
+		// Handle images part 4 - Resize and center all non-multi images
+		foreach ($non_multi_images as $image) {
+			$anchor = $image;
+			if (!$this->hasClass($image, 'alignleft') && !$this->hasClass($image, 'alignright') && !$this->hasClass($image, 'aligncenter') && !$this->hasClass($image, 'alignnone') && !$this->hasClass($image, 'ngg-center')) {
+				$p = $image->parent();
+				for ($i = 0; $i < 2 && $p; $i++, $p = $p->parent()) {
+					if ($this->hasClass($p, 'alignleft') || $this->hasClass($p, 'alignright') || $this->hasClass($p, 'aligncenter') || $this->hasClass($p, 'alignnone') || $this->hasClass($p, 'ngg-left') || $this->hasClass($p, 'ngg-right')) {
+						$anchor = $p;
+					}
+				}
+			}
+
+			$url = false;
+			if (!$image->find_ancestor_tag('a')) {
+				$url = 'cmd://open/image/'.urlencode($image->src);
+			}
+
+			if($this->hasClass($anchor, 'alignleft') || $this->hasClass($anchor, 'alignright') || $this->hasClass($anchor, 'ngg-left') || $this->hasClass($anchor, 'ngg-right') || $this->hasStyle($anchor, 'float', 'right') || $this->hasStyle($anchor, 'float', 'left')) {
+				if ($image->width > 90 && $image->height > 90) {
+					$new_height = intval(100*$image->height/$image->width);
+					$image->width = 100;
+					$image->height = $new_height;
+
+					$this->setStyle($anchor, 'width', '105px');
+				}
+				else {
+					$size = $this->calcResize($image->width, $image->height);
+					$image->width = $size['width'];
+					$image->height = $size['height'];
+				}
+				$image->border = '0';
+
+				if($this->hasClass($anchor, 'alignright') || (isset($anchor->align) && !stricmp($anchor->align, 'right')) || $this->hasClass($anchor, 'ngg-right') || $this->hasStyle($anchor, 'float', 'right')) {
+					$this->setStyle($anchor, 'float', 'right');
+					$this->setStyle($anchor, 'margin', '5px 6px 4px 5px');
+					$this->unsetStyle($anchor, 'margin-top');
+					$this->unsetStyle($anchor, 'margin-right');
+					$this->unsetStyle($anchor, 'margin-bottom');
+					$this->unsetStyle($anchor, 'margin-left');
+				} else if($this->hasClass($anchor, 'alignleft') || (isset($anchor->align) && !stricmp($anchor->align, 'left')) || $this->hasClass($anchor, 'ngg-left') || $this->hasStyle($anchor, 'float', 'left')) {
+					$this->setStyle($anchor, 'float', 'left');
+					$this->setStyle($anchor, 'margin', '5px 6px 4px 5px');
+					$this->unsetStyle($anchor, 'margin-top');
+					$this->unsetStyle($anchor, 'margin-right');
+					$this->unsetStyle($anchor, 'margin-bottom');
+					$this->unsetStyle($anchor, 'margin-left');
+				}
+
+				if ($url !== false) {
+					ob_start();
+?>
+<a href="<?php echo esc_attr($url); ?>"><?php echo $image->outertext; ?></a>
+<?php
+					$image->outertext = ob_get_clean();
+				}
+			}
+			else {
+				$large = ($image->width > 90 && $image->height > 90);
+
+				// First thing's first - Rescale the image before we change the DOM structure around it, because the attributes cannot be edited afterwards
+				$size = $this->calcResize($image->width, $image->height);
+				$image->width = $size['width'];
+				$image->height = $size['height'];
+				$image->border = '0';
+
+				if($this->hasClass($anchor, 'ngg-center') || $this->hasStyle($anchor, 'float', 'center')) {
+					$this->addClass($anchor, 'aligncenter');
+					$wrap = true;
+				}
+				else if ($this->hasClass($anchor, 'aligncenter')) {
+					$wrap = true;
+				}
+				else if (!$anchor->find_ancestor_tag('table')) {
+					$this->setStyle($anchor, 'float', 'none');
+					if ($large) {
+						$wrap = true;
+					}
+				}
+
+				if ($url !== false) {
+					ob_start();
+?>
+<a href="<?php echo esc_attr($url); ?>"><?php echo $image->outertext; ?></a>
+<?php
+					$image->outertext = ob_get_clean();
+				}
+				if ($wrap) {
+					ob_start();
+?>
+<p class="center" style="text-align: center"><?php echo $anchor->outertext; ?></p>
+<?php
+					$anchor->outertext = ob_get_clean();
+				}
+			}
+		}
+
+		// Handle images part 5 - Create multi-image component or gallery
+		$multi_image_height = WiziappConfig::getInstance()->multi_image_height;
+		$galleryPrefix = WiziappLinks::postImagesGalleryLink($post->ID).'%2F';
+		foreach ($multi_images as $multi_key => $images) {
+			if (count($images) < 5) {
+				// Make gallery
+				$ind = '';
+				$maxHeight = 0;
+				foreach ($images as $image) {
+					$size = $this->calcResize($image->width, $image->height, array('max_height' => $multi_image_height));
+					$ind .= $image->getAttribute('data-wiziapp-id').'_';
+					if ($maxHeight < $size['height']) {
+						$maxHeight = $size['height'];
+					}
+				}
+				$maxHeight += 20;
+				if ($maxHeight > $multi_image_height) {
+					$maxHeight = $multi_image_height;
+				}
+				$width = 303*count($images); // FIXME: There has to be a way to make this adaptable to device size
+				$height = $maxHeight+50;
+				ob_start();
+?>
+<div class="wiziAppMultiImage" style="height:<?php echo esc_attr($height); ?>px;">
+	<div class="wiziAppMultiImageScrolling ignoreFullPageSwipe" data-index="<?php echo esc_attr($multi_key+1); ?>" style="left: 0px; width: <?php echo esc_attr($width); ?>px">
+<?php
+				foreach ($images as $image) {
+					$size = $this->calcResize($image->width, $image->height, array('max_height' => $maxHeight));
+					$image->width = $size['width'];
+					$image->height = $size['height'];
+					$image->border = '0';
+					unset($image->align);
+					$this->setStyle($image, 'float', 'none');
+					$this->setStyle($image, 'display', 'block');
+					$this->unsetStyle($image, 'margin-top');
+					$this->unsetStyle($image, 'margin-right');
+					$this->unsetStyle($image, 'margin-bottom');
+					$this->unsetStyle($image, 'margin-left');
+					$top = 10+$maxHeight-$size['height'];
+					if ($top < 10) {
+						$top = 10;
+					}
+					$this->setStyle($image, 'margin', $top.'px auto 0px');
+
+					$image->parent()->href = $galleryPrefix.$image->getAttribute('data-wiziapp-id').'%2F'.$image->getAttribute('data-wiziapp-id').'%2F%26ids%3D'.$ind;
+					echo $image->parent()->outertext;
+					if ($this->hasClass($image, 'unsupported_video_format')) {
+?>
+		<span class="notice unsupported_notice">Unsupported video format</span>
+<?php
+					}
+				}
+?>
+	</div>
+	<div class="multiImageNavItems">
+<?php
+				foreach ($images as $key => $image) {
+?>
+		<a href="<?php echo esc_attr($galleryPrefix.$ind.'%2F'.$image->getAttribute('data-wiziapp-id')); ?>" data-total="<?php echo esc_attr(count($images)); ?>" data-image-index="<?php echo esc_attr($key); ?>" class="multiImageNav<?php echo ($key == 0)?' active':''; ?> swap">.</a>
+<?php
+				}
+?>
+	</div>
+</div>
+<?php
+				$replacement = ob_get_clean();
+				foreach ($images as $key => $image) {
+					$image->parent->outertext = ($key == 0)?$replacement:'';
+				}
+			}
+			else {
+				// Make album
+				$ind = '';
+				foreach ($images as $image) {
+					$ind .= $image->getAttribute('data-wiziapp-id').'_';
+				}
+				ob_start();
+?>
+<ul class="wiziapp_bottom_nav albums_list">
+	<li>
+		<a class="albumURL" href="<?php echo esc_attr($galleryPrefix.'%26ids%3D'.$ind); ?>">
+			<div class="imagesAlbumCellItem album_item">
+				<div class="attribute imageURL album_item_image" style="background-image: url(<?php echo esc_attr($images[0]->getAttribute('data-image-thumb')); ?>)"></div>
+				<div class="album_item_decor"></div>
+				<p class="attribute text_attribute title album_item_title">Open image gallery</p>
+				<div class="numOfImages attribute text_attribute album_item_numOfImages"><?php echo esc_html(count($images)); ?> photos</div>
+				<span class="rowCellIndicator"></span>
+			</div>
+		</a>
+	</li>
+</ul>
+<?php
+				$replacement = ob_get_clean();
+				foreach ($images as $key => $image) {
+					$image->parent->outertext = ($key == 0)?$replacement:'';
+				}
+			}
+		}
+
+		// Reload DOM tree - Unfortunately, simple_html_dom doesn't update the DOM tree in response to changes
+		$content = $html->save();
+		$html->clear();
+		$html->load($content);
+
+		// Handle images final part - mark all images as handled
+		foreach ($html->find('img') as $tag) {
+			$this->addClass($tag, 'done');
+		}
+		WiziappProfiler::getInstance()->write("Done Getting the images code for post {$post->ID}", "WiziappContentHandler.convert_content");
+
+		// Remove unsupported flash objects
+		foreach ($html->find('embed') as $tag) {
+			$p = $tag->parent();
+			while ($p && !$this->hasClass($p, 'data-wiziapp-iphone-support')) {
+				$p = $p->parent();
+			}
+			if (!$p) {
+				$tag->outertext = '';
+			}
+		}
+		foreach ($html->find('object') as $tag) {
+			$p = $tag->parent();
+			while ($p && !$this->hasClass($p, 'data-wiziapp-iphone-support')) {
+				$p = $p->parent();
+			}
+			if (!$p) {
+				$tag->outertext = '';
+			}
+		}
+
+		// Use HTML5 input types (This will fall back to text on old browsers)
+		foreach ($html->find('input[type="text"]') as $tag) {
+			if ((isset($tag->class) && strpos($tag->class, 'email') !== false) || (isset($tag->name) && strpos($tag->name, 'email') !== false)) {
+				$tag->type = 'email';
+			}
+		}
+
+		// Handle links
+		WiziappProfiler::getInstance()->write("Handling links for post {$post->ID}", "WiziappContentHandler.convert_content");
+		foreach ($html->find('a') as $a_tag) {
+			if (!isset($a_tag->href)) {
+				continue;
+			}
+			$a_tag->href = $this->getNewURL($a_tag->href);
+			$a_tag->setAttribute('data-transition', 'slide');
+		}
+		WiziappProfiler::getInstance()->write("Done Handling links for post {$post->ID}", "WiziappContentHandler.convert_content");
+
+		$content = $html->save();
+		$html->clear();
+
+		$content = $this->removeSharingFromContent($content, $post->ID);
+
+		WiziappProfiler::getInstance()->write("Done Content processing for post {$post->ID}", "WiziappContentHandler.convert_content");
 		WiziappLog::getInstance()->write('INFO', "Returning the converted content", "WiziappContentHandler.convert_content");
 		return $content;
 	}
@@ -572,28 +774,98 @@ class WiziappContentHandler {
 	*
 	* @return array $size
 	*/
-	function calcResize($width, $height) {
-		$settings = array("max_width" => 288, "max_height" => -1);
+	function calcResize($width, $height, $settings = array()) {
+		$settings += array('max_width' => 288, 'max_height' => -1);
 
 		WiziappLog::getInstance()->write('info', "Resizing an image with width " . $width . " and height " . $height, "calcResize");
 		WiziappLog::getInstance()->write('info', "The options are: max_width: " . $settings['max_width'] . " & max_height: " . $settings['max_height'], "calcResize");
 
-		$size = array("width" => $width, "height" => $height);
+		$size = array('width' => $width, 'height' => $height);
 
 		$width = intval($width);
 		$height = intval($height);
-		$ratio = $height / $width;
 
-		WiziappLog::getInstance()->write('info', "The ratio is: " . $ratio, "calcResize");
-
-		if ($width >= $settings['max_width']) {
-			$size['width'] = round($settings['max_width']);
-			$size['height'] = round($size['width'] * $ratio);
-		} elseif ($settings['max_height'] != -1 && $height >= $settings['max_height']) {
-			$size['height'] = $settings['max_height'];
-			$size['width'] = $size['height'] / $ratio;
+		if ($settings['max_width'] < 0) {
+			if ($settings['max_height'] >= 0 && $height > $settings['max_height']) {
+				$size['height'] = $settings['max_height'];
+				$size['width'] = intval($size['height']*$width/$height);
+			}
 		}
+		else if ($settings['max_height'] < 0 || $settings['max_height']*$width > $settings['max_width']*$height) {
+			if ($width > $settings['max_width']) {
+				$size['width'] = $settings['max_width'];
+				$size['height'] = intval($size['width']*$height/$width);
+			}
+		}
+		else if ($height > $settings['max_height']) {
+			$size['height'] = $settings['max_height'];
+			$size['width'] = intval($size['height']*$width/$height);
+		}
+
 		return $size;
+	}
+
+	function addClass($node, $class) {
+		// Sanity check
+		if (!$node) {
+			return;
+		}
+		if (!isset($node->class) || preg_match('!^\\s*$!Dsu', $node->class)) {
+			$node->class = $class;
+			return;
+		}
+		if ($this->hasClass($node, $class)) {
+			return;
+		}
+		$node->class .= ' '.$class;
+	}
+
+	function hasClass($node, $class) {
+		if (!$node || !isset($node->class)) {
+			return false;
+		}
+		return !!preg_match('!(^|\\s)'.preg_quote($class, '!').'($|\\s)!Dsu', $node->class);
+	}
+
+	function setStyle($node, $style, $value) {
+		// Sanity check
+		if (!$node) {
+			return;
+		}
+		if (!isset($node->style) || preg_match('!^\\s*$!Dsu', $node->style)) {
+			$node->style = $style.':'.$value;
+			return;
+		}
+		$match = array();
+		$old_style = $node->style;
+		if (preg_match('!(?:;|^)()\\s*'.preg_quote($style).'\\s*:[^;]*()!Dsui', $old_style, $match, PREG_OFFSET_CAPTURE)) {
+			$node->style = substr($old_style, 0, $match[1][1]).$style.':'.$value.substr($old_style, $match[2][1]);
+			return;
+		}
+		if (preg_match('!(;|^)()\\s*$!Dsu', $old_style, $match, PREG_OFFSET_CAPTURE)) {
+			$node->style = substr($old_style, 0, $match[1][1]).$style.':'.$value;
+			return;
+		}
+		$node->style .= ';'.$style.':'.$value;
+	}
+
+	function hasStyle($node, $style, $value) {
+		if (!$node || !isset($node->style)) {
+			return false;
+		}
+		return !!preg_match('!(^|;)\\s*'.preg_quote($style, '!').'\\s*:\\s*'.preg_quote($value, '!').'\\s*($|;)!Dsui', $node->style);
+	}
+
+	function unsetStyle($node, $style) {
+		// Sanity check
+		if (!$node || !isset($node->style) || preg_match('!^\\s*$!Dsu', $node->style)) {
+			return;
+		}
+		$old_style = $node->style;
+		$new_style = preg_replace('!(;|^)\\s*'.preg_quote($style).'\s*:[^;]*!Dsu', '', $old_style);
+		if ($new_style != $old_style) {
+			$node->style = $new_style;
+		}
 	}
 
 	function convert_categories_links($data1) {
@@ -605,24 +877,20 @@ class WiziappContentHandler {
 	}
 
 	function do_admin_head_section() {
-		$cssFile = dirname(__FILE__) . '/../../themes/admin/style.css';
-		if ( file_exists($cssFile) ) {
-			$css = file_get_contents($cssFile);
-			/* remove comments */
-			$css = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $css);
-			/* remove tabs, spaces, newlines, etc. */
-			$css = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $css);
-
-			$cdnServer = WiziappConfig::getInstance()->getCdnServer();
-
-			$css = str_replace('@@@WIZIAPP_CDN@@@', $cdnServer, $css);
-			echo '<style type="text/css">'. $css . '</style>';
-		}
+		$dir = realpath($this->_get_plugin_dir());
+		$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $dir);
+		$url = str_replace(DIRECTORY_SEPARATOR, '/', $url);
+?>
+<link rel="stylesheet" href="<?php echo $url.'/themes/admin/style.css'; ?>" type="text/css" />
+<?php
 	}
 
 	function get_stylesheet( $stylesheet ) {
 		if ($this->inApp === TRUE) {
 			$stylesheet = 'blank';
+		} elseif ( $this->mobile ) {
+			// @todo Detect device to load the right stylesheet
+			$stylesheet = 'webapp';
 		}
 		return $stylesheet;
 	}
@@ -632,6 +900,8 @@ class WiziappContentHandler {
 
 		if ($this->inApp) {
 			$template = 'iphone';
+		} elseif ( $this->mobile ) {
+			$template = 'webapp';
 		}
 
 		return $template;
@@ -641,7 +911,7 @@ class WiziappContentHandler {
 		$this->detectAccess();
 
 		$theme_root = $this->_get_plugin_dir();
-		if ($this->inApp) {
+		if ($this->inApp || $this->mobile) {
 			$value = trailingslashit($theme_root) . 'themes';
 		}
 
@@ -652,7 +922,7 @@ class WiziappContentHandler {
 		$this->detectAccess();
 
 		$theme_root = $this->_get_plugin_dir();
-		if ($this->inApp) {
+		if ($this->inApp || $this->mobile) {
 			$path = trailingslashit($theme_root) . 'themes';
 		}
 
@@ -667,7 +937,7 @@ class WiziappContentHandler {
 
 	public function reset_template_directory($val) {
 		$this->detectAccess();
-		if ( $this->inApp ) {
+		if ( $this->inApp || $this->mobile ) {
 			$val = $this->originalTemplateDir;
 		}
 
@@ -682,7 +952,7 @@ class WiziappContentHandler {
 
 	public function reset_template_directory_uri($val) {
 		$this->detectAccess();
-		if ( $this->inApp ) {
+		if ( $this->inApp || $this->mobile ) {
 			$val = $this->originalTemplateDirUri;
 		}
 
@@ -697,7 +967,7 @@ class WiziappContentHandler {
 
 	public function reset_stylesheet_directory_uri($val) {
 		$this->detectAccess();
-		if ( $this->inApp ) {
+		if ( $this->inApp || $this->mobile ) {
 			$val = $this->originalStylesheetDirUri;
 		}
 
@@ -712,7 +982,7 @@ class WiziappContentHandler {
 
 	public function reset_stylesheet_directory($val) {
 		$this->detectAccess();
-		if ( $this->inApp ) {
+		if ( $this->inApp || $this->mobile ) {
 			$val = $this->originalStylesheetDir;
 		}
 
@@ -722,55 +992,102 @@ class WiziappContentHandler {
 	function theme_root_uri( $url ) {
 		$this->detectAccess();
 
-		if ($this->inApp) {
+		if ($this->inApp || $this->mobile) {
 			$dir = realpath($this->_get_plugin_dir());
-			$url =str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $dir) . "/themes";
+			$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $dir) . "/themes";
 			$url = str_replace(DIRECTORY_SEPARATOR, '/', $url);
 		}
 
 		return $url;
 	}
 
+	public function registerWebAppScripts() {
+		if ( $this->mobile ) {
+			$pluginUrl = str_replace(get_bloginfo('url'), '', WP_PLUGIN_URL).'/'.dirname(WP_WIZIAPP_BASE);
+			$pluginUrl .= '/themes/webapp';
+
+			wp_register_script('scrollview',
+				$pluginUrl.'/scripts/scrollview.js',
+				array('jquery_mobile_scrollview'),
+				WIZIAPP_P_VERSION, FALSE );
+
+			wp_register_script('wiziapp_effects',
+				$pluginUrl.'/resources/effects_config.js',
+				array(),
+				WIZIAPP_P_VERSION, FALSE );
+
+			wp_register_script('wiziapp_webapp',
+				$pluginUrl.'/scripts/webapp.js',
+				array('jquery', 'jquery_mobile_scrollview'),
+				WIZIAPP_P_VERSION, FALSE );
+
+			wp_register_script('wiziapp_favorites',
+				$pluginUrl.'/scripts/favorites.js',
+				array('wiziapp_webapp'),
+				WIZIAPP_P_VERSION, FALSE );
+
+			wp_register_script('jquery_mobile_simple_dialog',
+				$pluginUrl.'/scripts/jquery.mobile.simpledialog.js',
+				array('jquery_mobile'),
+				WIZIAPP_P_VERSION, FALSE );
+
+			wp_enqueue_script('scrollview');
+			wp_enqueue_script('wiziapp_effects');
+			wp_enqueue_script('jquery_mobile_simple_dialog');
+			wp_enqueue_script('wiziapp_webapp');
+			wp_enqueue_script('wiziapp_webapp_postbar');
+			wp_enqueue_script('wiziapp_favorites');
+		}
+	}
+
 	public function registerPluginScripts() {
-		if ($this->inApp) {
-			$cdnUrl = WiziappConfig::getInstance()->getCdnServer();
-			wp_register_script('wiziapp_mousewheel',
-				$cdnUrl . '/scripts/jquery.mousewheel.min.js',
-				array('jquery'),
-				WIZIAPP_P_VERSION, TRUE );
+		if ($this->inApp || $this->mobile) {
+			$pluginUrl = str_replace(get_bloginfo('url'), '', WP_PLUGIN_URL).'/'.dirname(WP_WIZIAPP_BASE);
+			$pluginUrl .= '/themes/webapp';
 
-			wp_register_script('wiziapp_scrolling',
-				$cdnUrl . '/scripts/jScrollPane-1.2.3.min.js',
+			wp_register_script('jquery_mobile',
+				$pluginUrl.'/scripts/jquery.mobile-1.1.1.js',
 				array('jquery'),
-				WIZIAPP_P_VERSION, TRUE );
+				WIZIAPP_P_VERSION, FALSE );
 
-			wp_register_script('wiziapp_base_lite',
-				$cdnUrl . '/scripts/api/1/apps/scripts_lite.js',
+			wp_register_script('jquery_easing',
+				$pluginUrl.'/scripts/jquery.easing.1.3.js',
 				array('jquery'),
-				WIZIAPP_P_VERSION, TRUE );
+				WIZIAPP_P_VERSION, FALSE );
 
-			wp_register_script('wiziapp_content',
-				$cdnUrl . '/scripts/api/1/apps/content_'.WIZIAPP_VERSION.'.js',
-				array('jquery','wiziapp_base_lite'),
-				WIZIAPP_P_VERSION, TRUE );
+			wp_register_script('jquery_mobile_scrollview',
+				$pluginUrl.'/scripts/jquery.mobile.scrollview.js',
+				array('jquery_mobile','jquery_easing'),
+				WIZIAPP_P_VERSION, FALSE );
+
+			wp_register_script('jquery_mousewheel',
+				$pluginUrl.'/scripts/jquery.mousewheel.min.js',
+				array('jquery'),
+				WIZIAPP_P_VERSION, FALSE );
+
+			wp_register_script('wiziapp_helper_object',
+				$pluginUrl . '/scripts/wiziapp.js',
+				array('jquery', 'jquery_mobile'),
+				WIZIAPP_P_VERSION, FALSE );
 
 			wp_enqueue_script('jquery');
-			wp_enqueue_script('wiziapp_base_lite');
-			wp_enqueue_script('wiziapp_mousewheel');
-			wp_enqueue_script('wiziapp_scrolling');
-			wp_enqueue_script('wiziapp_content');
+			wp_enqueue_script('jquery_easing');
+			wp_enqueue_script('jquery_mousewheel');
+			wp_enqueue_script('jquery_mobile');
+			wp_enqueue_script('jquery_mobile_scrollview');
+			wp_enqueue_script('wiziapp_helper_object');
 		}
 
 	}
 
 	function _get_plugin_dir() {
-		return trailingslashit(trailingslashit(dirname(__FILE__)) . trailingslashit('..') . trailingslashit('..'));
+		return trailingslashit(dirname(dirname(dirname(__FILE__))));
 	}
 
 	/**
-	 * @static
-	 * @return WiziappContentHandler
-	 */
+	* @static
+	* @return WiziappContentHandler
+	*/
 	public static function getInstance() {
 		if ( is_null(self::$_instance) ) {
 			self::$_instance = new WiziappContentHandler();
@@ -778,4 +1095,33 @@ class WiziappContentHandler {
 
 		return self::$_instance;
 	}
+
+	private function removeSharingFromContent($content, $pid){
+		WiziappLog::getInstance()->write('INFO', "Remove Sharing From Content", "WiziappContentHandler.removeSharingFromContent");
+		$sc = new SharingCompanion();
+		$content= $sc->removeSharing($content, $pid);
+		return $content;
+	}
+
+	private function _desktop_site_mode() {
+		$is_started_already = session_id();
+		$is_desktop_site_mode = FALSE;
+
+		session_start();
+
+		if ( isset($_GET['setsession']) && $_GET['setsession'] === 'desktopsite' ) {
+			$_SESSION['output_mode'] = 'desktop_site';
+
+			$this->mobile = FALSE;
+			$is_desktop_site_mode = TRUE;
+		} elseif ( isset($_SESSION['output_mode']) && $_SESSION['output_mode'] === 'desktop_site' ) {
+			$this->mobile = FALSE;
+			$is_desktop_site_mode = TRUE;
+		}
+
+		return $is_desktop_site_mode;
+	}
 }
+
+require_once(dirname(dirname(__FILE__)) . '/libs/simpleHtmlDom/simple_html_dom.php');
+require_once(dirname(dirname(__FILE__)) . '/libs/simpleHtmlDom/SharingCompanion.php');

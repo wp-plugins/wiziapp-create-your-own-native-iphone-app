@@ -7,22 +7,29 @@
 */
 
 class WiziappVideoScreen extends WiziappBaseScreen{
-	protected $name = 'video';
-	protected $type = 'webview';
 
-	public function run(){
-
-	}
+	public function run(){}
 
 	public function runById($video_id){
-		global $video_row, $blog_title;
-//    $page = array();
-	//$video_row = WiziappDB::getInstance()->get_videos_by_provider_id($video_id);
+		global $video_row;
+
 		$video_row = WiziappDB::getInstance()->get_videos_by_id($video_id);
-		$blog_title = WiziappTheme::applyRequestTitle(wp_title('&laquo;', false, 'right').get_bloginfo('name'));
 
-		WiziappLog::getInstance()->write('INFO', "Preloading the video: " . $video_id, "screens.wiziapp_buildVideoPage");
+		if ( ! WiziappContentHandler::getInstance()->isHTML() ){
+			WiziappTemplateHandler::load(WIZI_DIR_PATH . 'themes/iphone/video.php');
+			return;
+		}
 
-		WiziappTemplateHandler::load(dirname(__FILE__) . '/../../../themes/iphone/video.php');
+		$video = json_decode($video_row['attachment_info'], TRUE);
+
+		$video_embed = new WiziappVideoEmbed();
+		$content = $video_embed->getCode($video['actionURL'], $video_row['id'], $video['bigThumb']);
+
+		$page = array(
+			'content' => str_replace('video_wrapper', '', $content),
+			'description' => $video['description'],
+		);
+
+		$this->output( $this->prepare($page, $video['title'], 'Video'), array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/media/videos'), 'text' => $this->getTitle('videos')) );
 	}
 }

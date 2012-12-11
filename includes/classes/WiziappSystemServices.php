@@ -135,6 +135,28 @@ class WiziappSystemServices{
 				$message = __('Settings updated', 'wiziapp');
 				$ce = new WiziappContentEvents();
 				$ce->updateCacheTimestampKey();
+
+				ob_start();
+				if ($key == 'app_icon'){
+					// We need to re-download the icon if we are to use it locally
+					$r = new WiziappHTTPRequest();
+					$response = $r->api(array(), '/application/'.WiziappConfig::getInstance()->app_id.'/icons', 'GET');
+					if ( !is_wp_error($response) ){
+						// Save this in the application configuration file
+						$base = WiziappContentHandler::getInstance()->_get_plugin_dir();
+						$file = $base.'themes/webapp/resources/icons.zip';
+						$dirPath = $base.'themes/webapp/resources/icons';
+						require_once(ABSPATH . 'wp-admin/includes/file.php');
+						if ( ( $creds = request_filesystem_credentials('') ) !== FALSE && WP_Filesystem($creds) ){
+							global $wp_filesystem;
+							if ( $wp_filesystem->put_contents($file, $response['body'], FS_CHMOD_FILE) && @file_exists($file) ){
+								@unzip_file($file, $dirPath);
+								@unlink($file);
+							}
+						}
+					}
+				}
+				ob_end_clean();
 			} else {
 				$message = __('Unable to update settings', 'wiziapp');
 			}

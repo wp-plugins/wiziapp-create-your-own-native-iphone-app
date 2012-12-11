@@ -16,6 +16,7 @@ class WiziappCms {
 		if (is_wp_error($response)) {
 			return FALSE;
 		}
+
 		$tokenResponse = json_decode($response['body'], TRUE);
 		if (empty($tokenResponse) || ! $tokenResponse['header']['status']) {
 			return FALSE;
@@ -30,7 +31,7 @@ class WiziappCms {
 			WiziappConfig::getInstance()->app_token = $tokenResponse['plugin_token'];
 		}
 		$common_settings = array(
-			'app_id', 'main_tab_index', 'settings_done', 'app_live', 'app_description', 'appstore_url', 'app_icon', 'app_name', 'email_verified',
+			'app_id', 'main_tab_index', 'settings_done', 'app_live', 'app_description', 'appstore_url', 'playstore_url', 'app_icon', 'app_name', 'email_verified',
 			'thumb_min_size', 'display_download_from_appstore', 'notify_on_new_post', 'notify_on_new_page', 'push_message',
 		);
 		$this->_apply_setting($common_settings, $tokenResponse);
@@ -72,7 +73,7 @@ class WiziappCms {
 		*/
 		if ( ! empty($tokenResponse['screen_titles']) ) {
 			$titles_settings = array('categories_title', 'tags_title', 'albums_title', 'videos_title', 'audio_title', 'links_title', 'pages_title', 'favorites_title', 'about_title', 'search_title', 'archive_title',);
-			$this->_apply_setting($titles_settings, $tokenResponse['screen_titles']);			
+			$this->_apply_setting($titles_settings, $tokenResponse['screen_titles']);
 		}
 
 		$screens = array();
@@ -109,17 +110,14 @@ class WiziappCms {
 	}
 
 	protected function deleteUser(){
-		$userName = 'wiziapp';
-		$userId = username_exists($userName);
-		if (!$userId) {
-			WiziappLog::getInstance()->write('ERROR', "User " . $userName . " was not found, and therefore couldn't be deleted.", "install.delete_user_wiziapp");
-		} else {
-			$userId = wp_delete_user($userId);
-			if (!$userId) {
-				WiziappLog::getInstance()->write('ERROR', "Error deleting user " . $userName, "install.delete_user_wiziapp");
-			} else {
-				WiziappLog::getInstance()->write('INFO', "User " . $userName . ' deleted successfully.', "install.delete_user_wiziapp");
-			}
+		$userId = username_exists('wiziapp');
+
+		if ( ! $userId){
+			return;
+		}
+
+		if ( ! wp_delete_user($userId) ){
+			WiziappLog::getInstance()->write('ERROR', "Error deleting user wiziapp", "install.delete_user_wiziapp");
 		}
 	}
 
@@ -161,6 +159,7 @@ class WiziappCms {
 
 	protected function generateProfile(){
 		$version = get_bloginfo('version');
+		$admin_email = get_option('admin_email');
 		/**
 		* @todo check if wp_touch is installed and try to get it's configuration
 		* for blog name and description
@@ -173,16 +172,17 @@ class WiziappCms {
 			'name' => get_bloginfo('name'),
 			'tag_line' => get_bloginfo('description'),
 			'profile_data' => json_encode(array(
-					'plugins' => $this->getActivePlugins(),
-					'pages' => $this->getPagesList(),
-					'stats' => $this->getCMSProfileStats(),
-					'os' => $checker->testOperatingSystem(),
-					'write_permissions' => $checker->testWritingPermissions(false),
-					'gd_image_magick' => $checker->testPhpGraphicRequirements(false),
-					'allow_url_fopen' => $checker->testAllowUrlFopen(false),
-					'web_server' => $checker->testWebServer(false),
-				)),
+				'plugins' => $this->getActivePlugins(),
+				'pages' => $this->getPagesList(),
+				'stats' => $this->getCMSProfileStats(),
+				'os' => $checker->testOperatingSystem(),
+				'write_permissions' => $checker->testWritingPermissions(false),
+				'gd_image_magick' => $checker->testPhpGraphicRequirements(false),
+				'allow_url_fopen' => $checker->testAllowUrlFopen(false),
+				'web_server' => $checker->testWebServer(false),
+			)),
 			'comment_registration' => get_option('comment_registration') ? 1 : 0,
+			'admin_email' => empty($admin_email) ? '' : $admin_email,
 			'installation_source' => WiziappConfig::getInstance()->installation_source,
 		);
 
@@ -222,8 +222,8 @@ class WiziappCms {
 	*/
 	protected  function getPagesList() {
 		$pages = get_pages(array(
-				'number' => 15,
-			));
+			'number' => 15,
+		));
 		$list = array();
 
 		foreach ($pages as $p) {
@@ -251,18 +251,18 @@ class WiziappCms {
 		ob_end_clean();
 
 		$numOfCategories = count(get_categories(array(
-					'number' => 15,
-				)));
+			'number' => 15,
+		)));
 
 		$numOfTags = count(get_tags(array(
-					'number' => 15,
-				)));
+			'number' => 15,
+		)));
 		$postImagesAlbums = WiziappDB::getInstance()->get_images_post_albums_count(5);
 		$videosCount = WiziappDB::getInstance()->get_videos_count();
 		$postAudiosAlbums = WiziappDB::getInstance()->get_audios_post_albums_count(2);
 		$linksCount = count(get_bookmarks(array(
-					'limit' => 15,
-				)));
+			'limit' => 15,
+		)));
 
 		$stats = array(
 			'numOfCategories' => $numOfCategories,

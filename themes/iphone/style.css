@@ -47,8 +47,6 @@ iframe, object, embed{
 }
 .pageitem{
     display: block;
-    /*margin: 10px 0px 5px;*/
-    /*padding: 0px 10px;*/
 }
 #singlentry{
     overflow: hidden;
@@ -61,7 +59,9 @@ iframe, object, embed{
 .pd-rating div, .ratingblock, .thumblock{
     display: none;
 }
+
 /* Start Scrolling */
+
 .mcontentwrapper{
     top: 4px !important;
 }
@@ -100,8 +100,10 @@ iframe, object, embed{
     right: 0px;
     background-color: transparent;
 }
+
 /* End Scrolling */
 /* Start full page scrolling, for the sim */
+
 .jScrollPaneContainer {
     position: relative;
     overflow: hidden;
@@ -148,11 +150,9 @@ a.jScrollArrowUp {
     right: 0;
     text-indent: -2000px;
     overflow: hidden;
-    /*background-color: #666;*/
     height: 9px;
 }
 a.jScrollArrowUp:hover {
-    /*background-color: #f60;*/
 }
 
 a.jScrollArrowDown {
@@ -163,15 +163,9 @@ a.jScrollArrowDown {
     right: 0;
     text-indent: -2000px;
     overflow: hidden;
-    /*background-color: #666;*/
     height: 9px;
 }
-a.jScrollArrowDown:hover {
-    /*background-color: #f60;*/
-}
-a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
-    /*background-color: #f00;*/
-}
+
 /* End Scrolling */
 
 .pageitem .wiziAppMultiImage img{
@@ -181,7 +175,6 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 .pageitem .wiziAppMultiImage a.multi span, .unsupported_video{
     background:none repeat scroll 0 0 #444444;
     color:#FFFFFF;
-    /**font-size:14px;*/
     font-size: 1em;
     height:20px;
     left:0;
@@ -199,7 +192,9 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     position: relative;
     height:100%;
 }
+
 /* Start rating */
+
 .wiziapp_star_container{
     height: 24px;
     width: 80px;
@@ -214,17 +209,15 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     width: 12px;
     margin: 2px;
 }
+
 /* End rating */
+
 #debug{
     display: none;
 }
 
-
-/*************************************************/
-/*************************************************/
 /**                 COMMON STYLES               **/
-/*************************************************/
-/*************************************************/
+
 .wiziapp_pages_nav li{
     height: 40px !important;
     line-height:30px !important;
@@ -247,7 +240,6 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     list-style: none;
     display: block;
     -webkit-tap-highlight-color: rgba(0,0,0,0);
-    /**height:60px;*/
     line-height:60px;
     text-indent:10px;
 }
@@ -263,13 +255,14 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 .wiziapp_bottom_nav li{
     display: block;
     cursor: pointer;
-    /**font-size: 17px;*/
-    font-size: 1.2em;
+    font-size: 14px;
 }
 .wiziapp_footer_links .title-bar{
     display: none;
 }
+
 /*.wiziapp_bottom_nav li:hover,*/
+
 .wiziapp_bottom_nav li.hover{
     background-image: rgb(84,176,247);
     background-image: -webkit-gradient(
@@ -287,7 +280,6 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 }
 
 .wiziapp_bottom_nav li:hover a, .wiziapp_bottom_nav li.hover a{
-    /**font-size: 17px;*/
     font-size: 1.1em;
 }
 .wiziapp_bottom_nav.albums_list li:hover a, .wiziapp_bottom_nav.albums_list li.hover a{
@@ -302,10 +294,8 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 }
 .wiziapp_bottom_nav li{
     border:1px solid #878787;
-    /**font-size: 17px;*/
-    font-size: 1.2em;
+    font-size: 14px;
 }
-
 
 .wiziapp_bottom_nav li:first-child{
     -webkit-border-top-left-radius: 8px;
@@ -319,13 +309,11 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     -webkit-border-bottom-right-radius: 8px;
     -moz-border-radius-bottomleft: 8px;
     -moz-border-radius-bottomright: 8px;
-    /**border-top: 0px none;*/
 }
 
 .pageitem .table_wrapper div{
     max-width: none;
 }
-
 
 .pageitem .table_wrapper{
     overflow: hidden;
@@ -336,7 +324,7 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 }
 
 .pageitem .table_wrapper_top{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/classic/cms/chart_back_top.png) repeat-x;
+    background: url(images/classic/chart_back_top.png) repeat-x;
     height: 5px;
     width: 310px;
 }
@@ -352,22 +340,18 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 }
 
 .pageitem .table_wrapper_content{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/classic/cms/chart_back_bg.png) repeat;
+    background: url(images/classic/chart_back_bg.png) repeat;
     width: 310px;
     /**height: 350px;*/
     padding-bottom:10px;
     overflow: auto;
     position:relative;
-
-/*    height: auto;*/
-
 }
 .pageitem .scroll{
     width: 280px;
     border: 2px solid #cccccc;
     height: 4px;
     position: relative;
-
 }
 
 .pageitem .scroll .sc_inn{
@@ -378,11 +362,6 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     top: 0;
     left: 0;
 }
-#scroller{
-/*    position: absolute;*/
-/*    top: 0;*/
-/*    left: 0;*/
-}
 #scroller_hscrollerbase{
     height:10px !important;
 }
@@ -390,7 +369,7 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     height:10px !important;
 }
 .pageitem  .table_wrapper_footer{
-    background: url(@@@WIZIAPP_CDN@@@/images/app/themes/classic/cms/chart_back_bottom.png) repeat-x;
+    background: url(images/classic/chart_back_bottom.png) repeat-x;
     height: 5px;
     width: 310px;
 }
@@ -399,12 +378,11 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 }
 
 /* Start Multi Image */
+
 .pageitem .wiziAppMultiImage{
     position: relative;
     overflow: hidden;
-    /** width: 300px; */
     width:298px;
-/*    height:350px;*/
     background-color: #F9F9F9;
     color: #fff;
     margin: 0px auto;
@@ -414,7 +392,6 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     padding-bottom: 10px;
     margin-bottom: 10px;
     margin-top: 10px;
-    /*left: -10px;*/
     -webkit-border-top-left-radius: 8px;
     -webkit-border-top-right-radius: 8px;
     -moz-border-radius-topleft: 8px;
@@ -426,7 +403,6 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     border: 1px solid #dedede;
     clear: both;
 }
-
 
 .pageitem .wiziAppMultiImage a{
     text-decoration: none;
@@ -442,19 +418,12 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     vertical-align: top;
     display:inline-block;
     text-indent: 50px;
-/*    margin: 10px auto 0px;*/
-/*    padding-left: 5px;*/
 }
 
 .pageitem .wiziAppMultiImage .wiziAppMultiImageScrolling a{
     text-indent: 0;
     margin-right: 5px;
-/*    margin-top: 10px;*/
     width: 298px;
-}
-
-.multiImageNavItems {
-/*    margin-top: 10px;*/
 }
 
 .pageitem .wiziAppMultiImage .multiImageNav{
@@ -465,7 +434,6 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 .wiziAppMultiImage .caption{
     display:inline-block;
     padding-top:4px;
-    /**font-size: 12px;*/
     font-size: 0.8em;
 }
 
@@ -479,13 +447,13 @@ a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
     display: inline-block;
 }
 
-.album_item .attribute {
+.album_item .attribute, .wiziapp_pages_item .attribute {
     overflow: hidden;
     position: absolute;
 }
 
-.album_item .rowCellIndicator {
-    background: url(@@@WIZIAPP_CDN@@@/images/simulator/more_cell_item.png) no-repeat scroll center center transparent;
+.album_item .rowCellIndicator, .wiziapp_pages_item .rowCellIndicator {
+    background: url(images/simulator/more_cell_item.png) no-repeat scroll center center transparent;
     height: 100%;
     position: absolute;
     right: 10px;

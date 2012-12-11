@@ -200,6 +200,9 @@ class WiziappGeneratorDisplay{
                         //$iframeSrc = 'http://'.wiziapp_getApiServer().'/generator?t='.$token;
                         //$iframeSrc = $httpProtocol.'://'.wiziapp_getServicesServer().'/generator?t='.$token;
                         $iframeSrc = $httpProtocol.'://'.WiziappConfig::getInstance()->api_server.'/generator/index/'.$token.'?v='.WIZIAPP_P_VERSION;
+                        if (WiziappConfig::getInstance()->webapp_installed) {
+                            $iframeSrc .= '&webapp_installed=1';
+                        }
                     ?>
                     <script type="text/javascript">
                         var WIZIAPP_HANDLER = (function(){
@@ -435,7 +438,9 @@ class WiziappGeneratorDisplay{
                                         top.document.location.reload(true);
                                     } else {
                                         // Error,
-                                        jQuery('#enter_license_modal .error').text(data.header.message).show();
+                                        jQuery('#enter_license_modal .error')
+										.text(data.header.message)
+										.show();
                                     }
                                     jQuery('#submit_license').removeClass('pending');
                                 }, 'json');
