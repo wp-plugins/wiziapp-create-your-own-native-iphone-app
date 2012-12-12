@@ -1,4 +1,4 @@
-﻿=== WiziApp - Create Mobile App (HTML5, Android, iPhone) ===
+=== WiziApp - Create Mobile App (HTML5, Android, iPhone) ===
 Contributors: wiziapp
 Tags: mobile, iphone, android, Mobile app, mobile theme, HTML5 app, web app, webapp, smartphones, wptouch
 Requires at least: 3.2
