@@ -260,7 +260,7 @@ class WiziappUserServices{
 	public function getAllUdids(){
 		global $wpdb;
 
-		$sql = $wpdb->prepare("SELECT udid FROM {$wpdb->prefix}{$this->user_table}");
+		$sql = "SELECT udid FROM {$wpdb->prefix}{$this->user_table}";
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappUserServices.getAllUdids');
 		$result = $wpdb->get_results($sql, OBJECT);
 
