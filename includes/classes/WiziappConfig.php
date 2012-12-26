@@ -42,6 +42,8 @@
 * @property boolean $show_email_verified_msg
 * @property integer $last_recorded_save
 * @property boolean $webapp_installed
+* @property boolean $webapp_active
+* @property boolean $skip_reload_webapp
 * @property string  $wiziapp_admin_messages_subject
 * @property string  $wiziapp_admin_messages_message
 * @property integer $thumb_min_size
@@ -62,7 +64,7 @@ class WiziappConfig implements WiziappIInstallable{
 
 	private $name = 'wiziapp_settings';
 
-	private $internalVersion =  61;
+	private $internalVersion =  62;
 
 	private static $_instance = null;
 
@@ -105,7 +107,7 @@ class WiziappConfig implements WiziappIInstallable{
 		// Add here the keys to reset to the default value;
 		$resetOptions = array();
 		// Add here the keys add with the default value, if they don't already exists;
-		$addOptions = array('playstore_url',);
+		$addOptions = array('webapp_active',);
 		// Add here the keys to remove from the options array;
 		$removeOptions = array();
 
@@ -405,6 +407,8 @@ class WiziappConfig implements WiziappIInstallable{
 
 			// Webapp
 			'webapp_installed' => FALSE,
+			'webapp_active' => TRUE,
+			'skip_reload_webapp' => FALSE,
 		);
 
 		return array_merge($settings, $envSettings);

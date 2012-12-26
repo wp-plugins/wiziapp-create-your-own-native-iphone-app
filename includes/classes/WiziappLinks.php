@@ -172,4 +172,13 @@ class WiziappLinks{
 	public static function convertVideoActionToWebVideo($actionURL){
 		return str_replace("open/video", "open/videopage", $actionURL);
 	}
+
+	private static $append = null;
+
+	public static function getAppend($sep = '&'){
+		if (self::$append === null) {
+			self::$append = 'wizi_ver='.WIZIAPP_P_VERSION.((isset($_GET['androidapp']) && $_GET['androidapp'] == 1)?'&androidapp=1':'').'&ap=1&output=html';
+		}
+		return $sep.self::$append;
+	}
 }

@@ -11,7 +11,7 @@
 class WiziappContentHandler {
 	private $mobile;
 	private $inApp;
-	private $_show_download_page = FALSE;
+	private $_show_intro_page = FALSE;
 	private $_is_access_checked = FALSE;
 	private $inSave = FALSE;
 
@@ -81,7 +81,7 @@ class WiziappContentHandler {
 	}
 
 	public function is_show_download() {
-		return $this->_show_download_page;
+		return $this->_show_intro_page;
 	}
 
 	public function isInApp() {
@@ -143,7 +143,7 @@ class WiziappContentHandler {
 			$this->inApp = TRUE;
 		}
 
-		if ( isset($_GET['output']) && $_GET['output'] == 'html' ) {
+		if ( isset($_GET['output']) && $_GET['output'] == 'html' && WiziappConfig::getInstance()->webapp_installed && (WiziappConfig::getInstance()->webapp_active || (isset($_GET['androidapp']) && $_GET['androidapp'] === '1')) ) {
 			$this->mobile = TRUE;
 			$this->inApp = FALSE;
 		}
@@ -152,7 +152,7 @@ class WiziappContentHandler {
 			WiziappLog::getInstance()->write('INFO', "In the application display", "WiziappContentHandler.detectAccess");
 
 			$this->setInApp();
-		} elseif ( isset($_SERVER['HTTP_USER_AGENT']) && WiziappConfig::getInstance()->webapp_installed && ! $this->_desktop_site_mode() ) {
+		} elseif ( isset($_SERVER['HTTP_USER_AGENT']) && WiziappConfig::getInstance()->webapp_installed && (WiziappConfig::getInstance()->webapp_active || (isset($_GET['androidapp']) && $_GET['androidapp'] === '1')) && ! $this->_desktop_site_mode() ) {
 			add_filter('body_class', array($this, 'getDeviceClass'), 10, 1);
 
 			$is_iPhone	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPhone')  !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
@@ -173,14 +173,16 @@ class WiziappContentHandler {
 			}
 
 			$is_suitable =
+			( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] === home_url('/') &&
 			! ( isset($_COOKIE['WIZI_SHOW_STORE_URL']) && $_COOKIE['WIZI_SHOW_STORE_URL'] === '1' ) &&
 			! empty($store_url) &&
-			intval(WiziappConfig::getInstance()->display_download_from_appstore) === 1;
+			intval(WiziappConfig::getInstance()->display_download_from_appstore) === 1 &&
+			! headers_sent();
 			if ( $is_suitable ) {
 				setcookie('WIZI_SHOW_STORE_URL', '1', time() + 60*60*24*7);
 
 				if ( ! ( isset($_GET['androidapp']) && $_GET['androidapp'] === '1' ) ) {
-					$this->_show_download_page = TRUE;
+					$this->_show_intro_page = TRUE;
 				}
 			}
 		}
@@ -374,7 +376,7 @@ class WiziappContentHandler {
 				<?php
 				if ( WiziappContentHandler::getInstance()->isHTML() ) {
 					?>
-					<div class="iframe_protect_screen" style="position: absolute;" data-video-url="<?php echo home_url('?wiziapp/content/video/'.$video['id'].'&wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html'); ?>"></div>
+					<div class="iframe_protect_screen" style="position: absolute;" data-video-url="<?php echo home_url('?wiziapp/content/video/'.$video['id'].WiziappLinks::getAppend()); ?>"></div>
 					<?php
 				}
 				 echo wp_oembed_get( $video_url.$url_parts[5], array('width' => 300, ) );
@@ -408,7 +410,7 @@ class WiziappContentHandler {
 		$content .= ob_get_clean();
 
 		WiziappProfiler::getInstance()->write("Content processing for post {$post->ID}", "WiziappContentHandler.convert_content");
-		$html = new simple_html_dom();
+		$html = new simple_html_dom_wiziapp();
 		$html->load($content);
 
 		// Handle Audio
@@ -421,7 +423,7 @@ class WiziappContentHandler {
 		$this->_handle_video($html, $post->ID);
 		WiziappProfiler::getInstance()->write("Done Getting the Video elements code for post {$post->ID}", "WiziappContentHandler.convert_content");
 
-		// Reload DOM tree - Unfortunately, simple_html_dom doesn't update the DOM tree in response to changes
+		// Reload DOM tree - Unfortunately, simple_html_dom_wiziapp doesn't update the DOM tree in response to changes
 		$content = $html->save();
 		$html->clear();
 		$html->load($content);
@@ -707,7 +709,7 @@ class WiziappContentHandler {
 			}
 		}
 
-		// Reload DOM tree - Unfortunately, simple_html_dom doesn't update the DOM tree in response to changes
+		// Reload DOM tree - Unfortunately, simple_html_dom_wiziapp doesn't update the DOM tree in response to changes
 		$content = $html->save();
 		$html->clear();
 		$html->load($content);

@@ -7,7 +7,7 @@
 
 class WiziappWebappDisplay{
 
-	function installFinish(){
+	public function installFinish(){
 		WiziappLog::getInstance()->write('INFO', "The webapp install is finished, marking it", 'WiziappWebappDisplay.installFinish');
 
 		$r = new WiziappHTTPRequest();
@@ -15,8 +15,7 @@ class WiziappWebappDisplay{
 
 		if ( is_wp_error($response) ){
 			WiziappLog::getInstance()->write('ERROR', "Unable to set installation finished statue: ".print_r($response, TRUE), 'WiziappWebappDisplay.installFinish');
-			self::returnResults(FALSE, 'install_finish');
-			return;
+			$this->_returnResults('retry', 'Connection error, please try again.');
 		}
 
 		WiziappConfig::getInstance()->webapp_installed = TRUE;
@@ -24,556 +23,564 @@ class WiziappWebappDisplay{
 		$ch = new WiziappContentEvents();
 		$ch->updateCacheTimestampKey();
 
-		$status = TRUE;
-		self::returnResults($status, 'install_finish');
+		$this->_returnResults('success', 'success');
 	}
 
 	public function updateConfig(){
+		if ( ( $resources = $this->_check_writing_permissions() ) !== '' ){
+			$this->_returnResults('retry', 'The '.$resources.' directory is not writable, please set the directory permission to 0777 and try again.');
+		}
+
 		$contentPrefix = "var config = ";
 		$contentSuffix = ';';
 
-		self::update('conf', 'config.js', FALSE, '', $contentPrefix, $contentSuffix);
+		$this->_update('conf', 'config.js', FALSE, '', $contentPrefix, $contentSuffix);
 	}
 
 	public function updateHandshake(){
+		if ( ( $resources = $this->_check_writing_permissions() ) !== '' ){
+			$this->_returnResults('retry', 'The '.$resources.' directory is not writable, please set the directory permission to 0777 and try again.');
+		}
+
 		$contentPrefix = "var handshake = ";
 		$contentSuffix = ';';
 
-		self::update('handshake', 'handshake.js', FALSE, '', $contentPrefix, $contentSuffix, TRUE);
+		$this->_update('handshake', 'handshake.js', FALSE, '', $contentPrefix, $contentSuffix, TRUE);
 	}
 
 	public function updateDisplay(){
-		self::update('webCss', 'main.css');
+		if ( ( $resources = $this->_check_writing_permissions() ) !== '' ){
+			$this->_returnResults('retry', 'The '.$resources.' directory is not writable, please set the directory permission to 0777 and try again.');
+		}
+
+		$this->_update('webCss', 'main.css');
 	}
 
 	public function updateEffects(){
+		if ( ( $resources = $this->_check_writing_permissions() ) !== '' ){
+			$this->_returnResults('retry', 'The '.$resources.' directory is not writable, please set the directory permission to 0777 and try again.');
+		}
+
 		$pluginUrl = WP_PLUGIN_URL.'/'.dirname(WP_WIZIAPP_BASE);
 		$imagesBase = $pluginUrl.'/themes/webapp/resources/';
 		$contentPrefix = "var jsInstructionsBase = '{$imagesBase}';var jsInstructions = ";
 		$contentSuffix = ';';
 
-		self::update('webeffects', 'effects_config.js', FALSE, '', $contentPrefix, $contentSuffix);
+		$this->_update('webeffects', 'effects_config.js', FALSE, '', $contentPrefix, $contentSuffix);
 	}
 
 	public function updateImages(){
-		self::update('images', 'images.zip', TRUE, 'images');
+		if ( ( $resources = $this->_check_writing_permissions() ) !== '' ){
+			$this->_returnResults('retry', 'The '.$resources.' directory is not writable, please set the directory permission to 0777 and try again.');
+		}
+
+		$this->_update('images', 'images.zip', TRUE, 'images');
 	}
 
 	public function updateIcons(){
-		self::update('icons', 'icons.zip', TRUE, 'icons');
+		if ( ( $resources = $this->_check_writing_permissions() ) !== '' ){
+			$this->_returnResults('retry', 'The '.$resources.' directory is not writable, please set the directory permission to 0777 and try again.');
+		}
+
+		$this->_update('icons', 'icons.zip', TRUE, 'icons');
 	}
 
 	public function updateSplash(){
-		self::update('splash', 'default.png');
+		if ( ( $resources = $this->_check_writing_permissions() ) !== '' ){
+			$this->_returnResults('retry', 'The '.$resources.' directory is not writable, please set the directory permission to 0777 and try again.');
+		}
+
+		$this->_update('splash', 'default.png');
 	}
 
-	private function update($type, $filename, $zip=FALSE, $dir='', $contentPrefix='', $contentSuffix='', $checkJSONError=FALSE){
+	private function _update($type, $filename, $zip=FALSE, $dir='', $contentPrefix='', $contentSuffix='', $checkJSONError=FALSE){
 		$r = new WiziappHTTPRequest();
 		$response = $r->api(array(), '/application/'.WiziappConfig::getInstance()->app_id.'/'.$type, 'GET');
 
 		if ( is_wp_error($response) ){
-			WiziappLog::getInstance()->write('ERROR', "Unable to get the {$type}: ".print_r($response, TRUE), 'WiziappWebappDisplay.update');
-			self::returnResults(FALSE, 'update_'.$type);
-			return;
+			WiziappLog::getInstance()->write('ERROR', "Unable to get the {$type}: ".print_r($response, TRUE), 'WiziappWebappDisplay._update');
+			$this->_returnResults('retry', 'Connection error, please try again.');
 		}
 
 		if ($checkJSONError){
 			$json = json_decode($response['body'], true);
-			if ($json === null){
-				self::returnResults(FALSE, 'update_'.$type);
-				return;
-			}
-			if (isset($json['header']) && is_array($json['header']) && isset($json['header']['status']) && $json['header']['status'] === false){
-				self::returnResults('retry', 'update_'.$type);
-				return;
+
+			if ( $json === NULL || ! isset($json['header']) || ! is_array($json['header']) || ! isset($json['header']['status']) ){
+				WiziappLog::getInstance()->write('ERROR', '$json === NULL, $response[\'body\'] = '.$response['body'], 'WiziappWebappDisplay._update');
+				$this->_returnResults('fatal', 'fatal');
+			} elseif ( $json['header']['status'] == FALSE ){
+				if ( isset($json['header']['action']) && $json['header']['action'] === 'handshake' && isset($json['header']['message']) && $json['header']['message'] === 'The_Application_is_saved_but_it_is_not_completed_yet_please_click_retry' ){
+					$this->_returnResults('recycle', 'The Application is saved but it is not completed yet, please click retry.');
+				} else {
+					WiziappLog::getInstance()->write('ERROR', 'Something into the Handshake response is false, $response[\'body\'] = '.$response['body'], 'WiziappWebappDisplay._update');
+					$this->_returnResults('fatal', 'fatal');
+				}
 			}
 		}
 
 		// Save this in the application configuration file
-		$base = WiziappContentHandler::getInstance()->_get_plugin_dir();
-		$file = $base.'themes/webapp/resources/'.$filename;
-		$dirPath = $base.'themes/webapp/resources/'.$dir;
+		$base = $this->_get_resources_path();
+		$file = $base.DIRECTORY_SEPARATOR.$filename;
+		$dirPath = $base.DIRECTORY_SEPARATOR.$dir;
 		$content = "{$contentPrefix}{$response['body']}{$contentSuffix}";
+
 		if ( $type === 'webCss' ){
 			$content = str_replace('/simulator/rgba', 'http://'.WiziappConfig::getInstance()->api_server.'/simulator/rgba', $content);
 		}
 
-		$url = wp_nonce_url('admin.php?page=wiziapp_webapp_display','wiziapp-webapp-options');
-		if ( ( $creds = request_filesystem_credentials($url, '', FALSE, FALSE, NULL) ) === FALSE ){
-			WiziappLog::getInstance()->write('ERROR', "Dont have permissions to upload the file", 'WiziappWebappDisplay.update');
-			self::returnResults(FALSE, 'update_'.$type);
-			return;
-		}
-
-		if ( ! WP_Filesystem($creds) ){
-			WiziappLog::getInstance()->write('ERROR', "Cant start the filesystem object", 'WiziappWebappDisplay.update');
-			self::returnResults(FALSE, 'update_'.$type);
-			return;
-		}
-
 		@file_put_contents($file, $content);
 		if ( ! @file_exists($file) ){
-			WiziappLog::getInstance()->write('ERROR', "Unable to write the {$type} file: ".$file, 'WiziappWebappDisplay.update');
-			self::returnResults(FALSE, 'update_'.$type);
-			return;
+			WiziappLog::getInstance()->write('ERROR', "Unable to write the {$type} file: ".$file, 'WiziappWebappDisplay._update');
+			$this->_returnResults('fatal', 'fatal');
 		}
 
 		if ( $zip ){
-			// If a zip file and the file exists, unzip the file
-			if ( ! @unzip_file($file, $dirPath) ){
-				WiziappLog::getInstance()->write('ERROR', "Can not unzip the file {$file}", 'WiziappWebappDisplay.update');
-				self::returnResults(FALSE, 'update_'.$type);
-				return;
+			if ( ! class_exists('ZipArchive') ){
+				WiziappLog::getInstance()->write('ERROR', '! class_exists(\'ZipArchive\')', 'WiziappWebappDisplay._update');
+				$this->_returnResults('retry', 'ZIP extension is not enabled on the PHP installation, please add this lib and try again.');
+			}
+
+			$zip = new ZipArchive;
+
+			if ( $zip->open($file) === TRUE ){
+				$zip->extractTo($dirPath);
+				$zip->close();
+			} else {
+				WiziappLog::getInstance()->write('ERROR', "Can not unzip the file {$file}", 'WiziappWebappDisplay._update');
+				$this->_returnResults('fatal', 'fatal');
 			}
 
 			@unlink($file);
 			if ( @file_exists($file) ){
-				WiziappLog::getInstance()->write('WARNING', "Cant delete the {$type} {$file}", 'WiziappWebappDisplay.update');
-				self::returnResults(FALSE, 'update_'.$type);
-				return;
+				WiziappLog::getInstance()->write('WARNING', "Cant delete the {$type} {$file}", 'WiziappWebappDisplay._update');
 			}
 		}
 
-		self::returnResults(TRUE, 'update_'.$type);
+		$this->_returnResults('success', 'success');
 	}
 
-	public function updateManifest(){
-		$status = FALSE;
-		$fileList = array();
-
-		// Scan the resources
-		$pluginUrl = str_replace(get_bloginfo('url'), '', WP_PLUGIN_URL) . '/' . dirname(WP_WIZIAPP_BASE);
-		$base = WiziappContentHandler::getInstance()->_get_plugin_dir();
-
-		$path = $base.'themes/webapp/resources/';
-		$dir = opendir($path);
-		while ( FALSE !== ( $file = readdir($dir) ) ){
-			if ( strpos($file, '.') != 0 && $file != "Thumbs.db" && $file != 'cache.manifest' ){
-				$fileList[] = $pluginUrl . '/themes/webapp/resources/' . $file;
-			}
-		}
-
-		$path = $base.'themes/webapp/resources/icons/';
-		$dir = opendir($path);
-		while ( FALSE !== ( $file = readdir($dir) ) ){
-			if (strpos($file,'.') != 0 && $file != "Thumbs.db"){
-				$fileList[] = $pluginUrl . '/themes/webapp/resources/icons/' . $file;
-			}
-		}
-
-		$path = $base.'themes/webapp/resources/images/';
-		$dir = opendir($path);
-		while ( FALSE !== ( $file = readdir($dir) ) ){
-			if (strpos($file,'.') != 0 && $file != "Thumbs.db"){
-				$fileList[] = $pluginUrl . '/themes/webapp/resources/images/' . $file;
-			}
-		}
-
-		$updatedAt = date('d-m-Y h:i:s A');
-		$version = WIZIAPP_P_VERSION;
-		// Build the
-		$files = implode("\n", $fileList);
-
-		$content =
-		"CACHE MANIFEST
-
-		# Last Update: {$updatedAt}
-		# Plugin Version: {$version}
-
-		CACHE:
-		/
-		{$files}
-		{$pluginUrl}/themes/webapp/jquery.mobile-1.1.1.css
-		{$pluginUrl}/themes/webapp/scripts/jquery.mobile-1.1.1.js?ver={$version}
-		{$pluginUrl}/themes/webapp/scripts/scrollview.js?ver={$version}
-		{$pluginUrl}/themes/webapp/scripts/jquery.mobile.scrollview.js?ver={$version}
-		{$pluginUrl}/themes/webapp/scripts/jquery.easing.1.3.js?ver={$version}
-		{$pluginUrl}/themes/webapp/jquery.mobile.scrollview.css
-		{$pluginUrl}/themes/webapp/style.css
-
-		NETWORK:
-		*
-
-		#FALLBACK:
-		/ {$pluginUrl}/themes/webapp/webapp_static.html
-		";
-
-		$manifestFile = $base.'themes/webapp/resources/cache.manifest';
-		@file_put_contents($manifestFile, trim($content));
-
-		if ( file_exists($manifestFile) ){
-			$status = TRUE;
-		}
-
-		self::returnResults($status, 'update_manifest');
-	}
-
-	private static function returnResults($status, $action){
-		$header = array(
-			'action' => $action,
-			'status' => $status,
-			'code' => ($status) ? 200 : 500,
-			'message' => '',
+	private function _returnResults($status, $message){
+		$results = array(
+			'status'  => $status,
+			'message' => $message,
 		);
 
-		echo json_encode(array('header' => $header));
+		echo json_encode($results);
 		exit;
 	}
 
-	public function webappDisplay(){
-	?>
-	<h2>Update WebApp Resources</h2>
-	<a href="javascript:void(0);" id="wiziappUpdateHandshake" data-action="handshake" class="update_button button">Update Handshake</a>
-	<a href="javascript:void(0);" id="wiziappUpdateConfig"	  data-action="config"	  class="update_button button">Update Configuration</a>
-	<a href="javascript:void(0);" id="wiziappUpdateDisplay"   data-action="display"   class="update_button button">Update Display</a>
-	<a href="javascript:void(0);" id="wiziappUpdateEffects"   data-action="effects"   class="update_button button">Update Effects</a>
-	<a href="javascript:void(0);" id="wiziappUpdateImages"    data-action="images"    class="update_button button">Update Images</a>
-	<a href="javascript:void(0);" id="wiziappUpdateIcons"     data-action="icons"     class="update_button button">Update Icons</a>
-	<a href="javascript:void(0);" id="wiziappUpdateSplash"    data-action="splash"    class="update_button button">Update Splash</a>
-	<a href="javascript:void(0);" id="wiziappUpdateManifest"  data-action="manifest"  class="update_button button">Update Manifest</a>
+	private function _check_writing_permissions(){
+		$resources = $this->_get_resources_path();
 
-	<script type="text/javascript">
-		jQuery(document).ready(function($){
-			$("a.update_button").bind('click', function(event){
-				event.preventDefault();
+		if ( @is_readable($resources) && @is_writable($resources)) {
+			return '';
+		}
 
-				var action = $(this).attr('data-action');
-				if ( action ){
-					var params = {
-						action: 'wiziapp_update_'+action
-					};
+		if ( @chmod($resources, 0755)) {
+			return '';
+		}
 
-					$.get(ajaxurl, params, function(data){
-						console.log(data);
-					});
-				}
-
-				return false;
-			});
-		});
-	</script>
-	<?php
+		WiziappLog::getInstance()->write('ERROR', 'The "Resources" directory is not readable or not writable: '.$resources, "WiziappWebappDisplay._check_writing_permissions");
+		return $resources;
 	}
 
-	function display(){
-	?>
-	<style type="text/css">
-		#wpbody{
-			background-color: #fff;
-		}
-		#wiziapp_posts_progress_bar_container{
-			border: 1px solid #0000FF;
-			background-color: #C0C0FF;
-			position: relative;
-			width: 300px;
-			height: 30px;
-		}
-		#wiziapp_posts_progress_bar_container .progress_bar{
-			background-color: #0000FF;
-			width: 0%;
-		}
-		.progress_bar{
-			position: absolute;
-			top: 0px;
-			left: 0px;
-			height: 100%;
-		}
-		.progress_indicator{
-			color: #fff;
-			font-weight: bolder;
-			text-align:center;
-			width: 100%;
-			position: absolute;
-			top: 0px;
-			left: 0px;
-		}
-		#wiziapp_finalize_title, #wiziapp_pages_title, #all_done{
-			display: none;
-		}
-		#just_a_moment{
-			background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/processingJustAmoment.png) no-repeat top center;
-			width: 262px;
-			margin: 50px auto 17px;
-			height: 32px;
-		}
-		#wizi_icon_processing{
-			background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/wiziapp_processing_icon.png) no-repeat top center;
-			width: 135px;
-			height: 93px;
-		}
-		#wizi_icon_wrapper{
-			margin: 52px auto 29px;
-			position: relative;
-			height:  93px;
-			width: 235px;
-		}
-		#current_progress_label{
-			/**position: absolute;
-			top: 40px;
-			right: 4px;*/
-		}
-		.text_label{
-			color: #0ca0f5;
-			font-weight: bold;
-			text-align: center;
-			font-size: 14px;
-			margin: 5px 0 9px;
-		}
-		#main_progress_bar_container{
-			width: 260px;
-			height: 12px;
-			position: relative;
-			margin: 0px auto;
-		}
-		#main_progress_bar_bg{
-			position: absolute;
-			top: 0px;
-			left: 0px;
-			width: 100%;
-			height: 100%;
-			background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/progress_bar_bg.png) no-repeat;
-			z-index: 2;
-		}
-		#main_progress_bar{
-			z-index: 1;
-			position: absolute;
-			top: 0px;
-			left: 0px;
-			height: 100%;
-			background-color: #0ca0f5;
-		}
-		#current_progress_indicator{
-			font-size: 17px;
-			margin: 10px;
-		}
-		#wizi_be_patient{
-			margin: 15px 0px 9px 32px;
-		}
-	</style>
+	private function _get_resources_path(){
+		$plugin_dir = WiziappContentHandler::getInstance()->_get_plugin_dir();
+		return realpath( $plugin_dir.'themes/webapp/resources' );
+	}
 
-	<script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
+	public function display(){
+		?>
+		<style type="text/css">
+			#wpbody{
+				background-color: #fff;
+			}
+			#wiziapp_posts_progress_bar_container{
+				border: 1px solid #0000FF;
+				background-color: #C0C0FF;
+				position: relative;
+				width: 300px;
+				height: 30px;
+			}
+			#wiziapp_posts_progress_bar_container .progress_bar{
+				background-color: #0000FF;
+				width: 0%;
+			}
+			.progress_bar{
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				height: 100%;
+			}
+			.progress_indicator{
+				color: #fff;
+				font-weight: bolder;
+				text-align:center;
+				width: 100%;
+				position: absolute;
+				top: 0px;
+				left: 0px;
+			}
+			#wiziapp_finalize_title, #wiziapp_pages_title, #all_done{
+				display: none;
+			}
+			#just_a_moment{
+				background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/processingJustAmoment.png) no-repeat top center;
+				width: 262px;
+				margin: 50px auto 17px;
+				height: 32px;
+			}
+			#wizi_icon_processing{
+				background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/wiziapp_processing_icon.png) no-repeat top center;
+				width: 135px;
+				height: 93px;
+			}
+			#wizi_icon_wrapper{
+				margin: 52px auto 29px;
+				position: relative;
+				height:  93px;
+				width: 235px;
+			}
+			#current_progress_label{
+				/**position: absolute;
+				top: 40px;
+				right: 4px;*/
+			}
+			.text_label{
+				color: #0ca0f5;
+				font-weight: bold;
+				text-align: center;
+				font-size: 14px;
+				margin: 5px 0 9px;
+			}
+			#main_progress_bar_container{
+				width: 260px;
+				height: 12px;
+				position: relative;
+				margin: 0px auto;
+			}
+			#main_progress_bar_bg{
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				width: 100%;
+				height: 100%;
+				background: url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/cms/progress_bar_bg.png) no-repeat;
+				z-index: 2;
+			}
+			#main_progress_bar{
+				z-index: 1;
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				height: 100%;
+				background-color: #0ca0f5;
+			}
+			#current_progress_indicator{
+				font-size: 17px;
+				margin: 10px;
+			}
+			#wizi_be_patient{
+				margin: 15px 0px 9px 32px;
+			}
+			div.wiziapp_errors_container{
+				display: none;
+			}
+		</style>
 
-	<script type="text/javascript">
-		var progressTimer = null;
-		var progressWait = 30;
-		var update_step = 0;
-		var update_steps = ['handshake', 'config', 'display', 'effects', 'images', 'icons', 'splash', 'manifest'];
-		var update_msg = [
-			'<?php echo __('Installing WebApp', 'wiziapp')?>',
-			'<?php echo __('Updating configuration', 'wiziapp')?>',
-			'<?php echo __('Updating display settings', 'wiziapp')?>',
-			'<?php echo __('Updating special effects', 'wiziapp')?>',
-			'<?php echo __('Updating images', 'wiziapp')?>',
-			'<?php echo __('Updating icons', 'wiziapp')?>',
-			'<?php echo __('Updating splash screen', 'wiziapp')?>',
-			'<?php echo __('Updating cache settings', 'wiziapp')?>'
-		];
+		<script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
 
-		jQuery(document).ready(function(){
-			wiziappRegisterAjaxErrorHandler();
+		<script type="text/javascript">
+			(function($){
 
-			// Register the report an error button
-			jQuery('#wiziapp_report_problem').click(function(event){
-				event.preventDefault();
-				var $el = jQuery(this).parents(".wiziapp_errors_container").find(".report_container");
+				var wiziapp_errors_container;
+				var wiziapp_message_wrapper;
+				var fatal_error_message = "There was a problem installing the Webapp, please contact support.";
+				var try_again_message = "Connection error, please try again.";
+				var retry_button;
+				var progressTimer = null;
+				var progressWait = 30;
+				var step_number = 0;
+				var retry_amount = 0;
+				var recycle_start_time = 0;
+				var update_steps = ['handshake', 'config', 'display', 'effects', 'images', 'icons', 'splash'];
+				var update_msg = [
+					'<?php echo __('Installing WebApp', 'wiziapp')?>',
+					'<?php echo __('Updating configuration', 'wiziapp')?>',
+					'<?php echo __('Updating display settings', 'wiziapp')?>',
+					'<?php echo __('Updating special effects', 'wiziapp')?>',
+					'<?php echo __('Updating images', 'wiziapp')?>',
+					'<?php echo __('Updating icons', 'wiziapp')?>',
+					'<?php echo __('Updating splash screen', 'wiziapp')?>',
+				];
+				var overlayParams = {
+					top: 100,
+					onClose: function(){
+						$("#wiziapp_error_mask").hide();
+					},
+					onBeforeLoad: function(){
+						var $toCover = $('#wpbody');
 
-				var data = {};
-				jQuery.each(jQuery('.wiziapp_error'), function(index, error){
-					var text = jQuery(error).text();
-					if ( text.indexOf('.') !== -1 ){
-						text = text.substr(0, text.indexOf('.'));
+						var $mask = $('#wiziapp_error_mask');
+						if ( $mask.length == 0 ){
+							$mask = $('<div></div>').attr("id", "wiziapp_error_mask");
+							$("body").append($mask);
+						}
+
+						$mask.css({
+							position:'absolute',
+							top: $toCover.offset().top,
+							left: $toCover.offset().left,
+							width: $toCover.outerWidth(),
+							height: $("#wpwrap").outerHeight(),
+							display: 'block',
+							"z-index": 10,
+							opacity: 0.9,
+							backgroundColor: '#444444'
+						});
+
+						$mask = $toCover = null;
+					},
+					closeOnClick: false,
+					closeOnEsc: false,
+					load: true
+				};
+
+				$(document).ready(function(){
+					$.ajaxSetup({
+						timeout: 60*1000,
+						error: function(jqXHR, textStatus, errorThrown){
+							clearTimeout(progressTimer);
+
+							if (textStatus == 'timeout'){
+								display_error_message(true, try_again_message);
+							} else if( jqXHR.status == 0 ){
+								display_error_message(true, try_again_message);
+							} else if( jqXHR.status == 404 ){
+								display_error_message(false, fatal_error_message);
+							} else if( jqXHR.status == 500 ){
+								display_error_message(false, fatal_error_message);
+							} else if( textStatus == 'parsererror' ){
+								display_error_message(false, fatal_error_message);
+							} else {
+								display_error_message(false, fatal_error_message);
+							}
+						}
+					});
+
+					wiziapp_errors_container = $("div.wiziapp_errors_container");
+					wiziapp_message_wrapper = wiziapp_errors_container.find("div.errors_container div.errors div.wiziapp_error")
+					retry_button = $("#wiziapp_retry_compatibilities");
+
+					overlayParams.left = (screen.width / 2) - (wiziapp_errors_container.outerWidth() / 2),
+					wiziapp_errors_container
+					.find("div.errors_container a")
+					.click(reaction_to_error);
+
+					// Start sending requests to generate content till we are getting a flag showing we are done
+					startProcessing();
+				});
+
+				function startProcessing(){
+					if ( typeof(update_steps[step_number]) === 'undefined' ){
+						requestFinalizingProcessing();
+						return;
 					}
-					data[index] = text;
-				});
-				var params = {
-					action: 'wiziapp_report_issue',
-					data: jQuery.param(data, true)
-				};
 
-				$el.load(ajaxurl, params, function(){
-					var $mainEl = jQuery(".wiziapp_errors_container");
-					$mainEl
-					.find(".errors_container").hide().end()
-					.find(".report_container").show().end();
-					$mainEl = null;
-				});
+					var params = {
+						action: 'wiziapp_update_' + update_steps[step_number]
+					};
 
-				var $el = null;
-				return false;
-			});
+					$.post(ajaxurl, params, handleUpdateResponse, 'json');
 
-			jQuery(".retry_processing").bind("click", retryRequest);
-			// Start sending requests to generate content till we are getting a flag showing we are done
-			startProcessing();
-		});
-
-		function retryRequest(event){
-			event.preventDefault();
-			var $el = jQuery(this);
-			var request = $el.parents('.wiziapp_error').data('reqObj');
-
-			$el.parents('.wiziapp_error').hide();
-			/*
-			request.error = function(req, error){
-			retryingFailed();
-			};
-			*/
-			delete request.context;
-			delete request.accepts;
-
-			jQuery.ajax(request);
-
-			$el = null;
-			return false;
-		}
-
-		function retryingFailed(req, error){
-			jQuery("#internal_error_2").show();
-		}
-
-		function startProcessing(){
-			if ( typeof(update_steps[update_step]) != 'undefined' ){
-				var params = {
-					action: 'wiziapp_update_' + update_steps[update_step]
-				};
-
-				jQuery.post(ajaxurl, params, handleUpdateResponse, 'json');
-				progressTimer = setTimeout(updateProgressBarByTimer, 1000 * progressWait);
-			} else {
-				requestFinalizingProcessing();
-			}
-		}
-
-		function handleUpdateResponse(data){
-			// Update the progress bar
-			if ( typeof(data) == 'undefined'  || !data ){
-				// The request failed from some reason...
-				jQuery("#error_updating").show();
-				return;
-			}
-
-			if (data.header.status){
-				if (data.header.status !== "retry"){
-					++update_step;
+					progressTimer = setTimeout(updateProgressBarByTimer, 1000 * progressWait);
 				}
 
-				updateProgressBar();
+				function handleUpdateResponse(data){
+					try {
+						if ( data.status === "fatal" ){
+							// Response is failed, display the "Cancel" button
+							display_error_message(false, fatal_error_message);
+						} else if ( data.status === "recycle" && typeof data.message === "string" && data.message.length != 0 ){
+							// Response is failed, retry automatic, without show error
+							var current_time = (new Date()).getTime();
 
-				startProcessing();
-			} else {
-				jQuery("#error_updating").show();
-			}
-		};
+							if ( recycle_start_time > 0 ){
+								if ( current_time - recycle_start_time < 30000 ){
+									if ( current_time%4 == 0 ){
+										updateProgressBarByTimer();
+									}
 
-		function wiziappRegisterAjaxErrorHandler(){
-			jQuery.ajaxSetup({
-				timeout: 60*1000,
-				error:function(req, error){
-					clearTimeout(progressTimer);
-					if (error == 'timeout'){
-						jQuery("#internal_error").data('reqObj', this).show();
-						//startProcessing();
-					} else if(req.status == 0){
-						jQuery("#error_network").data('reqObj', this).show();
-					} else if(req.status == 404){
-						jQuery("#error_activating").show();
-					} else if(req.status == 500){
-						jQuery("#internal_error").data('reqObj', this).show();
+									startProcessing();
+								} else {
+									// Time of the automatic recycle was expired, display a choice "Cancel" or "Retry"
+									display_error_message(true, data.message);
+								}
+							} else {
+								recycle_start_time = current_time;
+								updateProgressBarByTimer();
+								startProcessing();
+							}
+						} else if ( data.status === "retry" && typeof data.message === "string" && data.message.length != 0 ){
+							// Response is failed, display a choice "Cancel" or "Retry"
+							display_error_message(true, data.message);
+						} else if ( data.status === "success" ){
+							// Response is successful, can to continue
+							++step_number;
+							retry_amount = recycle_start_time = 0;
 
-					} else if(error == 'parsererror'){
-						jQuery("#error_activating").show();
-						/*
-						} else if(error == 'timeout'){
-						//jQuery("#error_network").show();
-						jQuery("#internal_error").data('reqObj', this).show();
-						*/
+							updateProgressBar();
+							startProcessing();
+						} else{
+							// Response is failed, display the "Cancel" button
+							display_error_message(false, fatal_error_message);
+						}
+					} catch(e) {
+						// Response is failed, display a choice "Cancel" or "Retry"
+						display_error_message(true, try_again_message);
+					}
+				};
+
+				function display_error_message(retry_ability, message){
+					recycle_start_time = 0;
+
+					if ( retry_ability && retry_amount < 3 ){
+						++retry_amount;
+
+						// Show the "Retry" button
+						retry_button.show();
 					} else {
-						jQuery("#error_updating").show();
+						// Show the "Retry" button
+						retry_button.hide();
+						message = fatal_error_message;
 					}
+
+					// Switch on the Overlay
+					wiziapp_message_wrapper.text(message);
+					wiziapp_errors_container
+					.overlay(overlayParams)
+					.load();
 				}
-			});
-		};
 
-		function updateProgressBarByTimer(){
-			var current = jQuery("#current_progress_indicator").text();
+				function reaction_to_error(event){
+					event.preventDefault();
 
-			if (current.length == 0){
-				current = 0;
-			} else if (current.indexOf('%') != -1){
-				current.replace('%', '');
-			}
+					if ( $(event.currentTarget).attr("id") === "wiziapp_report_problem" ){
+						// The user chooses a "Cancel"
+						handleFinalizingProcessing( { "status" : "skip" } );
+					}
 
-			current = parseInt(current) + 1;
+					startProcessing();
 
-			if (current != 100){
-				jQuery("#main_progress_bar").css('width', current + '%');
-				jQuery("#current_progress_indicator").text(current + '%');
+					// Switch off the Overlay
+					wiziapp_errors_container
+					.children("a:first-child")
+					.trigger("click");
 
-				// Repeat only once
-				//progressTimer = setTimeout(updateProgressBarByTimer, 1000*progressWait);
-			}
-		};
+					return false;
+				}
 
-		function updateProgressBar(){
-			clearTimeout(progressTimer);
-			progressTimer = null;
+				function updateProgressBarByTimer(){
+					var current = $("#current_progress_indicator").text();
 
-			var total_items = update_steps.length
-			var done = ((update_step) / total_items) * 100;
+					if (current.length == 0){
+						current = 0;
+					} else if (current.indexOf('%') != -1){
+						current.replace('%', '');
+					}
 
-			if (update_step < update_steps.length){
-				jQuery("#current_progress_label").text(update_msg[update_step]+"...");
-			} else {
-				jQuery("#current_progress_label").text("<?php echo __('Finalizing...', 'wiziapp'); ?>");
-			}
+					current = parseInt(current) + 1;
 
-			jQuery("#main_progress_bar").css('width', done + '%');
-			jQuery("#current_progress_indicator").text(Math.floor(done) + '%');
-		};
+					if (current != 100){
+						$("#main_progress_bar").css('width', current + '%');
+						$("#current_progress_indicator").text(current + '%');
+					}
+				};
 
-		function requestFinalizingProcessing(){
-			var params = {
-				action: 'wiziapp_install_webapp_finish'
-			};
+				function updateProgressBar(){
+					clearTimeout(progressTimer);
+					progressTimer = null;
 
-			jQuery.post(ajaxurl, params, handleFinalizingProcessing, 'json');
-		};
+					var total_items = update_steps.length
+					var done = (step_number / total_items) * 100;
 
-		function handleFinalizingProcessing(data){
-			jQuery("#wiziapp_finalize_title").show();
-			var url = document.location.href;
-			url = url.replace('wiziapp_webapp_display', 'wiziapp').replace("&wiziapp_reload_webapp=1", "");
-			document.location.replace(url);
-		}
-	</script>
+					if (step_number < update_steps.length){
+						$("#current_progress_label").text(update_msg[step_number]+"...");
+					} else {
+						$("#current_progress_label").text("<?php echo __('Finalizing...', 'wiziapp'); ?>");
+					}
 
-	<div id="wiziapp_activation_container">
-		<div id="just_a_moment"></div>
-		<p id="wizi_be_patient" class="text_label"><?php echo __('Please be patient while we activate your mobile App. It may take several minutes.', 'wiziapp');?></p>
-		<div id="wizi_icon_wrapper">
-			<div id="wizi_icon_processing"></div>
-			<div id="current_progress_label" class="text_label"><?php echo __('Initializing...', 'wiziapp'); ?></div>
-		</div>
-		<div id="main_progress_bar_container">
-			<div id="main_progress_bar"></div>
-			<div id="main_progress_bar_bg"></div>
-		</div>
-		<p id="current_progress_indicator" class="text_label"></p>
+					$("#main_progress_bar").css('width', done + '%');
+					$("#current_progress_indicator").text(Math.floor(done) + '%');
+				};
 
-		<p id="wiziapp_finalize_title" class="text_label"><?php echo __('Ready, if the page doesn\'t change in a couple of seconds click ', 'wiziapp'); ?><span id="finializing_activation"><?php echo __('here', 'wiziapp'); ?></span></p>
+				function requestFinalizingProcessing(){
+					var params = {
+						action: 'wiziapp_install_webapp_finish'
+					};
 
-		<div id="error_activating" class="wiziapp_error hidden"><div class="icon"></div><div class="text"><?php echo __('There was an error loading the wizard, please contact support', 'wiziapp');?></div></div>
-		<div id="internal_error" class="wiziapp_error hidden">
-			<div class="icon"></div>
-			<div class="text"><?php echo __('Connection error. Please try again.,', 'wiziapp');?> <a href="javscript:void(0);" class="retry_processing"><?php echo __('retry', 'wiziapp'); ?></a></div>
-		</div>
-		<div id="internal_error_2" class="wiziapp_error hidden"><div class="icon"></div><div class="text"><?php echo __('There were still errors contacting your server, please contact support', 'wiziapp');?></div></div>
-		<div id="error_network" class="wiziapp_error hidden">
-			<div class="icon"></div><div class="text"><?php echo __('Connection error. Please try again.', 'wiziapp');?> <a href="javscript:void(0);" class="retry_processing"><?php echo __('retry', 'wiziapp'); ?></a></div>
-		</div>
+					$.post(ajaxurl, params, handleFinalizingProcessing, 'json');
+				};
 
-		<div id="error_updating" class="wiziapp_error hidden"><div class="icon"></div><div class="text"><?php echo __('There was a problem installing the webapp, please contact support', 'wiziapp');?></div></div>
-	</div>
-	<?php
+				function handleFinalizingProcessing(data){
+					$("#wiziapp_finalize_title").show();
+
+					var url = document.location.href;
+
+					if ( url.indexOf("wiziapp_webapp_display") !== -1 || url.indexOf("&wiziapp_reload_webapp=1") !== -1 ){
+						var replace_get = "";
+
+						try {
+							if ( data.status === "skip" && url.indexOf("&skip_reload_webapp=1") < 0 ){
+								replace_get = "&skip_reload_webapp=1";
+							}
+						} catch(e) {}
+						url =
+						url
+						.replace('wiziapp_webapp_display', 'wiziapp')
+						.replace("&wiziapp_reload_webapp=1", replace_get);
+					} else if (url.search(/(page=wiziapp[^_])|(page=wiziapp$)/i) !== -1){
+						try {
+							if ( data.status === "skip" && url.indexOf("&skip_reload_webapp=1") < 0 ){
+								url = url.replace('page=wiziapp', 'page=wiziapp&skip_reload_webapp=1');
+							}
+						} catch(e) {}
+					}
+
+					document.location.replace(url);
+				}
+
+			})(jQuery);
+		</script>
+
+		<div id="wiziapp_activation_container">
+			<div id="just_a_moment"></div>
+			<p id="wizi_be_patient" class="text_label"><?php echo __('Please be patient while we activate your mobile App. It may take several minutes.', 'wiziapp');?></p>
+			<div id="wizi_icon_wrapper">
+				<div id="wizi_icon_processing"></div>
+				<div id="current_progress_label" class="text_label"><?php echo __('Initializing...', 'wiziapp'); ?></div>
+			</div>
+			<div id="main_progress_bar_container">
+				<div id="main_progress_bar"></div>
+				<div id="main_progress_bar_bg"></div>
+			</div>
+			<p id="current_progress_indicator" class="text_label"></p>
+
+			<p id="wiziapp_finalize_title" class="text_label">
+				<?php echo __('Ready, if the page doesn\'t change in a couple of seconds click ', 'wiziapp'); ?><span id="finializing_activation"><?php echo __('here', 'wiziapp'); ?></span>
+			</p>
+
+			<div class="wiziapp_errors_container">
+				<div class="errors_container">
+					<div class="errors">
+						<div class="wiziapp_error"></div>
+					</div>
+					<div class="buttons">
+						<a id="wiziapp_report_problem" 			href="javascript:void(0);">Cancel Scanning</a>
+						<a id="wiziapp_retry_compatibilities" 	href="javascript:void(0);">Retry</a>
+					</div>
+				</div>
+			</div>
+		<?php
 	}
 }

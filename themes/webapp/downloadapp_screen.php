@@ -23,7 +23,7 @@
 			window.site_url = '<?php echo site_url(); ?>';
 		</script>
 	</head>
-	<body>
+	<body onload="wiziapp_intro_page_load();">
 		<div class="title">
 			<div>
 				<img src="<?php echo wiziapp_get_app_icon(); ?>" alt="">

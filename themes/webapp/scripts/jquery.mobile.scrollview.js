@@ -4,6 +4,16 @@
 * Dual licensed under the MIT (MIT-LICENSE.txt) and GPL (GPL-LICENSE.txt) licenses.
 * Note: Code is in draft form and is subject to change
 */
+(function($, window, document, $$) {
+	if ($.mobile) {
+		$$($, window, document);
+	}
+	else {
+		$(document).bind("mobileinit", function() {
+			$$($, window, document);
+		});
+	}
+})(jQuery,window,document,
 (function($,window,document,undefined){
 
 jQuery.widget( "mobile.scrollview", jQuery.mobile.widget, {
@@ -884,5 +894,5 @@ jQuery.widget( "mobile.scrolllistview", jQuery.mobile.scrollview, {
 	}
 });
 
-})(jQuery,window,document); // End Component
+})); // End Component
 

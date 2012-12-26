@@ -249,7 +249,7 @@ class WiziappCompatibilitiesChecker{
 			$this->critical = TRUE;
 		}
 
-		if ( !empty($errors) ){
+		if ( count($errors->get_error_codes()) > 0 ){
 			return $errors;
 		} else {
 			return TRUE;
