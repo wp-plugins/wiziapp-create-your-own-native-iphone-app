@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<?php /* <html <?php language_attributes(); ?> manifest="<?php echo wiziapp_get_manifest(); ?>"> */ ?>
 <html <?php language_attributes(); ?>>
 <?php
 // Disable the admin bar

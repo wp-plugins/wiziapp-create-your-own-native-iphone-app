@@ -200,7 +200,7 @@ class WiziappGeneratorDisplay{
                         //$iframeSrc = 'http://'.wiziapp_getApiServer().'/generator?t='.$token;
                         //$iframeSrc = $httpProtocol.'://'.wiziapp_getServicesServer().'/generator?t='.$token;
                         $iframeSrc = $httpProtocol.'://'.WiziappConfig::getInstance()->api_server.'/generator/index/'.$token.'?v='.WIZIAPP_P_VERSION;
-                        if (WiziappConfig::getInstance()->webapp_installed) {
+                        if ( WiziappConfig::getInstance()->webapp_installed || WiziappConfig::getInstance()->skip_reload_webapp ) {
                             $iframeSrc .= '&webapp_installed=1';
                         }
                     ?>

@@ -20,7 +20,7 @@ class WiziappDB implements WiziappIInstallable{
 
 	private $media_table = 'wiziapp_content_media';
 	private $user_table = 'wiziapp_user_info';
-	private $internal_version = '0.7';
+	private $internal_version = '0.8';
 	private static $_instance = null;
 
 	/**
@@ -536,16 +536,17 @@ class WiziappDB implements WiziappIInstallable{
 	function get_albums_count() {
 		global $wpdb;
 
-		$sql = $wpdb->prepare("SELECT COUNT(id)
-			FROM {$wpdb->prefix}{$this->media_table} AS c
-			WHERE attachment_info LIKE '%data-wiziapp-cincopa-id%'
-			OR attachment_info LIKE '%data-wiziapp-nextgen-album-id%'
-			OR attachment_info LIKE '%data-wiziapp-nextgen-gallery-id%'
-			OR attachment_info LIKE '%data-wiziapp-pageflipbook-id%'
-			OR attachment_info LIKE '%wordpress-gallery-id%'
-			OR attachment_info LIKE '%external-gallery-id%'
-			OR attachment_info LIKE '%data-wiziapp-id%'
-			LIMIT 0, 15");
+		$sql =
+		"SELECT COUNT(id)
+		FROM {$wpdb->prefix}{$this->media_table} AS c
+		WHERE attachment_info LIKE '%data-wiziapp-cincopa-id%'
+		OR attachment_info LIKE '%data-wiziapp-nextgen-album-id%'
+		OR attachment_info LIKE '%data-wiziapp-nextgen-gallery-id%'
+		OR attachment_info LIKE '%data-wiziapp-pageflipbook-id%'
+		OR attachment_info LIKE '%wordpress-gallery-id%'
+		OR attachment_info LIKE '%external-gallery-id%'
+		OR attachment_info LIKE '%data-wiziapp-id%'
+		LIMIT 0, 15";
 		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappDB.get_albums_count');
 
 		return (int) $wpdb->get_var($sql);
@@ -722,23 +723,7 @@ class WiziappDB implements WiziappIInstallable{
 		global $wpdb;
 
 		return
-		( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}{$this->media_table}'" ) == $wpdb->prefix.$this->media_table ) &&
-		$this->_is_post_altered($this->_added_columns['exclude']) &&
-		$this->_is_post_altered($this->_added_columns['push']);
-	}
-
-	private function _is_post_altered($added_columns_pair, $safe = TRUE) {
-		try {
-			$columns_names = $this->_get_posts_columns();
-			return in_array( $added_columns_pair[0]['name'], $columns_names ) && in_array( $added_columns_pair[1]['name'], $columns_names );
-		} catch(Exception $e) {
-			if ($safe) {
-				WiziappLog::getInstance()->write('ERROR', $e->getMessage(), 'WiziappDB._is_post_altered');
-				return FALSE;
-			} else {
-				throw new Exception($e->getMessage());
-			}
-		}
+		$wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}{$this->media_table}'" ) == $wpdb->prefix.$this->media_table;
 	}
 
 	/**
@@ -811,30 +796,6 @@ class WiziappDB implements WiziappIInstallable{
 			WiziappLog::getInstance()->write('ERROR', $create_table_errors, 'WiziappDB.install');
 		}
 
-		// To add the "Exclude fields" and the "Push fields" to Posts table
-		foreach ( $this->_added_columns as $columns_pair ) {
-			try {
-				$columns_names = $this->_get_posts_columns();
-				if ( in_array( $columns_pair[0]['name'], $columns_names ) xor in_array( $columns_pair[1]['name'], $columns_names ) ) {
-					// The "Exclude fields" is added to Posts table already, but not complect
-					$this->_erase_post_alterations($columns_pair, FALSE);
-				}
-
-				if ( ! $this->_is_post_altered($columns_pair, FALSE) ) {
-					// The "Exclude fields" is not added to Posts table yet
-					$sql_post =
-					"ALTER TABLE `".$wpdb->posts."` ".
-					"ADD COLUMN `".$columns_pair[0]['name']."` TINYINT(1) UNSIGNED DEFAULT ".$columns_pair[0]['default']." NOT NULL COMMENT '".$columns_pair[0]['comment']."', ".
-					"ADD COLUMN `".$columns_pair[1]['name']."` TINYINT(1) UNSIGNED DEFAULT ".$columns_pair[1]['default']." NOT NULL COMMENT '".$columns_pair[1]['comment']."';";
-					if ( ! $wpdb->query( $sql_post ) ) {
-						throw new Exception('SQL: '.$sql_post.' '.$wpdb->last_error);
-					}
-				}
-			} catch (Exception $e) {
-				WiziappLog::getInstance()->write('ERROR', $e->getMessage(), 'WiziappDB.install');
-			}
-		}
-
 		// save the database version for easy upgrades
 		update_option("wiziapp_db_version", $this->internal_version);
 
@@ -876,14 +837,14 @@ class WiziappDB implements WiziappIInstallable{
 	public function upgrade() {
 		global $wpdb;
 
-		// Delete "iphone_post_thumb" Custom Fields from "wp_postmeta" table. The fields was removed on version 1.3.0c
-		$is_delete_error =
-		! $wpdb->query( "DELETE FROM " . $wpdb->postmeta . " WHERE meta_key = 'iphone_post_thumb_0' OR meta_key = 'iphone_post_thumb_1'" ) &&
-		! empty($wpdb->last_error);
-
-		if ($is_delete_error) {
-			WiziappLog::getInstance()->write('ERROR', $wpdb->last_error, 'WiziappDB.install');
+		// Delete the tables which was removed on version 2.0.0
+		if ( ! ( defined('EICONTENT_EXCLUDE_BASENAME') && is_plugin_active( EICONTENT_EXCLUDE_BASENAME ) ) ) {
+			// To remove the "Exclude fields" from the Posts table, if another plugin, "Exclude", is not activated
+			$this->_erase_post_alterations( $this->_added_columns['exclude'] );
 		}
+
+		// To remove the "Push fields" from the Posts table
+		$this->_erase_post_alterations( $this->_added_columns['push'] );
 
 		return $this->install();
 	}
@@ -892,41 +853,12 @@ class WiziappDB implements WiziappIInstallable{
 		return $this->media_table;
 	}
 
-	public function update_element_exclusion($id_array) {
-		global $wpdb;
-
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'wizi_included_site'  => isset( $_POST['wizi_not_exclude_site'] ),
-				'wizi_included_app'   => isset( $_POST['wizi_not_exclude_app'] ),
-				'wizi_published_push' => isset( $_POST['wizi_published_push'] ),
-				'wizi_updated_push'   => isset( $_POST['wizi_updated_push'] ),
-			),
-			$id_array,
-			array( '%d', '%d', '%d', '%d', ),
-			array( '%d', )
-		);
-	}
-
-	public function set_exclude_query() {
-		global $wpdb;
-
-		$query =
-		"SELECT `ID` " .
-		"FROM `" . $wpdb->posts . "` " .
-		"WHERE `" .
-		( ( WiziappContentHandler::getInstance()->isInApp() ) ? 'wizi_included_app' : 'wizi_included_site' ) .
-		"` = 0;";
-
-		return $wpdb->get_col( $query );
-	}
-
-	private function  _erase_post_alterations($colums_to_remove, $safe = TRUE) {
+	private function  _erase_post_alterations($colums_to_remove) {
 		global $wpdb;
 
 		try {
 			$columns_names = $this->_get_posts_columns();
+
 			foreach ( $colums_to_remove as $column ) {
 				if ( in_array( $column['name'], $columns_names ) ) {
 					// If the Exclude column exist in the Posts table
@@ -937,11 +869,7 @@ class WiziappDB implements WiziappIInstallable{
 				}
 			}
 		} catch (Exception $e) {
-			if ($safe) {
-				WiziappLog::getInstance()->write('ERROR', $e->getMessage(), 'WiziappDB._erase_post_alterations');
-			} else {
-				throw new Exception($e->getMessage());
-			}
+			WiziappLog::getInstance()->write('ERROR', $e->getMessage(), 'WiziappDB._erase_post_alterations');
 		}
 	}
 

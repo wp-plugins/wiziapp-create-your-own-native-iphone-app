@@ -4,6 +4,16 @@
 * CC 3.0 Attribution.  May be relicensed without permission/notifcation.
 * https://github.com/jtsage/jquery-mobile-simpledialog
 */
+(function($, $$) {
+	if ($.mobile) {
+		$$($);
+	}
+	else {
+		$(document).bind("mobileinit", function() {
+			$$($);
+		});
+	}
+})(jQuery,
 (function($, undefined ) {
  $.widget( "mobile.simpledialog", $.mobile.widget, {
 options: {
@@ -435,4 +445,4 @@ enable: function(){
  });
 
 
-})( jQuery );
+}));

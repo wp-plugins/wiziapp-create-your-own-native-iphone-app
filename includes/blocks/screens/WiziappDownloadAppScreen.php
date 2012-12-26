@@ -37,7 +37,7 @@ class WiziappDownloadAppScreen extends WiziappBaseScreen{
 		wp_register_script(
 			'downloadapp',
 			get_bloginfo('template_url').'/scripts/downloadapp.js',
-			array('jquery'),
+			array(),
 			WIZIAPP_P_VERSION,
 			FALSE
 		);

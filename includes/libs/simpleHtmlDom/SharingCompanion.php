@@ -14,7 +14,7 @@ class SharingCompanion {
 	private $flag;
 
 	public function __construct() {
-		$this->html = new simple_html_dom();
+		$this->html = new simple_html_dom_wiziapp();
 		$this->flag = false;
 	}
 

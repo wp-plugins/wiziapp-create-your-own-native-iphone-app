@@ -45,7 +45,7 @@ class WiziappVideoEmbed{
         $GLOBALS['content_width'] = $this->content_width;
 
         $iframe_protect_screen =
-        '<div class="iframe_protect_screen" style="position: absolute;" data-video-url="'.home_url('?wiziapp/content/video/'.$id.'&wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html').'">'.
+        '<div class="iframe_protect_screen" style="position: absolute;" data-video-url="'.home_url('?wiziapp/content/video/'.$id.WiziappLinks::getAppend()).'">'.
         '</div>';
 
         if ($provider == 'youtube'){

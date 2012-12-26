@@ -1,7 +1,18 @@
 // iOS5
-jQuery.mobile.touchOverflowEnabled = true;
+(function($, $$) {
+	if ($.mobile) {
+		$$($);
+	}
+	else {
+		$(document).bind("mobileinit", function() {
+			$$($);
+		});
+	}
+})(jQuery, function($) {
+	$.mobile.touchOverflowEnabled = true;
+});
 
-jQuery(".index:jqmData(role='page')").live("pageshow", function() {
+jQuery(document).delegate(".index:jqmData(role='page')", "pageshow", function() {
 	var a = jQuery("a", this);
 
 	if ( jQuery.mobile.path.parseUrl(window.location.href).search.indexOf("androidapp=1") >= 0 ){
@@ -13,7 +24,7 @@ jQuery(".index:jqmData(role='page')").live("pageshow", function() {
 	}
 });
 
-jQuery(":jqmData(role='page')" ).live("pageinit", pageShowEvent);
+jQuery(document).delegate(":jqmData(role='page')", "pageinit", pageShowEvent);
 jQuery(document).delegate(".edit_favorites", "vclick", function(event){
 	var $btn = jQuery(this);
 	var $page = $btn.closest('.ui-page');
@@ -258,12 +269,15 @@ function prepareActionURL(elements){
 				'screenType': screenType
 			});
 
-			var sep = '?output=html&';
+			var sep = '?output=html&androidapp=1&';
 			var ind = screenURL.indexOf('?');
 			if ( ind >= 0 ){
 				sep = '&';
 				if ( screenURL.indexOf('output=html', ind+1) < 0 ){
 					sep += 'output=html&';
+				}
+				if ( screenURL.indexOf('androidapp=1', ind+1) < 0 ){
+					sep += 'androidapp=1&';
 				}
 			}
 
@@ -729,6 +743,8 @@ function applyEffects($wantedContainer){
 		self = this,
 		data_role_content,
 		comment_parent_element,
+		comment_reply_button,
+		webapp_send_comments_button,
 		collapsible_wrapper,
 		comments_form,
 		root_ul_element,
@@ -741,14 +757,19 @@ function applyEffects($wantedContainer){
 			data_role_content = comments_page_wrapper.children("div:jqmData(role='content')");
 			title_wrapper = comments_page_wrapper.find("div:jqmData(role='header') h1.ui-title");
 			permanent_title = title_wrapper.text();
+			comment_reply_button = $("#comment_reply_root");
+			webapp_send_comments_button = $("#webapp_send_comments_form");
 
 			comments_page_wrapper
 			.on( "click", "div.comment_replyButton", self.show_form )
-			.on( "click", "#comment_reply_root", self.show_form)
-			.on( "click", 'input[type="button"][name="submit"]', self.send_form);
+			.on( "click", "#comment_reply_root", 	 self.show_form)
+			.on( "click", 'input[type="button"][name="submit"]', self.send_form)
+			.on( "click", "#webapp_send_comments_form", 		 self.send_form);
 		}
 
 		this.show_form = function(event){
+			event.preventDefault();
+
 			comment_parent_element = $(event.currentTarget).parent("li[data-comment-id]");
 			root_ul_element = data_role_content.find("ul").first();
 			comments_form = root_ul_element.next();
@@ -770,9 +791,15 @@ function applyEffects($wantedContainer){
 			title_wrapper.text(temporary_title);
 			comments_form.show();
 			root_ul_element.hide();
+			webapp_send_comments_button.show();
+			comment_reply_button.hide();
+
+			return false;
 		}
 
 		this.send_form = function(event){
+			event.preventDefault();
+
 			$(event.currentTarget).off("click");
 
 			var form_fields = {
@@ -791,6 +818,8 @@ function applyEffects($wantedContainer){
 				type : "post"
 			})
 			.done(self.prepare_response);
+
+			return false;
 		}
 
 		this.prepare_response = function(absUrl, options, page, dupCachedPage){
@@ -841,6 +870,8 @@ function applyEffects($wantedContainer){
 			title_wrapper.text(permanent_title);
 			comments_form.hide();
 			root_ul_element.show();
+			webapp_send_comments_button.hide();
+			comment_reply_button.show();
 		}
 
 		return {
@@ -993,9 +1024,8 @@ function applyEffects($wantedContainer){
 			}
 			b = $(this);
 			return !0;
-		}).bind("load", function() {
+		}).one("load", function() {
 			var $this = $(this);
-			$this.unbind("load");
 			recheck_scale($this);
 		});
 		if (a === !1) {
@@ -1029,12 +1059,15 @@ function applyEffects($wantedContainer){
 					screenURL = unescape(screenParams[1]);
 				}
 
-				sep = '?output=html&';
+				sep = '?output=html&androidapp=1&';
 				ind = screenURL.indexOf('?');
 				if ( ind >= 0 ){
 					sep = '&';
 					if ( screenURL.indexOf('output=html', ind+1) < 0 ){
 						sep += 'output=html&';
+					}
+					if ( screenURL.indexOf('androidapp=1', ind+1) < 0 ){
+						sep += 'androidapp=1&';
 					}
 				}
 
@@ -1052,12 +1085,15 @@ function applyEffects($wantedContainer){
 					screenURL = unescape(screenParams[1]);
 				}
 
-				sep = '?output=html&';
+				sep = '?output=html&androidapp=1&';
 				ind = screenURL.indexOf('?');
 				if ( ind >= 0 ){
 					sep = '&';
 					if ( screenURL.indexOf('output=html', ind+1) < 0 ){
 						sep += 'output=html&';
+					}
+					if ( screenURL.indexOf('androidapp=1', ind+1) < 0 ){
+						sep += 'androidapp=1&';
 					}
 				}
 
@@ -1069,9 +1105,8 @@ function applyEffects($wantedContainer){
 			$(".navigation_back_button_wrapper", h).css("display", "none");
 		}
 		c.parent().parent().removeClass("single-wrapper-displaced");
-		$(".fullsize", h).attr("src", "").attr("src", c.data("thumbnail-as-full")).bind("load", function() {
+		$(".fullsize", h).attr("src", "").attr("src", c.data("thumbnail-as-full")).one("load", function() {
 			var $this = $(this);
-			$this.unbind("load");
 			$this.closest(".single-wrapper").removeClass("single-wrapper-displaced");
 			recheck_scale($this);
 			$(".all-wrapper > .single-wrapper:has(.thumbnail)", h).addClass("single-wrapper-displaced");
@@ -1125,7 +1160,7 @@ function applyEffects($wantedContainer){
 // Back Button Stack Begin
 (function($){
 	var stack = [];
-	$(":jqmData(role='page')").live("pagebeforeshow", function() {
+	$(document).delegate(":jqmData(role='page')", "pagebeforeshow", function() {
 		var $page = $(this);
 		var $header = $(":jqmData(role='header')", $page);
 		if ($header.length < 1){
@@ -1180,7 +1215,7 @@ function applyEffects($wantedContainer){
 		$back.attr("href", stack[stack.length-2].url);
 		$back.css("display", "");
 	});
-	$(".navigation_back_button_wrapper").live("vclick", function() {
+	$(document).delegate(".navigation_back_button_wrapper", "vclick", function() {
 		if (stack.length > 0){
 			stack.pop();
 		}
@@ -1195,7 +1230,7 @@ function applyEffects($wantedContainer){
 (function($){
 	var cache_max_length = 3;
 	var cache = [];
-	$(":jqmData(role='page'):jqmData(external-page='true')").live("pagebeforeshow", function() {
+	$(document).delegate(":jqmData(role='page'):jqmData(external-page='true')", "pagebeforeshow", function() {
 		var $this = $( this );
 		var i;
 		for (i = 0; i < cache.length; ) {
@@ -1211,7 +1246,7 @@ function applyEffects($wantedContainer){
 			cache.shift().removeWithDependents();
 		}
 	});
-	$(":jqmData(role='page')").live("pageremove", function(e) {
+	$(document).delegate(":jqmData(role='page')", "pageremove", function(e) {
 		var $this = $( this );
 		var i;
 		for (i = 0; i < cache.length; i++) {
