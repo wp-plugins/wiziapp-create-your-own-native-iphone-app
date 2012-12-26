@@ -4,7 +4,7 @@
 * Plugin Name: Wiziapp
 * Description: WiziApp automatically turns your WordPress blog into a native iPhone app. Customize the app to make it your own by using our friendly wizard.
 * Author: Wiziapp Solutions Ltd.
-* Version: v2.0.1c
+* Version: v2.0.0a
 * Author URI: http://www.wiziapp.com/
 */
 /**
@@ -22,8 +22,8 @@ if ( ! defined('WP_WIZIAPP_BASE') ) {
 	define('WIZI_ABSPATH', realpath(ABSPATH));
 	define( 'WIZI_DIR_PATH', dirname(__FILE__) . DIRECTORY_SEPARATOR );
 	define('WIZIAPP_ENV', 'prod'); // can be dev/test/prod
-	define('WIZIAPP_VERSION', 'v2.0.1c');   // MAKE SURE TO UPDATE BOTH THIS AND THE UPPER VALUE
-	define('WIZIAPP_P_VERSION', '2.0.1');   // The platform version
+	define('WIZIAPP_VERSION', 'v2.0.0a');   // MAKE SURE TO UPDATE BOTH THIS AND THE UPPER VALUE
+	define('WIZIAPP_P_VERSION', '2.0.0');   // The platform version
 
 	if ( version_compare(PHP_VERSION, "5.2", ">=") && version_compare(get_bloginfo ("version"), "2.8.4", ">=") ) {
 		include dirname (__FILE__) . "/includes/classes/WiziappExceptions.php";

@@ -64,7 +64,7 @@ class WiziappConfig implements WiziappIInstallable{
 
 	private $name = 'wiziapp_settings';
 
-	private $internalVersion =  62;
+	private $internalVersion =  61;
 
 	private static $_instance = null;
 

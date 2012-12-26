@@ -50,7 +50,5 @@ return array(
 		'classes' => array(),
 	),
 
-	'2.0.1' => array(
-		'classes' => array(),
-	),
+
 );
