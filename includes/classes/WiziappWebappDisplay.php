@@ -135,19 +135,30 @@ class WiziappWebappDisplay{
 		}
 
 		if ( $zip ){
-			if ( ! class_exists('ZipArchive') ){
-				WiziappLog::getInstance()->write('ERROR', '! class_exists(\'ZipArchive\')', 'WiziappWebappDisplay._update');
-				$this->_returnResults('retry', 'ZIP extension is not enabled on the PHP installation, please add this lib and try again.');
-			}
+			if ( class_exists('ZipArchive') ){
+				$zip = new ZipArchive;
 
-			$zip = new ZipArchive;
-
-			if ( $zip->open($file) === TRUE ){
-				$zip->extractTo($dirPath);
-				$zip->close();
+				if ( $zip->open($file) === TRUE ){
+					$zip->extractTo($dirPath);
+					$zip->close();
+				} else {
+					WiziappLog::getInstance()->write('ERROR', 'Can not unzip the file '.$file.' by PHP class ZipArchive', 'WiziappWebappDisplay._update');
+					$this->_returnResults('fatal', 'fatal');
+				}
 			} else {
-				WiziappLog::getInstance()->write('ERROR', "Can not unzip the file {$file}", 'WiziappWebappDisplay._update');
-				$this->_returnResults('fatal', 'fatal');
+				WiziappLog::getInstance()->write('ERROR', '! class_exists(\'ZipArchive\')', 'WiziappWebappDisplay._update');
+
+				$url = wp_nonce_url('admin.php?page=wiziapp_webapp_display','wiziapp-webapp-options');
+				if ( ( $creds = request_filesystem_credentials($url, '', FALSE, FALSE, NULL) ) === FALSE ){
+					WiziappLog::getInstance()->write('ERROR', "Dont have permissions to upload the file", 'WiziappWebappDisplay.update');
+				}
+				if ( ! WP_Filesystem($creds) ){
+					WiziappLog::getInstance()->write('ERROR', "Cant start the filesystem object", 'WiziappWebappDisplay.update');
+				}
+				if ( ! @unzip_file($file, $dirPath) ){
+					WiziappLog::getInstance()->write('ERROR', 'Can not unzip the file '.$file.' by WP function unzip_file()', 'WiziappWebappDisplay._update');
+					$this->_returnResults('fatal', 'fatal');
+				}
 			}
 
 			@unlink($file);
