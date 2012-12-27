@@ -7,6 +7,7 @@
 */
 
 class WiziappUpgradeDisplay{
+
 	function upgradingFinish(){
 		WiziappLog::getInstance()->write('INFO', "The upgrading is finished, letting the admin know",
 											"post_upgrade.wiziapp_upgrading_finish");
@@ -63,6 +64,8 @@ class WiziappUpgradeDisplay{
 
 
 	function display(){
+		WiziappConfig::getInstance()->webapp_installed = FALSE;
+
 		?>
 		<script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
 		<style>
