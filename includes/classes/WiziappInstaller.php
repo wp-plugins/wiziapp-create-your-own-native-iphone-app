@@ -9,7 +9,7 @@ class WiziappInstaller
 		return FALSE;
 		}
 		*/
-		
+
 		return ( WiziappDB::getInstance()->needUpgrade() || WiziappConfig::getInstance()->needUpgrade() );
     }
 
@@ -41,6 +41,8 @@ class WiziappInstaller
 
         WiziappDB::getInstance()->install();
         WiziappConfig::getInstance()->install();
+
+		WiziappConfig::getInstance()->webapp_installed = FALSE;
 
         // Register tasks
         if (!wp_next_scheduled('wiziapp_daily_function_hook')) {
