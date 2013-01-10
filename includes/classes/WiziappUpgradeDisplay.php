@@ -19,6 +19,8 @@ class WiziappUpgradeDisplay{
 		$cms = new WiziappCms();
 		$cms->activate();
 
+		WiziappConfig::getInstance()->webapp_installed = FALSE;
+
 		$status = TRUE;
 
 		$header = array(
