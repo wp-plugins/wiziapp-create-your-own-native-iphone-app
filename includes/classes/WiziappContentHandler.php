@@ -9,9 +9,8 @@
 * @author comobix.com plugins@comobix.com
 */
 class WiziappContentHandler {
-	private $mobile;
-	private $inApp;
-	private $_show_download_page = FALSE;
+	private $mobile = FALSE;
+	private $inApp = FALSE;
 	private $_is_access_checked = FALSE;
 	private $inSave = FALSE;
 
@@ -29,9 +28,6 @@ class WiziappContentHandler {
 	* we don't need to start this request every time, just when it is possibly needed
 	*/
 	private function __construct() {
-		$this->mobile = FALSE;
-		$this->inApp  = FALSE;
-
 		add_action('plugins_loaded', array(&$this, 'detectAccess'), 99);
 		add_action('plugins_loaded', array(&$this, 'avoidWpTouchIfNeeded'), 1);
 
@@ -53,7 +49,8 @@ class WiziappContentHandler {
 			add_filter( 'stylesheet_directory', array( &$this, 'reset_stylesheet_directory' ), 99);
 			add_filter( 'stylesheet_directory_uri', array( &$this, 'reset_stylesheet_directory_uri' ), 99);
 
-			//add_filter('wp_head', array(&$this, 'do_head_section'), 99);
+			add_action('wp_enqueue_scripts', array(&$this, 'do_head_section'));
+
 			add_filter('the_content', array(&$this, 'trigger_before_content'), 1);
 			add_filter('the_content', array(&$this, 'convert_content'), 999);
 			add_filter('the_category', array(&$this, 'convert_categories_links'), 99);
@@ -73,15 +70,7 @@ class WiziappContentHandler {
 	}
 
 	public function isHTML() {
-		if ( $this->inApp ) {
-			return FALSE;
-		}
-
-		return $this->mobile;
-	}
-
-	public function is_show_download() {
-		return $this->_show_download_page;
+		return $this->mobile && ! $this->inApp;
 	}
 
 	public function isInApp() {
@@ -143,7 +132,11 @@ class WiziappContentHandler {
 			$this->inApp = TRUE;
 		}
 
-		if ( isset($_GET['output']) && $_GET['output'] == 'html' ) {
+		$is_webapp_ready =
+		WiziappConfig::getInstance()->webapp_installed &&
+		( WiziappConfig::getInstance()->webapp_active || ( isset($_GET['androidapp']) && $_GET['androidapp'] === '1' ) );
+
+		if ( isset($_GET['output']) && $_GET['output'] == 'html' && $is_webapp_ready ) {
 			$this->mobile = TRUE;
 			$this->inApp = FALSE;
 		}
@@ -152,7 +145,7 @@ class WiziappContentHandler {
 			WiziappLog::getInstance()->write('INFO', "In the application display", "WiziappContentHandler.detectAccess");
 
 			$this->setInApp();
-		} elseif ( isset($_SERVER['HTTP_USER_AGENT']) && WiziappConfig::getInstance()->webapp_installed && ! $this->_desktop_site_mode() ) {
+		} elseif ( isset($_SERVER['HTTP_USER_AGENT']) && ! $this->_desktop_site_mode() && $is_webapp_ready ) {
 			add_filter('body_class', array($this, 'getDeviceClass'), 10, 1);
 
 			$is_iPhone	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPhone')  !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
@@ -161,28 +154,13 @@ class WiziappContentHandler {
 			$is_windows	= stripos($_SERVER['HTTP_USER_AGENT'], 'Windows') !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'IEMobile')	   !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Phone') !== FALSE;
 			$is_iPad	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPad')    !== FALSE || stripos($_SERVER['HTTP_USER_AGENT'], 'webOS') 	   !== FALSE;
 
-			$store_url = '';
-			if ( ( $is_iPhone || $is_iPod ) && ! $is_iPad ) {
-				$this->mobile = 1;
-				$store_url = WiziappConfig::getInstance()->appstore_url;
-			} elseif ( $is_android ) {
-				$this->mobile = 2;
-				$store_url = WiziappConfig::getInstance()->playstore_url;
-			} elseif ( $is_windows ) {
-				$this->mobile = 3;
+			if ( ( $is_iPhone || $is_iPod || $is_android || $is_windows ) && ! $is_iPad ) {
+				$this->mobile = TRUE;
 			}
+		}
 
-			$is_suitable =
-			! ( isset($_COOKIE['WIZI_SHOW_STORE_URL']) && $_COOKIE['WIZI_SHOW_STORE_URL'] === '1' ) &&
-			! empty($store_url) &&
-			intval(WiziappConfig::getInstance()->display_download_from_appstore) === 1;
-			if ( $is_suitable ) {
-				setcookie('WIZI_SHOW_STORE_URL', '1', time() + 60*60*24*7);
-
-				if ( ! ( isset($_GET['androidapp']) && $_GET['androidapp'] === '1' ) ) {
-					$this->_show_download_page = TRUE;
-				}
-			}
+		if ($this->mobile || $this->inApp) {
+			add_action('init', array(WiziappPluginCompatibility::getInstance(), 'pluginGuard'), 9999);
 		}
 	}
 
@@ -372,9 +350,9 @@ class WiziappContentHandler {
 				?>
 				<div class="<?php echo $url_parts[4]; ?>_wrapper data-wiziapp-iphone-support">
 				<?php
-				if ( WiziappContentHandler::getInstance()->isHTML() ) {
+				if ( $this->isHTML() ) {
 					?>
-					<div class="iframe_protect_screen" style="position: absolute;" data-video-url="<?php echo home_url('?wiziapp/content/video/'.$video['id'].'&wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html'); ?>"></div>
+					<div class="iframe_protect_screen" style="position: absolute;" data-video-url="<?php echo home_url('?wiziapp/content/video/'.$video['id'].WiziappLinks::getAppend()); ?>"></div>
 					<?php
 				}
 				 echo wp_oembed_get( $video_url.$url_parts[5], array('width' => 300, ) );
@@ -408,7 +386,7 @@ class WiziappContentHandler {
 		$content .= ob_get_clean();
 
 		WiziappProfiler::getInstance()->write("Content processing for post {$post->ID}", "WiziappContentHandler.convert_content");
-		$html = new simple_html_dom();
+		$html = new simple_html_dom_wiziapp();
 		$html->load($content);
 
 		// Handle Audio
@@ -421,7 +399,7 @@ class WiziappContentHandler {
 		$this->_handle_video($html, $post->ID);
 		WiziappProfiler::getInstance()->write("Done Getting the Video elements code for post {$post->ID}", "WiziappContentHandler.convert_content");
 
-		// Reload DOM tree - Unfortunately, simple_html_dom doesn't update the DOM tree in response to changes
+		// Reload DOM tree - Unfortunately, simple_html_dom_wiziapp doesn't update the DOM tree in response to changes
 		$content = $html->save();
 		$html->clear();
 		$html->load($content);
@@ -707,7 +685,7 @@ class WiziappContentHandler {
 			}
 		}
 
-		// Reload DOM tree - Unfortunately, simple_html_dom doesn't update the DOM tree in response to changes
+		// Reload DOM tree - Unfortunately, simple_html_dom_wiziapp doesn't update the DOM tree in response to changes
 		$content = $html->save();
 		$html->clear();
 		$html->load($content);
@@ -872,10 +850,6 @@ class WiziappContentHandler {
 		return $data1;
 	}
 
-	function do_head_section() {
-		// Add our style sheets - no need anymore, or is there a need?
-	}
-
 	function do_admin_head_section() {
 		$dir = realpath($this->_get_plugin_dir());
 		$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $dir);
@@ -993,9 +967,7 @@ class WiziappContentHandler {
 		$this->detectAccess();
 
 		if ($this->inApp || $this->mobile) {
-			$dir = realpath($this->_get_plugin_dir());
-			$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $dir) . "/themes";
-			$url = str_replace(DIRECTORY_SEPARATOR, '/', $url);
+			$url = WP_PLUGIN_URL.'/'.dirname(WP_WIZIAPP_BASE) . '/themes';
 		}
 
 		return $url;
@@ -1003,7 +975,7 @@ class WiziappContentHandler {
 
 	public function registerWebAppScripts() {
 		if ( $this->mobile ) {
-			$pluginUrl = str_replace(get_bloginfo('url'), '', WP_PLUGIN_URL).'/'.dirname(WP_WIZIAPP_BASE);
+			$pluginUrl = WP_PLUGIN_URL.'/'.dirname(WP_WIZIAPP_BASE);
 			$pluginUrl .= '/themes/webapp';
 
 			wp_register_script('scrollview',
@@ -1041,43 +1013,55 @@ class WiziappContentHandler {
 	}
 
 	public function registerPluginScripts() {
-		if ($this->inApp || $this->mobile) {
-			$pluginUrl = str_replace(get_bloginfo('url'), '', WP_PLUGIN_URL).'/'.dirname(WP_WIZIAPP_BASE);
-			$pluginUrl .= '/themes/webapp';
-
-			wp_register_script('jquery_mobile',
-				$pluginUrl.'/scripts/jquery.mobile-1.1.1.js',
-				array('jquery'),
-				WIZIAPP_P_VERSION, FALSE );
-
-			wp_register_script('jquery_easing',
-				$pluginUrl.'/scripts/jquery.easing.1.3.js',
-				array('jquery'),
-				WIZIAPP_P_VERSION, FALSE );
-
-			wp_register_script('jquery_mobile_scrollview',
-				$pluginUrl.'/scripts/jquery.mobile.scrollview.js',
-				array('jquery_mobile','jquery_easing'),
-				WIZIAPP_P_VERSION, FALSE );
-
-			wp_register_script('jquery_mousewheel',
-				$pluginUrl.'/scripts/jquery.mousewheel.min.js',
-				array('jquery'),
-				WIZIAPP_P_VERSION, FALSE );
-
-			wp_register_script('wiziapp_helper_object',
-				$pluginUrl . '/scripts/wiziapp.js',
-				array('jquery', 'jquery_mobile'),
-				WIZIAPP_P_VERSION, FALSE );
-
-			wp_enqueue_script('jquery');
-			wp_enqueue_script('jquery_easing');
-			wp_enqueue_script('jquery_mousewheel');
-			wp_enqueue_script('jquery_mobile');
-			wp_enqueue_script('jquery_mobile_scrollview');
-			wp_enqueue_script('wiziapp_helper_object');
+		if ( ! $this->inApp && ! $this->mobile) {
+			return;
 		}
 
+		$pluginUrl = WP_PLUGIN_URL.'/'.dirname(WP_WIZIAPP_BASE);
+		$pluginUrl .= '/themes/webapp';
+
+		wp_register_script('jquery_mobile',
+			$pluginUrl.'/scripts/jquery.mobile-1.1.1.js',
+			array('jquery'),
+			WIZIAPP_P_VERSION, FALSE );
+
+		wp_register_script('jquery_easing',
+			$pluginUrl.'/scripts/jquery.easing.1.3.js',
+			array('jquery'),
+			WIZIAPP_P_VERSION, FALSE );
+
+		wp_register_script('jquery_mobile_scrollview',
+			$pluginUrl.'/scripts/jquery.mobile.scrollview.js',
+			array('jquery_mobile','jquery_easing'),
+			WIZIAPP_P_VERSION, FALSE );
+
+		wp_register_script('jquery_mousewheel',
+			$pluginUrl.'/scripts/jquery.mousewheel.min.js',
+			array('jquery'),
+			WIZIAPP_P_VERSION, FALSE );
+
+		wp_enqueue_script('jquery');
+		wp_enqueue_script('jquery_easing');
+		wp_enqueue_script('jquery_mousewheel');
+		wp_enqueue_script('jquery_mobile');
+		wp_enqueue_script('jquery_mobile_scrollview');
+	}
+
+	function do_head_section() {
+		wp_enqueue_script('jquery');
+
+		wp_enqueue_script(
+			'wiziapp_helper_object',
+			WP_PLUGIN_URL.'/'.dirname(WP_WIZIAPP_BASE).'/themes/webapp/scripts/wiziapp.js',
+			array('jquery'),
+			WIZIAPP_P_VERSION
+		);
+
+		wp_localize_script(
+			'wiziapp_helper_object',
+			'wiziapp_name_space',
+			array( 'ajaxurl' => admin_url('admin-ajax.php'), 'home_url' => home_url(), )
+		);
 	}
 
 	function _get_plugin_dir() {
@@ -1104,10 +1088,11 @@ class WiziappContentHandler {
 	}
 
 	private function _desktop_site_mode() {
-		$is_started_already = session_id();
 		$is_desktop_site_mode = FALSE;
 
-		session_start();
+		if ( session_id() == '' ) {
+			session_start();
+		}
 
 		if ( isset($_GET['setsession']) && $_GET['setsession'] === 'desktopsite' ) {
 			$_SESSION['output_mode'] = 'desktop_site';

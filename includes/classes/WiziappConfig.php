@@ -21,7 +21,7 @@
 * @property string  $app_name
 * @property string  $version
 * @property string  $appstore_url
-* @property string  playstore_url
+* @property string  $playstore_url
 * @property boolean $app_live
 * @property integer $appstore_url_timeout
 * @property boolean $allow_grouped_lists
@@ -42,6 +42,8 @@
 * @property boolean $show_email_verified_msg
 * @property integer $last_recorded_save
 * @property boolean $webapp_installed
+* @property boolean $webapp_active
+* @property boolean $skip_reload_webapp
 * @property string  $wiziapp_admin_messages_subject
 * @property string  $wiziapp_admin_messages_message
 * @property integer $thumb_min_size
@@ -62,7 +64,7 @@ class WiziappConfig implements WiziappIInstallable{
 
 	private $name = 'wiziapp_settings';
 
-	private $internalVersion =  61;
+	private $internalVersion =  63;
 
 	private static $_instance = null;
 
@@ -86,7 +88,7 @@ class WiziappConfig implements WiziappIInstallable{
 		return self::$_instance;
 	}
 
-	private function  __clone() {
+	private function __clone() {
 		// Prevent cloning
 	}
 
@@ -105,7 +107,7 @@ class WiziappConfig implements WiziappIInstallable{
 		// Add here the keys to reset to the default value;
 		$resetOptions = array();
 		// Add here the keys add with the default value, if they don't already exists;
-		$addOptions = array('playstore_url',);
+		$addOptions = array( 'webapp_active', 'webapp_installed', 'playstore_url', 'skip_reload_webapp', );
 		// Add here the keys to remove from the options array;
 		$removeOptions = array();
 
@@ -171,7 +173,7 @@ class WiziappConfig implements WiziappIInstallable{
 	}
 
 	private function save() {
-		return update_option($this->name, $this->options, '', 'no');
+		return update_option($this->name, $this->options);
 	}
 
 	public function __get($option) {
@@ -187,7 +189,7 @@ class WiziappConfig implements WiziappIInstallable{
 	public function saveUpdate($option, $value) {
 		$saved = FALSE;
 
-		if ( isset($this->options[$option]) ) {
+		if ( isset($this->options[$option]) || ( in_array( $option, array('appstore_url', 'playstore_url',) ) && array_key_exists($option, $this->options) ) ) {
 			$this->options[$option] = $value;
 			$this->save();
 			// If the value is the same it will not be updated but thats still ok.
@@ -198,7 +200,7 @@ class WiziappConfig implements WiziappIInstallable{
 	}
 
 	public function __isset($option) {
-		return isset($this->options[$option]);
+		return isset($this->options[$option]) || ( in_array( $option, array('appstore_url', 'playstore_url',) ) && array_key_exists($option, $this->options) );
 	}
 
 	public function __set($option, $value) {
@@ -405,6 +407,8 @@ class WiziappConfig implements WiziappIInstallable{
 
 			// Webapp
 			'webapp_installed' => FALSE,
+			'webapp_active' => TRUE,
+			'skip_reload_webapp' => FALSE,
 		);
 
 		return array_merge($settings, $envSettings);

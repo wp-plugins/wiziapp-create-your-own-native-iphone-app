@@ -78,7 +78,7 @@ class WiziappCommentCellItem extends WiziappLayoutComponent{
 			return;
 		}
 
-		$inner_comments_url = urldecode( str_ireplace( 'nav://comments/', '', $this->attributes['actionURL'] ) ).'&wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html';
+		$inner_comments_url = urldecode( str_ireplace( 'nav://comments/', '', $this->attributes['actionURL'] ) ).WiziappLinks::getAppend();
 
 		ob_start();
 		?>
@@ -127,7 +127,7 @@ class WiziappCommentCellItem extends WiziappLayoutComponent{
 				<textarea cols="40" rows="8" id="comment_reply_content" placeholder="Type your Comment here" aria-required="true"></textarea>
 			</div>
 
-			<input type="hidden" id="comment_form_action" value="<?php echo site_url('/wp-comments-post.php?wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html'); ?>" />
+			<input type="hidden" id="comment_form_action" value="<?php echo site_url('/wp-comments-post.php'.WiziappLinks::getAppend('?')); ?>" />
 			<input type="hidden" id="comment_post_ID" value="<?php echo $post_id; ?>" />
 			<?php do_action( 'comment_form', $post_id ); ?>
 

@@ -108,7 +108,7 @@ class WiziappTabbarBuilder{
 
 			$screenURL = $tab->rootScreenURL;
 			// Add the webapp needed qs params
-			$screenURL .= urlencode('&wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html');
+			$screenURL .= urlencode(WiziappLinks::getAppend());
 			if ( $tab->type === 'favorites') {
 				$screenURL = '#'.$tab->type;
 			}
@@ -198,7 +198,7 @@ class WiziappTabbarBuilder{
 			}
 
 			// Add the webapp needed qs params
-			$screenURL .= '&wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html&back=0';
+			$screenURL .= WiziappLinks::getAppend().'&back=0';
 			if ( $tab->type === 'favorites') {
 				$screenURL = '#'.$tab->type;
 			}
@@ -243,7 +243,7 @@ class WiziappTabbarBuilder{
 				$screenURL = urldecode($screenParams[1]);
 
 				// Add the webapp needed qs params
-				$screenURL .= '&wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html&back=0';
+				$screenURL .= WiziappLinks::getAppend().'&back=0';
 				if ( $tab->type === 'favorites') {
 					$screenURL = '#'.$tab->type;
 				}
@@ -258,7 +258,7 @@ class WiziappTabbarBuilder{
 			$screenURL = urldecode($screenParams[1]);
 
 			// Add the webapp needed qs params
-			$screenURL .= '&wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html&back=0';
+			$screenURL .= WiziappLinks::getAppend().'&back=0';
 			if ( $tab->type === 'favorites') {
 				$screenURL = '#'.$tab->type;
 			}
@@ -354,7 +354,12 @@ class WiziappTabbarBuilder{
 		$next_post_url = ($this->postNext === FALSE)?WiziappLinks::adjacent_post_url(FALSE, '', FALSE):$this->postNext;
 		$button_right = ( $next_post_url === '' ) ? 'right_disabled' : 'right_enabled';
 
-		$comments_path = '?wiziapp/content/list/post/'.$post->ID.'/comments&wizi_ver='.WIZIAPP_P_VERSION.'&ap=1&output=html';
+		$url_add = '';
+		if (isset($_GET['androidapp']) && $_GET['androidapp'] === 1) {
+			$url_add .= '&androidapp=1';
+		}
+
+		$comments_path = '?wiziapp/content/list/post/'.$post->ID.'/comments'.WiziappLinks::getAppend();
 		?>
 		<div data-id="single-tabbar" data-role="footer" class="nav-tabbar" data-position="fixed" data-tap-toggle="false">
 			<div data-role="navbar" class="webview_bar">
@@ -386,30 +391,7 @@ class WiziappTabbarBuilder{
 	}
 
 	public function getBackButton($selectedURL = false){
-		if ($selectedURL === false){
-			$selectedURL = $_SERVER['REQUEST_URI'];
-		}
-		$selectedTab = false;
-		$selectedTabIndex = 0;
-		for ($t = 0; $t < count($this->tabs); ++$t){
-			$tab = $this->tabs[$t];
-
-			if ($tab->type === $selectedURL){
-				$selectedTab = $tab->id;
-				$selectedTabIndex = $t;
-				break;
-			}
-			$url = explode('://', $tab->rootScreenURL, 2);
-			$url = isset($url[1])?explode('/', $url[1], 2):'';
-			$url = isset($url[1])?explode('?', urldecode($url[1]), 2):'';
-			$url = isset($url[1])?$url[1]:'';
-			// FIXME: Go by longest match?
-			if ($url != '' && strpos($selectedURL, $url) !== false){
-				$selectedTab = $tab->id;
-				$selectedTabIndex = $t;
-				break;
-			}
-		}
+		$selectedTab = $this->getTabFromURL($selectedURL);
 		$end = $this->gotMorePage() ? 4 : count($this->tabs);
 		if ( 'moreScreen' === $selectedURL ){
 			return false;
@@ -424,5 +406,30 @@ class WiziappTabbarBuilder{
 			}
 		}
 		return false;
+	}
+
+	public function getTabFromURL($selectedURL = false){
+		if ($selectedURL === false){
+			$selectedURL = $_SERVER['REQUEST_URI'];
+		}
+		$selectedTab = false;
+		for ($t = 0; $t < count($this->tabs); ++$t){
+			$tab = $this->tabs[$t];
+
+			if ($tab->type === $selectedURL){
+				$selectedTab = $tab->id;
+				break;
+			}
+			$url = explode('://', $tab->rootScreenURL, 2);
+			$url = isset($url[1])?explode('/', $url[1], 2):'';
+			$url = isset($url[1])?explode('?', urldecode($url[1]), 2):'';
+			$url = isset($url[1])?$url[1]:'';
+			// FIXME: Go by longest match?
+			if ($url != '' && strpos($selectedURL, $url) !== false){
+				$selectedTab = $tab->id;
+				break;
+			}
+		}
+		return $selectedTab;
 	}
 }

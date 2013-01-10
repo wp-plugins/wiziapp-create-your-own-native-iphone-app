@@ -104,15 +104,15 @@ function wiziapp_attach_hooks(){
 	add_action('wp_ajax_wiziapp_report_issue',			array('WiziappPostInstallDisplay', 'reportIssue'));
 
     // Web App
-	add_action('wp_ajax_wiziapp_update_handshake',		array('WiziappWebappDisplay', 'updateHandshake'));
-	add_action('wp_ajax_wiziapp_update_config',			array('WiziappWebappDisplay', 'updateConfig'));
-	add_action('wp_ajax_wiziapp_update_display',		array('WiziappWebappDisplay', 'updateDisplay'));
-    add_action('wp_ajax_wiziapp_update_effects',		array('WiziappWebappDisplay', 'updateEffects'));
-	add_action('wp_ajax_wiziapp_update_images',			array('WiziappWebappDisplay', 'updateImages'));
-    add_action('wp_ajax_wiziapp_update_icons',			array('WiziappWebappDisplay', 'updateIcons'));
-    add_action('wp_ajax_wiziapp_update_splash',			array('WiziappWebappDisplay', 'updateSplash'));
-    add_action('wp_ajax_wiziapp_update_manifest',		array('WiziappWebappDisplay', 'updateManifest'));
-    add_action('wp_ajax_wiziapp_install_webapp_finish', array('WiziappWebappDisplay', 'installFinish'));
+    $webapp_display = new WiziappWebappDisplay();
+	add_action('wp_ajax_wiziapp_update_handshake',		array(&$webapp_display, 'updateHandshake'));
+	add_action('wp_ajax_wiziapp_update_config',			array(&$webapp_display, 'updateConfig'));
+	add_action('wp_ajax_wiziapp_update_display',		array(&$webapp_display, 'updateDisplay'));
+    add_action('wp_ajax_wiziapp_update_effects',		array(&$webapp_display, 'updateEffects'));
+	add_action('wp_ajax_wiziapp_update_images',			array(&$webapp_display, 'updateImages'));
+    add_action('wp_ajax_wiziapp_update_icons',			array(&$webapp_display, 'updateIcons'));
+    add_action('wp_ajax_wiziapp_update_splash',			array(&$webapp_display, 'updateSplash'));
+    add_action('wp_ajax_wiziapp_install_webapp_finish', array(&$webapp_display, 'installFinish'));
 
 	// Upgrade
 	add_action('wp_ajax_wiziapp_upgrade_database', 		array('WiziappUpgradeDisplay', 'upgradeDatabase'));
@@ -123,6 +123,11 @@ function wiziapp_attach_hooks(){
 	add_action('wp_ajax_wiziapp_hide_verify_msg', 		   array('WiziappAdminDisplay', 'hideVerifyMsg'));
 	add_action('wp_ajax_wiziapp_hide_upgrade_msg',		   array('WiziappAdminDisplay', 'hideUpgradeMsg'));
 	add_action('wp_ajax_wiziapp_hide_display_message_msg', array('WiziappAdminDisplay', 'hideDisplayMessageMsg'));
+	add_action('wp_ajax_wiziapp_plugin_compatibility',	array(WiziappPluginCompatibility::getInstance(), 'configure'));
+
+	// Get info about the Intro Page
+	add_action('wp_ajax_intro_page_info', 		 array('WiziappIntroPageScreen', 'get_intro_page_info',));
+	add_action('wp_ajax_nopriv_intro_page_info', array('WiziappIntroPageScreen', 'get_intro_page_info',));
 
 	// Wizard
 	add_action('wp_ajax_wiziapp_register_license', array('WiziappLicenseUpdater', 'register'));

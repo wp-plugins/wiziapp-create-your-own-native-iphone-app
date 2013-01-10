@@ -87,12 +87,10 @@ class WiziappLoader
 		// Needs to load every time
 		$ch = WiziappContentHandler::getInstance();
 
-		// if (strpos($_SERVER['QUERY_STRING'], 'wiziapp/') !== FALSE){
-
-		// Start the request handler so it will register it's events.
-		$rh = new WiziappRequestHandler(); // Needs to load for the webservices
-
-		// }
+		if (strpos($_SERVER['QUERY_STRING'], 'wiziapp/') !== FALSE){
+			// Start the request handler so it will register it's events.
+			$rh = new WiziappRequestHandler(); // Needs to load for the webservices
+		}
 	}
 
 	public function loadClass($className){
@@ -142,7 +140,6 @@ class WiziappLoader
 		return $this->_getFromVersionConfig('functions', $func);
 	}
 }
-
 
 global $wiziappLoader;
 $wiziappLoader = new WiziappLoader();

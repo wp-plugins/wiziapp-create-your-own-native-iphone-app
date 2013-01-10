@@ -211,6 +211,15 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 	top: 0;
 	z-index: 2;
 }
+.navigation_back_button_opener{
+	background: url(images/back-but-opener.png) no-repeat top left;
+	left: 8px;
+	position: absolute;
+	height: 30px;
+	width: 5px;
+	top: 0;
+	z-index: 2;
+}
 #moreScreen .ui-content li:hover{
 	background: rgb(84,176,247) repeat;
 	background-image: -webkit-gradient(
@@ -282,8 +291,7 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 .featured_post{
 	border: none !important;
 }
-.featured_post_image_webapp{
-	height: 162px;
+.webapp_image_overriding{
 	position: relative !important;
 	text-align: center;
 }
@@ -841,6 +849,10 @@ div.comment_reply_form input.ui-input-text{
 	height: 30px;
 	background-image: url("images/add_comment.png");
 	cursor: pointer;
+}
+#webapp_send_comments_form{
+	background: none !important;
+	display: none;
 }
 li.comment_welcome_main div{
 	background-image: url("images/welcome_to_comments.png");

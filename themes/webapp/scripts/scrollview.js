@@ -23,7 +23,7 @@ function resizePageContentHeight(page) {
 	});
 }
 
-jQuery(":jqmData(role='page')" ).live( "pageshow", function(event) {
+jQuery(document).delegate(":jqmData(role='page')", "pageshow", function(event) {
 	var $page = jQuery( this );
 
 	// For the demos that use this script, we want the content area of each

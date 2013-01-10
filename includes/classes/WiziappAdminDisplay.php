@@ -18,6 +18,9 @@ class WiziappAdminDisplay {
 		if (isset($_GET['wiziapp_configured']) && $_GET['wiziapp_configured'] == 1){
 			$configured = TRUE;
 		}
+		if ( isset($_GET['skip_reload_webapp']) && $_GET['skip_reload_webapp'] == 1 ){
+			WiziappConfig::getInstance()->skip_reload_webapp = TRUE;
+		}
 
 		$iconPath = WiziappConfig::getInstance()->getCdnServer() . "/images/cms/WiziSmallIcon.png";
 
@@ -29,6 +32,7 @@ class WiziappAdminDisplay {
 			//add_action('admin_notices', array('WiziappAdminDisplay', 'versionCheck'));
 			add_action('admin_notices', array('WiziappAdminDisplay', 'upgradeCheck'));
 			add_action('admin_notices', array('WiziappAdminDisplay', 'displayMessageCheck'));
+			add_action('admin_notices', array(WiziappPluginCompatibility::getInstance(), 'notices'));
 			// Add CSS and Javascript for the Wiziapp Activate notice on the Admin panel
 			add_action( 'admin_enqueue_scripts', array('WiziappAdminDisplay', 'styles_javascripts' ) );
 
@@ -43,7 +47,7 @@ class WiziappAdminDisplay {
 				else {
 					add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappGeneratorDisplay', 'display'), $iconPath);
 				}
-			} elseif (!WiziappConfig::getInstance()->webapp_installed){
+			} elseif ( ! WiziappConfig::getInstance()->webapp_installed && ! WiziappConfig::getInstance()->skip_reload_webapp ){
 				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappWebappDisplay', 'display'), $iconPath);
 			} else {
 				// We are installed and configured
@@ -130,7 +134,7 @@ class WiziappAdminDisplay {
 			$httpProtocol = 'https';
 			if ( $includeSimOverlay ){
 			?>
-			<script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
+			<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
 			<style>
 				#wpadminbar{
 					z-index: 99;
@@ -535,13 +539,14 @@ class WiziappAdminDisplay {
 		$page = (isset($_GET['page'])) ? $_GET['page'] : '';
 
 		if ( $installer->needUpgrade() && $page != 'wiziapp' ){
-			$wiziapp_admin_page = get_admin_url().'admin.php?page=wiziapp';
 		?>
-		<script type="text/javascript">
-			/* <![CDATA[ */
-			window.location = '<?php echo $wiziapp_admin_page; ?>';
-			/* ]]> */
-		</script>
+		<div id="wiziapp_internal_upgrade_needed_message" class="updated fade">
+			<p style="line-height: 150%">
+				WiziApp needs one more step to finish the upgrading process, click <a href="admin.php?page=wiziapp">here</a> to upgrade your database.
+				<br />
+				Make sure to update as soon as you can to enjoy the security, bug fixes and new features this update contain.
+			</p>
+		</div>
 		<?php
 		}
 	}

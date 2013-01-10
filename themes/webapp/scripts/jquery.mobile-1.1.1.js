@@ -2558,7 +2558,7 @@ $.mobile.getMaxScrollForTransition = $.mobile.getMaxScrollForTransition || defau
 			//could be mailto, etc
 			isExternal: function( url ) {
 				var u = path.parseUrl( url );
-				return u.protocol && u.domain !== documentUrl.domain ? true : false;
+				return u.protocol && u.domain.toLowerCase() !== documentUrl.domain.toLowerCase() ? true : false;
 			},
 
 			hasProtocol: function( url ) {
@@ -3153,7 +3153,7 @@ $.mobile.getMaxScrollForTransition = $.mobile.getMaxScrollForTransition || defau
 							// XXX_jblas: We need to fix this so that it removes the document
 							//            base URL, and then prepends with the new page URL.
 							//if full path exists and is same, chop it - helps IE out
-							thisUrl = thisUrl.replace( location.protocol + '//' + location.host + location.pathname, '' );
+//							thisUrl = thisUrl.replace( location.protocol + '//' + location.host + location.pathname, '' );
 
 							if( !/^(\w+:|#|\/)/.test( thisUrl ) ) {
 								$( this ).attr( thisAttr, newPath + thisUrl );

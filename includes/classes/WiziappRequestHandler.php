@@ -38,11 +38,6 @@ class WiziappRequestHandler {
 	* @params WP object  the main wordpress object is passed by reference
 	*/
 	function handleRequest($wp){
-		if ( WiziappContentHandler::getInstance()->is_show_download() ) {
-			$this->_routeRequest('wiziapp/content/downloadapp');
-			exit;
-		}
-
 		$request = $wp->request;
 		if (empty($request)){
 			// doesn't rewrite the requests, try to get the query string
@@ -221,6 +216,9 @@ class WiziappRequestHandler {
 			$this->runService('Comment', 'add', $request);
 		} elseif ($service == 'keywords') {
 			$this->runScreenBy('Search', 'Keywords', null);
+		} elseif($service == "intropage"){
+			$this->runScreen('IntroPage');
+			exit;
 		} elseif ($service == 'system') {
 			if ($action == 'screens'){
 				$this->runService('System', 'updateScreenConfiguration');
@@ -276,8 +274,6 @@ class WiziappRequestHandler {
 				$this->runScreenBy('System', 'About', null);
 			} elseif ( $type == 'video' ){
 				$this->runScreenBy('Video', 'Id', $req[3]);
-			} elseif($type == "downloadapp"){
-				$this->runScreen('DownloadApp');
 			} elseif ($type == "list"){
 				$sub_type = $req[3];
 				WiziappLog::getInstance()->write('INFO', "Listing... The sub type is: {$sub_type}",

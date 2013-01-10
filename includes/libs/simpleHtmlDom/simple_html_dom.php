@@ -35,74 +35,75 @@
  * @author Rus Carroll
  * @version 1.5 ($Rev: 196 $)
  * @package PlaceLocalInclude
- * @subpackage simple_html_dom
+ * @subpackage simple_html_dom_wiziapp
  */
 
 /**
  * All of the Defines for the classes below.
  * @author S.C. Chen <me578022@gmail.com>
  */
-define('HDOM_TYPE_ELEMENT', 1);
-define('HDOM_TYPE_COMMENT', 2);
-define('HDOM_TYPE_TEXT',    3);
-define('HDOM_TYPE_ENDTAG',  4);
-define('HDOM_TYPE_ROOT',    5);
-define('HDOM_TYPE_UNKNOWN', 6);
-define('HDOM_QUOTE_DOUBLE', 0);
-define('HDOM_QUOTE_SINGLE', 1);
-define('HDOM_QUOTE_NO',     3);
-define('HDOM_INFO_BEGIN',   0);
-define('HDOM_INFO_END',     1);
-define('HDOM_INFO_QUOTE',   2);
-define('HDOM_INFO_SPACE',   3);
-define('HDOM_INFO_TEXT',    4);
-define('HDOM_INFO_INNER',   5);
-define('HDOM_INFO_OUTER',   6);
-define('HDOM_INFO_ENDSPACE',7);
-define('DEFAULT_TARGET_CHARSET', 'UTF-8');
-define('DEFAULT_BR_TEXT', "\r\n");
-define('DEFAULT_SPAN_TEXT', " ");
-define('MAX_FILE_SIZE', 600000);
+define('HDOM_TYPE_ELEMENT_WIZIAPP', 1);
+define('HDOM_TYPE_COMMENT_WIZIAPP', 2);
+define('HDOM_TYPE_TEXT_WIZIAPP',    3);
+define('HDOM_TYPE_ENDTAG_WIZIAPP',  4);
+define('HDOM_TYPE_ROOT_WIZIAPP',    5);
+define('HDOM_TYPE_UNKNOWN_WIZIAPP', 6);
+define('HDOM_QUOTE_DOUBLE_WIZIAPP', 0);
+define('HDOM_QUOTE_SINGLE_WIZIAPP', 1);
+define('HDOM_QUOTE_NO_WIZIAPP',     3);
+define('HDOM_INFO_BEGIN_WIZIAPP',   0);
+define('HDOM_INFO_END_WIZIAPP',     1);
+define('HDOM_INFO_QUOTE_WIZIAPP',   2);
+define('HDOM_INFO_SPACE_WIZIAPP',   3);
+define('HDOM_INFO_TEXT_WIZIAPP',    4);
+define('HDOM_INFO_INNER_WIZIAPP',   5);
+define('HDOM_INFO_OUTER_WIZIAPP',   6);
+define('HDOM_INFO_ENDSPACE_WIZIAPP',7);
+define('DEFAULT_TARGET_CHARSET_WIZIAPP', 'UTF-8');
+define('DEFAULT_BR_TEXT_WIZIAPP', "\r\n");
+define('DEFAULT_SPAN_TEXT_WIZIAPP', " ");
+define('MAX_FILE_SIZE_WIZIAPP', 600000);
 // helper functions
 // -----------------------------------------------------------------------------
 // get html dom from file
 // $maxlen is defined in the code as PHP_STREAM_COPY_ALL which is defined as -1.
-function file_get_html($url, $use_include_path = false, $context=null, $offset = -1, $maxLen=-1, $lowercase = true, $forceTagsClosed=true, $target_charset = DEFAULT_TARGET_CHARSET, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT, $defaultSpanText=DEFAULT_SPAN_TEXT)
+/*
+function file_get_html($url, $use_include_path = false, $context=null, $offset = -1, $maxLen=-1, $lowercase = true, $forceTagsClosed=true, $target_charset = DEFAULT_TARGET_CHARSET_WIZIAPP, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT_WIZIAPP, $defaultSpanText=DEFAULT_SPAN_TEXT_WIZIAPP)
 {
-    // We DO force the tags to be terminated.
-    $dom = new simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
-    // For sourceforge users: uncomment the next line and comment the retreive_url_contents line 2 lines down if it is not already done.
-    $contents = file_get_contents($url, $use_include_path, $context, $offset);
-    // Paperg - use our own mechanism for getting the contents as we want to control the timeout.
-    //$contents = retrieve_url_contents($url);
-    if (empty($contents) || strlen($contents) > MAX_FILE_SIZE)
-    {
-        return false;
-    }
-    // The second parameter can force the selectors to all be lowercase.
-    $dom->load($contents, $lowercase, $stripRN);
-    return $dom;
+// We DO force the tags to be terminated.
+$dom = new simple_html_dom_wiziapp(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
+// For sourceforge users: uncomment the next line and comment the retreive_url_contents line 2 lines down if it is not already done.
+$contents = file_get_contents($url, $use_include_path, $context, $offset);
+// Paperg - use our own mechanism for getting the contents as we want to control the timeout.
+//$contents = retrieve_url_contents($url);
+if (empty($contents) || strlen($contents) > MAX_FILE_SIZE_WIZIAPP)
+{
+return false;
+}
+// The second parameter can force the selectors to all be lowercase.
+$dom->load($contents, $lowercase, $stripRN);
+return $dom;
 }
 
 // get html dom from string
-function str_get_html($str, $lowercase=true, $forceTagsClosed=true, $target_charset = DEFAULT_TARGET_CHARSET, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT, $defaultSpanText=DEFAULT_SPAN_TEXT)
+function str_get_html($str, $lowercase=true, $forceTagsClosed=true, $target_charset = DEFAULT_TARGET_CHARSET_WIZIAPP, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT_WIZIAPP, $defaultSpanText=DEFAULT_SPAN_TEXT_WIZIAPP)
 {
-    $dom = new simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
-    if (empty($str) || strlen($str) > MAX_FILE_SIZE)
-    {
-        $dom->clear();
-        return false;
-    }
-    $dom->load($str, $lowercase, $stripRN);
-    return $dom;
+$dom = new simple_html_dom_wiziapp(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
+if (empty($str) || strlen($str) > MAX_FILE_SIZE_WIZIAPP)
+{
+$dom->clear();
+return false;
+}
+$dom->load($str, $lowercase, $stripRN);
+return $dom;
 }
 
 // dump html dom tree
 function dump_html_tree($node, $show_attr=true, $deep=0)
 {
-    $node->dump($node);
+$node->dump($node);
 }
-
+*/
 
 /**
  * simple html dom node
@@ -111,9 +112,9 @@ function dump_html_tree($node, $show_attr=true, $deep=0)
  *
  * @package PlaceLocalInclude
  */
-class simple_html_dom_node
+class simple_html_dom_node_wiziapp
 {
-    public $nodetype = HDOM_TYPE_TEXT;
+    public $nodetype = HDOM_TYPE_TEXT_WIZIAPP;
     public $tag = 'text';
     public $attr = array();
     public $children = array();
@@ -214,9 +215,9 @@ class simple_html_dom_node
         }
 
         $string .= " HDOM_INNER_INFO: '";
-        if (isset($node->_[HDOM_INFO_INNER]))
+        if (isset($node->_[HDOM_INFO_INNER_WIZIAPP]))
         {
-            $string .= $node->_[HDOM_INFO_INNER] . "'";
+            $string .= $node->_[HDOM_INFO_INNER_WIZIAPP] . "'";
         }
         else
         {
@@ -350,8 +351,8 @@ class simple_html_dom_node
     // get dom node's inner html
     function innertext()
     {
-        if (isset($this->_[HDOM_INFO_INNER])) return $this->_[HDOM_INFO_INNER];
-        if (isset($this->_[HDOM_INFO_TEXT])) return $this->dom->restore_noise($this->_[HDOM_INFO_TEXT]);
+        if (isset($this->_[HDOM_INFO_INNER_WIZIAPP])) return $this->_[HDOM_INFO_INNER_WIZIAPP];
+        if (isset($this->_[HDOM_INFO_TEXT_WIZIAPP])) return $this->dom->restore_noise($this->_[HDOM_INFO_TEXT_WIZIAPP]);
 
         $ret = '';
         foreach ($this->nodes as $n)
@@ -384,24 +385,24 @@ class simple_html_dom_node
             call_user_func_array($this->dom->callback, array($this));
         }
 
-        if (isset($this->_[HDOM_INFO_OUTER])) return $this->_[HDOM_INFO_OUTER];
-        if (isset($this->_[HDOM_INFO_TEXT])) return $this->dom->restore_noise($this->_[HDOM_INFO_TEXT]);
+        if (isset($this->_[HDOM_INFO_OUTER_WIZIAPP])) return $this->_[HDOM_INFO_OUTER_WIZIAPP];
+        if (isset($this->_[HDOM_INFO_TEXT_WIZIAPP])) return $this->dom->restore_noise($this->_[HDOM_INFO_TEXT_WIZIAPP]);
 
         // render begin tag
-        if ($this->dom && $this->dom->nodes[$this->_[HDOM_INFO_BEGIN]])
+        if ($this->dom && $this->dom->nodes[$this->_[HDOM_INFO_BEGIN_WIZIAPP]])
         {
-            $ret = $this->dom->nodes[$this->_[HDOM_INFO_BEGIN]]->makeup();
+            $ret = $this->dom->nodes[$this->_[HDOM_INFO_BEGIN_WIZIAPP]]->makeup();
         } else {
             $ret = "";
         }
 
         // render inner text
-        if (isset($this->_[HDOM_INFO_INNER]))
+        if (isset($this->_[HDOM_INFO_INNER_WIZIAPP]))
         {
             // If it's a br tag...  don't return the HDOM_INNER_INFO that we may or may not have added.
             if ($this->tag != "br")
             {
-                $ret .= $this->_[HDOM_INFO_INNER];
+                $ret .= $this->_[HDOM_INFO_INNER_WIZIAPP];
             }
         } else {
             if ($this->nodes)
@@ -414,7 +415,7 @@ class simple_html_dom_node
         }
 
         // render end tag
-        if (isset($this->_[HDOM_INFO_END]) && $this->_[HDOM_INFO_END]!=0)
+        if (isset($this->_[HDOM_INFO_END_WIZIAPP]) && $this->_[HDOM_INFO_END_WIZIAPP]!=0)
             $ret .= '</'.$this->tag.'>';
         return $ret;
     }
@@ -422,18 +423,18 @@ class simple_html_dom_node
     // get dom node's plain text
     function text()
     {
-        if (isset($this->_[HDOM_INFO_INNER])) return $this->_[HDOM_INFO_INNER];
+        if (isset($this->_[HDOM_INFO_INNER_WIZIAPP])) return $this->_[HDOM_INFO_INNER_WIZIAPP];
         switch ($this->nodetype)
         {
-            case HDOM_TYPE_TEXT: return $this->dom->restore_noise($this->_[HDOM_INFO_TEXT]);
-            case HDOM_TYPE_COMMENT: return '';
-            case HDOM_TYPE_UNKNOWN: return '';
+            case HDOM_TYPE_TEXT_WIZIAPP: return $this->dom->restore_noise($this->_[HDOM_INFO_TEXT_WIZIAPP]);
+            case HDOM_TYPE_COMMENT_WIZIAPP: return '';
+            case HDOM_TYPE_UNKNOWN_WIZIAPP: return '';
         }
         if (strcasecmp($this->tag, 'script')===0) return '';
         if (strcasecmp($this->tag, 'style')===0) return '';
 
         $ret = '';
-        // In rare cases, (always node type 1 or HDOM_TYPE_ELEMENT - observed for some span tags, and some p tags) $this->nodes is set to NULL.
+        // In rare cases, (always node type 1 or HDOM_TYPE_ELEMENT_WIZIAPP - observed for some span tags, and some p tags) $this->nodes is set to NULL.
         // NOTE: This indicates that there is a problem where it's set to NULL without a clear happening.
         // WHY is this happening?
         if (!is_null($this->nodes))
@@ -466,7 +467,7 @@ class simple_html_dom_node
     function makeup()
     {
         // text, comment, unknown
-        if (isset($this->_[HDOM_INFO_TEXT])) return $this->dom->restore_noise($this->_[HDOM_INFO_TEXT]);
+        if (isset($this->_[HDOM_INFO_TEXT_WIZIAPP])) return $this->dom->restore_noise($this->_[HDOM_INFO_TEXT_WIZIAPP]);
 
         $ret = '<'.$this->tag;
         $i = -1;
@@ -479,22 +480,22 @@ class simple_html_dom_node
             if ($val===null || $val===false)
                 continue;
 
-            $ret .= $this->_[HDOM_INFO_SPACE][$i][0];
+            $ret .= $this->_[HDOM_INFO_SPACE_WIZIAPP][$i][0];
             //no value attr: nowrap, checked selected...
             if ($val===true)
                 $ret .= $key;
             else {
-                switch ($this->_[HDOM_INFO_QUOTE][$i])
+                switch ($this->_[HDOM_INFO_QUOTE_WIZIAPP][$i])
                 {
-                    case HDOM_QUOTE_DOUBLE: $quote = '"'; break;
-                    case HDOM_QUOTE_SINGLE: $quote = '\''; break;
+                    case HDOM_QUOTE_DOUBLE_WIZIAPP: $quote = '"'; break;
+                    case HDOM_QUOTE_SINGLE_WIZIAPP: $quote = '\''; break;
                     default: $quote = '';
                 }
-                $ret .= $key.$this->_[HDOM_INFO_SPACE][$i][1].'='.$this->_[HDOM_INFO_SPACE][$i][2].$quote.$val.$quote;
+                $ret .= $key.$this->_[HDOM_INFO_SPACE_WIZIAPP][$i][1].'='.$this->_[HDOM_INFO_SPACE_WIZIAPP][$i][2].$quote.$val.$quote;
             }
         }
         $ret = $this->dom->restore_noise($ret);
-        return $ret . $this->_[HDOM_INFO_ENDSPACE] . '>';
+        return $ret . $this->_[HDOM_INFO_ENDSPACE_WIZIAPP] . '>';
     }
 
     // find elements by css selector
@@ -511,9 +512,9 @@ class simple_html_dom_node
             // The change on the below line was documented on the sourceforge code tracker id 2788009
             // used to be: if (($levle=count($selectors[0]))===0) return array();
             if (($levle=count($selectors[$c]))===0) return array();
-            if (!isset($this->_[HDOM_INFO_BEGIN])) return array();
+            if (!isset($this->_[HDOM_INFO_BEGIN_WIZIAPP])) return array();
 
-            $head = array($this->_[HDOM_INFO_BEGIN]=>1);
+            $head = array($this->_[HDOM_INFO_BEGIN_WIZIAPP]=>1);
 
             // handle descendant selectors, no recursive!
             for ($l=0; $l<$levle; ++$l)
@@ -565,7 +566,7 @@ class simple_html_dom_node
             {
                 if ($tag==='*' || $tag===$c->tag) {
                     if (++$count==$key) {
-                        $ret[$c->_[HDOM_INFO_BEGIN]] = 1;
+                        $ret[$c->_[HDOM_INFO_BEGIN_WIZIAPP]] = 1;
                         return;
                     }
                 }
@@ -573,17 +574,17 @@ class simple_html_dom_node
             return;
         }
 
-        $end = (!empty($this->_[HDOM_INFO_END])) ? $this->_[HDOM_INFO_END] : 0;
+        $end = (!empty($this->_[HDOM_INFO_END_WIZIAPP])) ? $this->_[HDOM_INFO_END_WIZIAPP] : 0;
         if ($end==0) {
             $parent = $this->parent;
-            while (!isset($parent->_[HDOM_INFO_END]) && $parent!==null) {
+            while (!isset($parent->_[HDOM_INFO_END_WIZIAPP]) && $parent!==null) {
                 $end -= 1;
                 $parent = $parent->parent;
             }
-            $end += $parent->_[HDOM_INFO_END];
+            $end += $parent->_[HDOM_INFO_END_WIZIAPP];
         }
 
-        for ($i=$this->_[HDOM_INFO_BEGIN]+1; $i<$end; ++$i) {
+        for ($i=$this->_[HDOM_INFO_BEGIN_WIZIAPP]+1; $i<$end; ++$i) {
             $node = $this->dom->nodes[$i];
 
             $pass = true;
@@ -733,14 +734,14 @@ class simple_html_dom_node
 
     function __set($name, $value) {
         switch ($name) {
-            case 'outertext': return $this->_[HDOM_INFO_OUTER] = $value;
+            case 'outertext': return $this->_[HDOM_INFO_OUTER_WIZIAPP] = $value;
             case 'innertext':
-                if (isset($this->_[HDOM_INFO_TEXT])) return $this->_[HDOM_INFO_TEXT] = $value;
-                return $this->_[HDOM_INFO_INNER] = $value;
+                if (isset($this->_[HDOM_INFO_TEXT_WIZIAPP])) return $this->_[HDOM_INFO_TEXT_WIZIAPP] = $value;
+                return $this->_[HDOM_INFO_INNER_WIZIAPP] = $value;
         }
         if (!isset($this->attr[$name])) {
-            $this->_[HDOM_INFO_SPACE][] = array(' ', '', '');
-            $this->_[HDOM_INFO_QUOTE][] = HDOM_QUOTE_DOUBLE;
+            $this->_[HDOM_INFO_SPACE_WIZIAPP][] = array(' ', '', '');
+            $this->_[HDOM_INFO_QUOTE_WIZIAPP][] = HDOM_QUOTE_DOUBLE_WIZIAPP;
         }
         $this->attr[$name] = $value;
     }
@@ -968,7 +969,7 @@ class simple_html_dom_node
  *
  * @package PlaceLocalInclude
  */
-class simple_html_dom
+class simple_html_dom_wiziapp
 {
     public $root = null;
     public $nodes = array();
@@ -1012,7 +1013,7 @@ class simple_html_dom
 		'option'=>array('option'=>1),
     );
 
-    function __construct($str=null, $lowercase=true, $forceTagsClosed=true, $target_charset=DEFAULT_TARGET_CHARSET, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT, $defaultSpanText=DEFAULT_SPAN_TEXT)
+    function __construct($str=null, $lowercase=true, $forceTagsClosed=true, $target_charset=DEFAULT_TARGET_CHARSET_WIZIAPP, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT_WIZIAPP, $defaultSpanText=DEFAULT_SPAN_TEXT_WIZIAPP)
     {
         if ($str)
         {
@@ -1038,7 +1039,7 @@ class simple_html_dom
     }
 
     // load html from string
-    function load($str, $lowercase=true, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT, $defaultSpanText=DEFAULT_SPAN_TEXT)
+    function load($str, $lowercase=true, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT_WIZIAPP, $defaultSpanText=DEFAULT_SPAN_TEXT_WIZIAPP)
     {
         global $debugObject;
 
@@ -1066,7 +1067,7 @@ class simple_html_dom
         // parsing
         while ($this->parse());
         // end
-        $this->root->_[HDOM_INFO_END] = $this->cursor;
+        $this->root->_[HDOM_INFO_END_WIZIAPP] = $this->cursor;
         $this->parse_charset();
 
         // make load function chainable
@@ -1131,7 +1132,7 @@ class simple_html_dom
     }
 
     // prepare HTML data and init everything
-    protected function prepare($str, $lowercase=true, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT, $defaultSpanText=DEFAULT_SPAN_TEXT)
+    protected function prepare($str, $lowercase=true, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT_WIZIAPP, $defaultSpanText=DEFAULT_SPAN_TEXT_WIZIAPP)
     {
         $this->clear();
 
@@ -1157,10 +1158,10 @@ class simple_html_dom
         $this->lowercase = $lowercase;
         $this->default_br_text = $defaultBRText;
         $this->default_span_text = $defaultSpanText;
-        $this->root = new simple_html_dom_node($this);
+        $this->root = new simple_html_dom_node_wiziapp($this);
         $this->root->tag = 'root';
-        $this->root->_[HDOM_INFO_BEGIN] = -1;
-        $this->root->nodetype = HDOM_TYPE_ROOT;
+        $this->root->_[HDOM_INFO_BEGIN_WIZIAPP] = -1;
+        $this->root->nodetype = HDOM_TYPE_ROOT_WIZIAPP;
         $this->parent = $this->root;
         if ($this->size>0) $this->char = $this->doc[0];
     }
@@ -1174,9 +1175,9 @@ class simple_html_dom
         }
 
         // text
-        $node = new simple_html_dom_node($this);
+        $node = new simple_html_dom_node_wiziapp($this);
         ++$this->cursor;
-        $node->_[HDOM_INFO_TEXT] = $s;
+        $node->_[HDOM_INFO_TEXT_WIZIAPP] = $s;
         $this->link_nodes($node, false);
         return true;
     }
@@ -1231,8 +1232,15 @@ class simple_html_dom
         if (empty($charset))
         {
             // Have php try to detect the encoding from the text given to us.
-            $charset = mb_detect_encoding($this->root->plaintext . "ascii", $encoding_list = array( "UTF-8", "CP1252" ) );
-            if (is_object($debugObject)) {$debugObject->debugLog(2, 'mb_detect found: ' . $charset);}
+			// PATCH
+			if ( ! function_exists('mb_detect_encoding')) {
+				// We're on an aged PHP version
+				$charset = false;
+			} else {
+                $charset = mb_detect_encoding($this->root->plaintext . "ascii", $encoding_list = array( "UTF-8", "CP1252" ) );
+                if (is_object($debugObject)) {$debugObject->debugLog(2, 'mb_detect found: ' . $charset);}
+			}
+			// END PATCH
 
             // and if this doesn't work...  then we need to just wrongheadedly assume it's UTF-8 so that we can move on - cause this will usually give us most of what we need...
             if ($charset === false)
@@ -1259,7 +1267,7 @@ class simple_html_dom
     {
         if ($this->char!=='<')
         {
-            $this->root->_[HDOM_INFO_END] = $this->cursor;
+            $this->root->_[HDOM_INFO_END_WIZIAPP] = $this->cursor;
             return false;
         }
         $begin_tag_pos = $this->pos;
@@ -1269,7 +1277,7 @@ class simple_html_dom
         if ($this->char==='/')
         {
             $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
-            // This represents the change in the simple_html_dom trunk from revision 180 to 181.
+            // This represents the change in the simple_html_dom_wiziapp trunk from revision 180 to 181.
             // $this->skip($this->token_blank_t);
             $this->skip($this->token_blank);
             $tag = $this->copy_until_char('>');
@@ -1285,7 +1293,7 @@ class simple_html_dom
             {
                 if (isset($this->optional_closing_tags[$parent_lower]) && isset($this->block_tags[$tag_lower]))
                 {
-                    $this->parent->_[HDOM_INFO_END] = 0;
+                    $this->parent->_[HDOM_INFO_END_WIZIAPP] = 0;
                     $org_parent = $this->parent;
 
                     while (($this->parent->parent) && strtolower($this->parent->tag)!==$tag_lower)
@@ -1294,13 +1302,13 @@ class simple_html_dom
                     if (strtolower($this->parent->tag)!==$tag_lower) {
                         $this->parent = $org_parent; // restore origonal parent
                         if ($this->parent->parent) $this->parent = $this->parent->parent;
-                        $this->parent->_[HDOM_INFO_END] = $this->cursor;
+                        $this->parent->_[HDOM_INFO_END_WIZIAPP] = $this->cursor;
                         return $this->as_text_node($tag);
                     }
                 }
                 else if (($this->parent->parent) && isset($this->block_tags[$tag_lower]))
                 {
-                    $this->parent->_[HDOM_INFO_END] = 0;
+                    $this->parent->_[HDOM_INFO_END_WIZIAPP] = 0;
                     $org_parent = $this->parent;
 
                     while (($this->parent->parent) && strtolower($this->parent->tag)!==$tag_lower)
@@ -1309,44 +1317,44 @@ class simple_html_dom
                     if (strtolower($this->parent->tag)!==$tag_lower)
                     {
                         $this->parent = $org_parent; // restore origonal parent
-                        $this->parent->_[HDOM_INFO_END] = $this->cursor;
+                        $this->parent->_[HDOM_INFO_END_WIZIAPP] = $this->cursor;
                         return $this->as_text_node($tag);
                     }
                 }
                 else if (($this->parent->parent) && strtolower($this->parent->parent->tag)===$tag_lower)
                 {
-                    $this->parent->_[HDOM_INFO_END] = 0;
+                    $this->parent->_[HDOM_INFO_END_WIZIAPP] = 0;
                     $this->parent = $this->parent->parent;
                 }
                 else
                     return $this->as_text_node($tag);
             }
 
-            $this->parent->_[HDOM_INFO_END] = $this->cursor;
+            $this->parent->_[HDOM_INFO_END_WIZIAPP] = $this->cursor;
             if ($this->parent->parent) $this->parent = $this->parent->parent;
 
             $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
             return true;
         }
 
-        $node = new simple_html_dom_node($this);
-        $node->_[HDOM_INFO_BEGIN] = $this->cursor;
+        $node = new simple_html_dom_node_wiziapp($this);
+        $node->_[HDOM_INFO_BEGIN_WIZIAPP] = $this->cursor;
         ++$this->cursor;
         $tag = $this->copy_until($this->token_slash);
         $node->tag_start = $begin_tag_pos;
 
         // doctype, cdata & comments...
         if (isset($tag[0]) && $tag[0]==='!') {
-            $node->_[HDOM_INFO_TEXT] = '<' . $tag . $this->copy_until_char('>');
+            $node->_[HDOM_INFO_TEXT_WIZIAPP] = '<' . $tag . $this->copy_until_char('>');
 
             if (isset($tag[2]) && $tag[1]==='-' && $tag[2]==='-') {
-                $node->nodetype = HDOM_TYPE_COMMENT;
+                $node->nodetype = HDOM_TYPE_COMMENT_WIZIAPP;
                 $node->tag = 'comment';
             } else {
-                $node->nodetype = HDOM_TYPE_UNKNOWN;
+                $node->nodetype = HDOM_TYPE_UNKNOWN_WIZIAPP;
                 $node->tag = 'unknown';
             }
-            if ($this->char==='>') $node->_[HDOM_INFO_TEXT].='>';
+            if ($this->char==='>') $node->_[HDOM_INFO_TEXT_WIZIAPP].='>';
             $this->link_nodes($node, true);
             $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
             return true;
@@ -1355,27 +1363,27 @@ class simple_html_dom
         // text
         if ($pos=strpos($tag, '<')!==false) {
             $tag = '<' . substr($tag, 0, -1);
-            $node->_[HDOM_INFO_TEXT] = $tag;
+            $node->_[HDOM_INFO_TEXT_WIZIAPP] = $tag;
             $this->link_nodes($node, false);
             $this->char = $this->doc[--$this->pos]; // prev
             return true;
         }
 
         if (!preg_match("/^[\w-:]+$/", $tag)) {
-            $node->_[HDOM_INFO_TEXT] = '<' . $tag . $this->copy_until('<>');
+            $node->_[HDOM_INFO_TEXT_WIZIAPP] = '<' . $tag . $this->copy_until('<>');
             if ($this->char==='<') {
                 $this->link_nodes($node, false);
                 return true;
             }
 
-            if ($this->char==='>') $node->_[HDOM_INFO_TEXT].='>';
+            if ($this->char==='>') $node->_[HDOM_INFO_TEXT_WIZIAPP].='>';
             $this->link_nodes($node, false);
             $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
             return true;
         }
 
         // begin tag
-        $node->nodetype = HDOM_TYPE_ELEMENT;
+        $node->nodetype = HDOM_TYPE_ELEMENT_WIZIAPP;
         $tag_lower = strtolower($tag);
         $node->tag = ($this->lowercase) ? $tag_lower : $tag;
 
@@ -1384,7 +1392,7 @@ class simple_html_dom
         {
             while (isset($this->optional_closing_tags[$tag_lower][strtolower($this->parent->tag)]))
             {
-                $this->parent->_[HDOM_INFO_END] = 0;
+                $this->parent->_[HDOM_INFO_END_WIZIAPP] = 0;
                 $this->parent = $this->parent->parent;
             }
             $node->parent = $this->parent;
@@ -1410,9 +1418,9 @@ class simple_html_dom
 
             // handle endless '<'
             if ($this->pos>=$this->size-1 && $this->char!=='>') {
-                $node->nodetype = HDOM_TYPE_TEXT;
-                $node->_[HDOM_INFO_END] = 0;
-                $node->_[HDOM_INFO_TEXT] = '<'.$tag . $space[0] . $name;
+                $node->nodetype = HDOM_TYPE_TEXT_WIZIAPP;
+                $node->_[HDOM_INFO_END_WIZIAPP] = 0;
+                $node->_[HDOM_INFO_TEXT_WIZIAPP] = '<'.$tag . $space[0] . $name;
                 $node->tag = 'text';
                 $this->link_nodes($node, false);
                 return true;
@@ -1420,11 +1428,11 @@ class simple_html_dom
 
             // handle mismatch '<'
             if ($this->doc[$this->pos-1]=='<') {
-                $node->nodetype = HDOM_TYPE_TEXT;
+                $node->nodetype = HDOM_TYPE_TEXT_WIZIAPP;
                 $node->tag = 'text';
                 $node->attr = array();
-                $node->_[HDOM_INFO_END] = 0;
-                $node->_[HDOM_INFO_TEXT] = substr($this->doc, $begin_tag_pos, $this->pos-$begin_tag_pos-1);
+                $node->_[HDOM_INFO_END_WIZIAPP] = 0;
+                $node->_[HDOM_INFO_TEXT_WIZIAPP] = substr($this->doc, $begin_tag_pos, $this->pos-$begin_tag_pos-1);
                 $this->pos -= 2;
                 $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
                 $this->link_nodes($node, false);
@@ -1441,11 +1449,11 @@ class simple_html_dom
                 }
                 else {
                     //no value attr: nowrap, checked selected...
-                    $node->_[HDOM_INFO_QUOTE][] = HDOM_QUOTE_NO;
+                    $node->_[HDOM_INFO_QUOTE_WIZIAPP][] = HDOM_QUOTE_NO_WIZIAPP;
                     $node->attr[$name] = true;
                     if ($this->char!='>') $this->char = $this->doc[--$this->pos]; // prev
                 }
-                $node->_[HDOM_INFO_SPACE][] = $space;
+                $node->_[HDOM_INFO_SPACE_WIZIAPP][] = $space;
                 $space = array($this->copy_skip($this->token_blank), '', '');
             }
             else
@@ -1453,13 +1461,13 @@ class simple_html_dom
         } while ($this->char!=='>' && $this->char!=='/');
 
         $this->link_nodes($node, true);
-        $node->_[HDOM_INFO_ENDSPACE] = $space[0];
+        $node->_[HDOM_INFO_ENDSPACE_WIZIAPP] = $space[0];
 
         // check self closing
         if ($this->copy_until_char_escape('>')==='/')
         {
-            $node->_[HDOM_INFO_ENDSPACE] .= '/';
-            $node->_[HDOM_INFO_END] = 0;
+            $node->_[HDOM_INFO_ENDSPACE_WIZIAPP] .= '/';
+            $node->_[HDOM_INFO_END_WIZIAPP] = 0;
         }
         else
         {
@@ -1473,7 +1481,7 @@ class simple_html_dom
         // since a br tag never has sub nodes, this works well.
         if ($node->tag == "br")
         {
-            $node->_[HDOM_INFO_INNER] = $this->default_br_text;
+            $node->_[HDOM_INFO_INNER_WIZIAPP] = $this->default_br_text;
         }
 
         return true;
@@ -1492,19 +1500,19 @@ class simple_html_dom
         $space[2] = $this->copy_skip($this->token_blank);
         switch ($this->char) {
             case '"':
-                $node->_[HDOM_INFO_QUOTE][] = HDOM_QUOTE_DOUBLE;
+                $node->_[HDOM_INFO_QUOTE_WIZIAPP][] = HDOM_QUOTE_DOUBLE_WIZIAPP;
                 $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
                 $node->attr[$name] = $this->restore_noise($this->copy_until_char_escape('"'));
                 $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
                 break;
             case '\'':
-                $node->_[HDOM_INFO_QUOTE][] = HDOM_QUOTE_SINGLE;
+                $node->_[HDOM_INFO_QUOTE_WIZIAPP][] = HDOM_QUOTE_SINGLE_WIZIAPP;
                 $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
                 $node->attr[$name] = $this->restore_noise($this->copy_until_char_escape('\''));
                 $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
                 break;
             default:
-                $node->_[HDOM_INFO_QUOTE][] = HDOM_QUOTE_NO;
+                $node->_[HDOM_INFO_QUOTE_WIZIAPP][] = HDOM_QUOTE_NO_WIZIAPP;
                 $node->attr[$name] = $this->restore_noise($this->copy_until($this->token_attr));
         }
         // PaperG: Attributes should not have \r or \n in them, that counts as html whitespace.
@@ -1530,9 +1538,9 @@ class simple_html_dom
     // as a text node
     protected function as_text_node($tag)
     {
-        $node = new simple_html_dom_node($this);
+        $node = new simple_html_dom_node_wiziapp($this);
         ++$this->cursor;
-        $node->_[HDOM_INFO_TEXT] = '</' . $tag . '>';
+        $node->_[HDOM_INFO_TEXT_WIZIAPP] = '</' . $tag . '>';
         $this->link_nodes($node, false);
         $this->char = (++$this->pos<$this->size) ? $this->doc[$this->pos] : null; // next
         return true;
@@ -1717,5 +1725,3 @@ class simple_html_dom
     function getElementsByTagName($name, $idx=-1) {return $this->find($name, $idx);}
     function loadFile() {$args = func_get_args();$this->load_file($args);}
 }
-
-?>

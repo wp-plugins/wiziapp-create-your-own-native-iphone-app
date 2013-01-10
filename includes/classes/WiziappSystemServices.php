@@ -120,9 +120,9 @@ class WiziappSystemServices{
 		$status = FALSE;
 		$key = $_POST['key'];
 
-		if ( in_array($key, WiziappConfig::getInstance()->integer_values) ) {
+		if ( in_array($key, WiziappConfig::getInstance()->integer_values) ){
 			$value = intval($_POST['value']);
-		} elseif ( $key === 'push_message' ) {
+		} elseif ( $key === 'push_message' ){
 			preg_match('/^[A-Z\d\!\.\,\s]{10,105}/i', $_POST['value'], $matches);
 			$value = $matches[0];
 		} else {

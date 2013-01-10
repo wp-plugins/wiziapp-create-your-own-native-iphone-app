@@ -1,7 +1,7 @@
 var FavoritesPage = function(){
     selector = '#favoritePage';
     posts = [];
-    serviceUrl = window.WiziappAccessPoint + '/?wiziapp/content/list/favorites&output=html&ap=1&pids=';
+    serviceUrl = window.WiziappAccessPoint + '/?wiziapp/content/list/favorites&output=html&androidapp=1&ap=1&pids=';
 
     // Get the favorites from the storage and save the list
     storedPosts = localStorage.getItem('WiziappFavoritePosts');

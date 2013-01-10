@@ -15,13 +15,14 @@ if ( $screen_content['screen']['update'] === TRUE ){
 
 	<div data-role="page" data-theme="c"<?php echo ( $is_comments && isset($screen_content['post_id']) ) ? ' class="comments_loaded_event"' : ''; ?>>
 		<div data-role="header" data-id="header" data-position="fixed" class="navigation">
-<?php
-	if ($back_content === false){
-		$tabBar->getBackButton();
-	} else {
-		wiziapp_back_button($back_content['url'], $back_content['text']);
-	}
-?>
+			<?php
+				if ($back_content === false || $tabBar->getTabFromURL() !== false){
+					$tabBar->getBackButton();
+				} else {
+					wiziapp_back_button($back_content['url'], $back_content['text']);
+				}
+			?>
+
 			<h1><?php echo $screen_content['screen']['title']; ?></h1>
 
 			<?php
@@ -30,9 +31,14 @@ if ( $screen_content['screen']['update'] === TRUE ){
 				*/
 
 				if ( $is_comments ) {
-				?>
-				<div id="comment_reply_root"></div>
-				<?php
+					?>
+					<div id="comment_reply_root"></div>
+					<a data-role="button" data-corners="false" data-theme="z" href="javascript:void(0)" class="navigation_back_button_wrapper ui-btn-right" id="webapp_send_comments_form">
+						<span class="navigation_back_button_opener"></span>
+						<span class="navigation_back_button">Post</span>
+						<span class="navigation_back_button_closer"></span>
+					</a>
+					<?php
 				}
 			?>
 		</div><!-- /header -->

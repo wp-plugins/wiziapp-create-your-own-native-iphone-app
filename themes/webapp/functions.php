@@ -18,10 +18,6 @@ function wiziapp_back_button($url = false, $text = false){
 <?php
 }
 
-function wiziapp_get_manifest(){
-	return get_bloginfo('template_url').'/resources/cache.manifest';
-}
-
 function wiziapp_get_webapp_title(){
 	global $page, $paged;
 	$title = wp_title('|', FALSE, 'right');

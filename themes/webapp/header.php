@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<?php /* <html <?php language_attributes(); ?> manifest="<?php echo wiziapp_get_manifest(); ?>"> */ ?>
 <html <?php language_attributes(); ?>>
 <?php
 // Disable the admin bar
@@ -41,7 +40,6 @@ if ( function_exists("show_admin_bar") ){
 		window.isSingle = false;
 	</script>
 	<!-- wp_head start -->
-	<script type='text/javascript' src='<?php echo home_url(); ?>/wp-includes/js/jquery/jquery.js?ver=1.7.2'></script>
 	<?php
 		WiziappContentHandler::getInstance()->registerWebAppScripts();
 		WiziappContentHandler::getInstance()->registerPluginScripts();

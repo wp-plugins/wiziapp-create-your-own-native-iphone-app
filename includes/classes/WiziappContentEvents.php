@@ -309,7 +309,10 @@ class WiziappContentEvents{
 			return $condition_rules;
 		}
 
-		$condition_rules[] = 'RewriteCond %{QUERY_STRING} !^wiziapp*';
+		// Avoid Wiziapp interference
+		$condition_rules[] = 'RewriteCond %{QUERY_STRING} !^wiziapp';
+		// Avoid Webapp interference
+		// 	$condition_rules[] = 'RewriteCond %{HTTP_USER_AGENT} !(iPhone.*Mac.*OS.*X)|(iPod.*Mac.*OS.*X)|(Android.*AppleWebKit)';
 
 		return $condition_rules;
 	}

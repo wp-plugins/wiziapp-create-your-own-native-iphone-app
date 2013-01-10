@@ -9,7 +9,7 @@ class WiziappInstaller
 		return FALSE;
 		}
 		*/
-		
+
 		return ( WiziappDB::getInstance()->needUpgrade() || WiziappConfig::getInstance()->needUpgrade() );
     }
 
@@ -41,6 +41,9 @@ class WiziappInstaller
 
         WiziappDB::getInstance()->install();
         WiziappConfig::getInstance()->install();
+		WiziappPluginCompatibility::getInstance()->install();
+
+		WiziappConfig::getInstance()->webapp_installed = FALSE;
 
         // Register tasks
         if (!wp_next_scheduled('wiziapp_daily_function_hook')) {
@@ -59,6 +62,7 @@ class WiziappInstaller
 
 	protected static function doUninstall(){
 		WiziappDB::getInstance()->uninstall();
+		WiziappPluginCompatibility::getInstance()->uninstall();
 
         // Remove scheduled tasks
         wp_clear_scheduled_hook('wiziapp_daily_function_hook');
