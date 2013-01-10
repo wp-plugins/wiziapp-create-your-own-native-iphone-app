@@ -41,7 +41,7 @@ class WiziappAdminDisplay {
 			} elseif ( $installer->needUpgrade() ){
 				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappUpgradeDisplay', 'display'), $iconPath);
 			} elseif ($configured === FALSE){
-				if (isset($_GET['wiziapp_reload_webapp']) || ( ! WiziappConfig::getInstance()->webapp_installed && ! WiziappConfig::getInstance()->skip_reload_webapp ) ) {
+				if (isset($_GET['wiziapp_reload_webapp'])) {
 					add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappWebappDisplay', 'display'), $iconPath);
 				}
 				else {
