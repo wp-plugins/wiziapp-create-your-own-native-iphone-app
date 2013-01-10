@@ -43,8 +43,6 @@ class WiziappInstaller
         WiziappConfig::getInstance()->install();
 		WiziappPluginCompatibility::getInstance()->install();
 
-		WiziappConfig::getInstance()->webapp_installed = FALSE;
-
         // Register tasks
         if (!wp_next_scheduled('wiziapp_daily_function_hook')) {
             wp_schedule_event(time(), 'daily', 'wiziapp_daily_function_hook' );
@@ -55,6 +53,8 @@ class WiziappInstaller
         // Activate the blog with the global services
         $cms = new WiziappCms();
         $cms->activate();
+
+		WiziappConfig::getInstance()->webapp_installed = FALSE;
 
         $restoreHandler = new WiziappUserServices();
         $restoreHandler->restoreUserData();
