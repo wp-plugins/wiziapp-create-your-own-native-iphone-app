@@ -247,7 +247,7 @@ function handleActionURL(page){
 }
 
 function prepareActionURL(elements){
-	elements.each(function(){
+	elements.filter("[href]").each(function(){
 		var $el = jQuery(this);
 		$el.attr("data-nav-processed", "processed");
 

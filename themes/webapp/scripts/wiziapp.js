@@ -1,5 +1,9 @@
-window.WIZIAPP = (function($) {
-	// Multi-image swipe support
+window.WIZIAPP = (function($){
+	var self = this;
+
+	/**
+	* Multi-image swipe support
+	*/
 	function swipeImage($el, direction){
 		var $container = $el.closest(".wiziAppMultiImage");
 		var images = $container.find("img");
@@ -77,6 +81,27 @@ window.WIZIAPP = (function($) {
 		$el = $container = null;
 	}
 
+	self.getCookie = function(c_name){
+		var i, x, y, ARRcookies = document.cookie.split(";");
+
+		for ( i=0; i<ARRcookies.length; i++ ){
+			x = ARRcookies[i].substr(0, ARRcookies[i].indexOf("="));
+			y = ARRcookies[i].substr(ARRcookies[i].indexOf("=") + 1);
+			x = x.replace(/^\s+|\s+$/g, "");
+
+			if ( x == c_name ){
+				return unescape(y);
+			}
+		}
+	};
+
+	self.setCookie = function(c_name, value, exdays){
+		var exdate = new Date();
+		exdate.setDate(exdate.getDate() + exdays);
+		var c_value = escape(value) + ( (exdays==null) ? "" : "; expires=" + exdate.toUTCString() );
+		document.cookie = c_name + "=" + c_value;
+	};
+
 	return {
 		changeFontSize: function(decrease){
 			var steps = 2;
@@ -126,6 +151,53 @@ window.WIZIAPP = (function($) {
 			}).bind("mousedown touchstart", function(e) {
 				e.preventDefault();
 			});
+		},
+
+		condition_for_intro_page: function(){
+			if ( typeof navigator !== "object" || typeof navigator.userAgent !== "string" || document.location.href.indexOf("androidapp=1") > 0 ){
+				return;
+			}
+
+			var device_type = "";
+
+			if ( navigator.userAgent.search(/(iPhone)|(iPod)/i) > -1 ){
+				device_type = "iphone";
+			} else if ( navigator.userAgent.search(/Android/i) > -1 ){
+				device_type = "android";
+			}
+
+			if ( device_type === "" ){
+				return;
+			}
+
+			if ( ! Boolean( self.getCookie("WIZI_SHOW_APPSTORE_URL") ) ) {
+				// Show "Appstore URL" message, if "WIZI_SHOW_APPSTORE_URL" cookie not exist
+				$.ajax({
+					type: "post",
+					url: wiziapp_name_space.ajaxurl,
+					data: {
+						action: "intro_page_info",
+						device_type: device_type
+					},
+					dataType : "text",
+					timeout: 10*1000,
+					success: function(response_text) {
+						if ( response_text.indexOf("allow_show_intro_page") < 0 ){
+							return;
+						}
+
+						self.setCookie("WIZI_SHOW_APPSTORE_URL", 1, 7);
+						if ( ! Boolean( self.getCookie("WIZI_SHOW_APPSTORE_URL") ) ) {
+							// We are not able to create the cookie, so it is not ok.
+							return;
+						}
+
+						window.location.href = wiziapp_name_space.home_url + "/?wiziapp/intropage&device=" + device_type;
+					}
+				});
+			}
 		}
 	};
 })(jQuery);
+
+window.WIZIAPP.condition_for_intro_page();

@@ -20,7 +20,10 @@
 <div data-role="page" data-theme="z">
 	<div data-role="header" data-id="header" data-position="fixed">
 <?php
-		if ($post->post_parent){
+		if ($tabBar->getTabFromURL() !== false) {
+			$tabBar->getBackButton();
+		}
+		else if ($post->post_parent){
 			$parent_post = get_post($post->post_parent);
 			wiziapp_back_button(WiziappLinks::pageLink($parent_post->ID), $parent_post->post_title);
 		}

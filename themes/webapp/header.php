@@ -40,7 +40,6 @@ if ( function_exists("show_admin_bar") ){
 		window.isSingle = false;
 	</script>
 	<!-- wp_head start -->
-	<script type='text/javascript' src='<?php echo home_url(); ?>/wp-includes/js/jquery/jquery.js?ver=1.7.2'></script>
 	<?php
 		WiziappContentHandler::getInstance()->registerWebAppScripts();
 		WiziappContentHandler::getInstance()->registerPluginScripts();

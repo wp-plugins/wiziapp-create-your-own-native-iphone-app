@@ -53,7 +53,7 @@ class WiziappUserServices{
 		global $wpdb;
 
 		$sql = $wpdb->prepare("SELECT wp_user_id FROM {$wpdb->prefix}{$this->user_table} AS c WHERE c.udid = %s", $udid);
-		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappUserServices.checkUdid');
+		WiziappLog::getInstance()->write('DEBUG', "About to run the sql: {$sql}", 'WiziappUserServices.checkUserId');
 		$result = $wpdb->get_results($sql, ARRAY_A);
 
 		if ($result) {

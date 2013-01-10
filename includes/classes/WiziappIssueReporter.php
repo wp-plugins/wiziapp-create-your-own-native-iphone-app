@@ -8,7 +8,7 @@ class WiziappIssueReporter{
             $this->data = $data;
         }
     }
-    
+
     public function render(){
         // Load the form from the api services inside an iframe
 
@@ -17,8 +17,7 @@ class WiziappIssueReporter{
         $iframeSrc = $httpProtocol . '://' . WiziappConfig::getInstance()->api_server . '/cms/reportIssue/?v='.WIZIAPP_P_VERSION;
         $iframeSrc .= '&d='.urlencode($this->data) . '&c=' . urlencode(get_bloginfo('url') . "/?wiziapp/system/frame&report=1");
         ?>
-            <?php // <script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script> ?>
-            <script type="text/javascript" src="<?php echo get_bloginfo('url') . '/wp-content/plugins/wiziapp/themes/admin/report_issue.js'; ?>"></script>
+            <script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/report_issue.js', dirname(dirname(__FILE__)))); ?>"></script>
             <style>
                 #wiziapp_report_issue_container{
                     height: 420px;

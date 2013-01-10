@@ -32,6 +32,7 @@ class WiziappAdminDisplay {
 			//add_action('admin_notices', array('WiziappAdminDisplay', 'versionCheck'));
 			add_action('admin_notices', array('WiziappAdminDisplay', 'upgradeCheck'));
 			add_action('admin_notices', array('WiziappAdminDisplay', 'displayMessageCheck'));
+			add_action('admin_notices', array(WiziappPluginCompatibility::getInstance(), 'notices'));
 			// Add CSS and Javascript for the Wiziapp Activate notice on the Admin panel
 			add_action( 'admin_enqueue_scripts', array('WiziappAdminDisplay', 'styles_javascripts' ) );
 
@@ -133,7 +134,7 @@ class WiziappAdminDisplay {
 			$httpProtocol = 'https';
 			if ( $includeSimOverlay ){
 			?>
-			<script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
+			<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
 			<style>
 				#wpadminbar{
 					z-index: 99;

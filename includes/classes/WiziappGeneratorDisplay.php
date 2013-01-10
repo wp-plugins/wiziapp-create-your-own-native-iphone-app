@@ -36,7 +36,7 @@ class WiziappGeneratorDisplay{
                 $token = $tokenResponse['token'];
                 $httpProtocol = 'https';
                 ?>
-                <script type="text/javascript" src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
+                <script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
                 <style type="text/css">
                 .overlay_close {
                     background-image:url(<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>/images/generator/close.png);

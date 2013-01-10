@@ -144,6 +144,10 @@ class WiziappLayoutComponent{
 			$attrName === 'date';
 			if ( isset($attr[2]) && $attr[2] === 'webapp' && $postfix_condition ){
 				$webapp_postfix = '_webapp';
+
+				if ( $this->attributes['class'] === 'featured_post' && $attrName === 'imageURL' ){
+					$webapp_postfix = ' webapp_image_overriding';
+				}
 			}
 
 			if ( $attrName === 'imageURL' ){

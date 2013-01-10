@@ -391,30 +391,7 @@ class WiziappTabbarBuilder{
 	}
 
 	public function getBackButton($selectedURL = false){
-		if ($selectedURL === false){
-			$selectedURL = $_SERVER['REQUEST_URI'];
-		}
-		$selectedTab = false;
-		$selectedTabIndex = 0;
-		for ($t = 0; $t < count($this->tabs); ++$t){
-			$tab = $this->tabs[$t];
-
-			if ($tab->type === $selectedURL){
-				$selectedTab = $tab->id;
-				$selectedTabIndex = $t;
-				break;
-			}
-			$url = explode('://', $tab->rootScreenURL, 2);
-			$url = isset($url[1])?explode('/', $url[1], 2):'';
-			$url = isset($url[1])?explode('?', urldecode($url[1]), 2):'';
-			$url = isset($url[1])?$url[1]:'';
-			// FIXME: Go by longest match?
-			if ($url != '' && strpos($selectedURL, $url) !== false){
-				$selectedTab = $tab->id;
-				$selectedTabIndex = $t;
-				break;
-			}
-		}
+		$selectedTab = $this->getTabFromURL($selectedURL);
 		$end = $this->gotMorePage() ? 4 : count($this->tabs);
 		if ( 'moreScreen' === $selectedURL ){
 			return false;
@@ -429,5 +406,30 @@ class WiziappTabbarBuilder{
 			}
 		}
 		return false;
+	}
+
+	public function getTabFromURL($selectedURL = false){
+		if ($selectedURL === false){
+			$selectedURL = $_SERVER['REQUEST_URI'];
+		}
+		$selectedTab = false;
+		for ($t = 0; $t < count($this->tabs); ++$t){
+			$tab = $this->tabs[$t];
+
+			if ($tab->type === $selectedURL){
+				$selectedTab = $tab->id;
+				break;
+			}
+			$url = explode('://', $tab->rootScreenURL, 2);
+			$url = isset($url[1])?explode('/', $url[1], 2):'';
+			$url = isset($url[1])?explode('?', urldecode($url[1]), 2):'';
+			$url = isset($url[1])?$url[1]:'';
+			// FIXME: Go by longest match?
+			if ($url != '' && strpos($selectedURL, $url) !== false){
+				$selectedTab = $tab->id;
+				break;
+			}
+		}
+		return $selectedTab;
 	}
 }

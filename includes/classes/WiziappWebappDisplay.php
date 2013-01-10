@@ -299,7 +299,7 @@ class WiziappWebappDisplay{
 			}
 		</style>
 
-		<script src="http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js"></script>
+		<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
 
 		<script type="text/javascript">
 			(function($){

@@ -123,6 +123,11 @@ function wiziapp_attach_hooks(){
 	add_action('wp_ajax_wiziapp_hide_verify_msg', 		   array('WiziappAdminDisplay', 'hideVerifyMsg'));
 	add_action('wp_ajax_wiziapp_hide_upgrade_msg',		   array('WiziappAdminDisplay', 'hideUpgradeMsg'));
 	add_action('wp_ajax_wiziapp_hide_display_message_msg', array('WiziappAdminDisplay', 'hideDisplayMessageMsg'));
+	add_action('wp_ajax_wiziapp_plugin_compatibility',	array(WiziappPluginCompatibility::getInstance(), 'configure'));
+
+	// Get info about the Intro Page
+	add_action('wp_ajax_intro_page_info', 		 array('WiziappIntroPageScreen', 'get_intro_page_info',));
+	add_action('wp_ajax_nopriv_intro_page_info', array('WiziappIntroPageScreen', 'get_intro_page_info',));
 
 	// Wizard
 	add_action('wp_ajax_wiziapp_register_license', array('WiziappLicenseUpdater', 'register'));

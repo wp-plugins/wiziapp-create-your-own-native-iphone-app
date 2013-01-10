@@ -24,8 +24,10 @@
 	<script type="text/javascript">
 		jQuery.mobile.autoInitializePage = false;
 	</script>
+        <?php $themeName = is_rtl() ? 'rtl' : WiziappConfig::getInstance()->wiziapp_theme_name; ?>
+        
 	<link rel="stylesheet" href="<?php echo get_bloginfo('template_url').'/style.css'; ?>" type="text/css" />
-	<link rel="stylesheet" href="<?php echo get_bloginfo('template_url').'/' . WiziappConfig::getInstance()->wiziapp_theme_name . '.css'; ?>" type="text/css" />
+	<link rel="stylesheet" href="<?php echo get_bloginfo('template_url').'/' . $themeName . '.css'; ?>" type="text/css" />
 	<link id="themeCss" rel="stylesheet" href="https://<?php echo WiziappConfig::getInstance()->api_server . '/application/postViewCss/'.WiziappConfig::getInstance()->app_id.'?v=' . WIZIAPP_VERSION . '&c=' . (WiziappConfig::getInstance()->configured ? 1 : 0);  ?>" type="text/css" />
 </head>
 <body>

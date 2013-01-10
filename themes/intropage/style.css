@@ -26,14 +26,14 @@ div{
 	width: 266px;
 }
 .mobile_site{
-	background-image: url(images/downloadapp/mobile_site.png);
+	background-image: url(mobile_site.png);
 	width: 287px;
 }
 .app_store{
-	background-image: url(images/downloadapp/iphone.png);
+	background-image: url(iphone.png);
 }
 .play_store{
-	background-image: url(images/downloadapp/android.png);
+	background-image: url(android.png);
 }
 .title{
 	height: 57px;

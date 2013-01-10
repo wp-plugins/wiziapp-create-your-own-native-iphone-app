@@ -291,8 +291,7 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 .featured_post{
 	border: none !important;
 }
-.featured_post_image_webapp{
-	height: 162px;
+.webapp_image_overriding{
 	position: relative !important;
 	text-align: center;
 }

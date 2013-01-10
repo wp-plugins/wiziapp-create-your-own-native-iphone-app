@@ -2558,7 +2558,7 @@ $.mobile.getMaxScrollForTransition = $.mobile.getMaxScrollForTransition || defau
 			//could be mailto, etc
 			isExternal: function( url ) {
 				var u = path.parseUrl( url );
-				return u.protocol && u.domain !== documentUrl.domain ? true : false;
+				return u.protocol && u.domain.toLowerCase() !== documentUrl.domain.toLowerCase() ? true : false;
 			},
 
 			hasProtocol: function( url ) {

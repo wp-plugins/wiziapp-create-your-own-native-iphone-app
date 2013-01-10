@@ -16,7 +16,7 @@ if ( $screen_content['screen']['update'] === TRUE ){
 	<div data-role="page" data-theme="c"<?php echo ( $is_comments && isset($screen_content['post_id']) ) ? ' class="comments_loaded_event"' : ''; ?>>
 		<div data-role="header" data-id="header" data-position="fixed" class="navigation">
 			<?php
-				if ($back_content === false){
+				if ($back_content === false || $tabBar->getTabFromURL() !== false){
 					$tabBar->getBackButton();
 				} else {
 					wiziapp_back_button($back_content['url'], $back_content['text']);
