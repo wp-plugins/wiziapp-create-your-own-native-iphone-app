@@ -40,6 +40,8 @@ class WiziappAdminDisplay {
 				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappPostInstallDisplay', 'display'), $iconPath);
 			} elseif ( $installer->needUpgrade() ){
 				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappUpgradeDisplay', 'display'), $iconPath);
+			} elseif ( ! WiziappConfig::getInstance()->webapp_installed && ! WiziappConfig::getInstance()->skip_reload_webapp ){
+				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappWebappDisplay', 'display'), $iconPath);
 			} elseif ($configured === FALSE){
 				if (isset($_GET['wiziapp_reload_webapp'])) {
 					add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappWebappDisplay', 'display'), $iconPath);
@@ -47,8 +49,6 @@ class WiziappAdminDisplay {
 				else {
 					add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappGeneratorDisplay', 'display'), $iconPath);
 				}
-			} elseif ( ! WiziappConfig::getInstance()->webapp_installed && ! WiziappConfig::getInstance()->skip_reload_webapp ){
-				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappWebappDisplay', 'display'), $iconPath);
 			} else {
 				// We are installed and configured
 				// add_submenu_page('wiziapp', __('dashboard'), __('dashboard'), 'administrator', 'wiziapp_dashboard_display', 'wiziapp_dashboard_display');
