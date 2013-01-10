@@ -64,8 +64,6 @@ class WiziappUpgradeDisplay{
 
 
 	function display(){
-		WiziappConfig::getInstance()->webapp_installed = FALSE;
-
 		?>
 		<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
 		<style>

@@ -54,8 +54,6 @@ class WiziappInstaller
         $cms = new WiziappCms();
         $cms->activate();
 
-		WiziappConfig::getInstance()->webapp_installed = FALSE;
-
         $restoreHandler = new WiziappUserServices();
         $restoreHandler->restoreUserData();
     }
