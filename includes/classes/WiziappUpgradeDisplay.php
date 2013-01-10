@@ -19,8 +19,6 @@ class WiziappUpgradeDisplay{
 		$cms = new WiziappCms();
 		$cms->activate();
 
-		WiziappConfig::getInstance()->webapp_installed = FALSE;
-
 		$status = TRUE;
 
 		$header = array(
@@ -198,6 +196,7 @@ class WiziappUpgradeDisplay{
 			var progressWait = 30;
 			var upgrade_step = 0;
 			var upgrade_steps = [requestDatabaseUpgrade, requestConfigurationUpgrade, requestFinalizingProcessing];
+			var webapp_installed = "<?php echo intval(WiziappConfig::getInstance()->webapp_installed); ?>";
 
 
 			jQuery(document).ready(function(){
@@ -453,7 +452,12 @@ class WiziappUpgradeDisplay{
 				// Update the progress bar
 				updateProgressBar();
 				jQuery("#wiziapp_finalize_title").show();
-				document.location.reload();
+
+				if (webapp_installed === "1"){
+					document.location.replace(document.location.href + "&wiziapp_reload_webapp=1");
+				} else {
+					document.location.reload();
+				}
 			}
 		</script>
 		<?php
