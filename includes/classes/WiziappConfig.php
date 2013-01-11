@@ -81,7 +81,7 @@ class WiziappConfig implements WiziappIInstallable{
 	* @return WiziappConfig
 	*/
 	public static function getInstance() {
-		if( is_null(self::$_instance) ) {
+		if ( is_null(self::$_instance) ) {
 			self::$_instance = new WiziappConfig();
 		}
 
@@ -97,7 +97,11 @@ class WiziappConfig implements WiziappIInstallable{
 	}
 
 	private function load() {
-		$this->options = get_option($this->name);
+		$options = get_option($this->name);
+
+		if ( is_array($options) ) {
+			$this->options = $options;
+		}
 	}
 
 	public function upgrade() {
