@@ -14,7 +14,7 @@ class WiziappWebappDisplay{
 	* First, need to be safe, it is really the "Wiziapp plugin upgrade" process
 	*/
 	public static function deactivate_on_upgrade(){
-		if ( ! isset($_SERVER['HTTP_REFERER']) || ! isset($_SERVER['HTTP_URI']) ){
+		if ( ! isset($_SERVER['HTTP_REFERER']) || ! isset($_SERVER['REQUEST_URI']) ){
 			return;
 		}
 
