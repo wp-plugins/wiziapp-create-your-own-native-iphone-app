@@ -14,6 +14,9 @@
 function wiziapp_attach_hooks(){
 	$ce = new WiziappContentEvents();
 
+	// Deactivate the Webapp feature on the "Wiziapp plugin upgrade" process
+	WiziappWebappDisplay::deactivate_on_upgrade();
+
 	//add_action('admin_menu', 'wiziapp_setup_menu');
 	add_action( 'admin_menu', array( 'WiziappAdminDisplay', 'setup' ) );
 
