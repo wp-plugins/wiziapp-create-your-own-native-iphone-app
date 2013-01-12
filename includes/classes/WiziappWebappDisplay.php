@@ -19,11 +19,11 @@ class WiziappWebappDisplay{
 		}
 
 		$http_referer = urldecode($_SERVER['HTTP_REFERER']);
-		$http_uri 	  = urldecode($_SERVER['HTTP_URI']);
+		$request_uri  = urldecode($_SERVER['REQUEST_URI']);
 
 		$is_upgrade_process =
 		preg_match('/wp-admin/update.php?action=upgrade-plugin.*&plugin=wiziapp[a-z\-]+?/wiziapp.php/i', $http_referer) &&
-		preg_match('/wp-admin/update.php?action=activate-plugin.*&plugin=wiziapp[a-z\-]+?/wiziapp.php/i', $http_uri);
+		preg_match('/wp-admin/update.php?action=activate-plugin.*&plugin=wiziapp[a-z\-]+?/wiziapp.php/i', $request_uri);
 		if ( $is_upgrade_process ) {
 			return;
 		}
