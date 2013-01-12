@@ -7,6 +7,30 @@
 
 class WiziappWebappDisplay{
 
+	/**
+	* Need to deactivate the Webapp feature on the "Wiziapp plugin upgrade" process,
+	* as the "wiziapp/themes/webapp/resources" folder is not exist already,
+	* so, the Webapp feature will not work.
+	* First, need to be safe, it is really the "Wiziapp plugin upgrade" process
+	*/
+	public static function deactivate_on_upgrade(){
+		if ( ! current_user_can('administrator') || ! isset($_SERVER['HTTP_REFERER']) || ! isset($_SERVER['HTTP_URI']) ){
+			return;
+		}
+
+		$http_referer = urldecode($_SERVER['HTTP_REFERER']);
+		$http_uri 	  = urldecode($_SERVER['HTTP_URI']);
+
+		$is_upgrade_process =
+		preg_match('/wp-admin/update.php?action=upgrade-plugin.*&plugin=wiziapp[a-z\-]+?/wiziapp.php/i', $http_referer) &&
+		preg_match('/wp-admin/update.php?action=activate-plugin.*&plugin=wiziapp[a-z\-]+?/wiziapp.php/i', $http_uri);
+		if ( $is_upgrade_process ) {
+			return;
+		}
+
+		WiziappConfig::getInstance()->webapp_installed = FALSE;
+	}
+
 	public function installFinish(){
 		WiziappLog::getInstance()->write('INFO', "The webapp install is finished, marking it", 'WiziappWebappDisplay.installFinish');
 
