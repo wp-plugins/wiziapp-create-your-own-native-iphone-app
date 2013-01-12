@@ -14,7 +14,7 @@ class WiziappWebappDisplay{
 	* First, need to be safe, it is really the "Wiziapp plugin upgrade" process
 	*/
 	public static function deactivate_on_upgrade(){
-		if ( ! isset($_SERVER['HTTP_REFERER']) || ! isset($_SERVER['REQUEST_URI']) ){
+		if ( ! is_admin() || ! isset($_SERVER['HTTP_REFERER']) || ! isset($_SERVER['REQUEST_URI']) ){
 			return;
 		}
 
@@ -22,8 +22,8 @@ class WiziappWebappDisplay{
 		$request_uri  = urldecode($_SERVER['REQUEST_URI']);
 
 		$is_upgrade_process =
-		preg_match('/\/wp-admin\/update\.php\?action=upgrade-plugin.*plugin=wiziapp[a-z\-]*?\/wiziapp.php/i', $http_referer) &&
-		preg_match('/\/wp-admin\/update\.php\?action=activate-plugin.*plugin=wiziapp[a-z\-]*?\/wiziapp.php/i', $request_uri);
+		preg_match('/\/wp-admin\/update\.php\?action=upgrade-plugin.*&plugin=wiziapp[a-z\-]*?\/wiziapp.php/i', $http_referer) &&
+		preg_match('/\/wp-admin\/update\.php\?action=activate-plugin.*&plugin=wiziapp[a-z\-]*?\/wiziapp.php/i', $request_uri);
 		if ( ! $is_upgrade_process ) {
 			return;
 		}
