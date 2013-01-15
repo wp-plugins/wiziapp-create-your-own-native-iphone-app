@@ -522,14 +522,14 @@ class WiziappContentHandler {
 				}
 				$image->border = '0';
 
-				if($this->hasClass($anchor, 'alignright') || (isset($anchor->align) && !stricmp($anchor->align, 'right')) || $this->hasClass($anchor, 'ngg-right') || $this->hasStyle($anchor, 'float', 'right')) {
+				if($this->hasClass($anchor, 'alignright') || (isset($anchor->align) && !strcasecmp($anchor->align, 'right')) || $this->hasClass($anchor, 'ngg-right') || $this->hasStyle($anchor, 'float', 'right')) {
 					$this->setStyle($anchor, 'float', 'right');
 					$this->setStyle($anchor, 'margin', '5px 6px 4px 5px');
 					$this->unsetStyle($anchor, 'margin-top');
 					$this->unsetStyle($anchor, 'margin-right');
 					$this->unsetStyle($anchor, 'margin-bottom');
 					$this->unsetStyle($anchor, 'margin-left');
-				} else if($this->hasClass($anchor, 'alignleft') || (isset($anchor->align) && !stricmp($anchor->align, 'left')) || $this->hasClass($anchor, 'ngg-left') || $this->hasStyle($anchor, 'float', 'left')) {
+				} else if($this->hasClass($anchor, 'alignleft') || (isset($anchor->align) && !strcasecmp($anchor->align, 'left')) || $this->hasClass($anchor, 'ngg-left') || $this->hasStyle($anchor, 'float', 'left')) {
 					$this->setStyle($anchor, 'float', 'left');
 					$this->setStyle($anchor, 'margin', '5px 6px 4px 5px');
 					$this->unsetStyle($anchor, 'margin-top');
