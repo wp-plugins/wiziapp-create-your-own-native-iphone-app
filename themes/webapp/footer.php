@@ -62,7 +62,7 @@
 			<a href="" data-role="button" target="_blank">Facebook</a>
 		</p>
 		<p>
-			<a href="" data-role="button" target="_blank">Tweeter</a>
+			<a href="" data-role="button" target="_blank">Twitter</a>
 		</p>
 		<p>
 			<a href="" data-role="button">Email</a>
