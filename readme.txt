@@ -1,8 +1,8 @@
 === WiziApp - Create Mobile App (HTML5, Android, iPhone) ===
 Contributors: wiziapp
 Tags: mobile, iphone, android, Mobile app, mobile theme, HTML5 app, web app, webapp, smartphones, wptouch
-Requires at least: 3.2
-Tested up to: 3.4
+Requires at least: 3.3
+Tested up to: 3.5
 Stable tag: v2.0.2a
 License: GPLv2
 
@@ -80,11 +80,11 @@ Yes. We'll make sure to answer your questions as quickly as possible. You can co
 
 = How do I Publish my mobile iPhone App to the Apple App Store ? =
 As soon as you will complete your mobile App creation we will review and advice regarding your mobile iPhone App metadata and content, in order for it to meet Apple Appstore guidelines, then we will submit it to the App Store for Apple approval.
-An Apple developer account is required in order to publish your mobile native iPhone App.  
+An Apple developer account is required in order to publish your mobile native iPhone App.
 
 = How do I Publish my mobile Android App to the Google Play Android market? =
 We will upload your Android App on the Google Play Android Market for you.
-A Google Play account is required in order to publish your mobile native Android App.  
+A Google Play account is required in order to publish your mobile native Android App.
 
 = How does the Push notification service works? =
 The Push notification is a service that enables you to notify your readers about new content directly on their mobile device. The push notification service runs and maintained on the WiziApp servers.
@@ -112,7 +112,7 @@ Yes, you can monetize your mobile App:
 3. Enjoy all the revenues, WiziApp take no cut of your revenues nor do we share the ad space.
 
 = How long does it take for my mobile native iPhone App to become available on the Apple App Store? =
-In most cases, the App will be available in the Appstore within 1 to 2 weeks, depending upon Apple's confirmation. 
+In most cases, the App will be available in the Appstore within 1 to 2 weeks, depending upon Apple's confirmation.
 
 = How long does it take for my mobile native Android App to become available on the Google Play Android market? =
 The Android App should be available on the Google Play Android Market within 1-2 business days.
@@ -139,7 +139,7 @@ Yes, you can customize and create a mobile App for each of your websites.
 
 = Will I be able to change my mobile App after it was created? =
 Yes, you will be able to change your mobile App after it was created and these changes will take effect in real time.
-Changes to the native mobile App that was uploaded to the Appstore & Google Play Android Market, may require us to upload an update version to the stores for your. 
+Changes to the native mobile App that was uploaded to the Appstore & Google Play Android Market, may require us to upload an update version to the stores for your.
 
 = Can the WiziApp plugin work with third party themes or plugins? =
 The WiziApp plugin is compatible with most of the major plugins and themes. However if you notice any compatibility issues while customizing your mobile App please let us know and we will check it and advise.
@@ -163,7 +163,7 @@ Please see a guide at:
 
 = How do I create a Google Play developer account? =
 Please see a guide at:
-[Register for Google Play Android account](http://www.wiziapp.com/blog/guides-tutorials/register-for-google-play-android-account)    
+[Register for Google Play Android account](http://www.wiziapp.com/blog/guides-tutorials/register-for-google-play-android-account)
 
 = Could Apple reject my App? =
 Apple may reject your native mobile App if it believes the App doesn't meet their guidelines, like for example if it has an offensive, violent or sexual content.
@@ -181,7 +181,7 @@ Read all about it here.
 Unless you are a wordpress.com/vip user, you will have to migrate to the wordpress.org platform in order to use the WiziApp service. Wordpress.com offers a redirect service for migrating clients that will ensure traffic that comes to your old domain under wordpress.com will be redirected to its new URL under wordpress.org
 
 = What is an HTML5 mobile App? =
-The HTML5 mobile WebApp enables your mobile users to access your website from their mobile device browser and enjoy an advanced native mobile App user experience. 
+The HTML5 mobile WebApp enables your mobile users to access your website from their mobile device browser and enjoy an advanced native mobile App user experience.
 The user can also save a shortcut for a quick access to your mobile App from his mobile device home screen.
 
 = What is a Native mobile App? =
