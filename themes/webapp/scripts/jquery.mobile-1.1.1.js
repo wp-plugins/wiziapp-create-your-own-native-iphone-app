@@ -1176,9 +1176,11 @@ $.widget( "mobile.widget", {
 	// TODO create a pull request for jquery ui to trigger this event
 	// in the original _createWidget
 	_createWidget: function() {
-		$.Widget.prototype._createWidget.apply( this, arguments );
+		this.__createWidget.apply( this, arguments );
 		this._trigger( 'init' );
 	},
+
+	__createWidget: $.Widget.prototype._createWidget,
 
 	_getCreateOptions: function() {
 
@@ -3161,6 +3163,8 @@ $.mobile.getMaxScrollForTransition = $.mobile.getMaxScrollForTransition || defau
 						});
 					}
 
+					try
+					{
 					//append to page and enhance
 					// TODO taging a page with external to make sure that embedded pages aren't removed
 					//      by the various page handling code is bad. Having page handling code in many
@@ -3169,6 +3173,9 @@ $.mobile.getMaxScrollForTransition = $.mobile.getMaxScrollForTransition || defau
 						.attr( "data-" + $.mobile.ns + "url", path.convertUrlToDataUrl( fileUrl ) )
 						.attr( "data-" + $.mobile.ns + "external-page", true )
 						.appendTo( settings.pageContainer );
+					}
+					catch (e) {
+					}
 
 					// wait for page creation to leverage options defined on widget
 					page.one( 'pagecreate', $.mobile._bindPageRemove );

@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
 class WiziappSupportDisplay{
 	private $checker = null;
@@ -28,7 +28,7 @@ class WiziappSupportDisplay{
 		$showAllTabs = WiziappConfig::getInstance()->finished_processing && $configured;
 
 		?>
-		<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
+		<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/scripts/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
 		<style type="text/css">
 		#wiziapp_container{
 			background: #fff;

@@ -1259,3 +1259,167 @@ function applyEffects($wantedContainer){
 	});
 })(jQuery);
 // Page LRU Cache End
+
+// Dynamic Library Compatibility Begin
+(function() {
+	var queue = [];
+	function push_function(path) {
+		return function() {
+			var args = arguments;
+			queue.push(function(subset) {
+				var o = window;
+				var p = o;
+				var i;
+				for (i = 0; i < path.length && i < subset.length; i++) {
+					if (path[i] != subset[i]) {
+						return false;
+					}
+					p = o;
+					o = o[path[i]];
+				}
+				for (; i < path.length; i++) {
+					p = o;
+					o = o[path[i]];
+				}
+				o.apply(p, args);
+				return true;
+			});
+		};
+	}
+	function push_class(path, proto) {
+		proto = proto || {};
+		return function() {
+			var args = arguments;
+			var me = this;
+			var i;
+			for (i in proto) {
+				if (proto.hasOwnProperty(i)) {
+					me[i] = proto[i];
+				}
+			}
+			queue.push(function(subset) {
+				var o = window;
+				var i;
+				for (i = 0; i < path.length && i < subset.length; i++) {
+					if (path[i] != subset[i]) {
+						return false;
+					}
+					o = o[path[i]];
+				}
+				for (; i < path.length; i++) {
+					o = o[path[i]];
+				}
+				me.__proto__ = o.prototype;
+				o.apply(me, args);
+				return true;
+			});
+			return me;
+		};
+	}
+	function push_method(path, method) {
+		return function() {
+			var args = arguments;
+			var me = this;
+			queue.push(function(subset) {
+				var i;
+				for (i = 0; i < path.length && i < subset.length; i++) {
+					if (path[i] != subset[i]) {
+						return false;
+					}
+				}
+				me[method].apply(me, args);
+				return true;
+			});
+		};
+	}
+	function onload(subset) {
+		subset = subset || [];
+		var q = queue;
+		queue = [];
+		var i;
+		for (i = 0; i < q.length; i++) {
+			if (!q[i](subset)) {
+				queue.push(q[i]);
+			}
+		}
+	}
+
+	window.IN=window.IN||{
+		Event: {
+			on: push_function(["IN", "Event", "on"])
+		}
+	};
+	window.google=window.google||{
+		maps: {
+			Geocoder: push_class(["google", "maps", "Geocoder"], {
+				geocode: push_method(["google", "maps", "Geocoder"], "geocode")
+			}),
+			LatLng: push_class(["google", "maps", "LatLng"]),
+			Map: push_class(["google", "maps", "Map"], {
+				setCenter: push_method(["google", "maps", "Map"], "setCenter"),
+				setZoom: push_method(["google", "maps", "Map"], "setZoom")
+			}),
+			Marker: push_class(["google", "maps", "Marker"], {
+				setIcon: push_method(["google", "maps", "Marker"], "setIcon"),
+				setMap: push_method(["google", "maps", "Marker"], "setMap")
+			}),
+			MarkerImage: push_class(["google", "maps", "MarkerImage"]),
+			Point: push_class(["google", "maps", "Point"]),
+			Size: push_class(["google", "maps", "Size"]),
+			event: {
+				addListener: push_function(["google", "maps", "event", "addListener"]),
+				trigger: push_function(["google", "maps", "event", "trigger"])
+			},
+			ControlPosition: {
+				BOTTOM: 11,
+				BOTTOM_CENTER: 11,
+				BOTTOM_LEFT: 10,
+				BOTTOM_RIGHT: 12,
+				CENTER: 13,
+				LEFT: 5,
+				LEFT_BOTTOM: 6,
+				LEFT_CENTER: 4,
+				LEFT_TOP: 5,
+				RIGHT: 7,
+				RIGHT_BOTTOM: 9,
+				RIGHT_CENTER: 8,
+				RIGHT_TOP: 7,
+				TOP: 2,
+				TOP_CENTER: 2,
+				TOP_LEFT: 1,
+				TOP_RIGHT: 3
+			},
+			MapTypeId: {
+				HYBRID: "hybrid",
+				ROADMAP: "roadmap",
+				SATELLITE: "satellite",
+				TERRAIN: "terrain"
+			},
+			NavigationControlStyle: {
+				ANDROID: 2,
+				DEFAULT: 0,
+				SMALL: 1,
+				Wl: 5,
+				ZOOM_PAN: 3,
+				xm: 4
+			}
+		}
+	};
+
+	jQuery(document).delegate(":jqmData(role='page')", "pageinit pageshow", function() {
+		if (window.IN.ENV) {
+			onload(["IN"]);
+		}
+		if (window.google.maps.version) {
+			onload(["google", "maps"]);
+		}
+	});
+
+	// Compatibility with scripts that try to "realtime write"
+	jQuery(document).ready(function() {
+		document.write = function(content) {
+			jQuery("head").append(content);
+		}
+	});
+})();
+// Dynamic Library Compatibility End

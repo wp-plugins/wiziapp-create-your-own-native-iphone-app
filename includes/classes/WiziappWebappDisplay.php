@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
 * @package WiziappWordpressPlugin
 * @subpackage WebApp
@@ -6,30 +6,6 @@
 */
 
 class WiziappWebappDisplay{
-
-	/**
-	* Need to deactivate the Webapp feature on the "Wiziapp plugin upgrade" process,
-	* as the "wiziapp/themes/webapp/resources" folder is not exist already,
-	* so, the Webapp feature will not work.
-	* First, need to be safe, it is really the "Wiziapp plugin upgrade" process
-	*/
-	public static function deactivate_on_upgrade(){
-		if ( ! is_admin() || ! isset($_SERVER['HTTP_REFERER']) || ! isset($_SERVER['REQUEST_URI']) ){
-			return;
-		}
-
-		$http_referer = urldecode($_SERVER['HTTP_REFERER']);
-		$request_uri  = urldecode($_SERVER['REQUEST_URI']);
-
-		$is_upgrade_process =
-		preg_match('/\/wp-admin\/update\.php\?action=upgrade-plugin.*&plugin=wiziapp[a-z\-]*?\/wiziapp.php/i', $http_referer) &&
-		preg_match('/\/wp-admin\/update\.php\?action=activate-plugin.*&plugin=wiziapp[a-z\-]*?\/wiziapp.php/i', $request_uri);
-		if ( ! $is_upgrade_process ) {
-			return;
-		}
-
-		WiziappConfig::getInstance()->webapp_installed = FALSE;
-	}
 
 	public function installFinish(){
 		WiziappLog::getInstance()->write('INFO', "The webapp install is finished, marking it", 'WiziappWebappDisplay.installFinish');
@@ -85,8 +61,7 @@ class WiziappWebappDisplay{
 			$this->_returnResults('retry', 'The '.$resources.' directory is not writable, please set the directory permission to 0777 and try again.');
 		}
 
-		$pluginUrl = WP_PLUGIN_URL.'/'.dirname(WP_WIZIAPP_BASE);
-		$imagesBase = $pluginUrl.'/themes/webapp/resources/';
+		$imagesBase = plugins_url( dirname( WP_WIZIAPP_BASE ) ).'/themes/webapp/resources/';
 		$contentPrefix = "var jsInstructionsBase = '{$imagesBase}';var jsInstructions = ";
 		$contentSuffix = ';';
 
@@ -220,8 +195,7 @@ class WiziappWebappDisplay{
 	}
 
 	private function _get_resources_path(){
-		$plugin_dir = WiziappContentHandler::getInstance()->_get_plugin_dir();
-		return realpath( $plugin_dir.'themes/webapp/resources' );
+		return realpath( WIZI_DIR_PATH.'themes/webapp/resources' );
 	}
 
 	public function display(){
@@ -323,7 +297,7 @@ class WiziappWebappDisplay{
 			}
 		</style>
 
-		<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
+		<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/scripts/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
 
 		<script type="text/javascript">
 			(function($){

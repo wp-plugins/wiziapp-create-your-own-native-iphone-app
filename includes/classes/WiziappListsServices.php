@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
 * @package WiziappWordpressPlugin
 * @subpackage Display
@@ -117,7 +117,7 @@ class WiziappListsServices{
 		// Get the total number of pages
 		$total  = wp_count_posts( 'page' );
 
-		echo json_encode(array('header' => $header, 'pages' => $pagesSummary, 'total'=>$total));
+		echo json_encode( array( 'header' => $header, 'pages' => $pagesSummary, 'total' => $total->publish, ) );
 	}
 
 	public function links(){

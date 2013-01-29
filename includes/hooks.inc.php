@@ -9,15 +9,9 @@
 * @author comobix.com plugins@comobix.com
 */
 
-//add_action('init', 'wiziapp_init');
-//add_action('plugins_loaded', 'wiziapp_attach_hooks');
 function wiziapp_attach_hooks(){
 	$ce = new WiziappContentEvents();
 
-	// Deactivate the Webapp feature on the "Wiziapp plugin upgrade" process
-	// WiziappWebappDisplay::deactivate_on_upgrade();
-
-	//add_action('admin_menu', 'wiziapp_setup_menu');
 	add_action( 'admin_menu', array( 'WiziappAdminDisplay', 'setup' ) );
 
 	/* Add a custom column to the users table to indicate that the user
@@ -27,7 +21,7 @@ function wiziapp_attach_hooks(){
 	add_filter('manage_users_columns', array('WiziappUserList', 'column'));
 	add_filter('manage_users_custom_column', array('WiziappUserList', 'customColumn'), 10, 3);
 
-	add_filter('cron_schedules', array('wiziappCronSchedules','addSchedules'));
+	add_filter('cron_schedules', array('WiziappCronSchedules','addSchedules'));
 
 	add_action('new_to_publish', 	 array(&$ce, 'savePost'));
 	add_action('pending_to_publish', array(&$ce, 'savePost'));
@@ -55,24 +49,8 @@ function wiziapp_attach_hooks(){
 
 	add_action('created_term', array(&$ce, 'updateCacheTimestampKey'));
 	add_action('edited_term', array(&$ce, 'updateCacheTimestampKey'));
-	/**
-	* @todo add this function to allow updates and no new post was published notifications
-	add_action('publish_to_publish', 'wiziapp_publish_updated_post');
-	*/
 
-	/**
-	* Notice: publish_post might happen a few times, make sure we are only doing the action once
-	* by removing the action once done
-	*/
-	/*
-	add_action('publish_post', array('WiziappContentEvents', 'savePost'));
-	add_action('publish_post', 'wiziapp_publish_post');
-	*/
-
-	// hook to avoid the Collision with the WP Super Cache
-	add_filter('supercacherewriteconditions', array(&$ce, 'add_wiziapp_condition'));
-
-	if ( !empty(WiziappConfig::getInstance()->settings_done) ){
+	if ( ! empty(WiziappConfig::getInstance()->settings_done) ){
 		add_action('wiziapp_daily_function_hook', array('WiziappPush', 'daily'));
 		add_action('wiziapp_weekly_function_hook', array('WiziappPush', 'weekly'));
 		add_action('wiziapp_monthly_function_hook', array('WiziappPush', 'monthly'));
@@ -86,16 +64,6 @@ function wiziapp_attach_hooks(){
 	register_deactivation_hook(WP_WIZIAPP_BASE, array('WiziappInstaller', 'uninstall'));
 	register_activation_hook(WP_WIZIAPP_BASE, array('WiziappInstaller', 'install'));
 	add_action('delete_blog', array('WiziappInstaller', 'deleteBlog'), 10, 2);
-
-	// Update the cache when the settings are changed
-	//add_action('updated_option', array('WiziappContentEvents', 'triggerCacheUpdate'));
-	//add_action('profile_update', array('WiziappContentEvents', 'triggerCacheUpdateByProfile'));
-
-	// add custom image size
-	/**add_image_size('wiziapp-thumbnail', wiziapp_getThumbSize(), wiziapp_getThumbSize(), true );
-	add_image_size('wiziapp-small-thumb', wiziapp_getSmallThumbWidth(), wiziapp_getSmallThumbHeight(), true );
-	add_image_size('wiziapp-med-thumb', wiziapp_getMedThumbWidth(), wiziapp_getMedThumbHeight(), true );
-	add_image_size('wiziapp-iphone', '320', '480', true);*/
 
 	/**
 	* Admin ajax hooks
@@ -123,9 +91,7 @@ function wiziapp_attach_hooks(){
 	add_action('wp_ajax_wiziapp_upgrading_finish', 		array('WiziappUpgradeDisplay', 'upgradingFinish'));
 
 	// admin
-	add_action('wp_ajax_wiziapp_hide_verify_msg', 		   array('WiziappAdminDisplay', 'hideVerifyMsg'));
-	add_action('wp_ajax_wiziapp_hide_upgrade_msg',		   array('WiziappAdminDisplay', 'hideUpgradeMsg'));
-	add_action('wp_ajax_wiziapp_hide_display_message_msg', array('WiziappAdminDisplay', 'hideDisplayMessageMsg'));
+	add_action('wp_ajax_wiziapp_hide_verify_msg', 		array('WiziappAdminNotices', 'hideVerifyMsg'));
 	add_action('wp_ajax_wiziapp_plugin_compatibility',	array(WiziappPluginCompatibility::getInstance(), 'configure'));
 
 	// Get info about the Intro Page

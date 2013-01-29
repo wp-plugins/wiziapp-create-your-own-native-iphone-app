@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
 * @package WiziappWordpressPlugin
 * @subpackage AdminDisplay
@@ -26,59 +26,44 @@ class WiziappAdminDisplay {
 
 		$installer = new WiziappInstaller();
 
-		// if (current_user_can('administrator') && !empty($options['app_token'])){
 		if ( current_user_can('administrator') ){
-			add_action('admin_notices', array('WiziappAdminDisplay', 'configNotice'));
-			//add_action('admin_notices', array('WiziappAdminDisplay', 'versionCheck'));
-			add_action('admin_notices', array('WiziappAdminDisplay', 'upgradeCheck'));
-			add_action('admin_notices', array('WiziappAdminDisplay', 'displayMessageCheck'));
-			add_action('admin_notices', array(WiziappPluginCompatibility::getInstance(), 'notices'));
-			// Add CSS and Javascript for the Wiziapp Activate notice on the Admin panel
-			add_action( 'admin_enqueue_scripts', array('WiziappAdminDisplay', 'styles_javascripts' ) );
+			WiziappAdminNotices::set_admin_notices();
+
+			$webapp_create_resources =
+			( $configured === TRUE && ! WiziappConfig::getInstance()->webapp_installed && ! WiziappConfig::getInstance()->skip_reload_webapp ) ||
+			( isset($_GET['wiziapp_reload_webapp']) && $_GET['wiziapp_reload_webapp'] === '1' );
 
 			if ( WiziappConfig::getInstance()->finished_processing === FALSE || is_null($configured) ){
 				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappPostInstallDisplay', 'display'), $iconPath);
 			} elseif ( $installer->needUpgrade() ){
-				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappUpgradeDisplay', 'display'), $iconPath);
+				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappUpgradeDisplay', 	   'display'), $iconPath);
+			} elseif ( $webapp_create_resources ){
+				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappWebappDisplay', 	   'display'), $iconPath);
 			} elseif ($configured === FALSE){
-				if (isset($_GET['wiziapp_reload_webapp'])) {
-					add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappWebappDisplay', 'display'), $iconPath);
-				}
-				else {
-					add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappGeneratorDisplay', 'display'), $iconPath);
-				}
-			} elseif ( ! WiziappConfig::getInstance()->webapp_installed && ! WiziappConfig::getInstance()->skip_reload_webapp ){
-				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappWebappDisplay', 'display'), $iconPath);
+				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappGeneratorDisplay',   'display'), $iconPath);
 			} else {
-				// We are installed and configured
-				// add_submenu_page('wiziapp', __('dashboard'), __('dashboard'), 'administrator', 'wiziapp_dashboard_display', 'wiziapp_dashboard_display');
 				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappAdminDisplay', 'dashboardDisplay'), $iconPath);
+
 				// This is to avoid having the top menu duplicated as a sub menu
 				add_submenu_page('wiziapp', '', '', 'administrator', 'wiziapp', '');
 
 				if (WiziappConfig::getInstance()->app_live !== FALSE){
-					add_submenu_page('wiziapp', __('Statistics'), __('Statistics'), 'administrator',
-						'wiziapp_statistics_display', array('WiziappAdminDisplay', 'statisticsDisplay'));
+					add_submenu_page('wiziapp', __('Statistics'), __('Statistics'), 'administrator', 'wiziapp_statistics_display', array('WiziappAdminDisplay', 'statisticsDisplay'));
 				}
-				add_submenu_page('wiziapp', __('App Info'), __('App Info'), 'administrator',
-					'wiziapp_app_info_display', array('WiziappAdminDisplay', 'appInfoDisplay'));
-				add_submenu_page('wiziapp', __('My Account'), __('My Account'), 'administrator',
-					'wiziapp_my_account_display', array('WiziappAdminDisplay', 'myAccountDisplay'));
-				add_submenu_page('wiziapp', __('Settings'), __('Settings'), 'administrator',
-					'wiziapp_settings_display', array('WiziappAdminDisplay', 'settingsDisplay'));
 
-				add_submenu_page('wiziapp', __('Reactivate'), __('Reactivate'), 'administrator',
-					'wiziapp_webapp_display', array('WiziappWebappDisplay', 'display'));
+				add_submenu_page('wiziapp', __('App Info'),   __('App Info'),   'administrator', 'wiziapp_app_info_display',   array('WiziappAdminDisplay', 'appInfoDisplay'));
+				add_submenu_page('wiziapp', __('My Account'), __('My Account'), 'administrator', 'wiziapp_my_account_display', array('WiziappAdminDisplay', 'myAccountDisplay'));
+				add_submenu_page('wiziapp', __('Settings'),   __('Settings'),   'administrator', 'wiziapp_settings_display',   array('WiziappAdminDisplay', 'settingsDisplay'));
+				add_submenu_page('wiziapp', __('Reactivate'), __('Reactivate'), 'administrator', 'wiziapp_webapp_display',     array('WiziappWebappDisplay', 'display'));
 			}
 
 			$sd = new WiziappSupportDisplay();
-			add_submenu_page('wiziapp', __('Support'), __('Support'), 'administrator',
-				'wiziapp_support_display', array($sd, 'display'));
+			add_submenu_page('wiziapp', __('Support'), __('Support'), 'administrator', 'wiziapp_support_display', array($sd, 'display'));
 		}
 
 		global $submenu;
-		if ((isset($submenu['wiziapp'][2][0]) && $submenu['wiziapp'][2][0] == 'My Account') ||
-			(isset($submenu['wiziapp'][3][0]) && $submenu['wiziapp'][3][0] == 'My Account')){
+		if ( (isset($submenu['wiziapp'][2][0]) && $submenu['wiziapp'][2][0] == 'My Account') ||
+			(isset($submenu['wiziapp'][3][0]) && $submenu['wiziapp'][3][0] == 'My Account') ){
 			if ($submenu['wiziapp'][0][0] == 'Create your App'){
 				array_shift($submenu['wiziapp']);
 			}
@@ -109,6 +94,7 @@ class WiziappAdminDisplay {
 	function appInfoDisplay(){
 		self::includeGeneralDisplay('appInfo', TRUE);
 	}
+
 	protected static function includeGeneralDisplay($display_action, $includeSimOverlay = TRUE){
 		$r = new WiziappHTTPRequest();
 		$response = $r->api(array(), '/generator/getToken?app_id=' . WiziappConfig::getInstance()->app_id, 'POST');
@@ -134,7 +120,7 @@ class WiziappAdminDisplay {
 			$httpProtocol = 'https';
 			if ( $includeSimOverlay ){
 			?>
-			<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
+			<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/scripts/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
 			<style>
 				#wpadminbar{
 					z-index: 99;
@@ -440,205 +426,4 @@ class WiziappAdminDisplay {
 		<?php
 		}
 	}
-
-	public function versionCheck(){
-		$needCheck = TRUE;
-		$needShow = TRUE;
-
-		// Check only if we didn't check in the last 12 hours
-		if ( isset(WiziappConfig::getInstance()->last_version_checked_at) ){
-			// We checked for the version already, but was it in the last 12 hours?
-			if ((time() - WiziappConfig::getInstance()->last_version_checked_at) <= 60*60*12){
-				// We need to check again
-				$needCheck = FALSE;
-			}
-		}
-		if ( $needCheck ){
-			// Get the current version
-			if ( empty(WiziappConfig::getInstance()->wiziapp_avail_version) ){
-				WiziappConfig::getInstance()->wiziapp_avail_version = WIZIAPP_P_VERSION;
-			}
-			$r = new WiziappHTTPRequest();
-			$response = $r->api(array(), '/cms/version', 'POST');
-			if ( !is_wp_error($response) ){
-				$vResponse = json_decode($response['body'], TRUE);
-				if ( !empty($vResponse) ){
-					WiziappConfig::getInstance()->wiziapp_avail_version = $vResponse['version'];
-					WiziappConfig::getInstance()->last_version_checked_at = time();
-					//update_option('wiziapp_settings', $options);
-				}
-			}
-		}
-
-		if ( WiziappConfig::getInstance()->wiziapp_avail_version != WIZIAPP_P_VERSION ){
-			if ( isset(WiziappConfig::getInstance()->show_need_upgrade_msg) && WiziappConfig::getInstance()->show_need_upgrade_msg === FALSE ){
-				// The user choose to hide the version alert, but was the version alert for the version he saw?
-				if ( WiziappConfig::getInstance()->last_version_shown === WiziappConfig::getInstance()->wiziapp_avail_version ){
-					$needShow = FALSE;
-				}
-			}
-
-			if ( $needShow ){
-			?>
-			<!--                <div id="wiziapp_upgrade_needed_message" class="updated fade">-->
-			<!--                    <p style="line-height: 150%">-->
-			<!--                        An important update is available for the WiziApp WordPress plugin.-->
-			<!--                        <br />-->
-			<!--                        Make sure to <a href="plugins.php">update</a> as soon as possible, to enjoy the security, bug fixes and new features contained in this update.-->
-			<!--                    </p>-->
-			<!--                    <p>-->
-			<!--                        <input id="wiziappHideUpgrade" type="button" class="button" value="Hide this message" />-->
-			<!--                    </p>-->
-			<!--                    <script type="text/javascript">-->
-			<!--                    jQuery(document).ready(function(){-->
-			<!--                        jQuery("#wiziappHideUpgrade").click(function(){-->
-			<!--                            var params = {-->
-			<!--                                action: 'wiziapp_hide_upgrade_msg'-->
-			<!--                            };-->
-			<!--                            jQuery.post(ajaxurl, params, function(data){-->
-			<!--                                jQuery("#wiziapp_upgrade_needed_message").remove();-->
-			<!--                            });-->
-			<!--                        });-->
-			<!--                    });-->
-			<!--                    </script>-->
-			<!--                </div>-->
-			<?php
-			}
-		}
-	}
-
-	public function displayMessageCheck(){
-		if (WiziappConfig::getInstance()->wiziapp_admin_messages_subject != '' && WiziappConfig::getInstance()->wiziapp_admin_messages_message != ''){
-		?>
-		<div id="wiziapp_display_message_message" class="error fade">
-			<p style="line-height: 150%">
-				<?php echo WiziappConfig::getInstance()->wiziapp_admin_messages_message; ?>
-			</p>
-			<p>
-				<input id="wiziappDisplayUserMessageButton" type="button" class="button" value="Hide this message" />
-			</p>
-			<script type="text/javascript">
-				jQuery(document).ready(function(){
-						jQuery("#wiziappDisplayUserMessageButton").click(function(){
-								var params = {
-									action: 'wiziapp_hide_display_message_msg'
-								};
-								jQuery.post(ajaxurl, params, function(data){
-										jQuery("#wiziapp_display_message_message").remove();
-								});
-						});
-				});
-			</script>
-		</div>
-		<?php
-		}
-	}
-
-	public function upgradeCheck(){
-		$installer = new WiziappInstaller();
-		$page = (isset($_GET['page'])) ? $_GET['page'] : '';
-
-		if ( $installer->needUpgrade() && $page != 'wiziapp' ){
-		?>
-		<div id="wiziapp_internal_upgrade_needed_message" class="updated fade">
-			<p style="line-height: 150%">
-				WiziApp needs one more step to finish the upgrading process, click <a href="admin.php?page=wiziapp">here</a> to upgrade your database.
-				<br />
-				Make sure to update as soon as you can to enjoy the security, bug fixes and new features this update contain.
-			</p>
-		</div>
-		<?php
-		}
-	}
-
-	/**
-	* Displays a notice for the user
-	*/
-	public function configNotice(){
-		$show_notice_condition = ! isset( WiziappConfig::getInstance()->wiziapp_showed_config_once ) || WiziappConfig::getInstance()->wiziapp_showed_config_once !== TRUE;
-
-		if ( $show_notice_condition ){
-		?>
-		<div id="wiziapp_active_notice" class="updated">
-			<div></div>
-			<div></div>
-		</div>
-		<?php
-			WiziappConfig::getInstance()->wiziapp_showed_config_once = TRUE;
-		}
-
-		if (!WiziappConfig::getInstance()->email_verified &&
-			WiziappConfig::getInstance()->settings_done &&
-			WiziappConfig::getInstance()->show_email_verified_msg &&
-			WiziappConfig::getInstance()->finished_processing){
-		?>
-		<div id="wiziapp_email_verified_message" class="error fade">
-			<p style="line-height: 150%">
-				Your Email address is not verified yet. We have sent you a verification Email, please go to your Email account and click the verify link.
-				<br />
-				In case you haven’t got this email please go to <a href="admin.php?page=wiziapp_my_account_display">my account</a> and click "verify email".
-			</p>
-			<p>
-				<input id="wiziappHideVerify" type="button" class="button" value="Hide this message" />
-			</p>
-			<script type="text/javascript">
-				jQuery(document).ready(function(){
-					jQuery("#wiziappHideVerify").click(function(){
-						var params = {
-							action: 'wiziapp_hide_verify_msg'
-						};
-						jQuery.post(ajaxurl, params, function(data){
-							jQuery("#wiziapp_email_verified_message").remove();
-						});
-					});
-				});
-			</script>
-		</div>
-		<?php
-		}
-	}
-
-	public function styles_javascripts($hook){
-		$print_js_condition =
-		$hook === 'plugins.php' && isset($_GET['activate']) && $_GET['activate'] === 'true' &&
-		( ! isset( WiziappConfig::getInstance()->wiziapp_showed_config_once ) || WiziappConfig::getInstance()->wiziapp_showed_config_once !== TRUE );
-
-		if ( $print_js_condition ){
-			$plugins_url = plugins_url( dirname( WP_WIZIAPP_BASE ) );
-			wp_enqueue_script( 'active_plugin_notice', $plugins_url . '/themes/admin/active_plugin_notice.js', 'jquery' );
-			wp_enqueue_style(  'active_plugin_notice', $plugins_url . '/themes/admin/active_plugin_notice.css' );
-		}
-	}
-
-	public function hideVerifyMsg(){
-		$status = (WiziappConfig::getInstance()->show_email_verified_msg = FALSE);
-
-		$header = array(
-			'action' => 'hideVerifyMsg',
-			'status' => $status,
-			'code' => ($status) ? 200 : 4004,
-			'message' => '',
-		);
-
-		echo json_encode(array('header' => $header));
-		exit;
-	}
-
-	public function hideUpgradeMsg(){
-		$status = TRUE;
-
-		WiziappConfig::getInstance()->show_need_upgrade_msg = FALSE;
-		WiziappConfig::getInstance()->last_version_shown = WiziappConfig::getInstance()->wiziapp_avail_version;
-
-		$header = array(
-			'action' => 'hideUpgradeMsg',
-			'status' => $status,
-			'code' => ($status) ? 200 : 4004,
-			'message' => '',
-		);
-
-		echo json_encode(array('header' => $header));
-		exit;
-	}
-
 }

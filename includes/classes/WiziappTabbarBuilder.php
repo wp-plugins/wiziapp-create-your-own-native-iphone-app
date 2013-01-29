@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
 class WiziappTabbarBuilder{
 
@@ -50,8 +50,6 @@ class WiziappTabbarBuilder{
 		if ( count($this->tabs) > $this->maxTabsInBar ){
 			$this->gotMore = TRUE;
 		}
-
-		sort($this->tabs);
 	}
 
 	public function getCss(){

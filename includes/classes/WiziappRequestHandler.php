@@ -238,8 +238,6 @@ class WiziappRequestHandler {
 				$this->runService('System', 'listLogs');
 			} else if ( $action == 'getLog' ){
 				$this->runService('System', 'getLogFile', $req[3]);
-			} else if ( $action == 'msgUser' ){
-				$this->runService('System', 'displayUsersAdminMessage');
 			}
 		} elseif ($service == 'external') {
 			$this->runScreenBy('External', 'Link', urldecode($req[2]));

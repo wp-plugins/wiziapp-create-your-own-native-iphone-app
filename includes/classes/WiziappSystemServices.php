@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
 * @package WiziappWordpressPlugin
 * @subpackage AdminWebServices
@@ -32,13 +32,6 @@ class WiziappSystemServices{
 
 		echo json_encode(array('header' => $header, 'version' => WIZIAPP_P_VERSION));
 		exit;
-	}
-
-	public function displayUsersAdminMessage() {
-		$this->checkSystemAuth();
-
-		WiziappConfig::getInstance()->wiziapp_admin_messages_subject = $_POST['subject'];
-		WiziappConfig::getInstance()->wiziapp_admin_messages_message = $_POST['message'];
 	}
 
 	public function updateThumbsConfiguration(){
@@ -143,9 +136,8 @@ class WiziappSystemServices{
 					$response = $r->api(array(), '/application/'.WiziappConfig::getInstance()->app_id.'/icons', 'GET');
 					if ( !is_wp_error($response) ){
 						// Save this in the application configuration file
-						$base = WiziappContentHandler::getInstance()->_get_plugin_dir();
-						$file = $base.'themes/webapp/resources/icons.zip';
-						$dirPath = $base.'themes/webapp/resources/icons';
+						$file 	 = WIZI_DIR_PATH.'themes/webapp/resources/icons.zip';
+						$dirPath = WIZI_DIR_PATH.'themes/webapp/resources/icons';
 						require_once(ABSPATH . 'wp-admin/includes/file.php');
 						if ( ( $creds = request_filesystem_credentials('') ) !== FALSE && WP_Filesystem($creds) ){
 							global $wp_filesystem;

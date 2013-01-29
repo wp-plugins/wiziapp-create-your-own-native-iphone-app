@@ -14,7 +14,12 @@ function wiziapp_intro_page_load(){
 		window.location = window.site_url;
 	};
 
-	document.getElementById("desktop_site").onclick = function(event){
+	var desktop_site = document.getElementById("desktop_site");
+	if ( ! desktop_site ) {
+		return;
+	}
+
+	desktop_site.onclick = function(event){
 		// Clear the Cookie
 		document.cookie = "WIZI_SHOW_STORE_URL=1; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 

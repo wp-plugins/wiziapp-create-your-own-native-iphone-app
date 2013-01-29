@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
 class WiziappOperationNotAllowed extends Exception
 {

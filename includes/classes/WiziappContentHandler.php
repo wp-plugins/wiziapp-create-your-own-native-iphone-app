@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
 * Handles the display of the application, checks if the request for the blog came from a
 * supported known application and if so directs it to the CMS Plugin theme.
@@ -31,8 +31,7 @@ class WiziappContentHandler {
 		add_action('plugins_loaded', array(&$this, 'detectAccess'), 99);
 		add_action('plugins_loaded', array(&$this, 'avoidWpTouchIfNeeded'), 1);
 
-		if ( strpos($_SERVER['REQUEST_URI'], '/wp-admin') === FALSE
-			&& strpos($_SERVER['REQUEST_URI'], 'xmlrpc') === FALSE) {
+		if ( strpos($_SERVER['REQUEST_URI'], '/wp-admin') === FALSE	&& strpos($_SERVER['REQUEST_URI'], 'xmlrpc') === FALSE ) {
 			// Don't change the template directory when in the admin panel
 			add_filter('stylesheet', array(&$this, 'get_stylesheet'), 99);
 			add_filter('theme_root', array(&$this, 'theme_root'), 99);
@@ -54,13 +53,11 @@ class WiziappContentHandler {
 			add_filter('the_content', array(&$this, 'trigger_before_content'), 1);
 			add_filter('the_content', array(&$this, 'convert_content'), 999);
 			add_filter('the_category', array(&$this, 'convert_categories_links'), 99);
-		} else {
-			if (strpos($_SERVER['REQUEST_URI'], 'wiziapp') !== FALSE) {
-				// Avoid cache in the admin
-				header("Cache-Control: no-store, no-cache, must-revalidate");
-				header("Expires: " . gmdate("D, d M Y H:i:s", time() - 3600) . " GMT");
-				add_filter('admin_head', array(&$this, 'do_admin_head_section'), 99);
-			}
+		} elseif ( strpos($_SERVER['REQUEST_URI'], 'wiziapp') !== FALSE ) {
+			// Avoid cache in the admin
+			header("Cache-Control: no-store, no-cache, must-revalidate");
+			header("Expires: " . gmdate("D, d M Y H:i:s", time() - 3600) . " GMT");
+			add_filter('admin_head', array(&$this, 'do_admin_head_section'), 99);
 		}
 	}
 
@@ -227,142 +224,6 @@ class WiziappContentHandler {
 			$content = $this->add_header_to_content($content);
 		}
 		return $content;
-	}
-
-	private function _handle_audio( & $html, $post_id) {
-		$audios_by_props = array();
-		$all_audios = $html->find('a');
-
-		foreach ($all_audios as $audio) {
-			if ( ! isset($audio->attr['href']) ) {
-				continue;
-			}
-
-			$key = md5($audio->attr['href']);
-			$audios_by_props[$key] = $audio;
-		}
-
-		$content_audios = WiziappDB::getInstance()->get_post_audios($post_id);
-		foreach ( $content_audios as $audio ) {
-			if ( ! isset($audio['attachment_info'])) {
-				continue;
-			}
-			$attachment_info = json_decode($audio['attachment_info'], true);
-
-			if ( ! isset($attachment_info['actionURL']) ) {
-				continue;
-			}
-			$url_parts = explode('/', $attachment_info['actionURL']);
-			$audio_href = urldecode($url_parts[4]);
-			$key = md5($audio_href);
-
-			if ( ! isset( $audios_by_props[ $key ] ) ) {
-				continue;
-			}
-
-			if ( empty($info['imageURL'])) {
-			$style = '';
-			} else {
-				$style = "background-image: url({$this->_getAdminImagePath()}{$info['imageURL']}.png);";
-			}
-
-			if (strlen($attachment_info['title']) > 35) {
-				$title = substr($attachment_info['title'], 0, 35) . '...';
-			} else {
-				$title = $attachment_info['title'];
-			}
-
-			ob_start();
-			?>
-			<a href="<?php echo $audio_href; ?>">
-				<div class='audioCellItem'>
-					<div class='col1'>
-						<div class="imageURL" style="<?php echo $style; ?>"></div>
-					</div>
-					<div class='col2'>
-						<p class="title"><?php echo $title; ?></p>
-						<p class="duration"><?php echo $attachment_info['duration']; ?></p>
-					</div>
-					<div class="col3">
-						<div class="playButton"></div>
-					</div>
-				</div>
-			</a>
-			<?php
-			$audios_by_props[ $key ]->outertext = ob_get_clean();
-		}
-	}
-
-	private function _handle_video( & $html, $post_id) {
-		$videos_by_props = array();
-		$all_videos = $html->find('iframe');
-
-		foreach ($all_videos as $video) {
-			if ( ! isset($video->attr['src']) ) {
-				continue;
-			}
-
-			$video_id_pattern = '/^http:\/\/(?:\w+\.)?(?:youtu|vimeo)[\w\/\.]*(?:\/|\?v=)([\w\-]+)/i';
-			preg_match($video_id_pattern, $video->attr['src'], $match);
-
-			if ( empty($match) || empty($match[1]) ) {
-				continue;
-			}
-
-			$videos_by_props[$match[1]] = $video;
-		}
-
-		$content_videos = WiziappDB::getInstance()->get_post_videos($post_id);
-		foreach ( $content_videos as $video ) {
-			if ( ! isset($video['attachment_info'])) {
-				continue;
-			}
-			$attachment_info = json_decode($video['attachment_info'], true);
-
-			if ( ! isset($attachment_info['actionURL']) ) {
-				continue;
-			}
-
-			$url_parts = explode('/', $attachment_info['actionURL']);
-
-			if ( ! isset( $videos_by_props[ $url_parts[5] ] ) && ( $url_parts[4] !== 'youtube' || $url_parts[4] !== 'vimeo' ) ) {
-				continue;
-			}
-
-			if ( $url_parts[4] === 'youtube' ) {
-				$url_parts[4] = 'video';
-				$video_url = 'http://www.youtube.com/watch?v=';
-			} elseif ( $url_parts[4] === 'vimeo' ) {
-				$video_url = 'http://vimeo.com/';
-			}
-
-			ob_start();
-			if ( isset($_GET['sim']) && $_GET['sim'] == 1 && isset($attachment_info['thumb']) ) {
-				?>
-				<div class="video_wrapper_container">
-					<div class="video_wrapper_sim" data-video="video_<?php echo $video['id']; ?>">
-						<img src="<?php echo $attachment_info['thumb']; ?>" width="340" alt="Video Thumbnail" />
-						<div class="video_effect"></div>
-					</div>
-				</div>
-				<?php
-			} else {
-				?>
-				<div class="<?php echo $url_parts[4]; ?>_wrapper data-wiziapp-iphone-support">
-				<?php
-				if ( $this->isHTML() ) {
-					?>
-					<div class="iframe_protect_screen" style="position: absolute;" data-video-url="<?php echo home_url('?wiziapp/content/video/'.$video['id'].WiziappLinks::getAppend()); ?>"></div>
-					<?php
-				}
-				 echo wp_oembed_get( $video_url.$url_parts[5], array('width' => 300, ) );
-				?>
-				</div>
-				<?php
-			}
-
-			$videos_by_props[ $url_parts[5] ]->outertext = ob_get_clean();
-		}
 	}
 
 	/**
@@ -851,12 +712,9 @@ class WiziappContentHandler {
 	}
 
 	function do_admin_head_section() {
-		$dir = realpath($this->_get_plugin_dir());
-		$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $dir);
-		$url = str_replace(DIRECTORY_SEPARATOR, '/', $url);
-?>
-<link rel="stylesheet" href="<?php echo $url.'/themes/admin/style.css'; ?>" type="text/css" />
-<?php
+		?>
+		<link rel="stylesheet" href="<?php echo plugins_url( dirname( WP_WIZIAPP_BASE ) ).'/themes/admin/styles/style.css'; ?>" type="text/css" />
+		<?php
 	}
 
 	function get_stylesheet( $stylesheet ) {
@@ -884,23 +742,21 @@ class WiziappContentHandler {
 	function get_template_directory( $value ) {
 		$this->detectAccess();
 
-		$theme_root = $this->_get_plugin_dir();
-		if ($this->inApp || $this->mobile) {
-			$value = trailingslashit($theme_root) . 'themes';
+		if ( $this->inApp || $this->mobile ) {
+			$value = WIZI_DIR_PATH . 'themes';
 		}
 
 		return $value;
 	}
 
-	function theme_root( $path ) {
+	function theme_root( $value ) {
 		$this->detectAccess();
 
-		$theme_root = $this->_get_plugin_dir();
-		if ($this->inApp || $this->mobile) {
-			$path = trailingslashit($theme_root) . 'themes';
+		if ( $this->inApp || $this->mobile ) {
+			$value = WIZI_DIR_PATH . 'themes';
 		}
 
-		return $path;
+		return $value;
 	}
 
 	public function save_template_directory($val) {
@@ -967,7 +823,7 @@ class WiziappContentHandler {
 		$this->detectAccess();
 
 		if ($this->inApp || $this->mobile) {
-			$url = WP_PLUGIN_URL.'/'.dirname(WP_WIZIAPP_BASE) . '/themes';
+			$url = plugins_url( dirname( WP_WIZIAPP_BASE ) ) . '/themes';
 		}
 
 		return $url;
@@ -975,8 +831,7 @@ class WiziappContentHandler {
 
 	public function registerWebAppScripts() {
 		if ( $this->mobile ) {
-			$pluginUrl = WP_PLUGIN_URL.'/'.dirname(WP_WIZIAPP_BASE);
-			$pluginUrl .= '/themes/webapp';
+			$pluginUrl = plugins_url( dirname( WP_WIZIAPP_BASE ) ).'/themes/webapp';
 
 			wp_register_script('scrollview',
 				$pluginUrl.'/scripts/scrollview.js',
@@ -1017,8 +872,7 @@ class WiziappContentHandler {
 			return;
 		}
 
-		$pluginUrl = WP_PLUGIN_URL.'/'.dirname(WP_WIZIAPP_BASE);
-		$pluginUrl .= '/themes/webapp';
+		$pluginUrl = plugins_url( dirname( WP_WIZIAPP_BASE ) ).'/themes/webapp';
 
 		wp_register_script('jquery_mobile',
 			$pluginUrl.'/scripts/jquery.mobile-1.1.1.js',
@@ -1052,7 +906,7 @@ class WiziappContentHandler {
 
 		wp_enqueue_script(
 			'wiziapp_helper_object',
-			WP_PLUGIN_URL.'/'.dirname(WP_WIZIAPP_BASE).'/themes/webapp/scripts/wiziapp.js',
+			plugins_url( dirname( WP_WIZIAPP_BASE ) ).'/themes/webapp/scripts/wiziapp.js',
 			array('jquery'),
 			WIZIAPP_P_VERSION
 		);
@@ -1060,12 +914,8 @@ class WiziappContentHandler {
 		wp_localize_script(
 			'wiziapp_helper_object',
 			'wiziapp_name_space',
-			array( 'ajaxurl' => admin_url('admin-ajax.php'), 'home_url' => home_url(), )
+			array( 'ajaxurl' => $this->inApp ? '' : admin_url('admin-ajax.php'), 'home_url' => $this->inApp ? '' : home_url(), )
 		);
-	}
-
-	function _get_plugin_dir() {
-		return trailingslashit(dirname(dirname(dirname(__FILE__))));
 	}
 
 	/**
@@ -1105,6 +955,142 @@ class WiziappContentHandler {
 		}
 
 		return $is_desktop_site_mode;
+	}
+
+	private function _handle_audio( & $html, $post_id) {
+		$audios_by_props = array();
+		$all_audios = $html->find('a');
+
+		foreach ($all_audios as $audio) {
+			if ( ! isset($audio->attr['href']) ) {
+				continue;
+			}
+
+			$key = md5($audio->attr['href']);
+			$audios_by_props[$key] = $audio;
+		}
+
+		$content_audios = WiziappDB::getInstance()->get_post_audios($post_id);
+		foreach ( $content_audios as $audio ) {
+			if ( ! isset($audio['attachment_info'])) {
+				continue;
+			}
+			$attachment_info = json_decode($audio['attachment_info'], true);
+
+			if ( ! isset($attachment_info['actionURL']) ) {
+				continue;
+			}
+			$url_parts = explode('/', $attachment_info['actionURL']);
+			$audio_href = urldecode($url_parts[4]);
+			$key = md5($audio_href);
+
+			if ( ! isset( $audios_by_props[ $key ] ) ) {
+				continue;
+			}
+
+			if ( empty($info['imageURL'])) {
+			$style = '';
+			} else {
+				$style = "background-image: url({$this->_getAdminImagePath()}{$info['imageURL']}.png);";
+			}
+
+			if (strlen($attachment_info['title']) > 35) {
+				$title = substr($attachment_info['title'], 0, 35) . '...';
+			} else {
+				$title = $attachment_info['title'];
+			}
+
+			ob_start();
+			?>
+			<a href="<?php echo $audio_href; ?>">
+				<div class='audioCellItem'>
+					<div class='col1'>
+						<div class="imageURL" style="<?php echo $style; ?>"></div>
+					</div>
+					<div class='col2'>
+						<p class="title"><?php echo $title; ?></p>
+						<p class="duration"><?php echo $attachment_info['duration']; ?></p>
+					</div>
+					<div class="col3">
+						<div class="playButton"></div>
+					</div>
+				</div>
+			</a>
+			<?php
+			$audios_by_props[ $key ]->outertext = ob_get_clean();
+		}
+	}
+
+	private function _handle_video( & $html, $post_id) {
+		$videos_by_props = array();
+		$all_videos = $html->find('iframe');
+
+		foreach ($all_videos as $video) {
+			if ( ! isset($video->attr['src']) ) {
+				continue;
+			}
+
+			$video_id_pattern = '/^http:\/\/(?:\w+\.)?(?:youtu|vimeo)[\w\/\.]*(?:\/|\?v=)([\w\-]+)/i';
+			preg_match($video_id_pattern, $video->attr['src'], $match);
+
+			if ( empty($match) || empty($match[1]) ) {
+				continue;
+			}
+
+			$videos_by_props[$match[1]] = $video;
+		}
+
+		$content_videos = WiziappDB::getInstance()->get_post_videos($post_id);
+		foreach ( $content_videos as $video ) {
+			if ( ! isset($video['attachment_info'])) {
+				continue;
+			}
+			$attachment_info = json_decode($video['attachment_info'], true);
+
+			if ( ! isset($attachment_info['actionURL']) ) {
+				continue;
+			}
+
+			$url_parts = explode('/', $attachment_info['actionURL']);
+
+			if ( ! isset( $videos_by_props[ $url_parts[5] ] ) && ( $url_parts[4] !== 'youtube' || $url_parts[4] !== 'vimeo' ) ) {
+				continue;
+			}
+
+			if ( $url_parts[4] === 'youtube' ) {
+				$url_parts[4] = 'video';
+				$video_url = 'http://www.youtube.com/watch?v=';
+			} elseif ( $url_parts[4] === 'vimeo' ) {
+				$video_url = 'http://vimeo.com/';
+			}
+
+			ob_start();
+			if ( isset($_GET['sim']) && $_GET['sim'] == 1 && isset($attachment_info['thumb']) ) {
+				?>
+				<div class="video_wrapper_container">
+					<div class="video_wrapper_sim" data-video="video_<?php echo $video['id']; ?>">
+						<img src="<?php echo $attachment_info['thumb']; ?>" width="340" alt="Video Thumbnail" />
+						<div class="video_effect"></div>
+					</div>
+				</div>
+				<?php
+			} else {
+				?>
+				<div class="<?php echo $url_parts[4]; ?>_wrapper data-wiziapp-iphone-support">
+				<?php
+				if ( $this->isHTML() ) {
+					?>
+					<div class="iframe_protect_screen" style="position: absolute;" data-video-url="<?php echo home_url('?wiziapp/content/video/'.$video['id'].WiziappLinks::getAppend()); ?>"></div>
+					<?php
+				}
+				 echo wp_oembed_get( $video_url.$url_parts[5], array('width' => 300, ) );
+				?>
+				</div>
+				<?php
+			}
+
+			$videos_by_props[ $url_parts[5] ]->outertext = ob_get_clean();
+		}
 	}
 }
 

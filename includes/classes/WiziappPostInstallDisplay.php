@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
 * @package WiziappWordpressPlugin
 * @subpackage Core
@@ -189,7 +189,7 @@ class WiziappPostInstallDisplay{
 			$installer = new WiziappInstaller();
 			$installer->install();
 			// If we are here, we already seen the message...
-			WiziappConfig::getInstance()->wiziapp_showed_config_once = TRUE;
+			WiziappConfig::getInstance()->install_notice_showed = TRUE;
 		}
 
 		// Test for compatibilities issues with this installation
@@ -267,7 +267,7 @@ class WiziappPostInstallDisplay{
 		WiziappLog::getInstance()->write('DEBUG', "Going to process the following pages names: " . print_r($pagesNames, TRUE),
 			"post_install.wiziapp_activate_display");
 	?>
-	<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
+	<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/scripts/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
 	<style>
 		#wpbody{
 			background-color: #fff;
