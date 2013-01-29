@@ -1,7 +1,5 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
-if (!defined('WP_WIZIAPP_BASE'))
-	exit();
 /**
 * This file contains functions that handle the content from the CMS
 *

@@ -1,9 +1,9 @@
 <?php
+
 WiziappLog::getInstance()->write('INFO', 'Loaded index template', 'themes.default.index');
-/**
-* Get access to the globals
-*/
+
 global $wiziapp_block, $cPage, $nextPost, $prevPost, $postsScreen, $wiziappQuery;
+
 /**
 * Start wordpress loop, the condition for the loop was prepared in the screens functions
 * but a minute before starting the loop get the header and footer to try and avoid problems with plugins
@@ -24,6 +24,7 @@ if (have_posts()) :
 	}
 
 	/* Pre-copy posts array */
+	ob_start();
 	$waPosts = array();
 	while (have_posts()) : the_post();
 		$waPosts[] = $post->ID;
@@ -38,9 +39,9 @@ if (have_posts()) :
 			}
 		}
 	endwhile;
+	ob_end_clean();
 
 	// In case something in the template changed, add the modified date to the etag
-
 	$GLOBALS['WiziappEtagOverride'] .= date("F d Y H:i:s.", filemtime(dirname(__FILE__).'/_content.php'));
 	$GLOBALS['WiziappEtagOverride'] .= date("F d Y H:i:s.", filemtime(dirname(__FILE__).'/index.php'));
 

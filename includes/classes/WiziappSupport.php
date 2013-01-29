@@ -1,16 +1,13 @@
-<?php 
-
-if (!defined('WP_WIZIAPP_BASE')) 
-    exit();
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
 class WiziappSupport {
     private $path = '';
     private static $instance = null;
-    
+
     private function __construct() {
-        $this->path = dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR;        
+        $this->path = dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR;
     }
-    
+
     public static function getInstance(){
         if (is_null(self::$instance)) {
             $c = __CLASS__;
@@ -19,7 +16,7 @@ class WiziappSupport {
 
         return self::$instance;
     }
-    
+
     public function listLogs(){
         if (is_dir($this->path) && is_readable($this->path)){
             if ($logsDir = opendir($this->path)){
@@ -27,11 +24,11 @@ class WiziappSupport {
                 while (($log = readdir($logsDir)) !== false){
                     if (preg_match("/\.log(.)*\.php$/", $log) ){
                         $logs[] = array(
-                            'name' => $log, 
+                            'name' => $log,
                             'date' => filemtime($this->path . $log),
                             'size' => filesize($this->path . $log),
                         );
-                            
+
                     }
                 }
                 $this->array_sort($logs, 'name', 'date');
@@ -42,11 +39,11 @@ class WiziappSupport {
             }
         } else {
             $this->alert(500, "The log directory does not exists", 'listLogs');
-        }      
-        
+        }
+
     }
-    
-    public function getLog($log){  
+
+    public function getLog($log){
         $file = $this->path.$log;
         if (file_exists($file)) {
             header('Content-Description: File Transfer');
@@ -64,9 +61,9 @@ class WiziappSupport {
             header("HTTP/1.0 404 Not Found");
         }
         exit;
-        
+
     }
-    
+
     protected function alert($code, $msg, $action=''){
         $status = array(
             'action' => $action,
@@ -74,18 +71,18 @@ class WiziappSupport {
             'code' => $code,
             'message' => Yii::t('yii',$msg),
         );
-        
+
         // API request should never be cached
         header('Cache-Control: no-cache, must-revalidate');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-        
+
         $result = array('header' => $status);
-        
+
         header('Content-type: application/json');
         echo json_encode($result);
         exit();
-    }  
-    
+    }
+
     protected function returnResults($body, $action=''){
         $status = array(
             'action' => $action,
@@ -93,14 +90,14 @@ class WiziappSupport {
             'code' => 200,
             'message' => '',
         );
-        
+
         $result = array_merge(array('header' => $status), $body);
-        
+
         header('Content-type: application/json');
         echo json_encode($result);
-        
+
         exit();
-    }  
+    }
 
     function array_sort_func($a,$b=NULL) {
         static $keys;
@@ -118,7 +115,7 @@ class WiziappSupport {
         }
         return 0;
     }
-    
+
     function array_sort(&$array) {
         if(!$array)
             return '';

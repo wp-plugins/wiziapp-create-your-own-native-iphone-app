@@ -3,7 +3,7 @@ Contributors: wiziapp
 Tags: mobile, iphone, android, Mobile app, mobile theme, HTML5 app, web app, webapp, smartphones, wptouch
 Requires at least: 3.3
 Tested up to: 3.5
-Stable tag: v2.0.2a
+Stable tag: v2.0.3a
 License: GPLv2
 
 Publish your App as a native App to the App Store and Google Play Market! Create your own free HTML5 mobile App for iPhone, Android and WP8 users.

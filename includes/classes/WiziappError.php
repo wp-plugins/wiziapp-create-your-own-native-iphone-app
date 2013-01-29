@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
 class WiziappError extends WP_Error{
     //return new WP_Error( 'http_request_failed', __( 'User has blocked requests through HTTP.' ) );

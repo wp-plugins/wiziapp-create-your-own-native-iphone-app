@@ -154,7 +154,12 @@ window.WIZIAPP = (function($){
 		},
 
 		condition_for_intro_page: function(){
-			if ( typeof navigator !== "object" || typeof navigator.userAgent !== "string" || document.location.href.indexOf("androidapp=1") > 0 ){
+			var not_show_intro_page =
+			typeof navigator !== "object" || typeof navigator.userAgent !== "string" ||
+			document.location.href.indexOf("androidapp=1") > 0 ||
+			wiziapp_name_space.ajaxurl == '' || wiziapp_name_space.home_url == '';
+
+			if ( not_show_intro_page ){
 				return;
 			}
 

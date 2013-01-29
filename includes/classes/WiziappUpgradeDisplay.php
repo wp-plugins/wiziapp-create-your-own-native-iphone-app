@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
 /**
 * @package WiziappWordpressPlugin
@@ -9,8 +9,7 @@
 class WiziappUpgradeDisplay{
 
 	function upgradingFinish(){
-		WiziappLog::getInstance()->write('INFO', "The upgrading is finished, letting the admin know",
-											"post_upgrade.wiziapp_upgrading_finish");
+		WiziappLog::getInstance()->write('INFO', "The upgrading is finished, letting the admin know", "post_upgrade.wiziapp_upgrading_finish");
 
 		$ch = new WiziappContentEvents();
 		$ch->updateCacheTimestampKey();
@@ -65,7 +64,7 @@ class WiziappUpgradeDisplay{
 
 	function display(){
 		?>
-		<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
+		<script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/scripts/jquery.tools.min.js', dirname(dirname(__FILE__)))); ?>"></script>
 		<style>
 			#wpbody{
 				background-color: #fff;
@@ -453,7 +452,7 @@ class WiziappUpgradeDisplay{
 				updateProgressBar();
 				jQuery("#wiziapp_finalize_title").show();
 
-				if (webapp_installed === "1"){
+				if ( webapp_installed === "1" ){
 					document.location.replace(document.location.href + "&wiziapp_reload_webapp=1");
 				} else {
 					document.location.reload();

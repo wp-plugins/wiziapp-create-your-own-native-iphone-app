@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
 class WiziappSingleton extends stdClass
 {
@@ -23,7 +23,7 @@ class WiziappSingleton extends stdClass
         if (!isset(self::$instances[$class])) {
             self::$instances[$class] = new $class();
         }
-        
+
         return self::$instances[$class];
     }
 }

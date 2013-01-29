@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
 * @package WiziappWordpressPlugin
 * @subpackage DOMParser
@@ -204,7 +204,7 @@ class WiziappMediaExtractor{
 
 		// Cut the parameters
 		if (strpos($src, '&') !== FALSE){
-			if ( strpos($src, '/embed') !== FALSE && strpos($src, '/embed/videoseries') === FALSE ) {			
+			if ( strpos($src, '/embed') !== FALSE && strpos($src, '/embed/videoseries') === FALSE ) {
 				$startPos = strpos($src, '/embed')+strlen('/embed')+1;
 				$endPos = strpos($src, '?') - $startPos;
 				$youTubeId = substr($src, $startPos, $endPos);

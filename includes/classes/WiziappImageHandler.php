@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
 * Make sure every image size we need is available from wordpress
 *
@@ -108,7 +108,7 @@ class WiziappImageHandler {
 		$cacheFile = realpath($this->cache) . '/' . $cacheFileImageKey . $ext;
 
         WiziappLog::getInstance()->write('info', 'Checking for cache key: '.$cacheFileImageKey.' in '.$cacheFile, 'WiziappImageHandler.wiziapp_getResizedImage');
-        
+
 		if ($this->_cacheExists($cacheFile)){
 			$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $cacheFile);
 			WiziappLog::getInstance()->write('info', "Before loading image from cache: " . $cacheFile, "image_resizing.getResizedImage");

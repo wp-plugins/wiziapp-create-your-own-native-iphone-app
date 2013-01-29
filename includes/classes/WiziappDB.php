@@ -1,7 +1,4 @@
-<?php
-
-if (!defined('WP_WIZIAPP_BASE'))
-	exit();
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
 /**
 * Main database class for all the plugins needs
@@ -20,7 +17,7 @@ class WiziappDB implements WiziappIInstallable{
 
 	private $media_table = 'wiziapp_content_media';
 	private $user_table = 'wiziapp_user_info';
-	private $internal_version = '0.20';
+	private $internal_version = '0.21';
 	private static $_instance = null;
 
 	/**

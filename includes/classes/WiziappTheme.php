@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
 * @package WiziappWordpressPlugin
 * @subpackage contentDisplay
@@ -174,36 +174,30 @@ class WiziappTheme{
 	public static function getTagsNav(){
 		global $post;
 		$tags = get_the_tags($post->ID);
-	//    $max_to_show = 2;
 		$count = count($tags);
-		$html = '';
-		if ($tags){
-			if ($count > 1){
-				$link = WiziappLinks::postTagsLink($post->ID);
-				$tag_names = $count . ' ' . __('Tags', 'wiziapp');
-			} else {
-				$link = WiziappLinks::tagLink($tags[key($tags)]->term_id);
 
-				$tag_names = WiziappHelpers::makeShortString($tags[key($tags)]->name, 18);
-			}
-			$tag_names = '<span class="names">: ' . $tag_names . '</span>';
-			$html .= '<li><a id="wizapp_tags_footer_link" class="wiziapp_footer_links" href="' . $link . '">';
-			$html .= '<div class="title-bar"></div><span class="title">' . __('Tags', 'wiziapp') . '</span>';
-			/**$names = array();
-			foreach($tags as $tag){;
-					$names[] = "{$tag->name}";
-			}
-			$tag_names = implode(', ', $names);
-			$tag_names = WiziappHelpers::makeShortString($tag_names, 30);
-			if ( strpos($tag_names, '...') === FALSE ){
-				if ( $count > $max_to_show ){
-					$tag_names .= '...';
-				}
-			}  */
-			$html .= $tag_names . '</a></li>';
+		if ( ! $tags){
+			return;
 		}
 
-		echo $html;
+		if ($count > 1){
+			$link = WiziappLinks::postTagsLink($post->ID);
+			$tag_names = $count . ' ' . __('Tags', 'wiziapp');
+		} else {
+			$link = WiziappLinks::tagLink($tags[key($tags)]->term_id);
+			$tag_names = WiziappHelpers::makeShortString($tags[key($tags)]->name, 18);
+		}
+
+		?>
+		<li>
+			<a id="wizapp_tags_footer_link" class="wiziapp_footer_links" href="<?php echo $link; ?>" data-transition="slide">
+				<div class="title-bar"></div>
+				<span class="title"><?php echo __('Tags', 'wiziapp'); ?></span>
+
+				<span class="names">: <?php echo $tag_names; ?></span>
+			</a>
+		</li>
+		<?php
 	}
 
 	/**
@@ -213,41 +207,29 @@ class WiziappTheme{
 	static function getCategoriesNav(){
 		global $post;
 		$categories = get_the_category($post->ID);
-	//    $max_to_show = 2;
 		$count = count($categories);
-		$html = '';
 
-		if ($categories){
-			if ($count == 1 && $categories[0]->cat_name == 'Uncategorized') {
-				// Do nothing, if the only category we have is uncategorized, we will not show anything
-			} else {
-				if ($count > 1){
-					$link = WiziappLinks::postCategoriesLink($post->ID);
-					$cat_names = $count . ' ' . __('Categories', 'wiziapp');
-				} else {
-					$link = WiziappLinks::categoryLink($categories[0]->cat_ID);
-					$cat_names = WiziappHelpers::makeShortString($categories[0]->cat_name, 13);
-				}
-				$cat_names = '<span class="names">: ' . $cat_names . '</span>';
-
-				$html .= '<li class="categories"><a id="wizapp_cats_footer_link" class="wiziapp_footer_links" href="' . $link . '">';
-				$html .= '<div class="title-bar"></div><span class="title">' . __('Categories', 'wiziapp') . '</span>';
-				/**$names = array();
-				for($c=0; $c < $count && $c < $max_to_show; ++$c){
-						$names[] = "{$categories[$c]->cat_name}";
-				}
-
-				$cat_names = implode(', ', $names);
-				$cat_names = WiziappHelpers::makeShortString($cat_names, 25);
-				if ( strpos($cat_names, '...') === FALSE ){
-					if ( $count > $max_to_show ){
-						$cat_names .= '...';
-					}
-				}   */
-				$html .= $cat_names . '</a></li>';
-			}
+		if ( ! $categories || ( $count === 1 && $categories[0]->cat_name == 'Uncategorized' ) ){
+			// Do nothing, if the only category we have is uncategorized, we will not show anything
+			return;
 		}
 
-		echo $html;
+		if ($count > 1){
+			$link = WiziappLinks::postCategoriesLink($post->ID);
+			$cat_names = $count . ' ' . __('Categories', 'wiziapp');
+		} else {
+			$link = WiziappLinks::categoryLink($categories[0]->cat_ID);
+			$cat_names = WiziappHelpers::makeShortString($categories[0]->cat_name, 13);
+		}
+
+		?>
+		<li class="categories">
+			<a id="wizapp_cats_footer_link" class="wiziapp_footer_links" href="<?php echo $link; ?>" data-transition="slide">
+				<div class="title-bar"></div>
+				<span class="title"><?php echo __('Categories', 'wiziapp'); ?></span>
+				<span class="names">: <?php echo $cat_names; ?></span>
+			</a>
+		</li>
+		<?php
 	}
 }

@@ -1,4 +1,5 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
+
 /**
 * @package WiziappWordpressPlugin
 * @subpackage Display

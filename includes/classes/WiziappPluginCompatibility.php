@@ -1,4 +1,4 @@
-<?php
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
 * Handles compatibility with other plugins, adjusting configurations of other
 * plugins as necessary
@@ -25,8 +25,12 @@ class WiziappPluginCompatibility {
 	private function __construct() {
 	}
 
+	/**
+	* Disable known conflicting plugins and popups incompatible with mobile display
+	*/
 	public function pluginGuard() {
-		/* Disable known conflicting plugins and popups incompatible with mobile display */
+		/* Hook to avoid the Collision with the WP Super Cache */
+		add_filter('supercacherewriteconditions', array(&$ce, 'add_wiziapp_condition'));
 
 		/* WP super popup */
 		remove_action('wp_print_styles', 'smp_add_styles');

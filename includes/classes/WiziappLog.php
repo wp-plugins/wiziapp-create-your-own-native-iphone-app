@@ -1,7 +1,4 @@
-<?php
-
-if (!defined('WP_WIZIAPP_BASE'))
-	exit();
+<?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
 /**
 * Basic log class for the wordpress plugin
