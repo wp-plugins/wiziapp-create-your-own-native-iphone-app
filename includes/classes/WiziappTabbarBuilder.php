@@ -50,6 +50,9 @@ class WiziappTabbarBuilder{
 		if ( count($this->tabs) > $this->maxTabsInBar ){
 			$this->gotMore = TRUE;
 		}
+
+		// Sort the Tabs after elements removing
+		$this->tabs = array_values($this->tabs);
 	}
 
 	public function getCss(){
