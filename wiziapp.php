@@ -2,7 +2,7 @@
 
 /**
 * Plugin Name: Wiziapp
-* Description: WiziApp automatically turns your WordPress blog into a native iPhone app. Customize the app to make it your own by using our friendly wizard.
+* Description: Create your own free HTML5 mobile App for iPhone, Android and WP8 users. Publish your App as a native App to the App Store and Google Play Market!
 * Author: Wiziapp Solutions Ltd.
 * Version: v2.0.3a
 * Author URI: http://www.wiziapp.com/
