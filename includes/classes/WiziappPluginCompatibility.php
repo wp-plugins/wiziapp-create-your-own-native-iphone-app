@@ -25,12 +25,8 @@ class WiziappPluginCompatibility {
 	private function __construct() {
 	}
 
-	/**
-	* Disable known conflicting plugins and popups incompatible with mobile display
-	*/
 	public function pluginGuard() {
-		/* Hook to avoid the Collision with the WP Super Cache */
-		add_filter('supercacherewriteconditions', array(&$ce, 'add_wiziapp_condition'));
+		/* Disable known conflicting plugins and popups incompatible with mobile display */
 
 		/* WP super popup */
 		remove_action('wp_print_styles', 'smp_add_styles');
