@@ -56,6 +56,9 @@ function wiziapp_attach_hooks(){
 		add_action('wiziapp_monthly_function_hook', array('WiziappPush', 'monthly'));
 	}
 
+	// The hook to avoid the Collision with the WP Super Cache
+	add_filter('supercacherewriteconditions', array(&$ce, 'add_wiziapp_condition'));
+
 	// Add "Delete Old Log Files" and "Delete Old Cache Files" daily Wordpress Cron job
 	add_action('wiziapp_daily_function_hook', array(WiziappLog::getInstance(), 'deleteOldFiles'));
 	add_action('wiziapp_daily_function_hook', array(WiziappCache::getCacheInstance(), 'delete_old_files'));
