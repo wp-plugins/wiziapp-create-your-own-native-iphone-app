@@ -1,6 +1,7 @@
 <?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
 class WiziappCompatibilitiesChecker{
+
 	public $critical = FALSE;
 	public $testedConnection = FALSE;
 	public $hadConnectionError = FALSE;
@@ -220,7 +221,11 @@ class WiziappCompatibilitiesChecker{
 	public function testAllowUrlFopen($return_as_html = true){
 		if ( ini_get('allow_url_fopen') != '1' ){
 			if ($return_as_html) {
-				return new WiziappError('missing_php_requirements', __('Your host is blocking the PHP directive allow_url_fopen, which is required by the WiziApp plugin in order to use images that are hosted on other websites as thumbnails. To allow this directive, edit your php.ini file, and replace "allow_url_fopen=Off" with "allow_url_fopen=On"', 'wiziapp'));
+				$error_message =
+				'Your host is blocking the PHP directive allow_url_fopen which is required by the WiziApp plugin.
+				Please change the "allow_url_fopen=Off" with "allow_url_fopen=On".
+				In most cases you can do this by editing your php.ini file, in other cases you should be able to change these settings on your hosting cPanel.';
+				return new WiziappError('missing_php_requirements', __($error_message, 'wiziapp'));
 			} else {
 				return FALSE;
 			}
@@ -234,15 +239,16 @@ class WiziappCompatibilitiesChecker{
 		//xml processing curl or other ways to open remote streams enabled allow_url_fopen as on/true gd / imagemagick lib installed
 		$errors = new WiziappError();
 
-		/**$gotGD =extension_loaded('gd');
+		/*
+		$gotGD =extension_loaded('gd');
 		$gotImagick = extension_loaded('imagick');
 		if ( !$gotGD && !$gotImagick ){
-			$errors->add('missing_php_requirements', __('Wiziapp requires either the GD or the ImageMagick PHP extension to be installed on the server. Please contact your hosting provider to enable one of these extensions, otherwise the thumbnails will not function properly', 'wiziapp'));
-		}*/
-
-		/**if ( ini_get('allow_url_fopen') != '1' ){
-			$errors->add('missing_php_requirements', __('Your host blocked the PHP directive allow_url_fopen. Wiziapp needs allow_url_fopen to use images that are hosted on other websites as thumbnails', 'wiziapp'));
-		}*/
+		$errors->add('missing_php_requirements', __('Wiziapp requires either the GD or the ImageMagick PHP extension to be installed on the server. Please contact your hosting provider to enable one of these extensions, otherwise the thumbnails will not function properly', 'wiziapp'));
+		}
+		if ( ini_get('allow_url_fopen') != '1' ){
+		$errors->add('missing_php_requirements', __('Your host blocked the PHP directive allow_url_fopen. Wiziapp needs allow_url_fopen to use images that are hosted on other websites as thumbnails', 'wiziapp'));
+		}
+		*/
 
 		if ( !extension_loaded('libxml') || !extension_loaded('dom') ){
 			$errors->add('missing_php_requirements', __('In order for WiziApp to operate, libxml and the DOM extension must be installed and enabled. ', 'wiziapp'));
@@ -256,9 +262,17 @@ class WiziappCompatibilitiesChecker{
 		}
 
 	}
+
 	/**
 	 * Check for the ability to issue outgoing requests
 	 * and accept requests from the api server.
+	 *
+	 * Send a request to the admin to check access to this address
+	 * it's POST since we need a more restrictive method, there is way
+	 * to allow Wordpress to send GET request but not POST
+	 *
+	 * The post request must have a value to avoid issues with Content-Length  invalid and
+	 * 413 Request Entity Too Large as a result...
 	 *
 	 * Covers the publicly accessible and out going requests tests
 	 *
@@ -267,18 +281,10 @@ class WiziappCompatibilitiesChecker{
 	public function testConnection(){
 		$this->testedConnection = TRUE;
 
-		/**
-		 * Send a request to the admin to check access to this address
-		 * it's POST since we need a more restrictive method, there is way
-		 * to allow Wordpress to send GET request but not POST
-		 *
-		 * The post request must have a value to avoid issues with Content-Length  invalid and
-		 * 413 Request Entity Too Large as a result...
-		 */
 		$r = new WiziappHTTPRequest();
-		$response = $r->api(array('url' => urlencode(home_url()),), '/cms/checkUrl', 'POST');
+		$response = $r->api( array( 'url' => urlencode(home_url()), ), '/cms/checkUrl', 'POST' );
 
-		if ( is_wp_error($response) ) {
+		if ( is_wp_error($response) ){
 			// If we couldn't connect to the host, outbound connections might be blocked
 			if ( "couldn't connect to host" == $response->get_error_message() ){
 				$this->critical = TRUE;
@@ -296,8 +302,8 @@ class WiziappCompatibilitiesChecker{
 		// The request worked, but was our server able to contact our url?
 		$checkResult = json_decode($response['body']);
 
-		if ( empty($checkResult) ) {
-			if ( isset($response['response']) && isset($response['response']['code']) && $response['response']['code'] === FALSE ) {
+		if ( empty($checkResult) ){
+			if ( isset($response['response']) && isset($response['response']['code']) && $response['response']['code'] === FALSE ){
 				$this->critical = TRUE;
 				$this->hadConnectionError = TRUE;
 
