@@ -7,8 +7,8 @@
 * @author comobix.com plugins@comobix.com
 */
 
-class WiziappLoader
-{
+class WiziappLoader{
+
 	private $versions = array();
 	private $defaultVersion = '1.2.0';
 	private $version = WIZIAPP_P_VERSION;
@@ -24,13 +24,13 @@ class WiziappLoader
 		$this->load();
 	}
 
+	/**
+	* Some plugins like wordpress-backup-to-dropbox version 0.8 might do something silly like:
+	* ini_set( 'include_path', dirname( __FILE__ ) . '/PEAR_Includes' . PATH_SEPARATOR . DEFAULT_INCLUDE_PATH );
+	* which will remove the include path from our path....
+	* so we need to run this check and set the path everytime just in case...
+	*/
 	private function _checkSetIncludePath(){
-		/**
-		 * Some plugins like wordpress-backup-to-dropbox version 0.8 might do something silly like:
-		 * ini_set( 'include_path', dirname( __FILE__ ) . '/PEAR_Includes' . PATH_SEPARATOR . DEFAULT_INCLUDE_PATH );
-		 * which will remove the include path from our path....
-		 * so we need to run this check and set the path everytime just in case...
-		 */
 		$currentPath = get_include_path();
 		$currentFilePath = dirname(__FILE__);
 		if ( strpos($currentPath, $currentFilePath) === FALSE ){
@@ -47,12 +47,8 @@ class WiziappLoader
 	protected function setVersion(){
 		if ( isset($_SERVER['HTTP_WIZIAPP_VERSION']) ){
 			$this->version = $_SERVER['HTTP_WIZIAPP_VERSION'];
-		} else {
-            if ( isset($_GET['wizi_ver']) ){
-                $this->version = $_GET['wizi_ver'];
-            } else {
-			// $this->version = $this->defaultVersion;
-            }
+		} elseif ( isset($_GET['wizi_ver']) ){
+			$this->version = $_GET['wizi_ver'];
 		}
 	}
 
@@ -77,7 +73,6 @@ class WiziappLoader
 							if ( $block !== FALSE ){
 								include_once dirname(__FILE__) . $block;
 							}
-
 						}
 					}
 				}
@@ -94,7 +89,6 @@ class WiziappLoader
 	}
 
 	public function loadClass($className){
-
 		// Make sure the class is ours
 		if ( stripos($className, $this->prefix) === 0 ){
 			if ( ! class_exists($className, FALSE)  && ! interface_exists($className, FALSE) ){
@@ -119,6 +113,7 @@ class WiziappLoader
 				}
 			}
 		}
+
 		return $name;
 	}
 
@@ -129,10 +124,9 @@ class WiziappLoader
 	protected function getClassFileName($name){
 		$result = $this->_getFromVersionConfig('classes', $name);
 		if ( $result == $name ){
-			/**$result = substr($name, strlen('wiziapp')+1);
-			$result = strtolower(substr($name, strlen('wiziapp'), 1)).$result.'.php';*/
 			$result .= '.php';
 		}
+
 		return $result;
 	}
 

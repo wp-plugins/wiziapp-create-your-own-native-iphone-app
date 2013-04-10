@@ -6,16 +6,17 @@
 */
 
 class WiziappSystemServices{
+
 	/**
-	* Authenticate the request against the plugin token.
-	* if the authentication fail, throw 404.
-	*
+	 * Authenticate the request against the plugin token.
+	 * if the authentication fail, throw 404.
+	 *
 	 * @return bool
 	 */
 	public function checkSystemAuth(){
-		// Verify the plugin token against our app_token
+		// Verify the plugin token against our plugin_token
 		$token = $_SERVER['HTTP_PLUGIN'];
-		if ( $token != WiziappConfig::getInstance()->app_token ){
+		if ( $token != WiziappConfig::getInstance()->plugin_token ){
 			header("HTTP/1.0 404 Not Found");
 			exit;
 		}
@@ -100,11 +101,8 @@ class WiziappSystemServices{
 
 	/**
 	 * Used to update the wiziapp_settings option
-	 *
 	 * Used by the system control services in case of changes done in the account.
-	 *
 	 * POST /wiziapp/system/settings
-	 *
 	 *
 	 * @return regular json status header.
 	 */
@@ -119,7 +117,11 @@ class WiziappSystemServices{
 			preg_match('/^[A-Z\d\!\.\,\s]{10,105}/i', $_POST['value'], $matches);
 			$value = $matches[0];
 		} else {
-			$value = $_POST['value'];
+			$value = stripslashes($_POST['value']);
+
+			if ( $key === 'adsense' ){
+				$value = json_decode($value, TRUE);
+			}
 		}
 
 		if ( isset(WiziappConfig::getInstance()->$key) ){
@@ -136,8 +138,8 @@ class WiziappSystemServices{
 					$response = $r->api(array(), '/application/'.WiziappConfig::getInstance()->app_id.'/icons', 'GET');
 					if ( !is_wp_error($response) ){
 						// Save this in the application configuration file
-						$file 	 = WIZI_DIR_PATH.'themes/webapp/resources/icons.zip';
-						$dirPath = WIZI_DIR_PATH.'themes/webapp/resources/icons';
+						$file 	 = WiziappContentHandler::getInstance()->get_blog_property('data_files_dir').'/resources/icons.zip';
+						$dirPath = WiziappContentHandler::getInstance()->get_blog_property('data_files_dir').'/resources/icons';
 						require_once(ABSPATH . 'wp-admin/includes/file.php');
 						if ( ( $creds = request_filesystem_credentials('') ) !== FALSE && WP_Filesystem($creds) ){
 							global $wp_filesystem;
@@ -169,11 +171,8 @@ class WiziappSystemServices{
 
 	/**
 	 * Used to update the wiziapp_screens option
-	 *
 	 * Used by the system control services in case of changes done in the template the app uses.
-	 *
 	 * POST /wiziapp/system/screens
-	 *
 	 * @todo add validation to the content of the screens
 	 *
 	 * @returns regular json status header.
@@ -226,17 +225,18 @@ class WiziappSystemServices{
 		$components = json_decode($componentsJson, TRUE);
 		$message = '';
 
-		if ( !$components ){
-			$status = FALSE;
-			$message = __('Unable to decode components: ', 'wiziapp').$componentsJson;
-		} else {
+		if ( $components ){
 			$status = update_option('wiziapp_components', $components);
-			if ( !$status )  {
-				$message = __('Unable to update components', 'wiziapp');
-			} else {
+
+			if ( $status )  {
 				$ce = new WiziappContentEvents();
 				$ce->updateCacheTimestampKey();
+			} else {
+				$message = __('Unable to update components', 'wiziapp');
 			}
+		} else {
+			$status = FALSE;
+			$message = __('Unable to decode components: ', 'wiziapp').$componentsJson;
 		}
 
 		$header = array(

@@ -6,11 +6,7 @@ if ( have_posts() ){
 	setup_postdata($post);
 	$tabBar = new WiziappTabbarBuilder();
 
-	/*
-	WiziappTheme::getPostHeaders(TRUE);
-	// Do NOT write anything before the template header
-	ob_end_clean();
-	*/
+	$wiziapp_google_adsense = WiziappHelpers::get_adsense();
 
 	// Before handing the content, make sure this post is scanned
 	$processed = get_post_meta($post->ID, 'wiziapp_processed');
@@ -26,14 +22,15 @@ if ( have_posts() ){
 	<?php $tabBar->post_header_bar($post); ?>
 
 	<div data-role="content">
-		<div class="page_content">
+		<div class="page_content<?php echo $wiziapp_google_adsense['is_shown'] ? ' wiziapp_google_adsenes' : ''; ?>">
 			<div class="post">
 				<?php
 					$pLink = WiziappLinks::postLink($post->ID);
 
-					if (is_page($post->ID)) {
+					if ( is_page($post->ID) ) {
 						$config = WiziappComponentsConfiguration::getInstance();
-						if (in_array('pages', $config->getAttrToAdd('postDescriptionCellItem'))) {
+
+						if ( in_array( 'pages', $config->getAttrToAdd('postDescriptionCellItem') ) ) {
 							$subPages = get_pages(array(
 								'child_of' => $post->ID,
 								'sort_column' => 'menu_order',
@@ -70,6 +67,7 @@ if ( have_posts() ){
 						<?php the_title(); ?>
 					</a>
 				</h2>
+
 				<div class="pageitem">
 					<div class="single-post-meta-top">
 						<div id="author_and_date">
@@ -77,10 +75,15 @@ if ( have_posts() ){
 								<a href="<?php echo WiziappLinks::authorLink($post->post_author); ?>" data-transition="slide"><?php the_author(); ?></a>
 							</span>&nbsp;<span class="postDescriptionCellItem_date"><?php echo WiziappTheme::formatDate($post->post_date); ?></span>
 						</div>
-						<?php //wiziapp_the_rating(); ?>
 					</div>
-
 					<div class="clear"></div>
+
+					<?php
+						if ( ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['upper_mask'] ) ) {
+							echo $wiziapp_google_adsense['code'];
+						}
+					 ?>
+
 					<div class="post" id="post-<?php the_ID(); ?>">
 						<div id="singlentry">
 							<?php
@@ -102,7 +105,9 @@ if ( have_posts() ){
 						</div>
 					</div>
 				</div>
-				<?php if (!is_page()) { ?>
+				<?php
+				if ( ! is_page() ) {
+					?>
 					<div class="clear"></div>
 					<ul class="wiziapp_bottom_nav">
 						<?php
@@ -111,7 +116,13 @@ if ( have_posts() ){
 						?>
 					</ul>
 					<div class="clear"></div>
-					<?php } ?>
+					<?php
+				}
+
+				if ( ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['lower_mask'] ) ) {
+					echo $wiziapp_google_adsense['code'];
+				}
+				?>
 			</div>
 			<br />
 			<div id="debug" style="background-color: #c0c0c0;">

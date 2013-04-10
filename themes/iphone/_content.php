@@ -1,5 +1,6 @@
 <?php
 	wiziapp_get_header();
+	$wiziapp_google_adsense = WiziappHelpers::get_adsense();
 
 	// Before handing the content, make sure this post is scanned
 	$processed = get_post_meta($post->ID, 'wiziapp_processed');
@@ -8,14 +9,14 @@
 		$ce->savePost($post);
 	}
 ?>
-<div class="page_content">
+<div class="page_content<?php echo $wiziapp_google_adsense['is_shown'] ? ' wiziapp_google_adsenes' : ''; ?>">
 	<div class="post">
 		<?php
 			$pLink = WiziappLinks::postLink($post->ID);
 
-			if (is_page($post->ID)) {
+			if ( is_page($post->ID) ) {
 				$config = WiziappComponentsConfiguration::getInstance();
-				if (in_array('pages', $config->getAttrToAdd('postDescriptionCellItem'))) {
+				if ( in_array('pages', $config->getAttrToAdd('postDescriptionCellItem')) ) {
 					$subPages = get_pages(array(
 						'child_of' => $post->ID,
 						'sort_column' => 'menu_order',
@@ -24,28 +25,28 @@
 
 					if ($subPages) {
 						// @todo change the pages to not be related to the post description cell item since it doesn't make sense
-					?>
-					<div class="postDescriptionCellItem_pages">
-						<ul class="wiziapp_bottom_nav wiziapp_pages_nav albums_list">
-							<?php
-								foreach ($subPages as $subPage) {
-									if ($subPage->post_parent == $post->ID) {
-									?>
-									<li>
-										<a href="<?php echo WiziappLinks::pageLink($subPage->ID); ?>">
-											<div class="album_item wiziapp_pages_item">
-												<p class="attribute text_attribute title wiziapp_pages_title"><?php echo ($subPage->post_title); ?></p>
-												<span class="rowCellIndicator"></span>
-											</div>
-										</a>
-									</li>
-									<?php
+						?>
+						<div class="postDescriptionCellItem_pages">
+							<ul class="wiziapp_bottom_nav wiziapp_pages_nav albums_list">
+								<?php
+									foreach ($subPages as $subPage) {
+										if ($subPage->post_parent == $post->ID) {
+											?>
+											<li>
+												<a href="<?php echo WiziappLinks::pageLink($subPage->ID); ?>">
+													<div class="album_item wiziapp_pages_item">
+														<p class="attribute text_attribute title wiziapp_pages_title"><?php echo ($subPage->post_title); ?></p>
+														<span class="rowCellIndicator"></span>
+													</div>
+												</a>
+											</li>
+											<?php
+										}
 									}
-								}
-							?>
-						</ul>
-					</div>
-					<?php
+								?>
+							</ul>
+						</div>
+						<?php
 					}
 				}
 			}
@@ -56,17 +57,33 @@
 				<?php the_title(); ?>
 			</a>
 		</h2>
+
 		<div class="pageitem">
 			<div class="single-post-meta-top">
 				<div id="author_and_date">
-					<span class="postDescriptionCellItem_author">By
-						<a href="<?php echo WiziappLinks::authorLink($post->post_author); ?>"><?php the_author(); ?></a>
-					</span>&nbsp;<span class="postDescriptionCellItem_date"><?php echo WiziappTheme::formatDate($post->post_date); ?></span>
+					<span class="postDescriptionCellItem_author">
+						By <a href="<?php echo WiziappLinks::authorLink($post->post_author); ?>"><?php the_author(); ?></a>
+					</span>
+					&nbsp;
+					<span class="postDescriptionCellItem_date"><?php echo WiziappTheme::formatDate($post->post_date); ?></span>
 				</div>
-				<?php //wiziapp_the_rating(); ?>
 			</div>
 
 			<div class="clear"></div>
+
+			<?php
+				if ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['upper_mask'] ) {
+					echo $wiziapp_google_adsense['code'];
+				}
+				/*
+				if ( isset($_SERVER['HTTP_UDID']) && $_SERVER['HTTP_UDID'] === 'simulator' ) {
+				?>
+				<div id="upper_adsense_mockup" class="google_adsense_mockup upper"></div>
+				<?php
+				}
+				*/
+			?>
+
 			<div class="post" id="post-<?php the_ID(); ?>">
 				<div id="singlentry">
 					<?php
@@ -88,7 +105,9 @@
 				</div>
 			</div>
 		</div>
-		<?php if (!is_page()) { ?>
+		<?php
+		if ( ! is_page() ) {
+			?>
 			<div class="clear"></div>
 			<ul class="wiziapp_bottom_nav">
 				<?php
@@ -97,7 +116,20 @@
 				?>
 			</ul>
 			<div class="clear"></div>
-			<?php } ?>
+			<?php
+		}
+
+		if ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['lower_mask'] ) {
+			echo $wiziapp_google_adsense['code'];
+		}
+		/*
+		if ( isset($_SERVER['HTTP_UDID']) && $_SERVER['HTTP_UDID'] === 'simulator' ) {
+		?>
+		<div id="lower_adsense_mockup" class="google_adsense_mockup lower"></div>
+		<?php
+		}
+		*/
+		?>
 	</div>
 	<br />
 	<div id="debug" style="background-color: #c0c0c0;">
@@ -142,6 +174,7 @@
 		</ul>
 	</div>
 </div>
+
 <script type="text/javascript">
 	<?php
 		/**

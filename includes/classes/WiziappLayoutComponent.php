@@ -199,11 +199,6 @@ class WiziappLayoutComponent{
 	* @returns the layout map for the component
 	*/
 	function get_layout_attr(){
-		/*if ( is_array($this->attrMap[$this->layout]) ){
-			return $this->layout;
-		}
-		else return $this->attrMap[$this->layout];*/
-
 		// Support dynamic layout in the application
 		return 'L0';
 	}

@@ -19,12 +19,15 @@
 		?>
 
 		<script type="text/javascript">
-			window.store_url = '<?php echo $store_url; ?>';
-			window.site_url  = '<?php echo site_url(); ?>';
+			window.intro_page_parameters = {
+				store_url: '<?php echo $store_url; ?>',
+				delay_period: '<?php echo $delay_period; ?>',
+				site_url: '<?php echo WiziappContentHandler::getInstance()->get_blog_property('url'); ?>'
+			};
 		</script>
 	</head>
 	<body onload="wiziapp_intro_page_load();">
-		<div class="title">
+		<div id="title">
 			<div>
 				<img src="<?php echo $app_icon; ?>" alt="Application Icon">
 			</div>
@@ -34,20 +37,38 @@
 			</div>
 		</div>
 
-		<div id="download_from_store" class="button <?php echo $button_image; ?>">Download from the <?php echo  $download_place; ?></div>
+		<div id="arrow_up"></div>
 
-		<div>OR</div>
+		<p id="intro_page_postclick" class="display_none">
+			Please pull-down your notification center to complete the installation
+		</p>
+
+		<p id="download_button_title">
+			Get the ultimate <?php echo  $download_place; ?> experience
+			<br />
+			with our new App!
+		</p>
+
+		<div id="download_from_store">
+			<img src="<?php echo $wiziapp_plugin_url; ?>/themes/intropage/left_arrow.png" alt="Left Arrow"   class="intro_page_arrow">
+			<img src="<?php echo $wiziapp_plugin_url; ?>/themes/intropage/<?php echo $button_image; ?>" alt="Application Store">
+			<img src="<?php echo $wiziapp_plugin_url; ?>/themes/intropage/right_arrow.png" alt="Right Arrow" class="intro_page_arrow">
+		</div>
+
+		<p>
+			<span id="no_thanks_notation">No thanks.</span> Continue to:
+		</p>
 
 		<?php
 		if ( $is_show_desktop ) {
 			?>
-			<div id="mobile_site" class="button mobile_site">Go to the mobile site</div>
+			<div id="mobile_site">Mobile Site</div>
 
 			<div id="desktop_site">Desktop Site</div>
 			<?php
 		} else {
 			?>
-			<div id="mobile_site" class="button mobile_site">Continue to Website</div>
+			<div id="mobile_site">Website</div>
 			<?php
 		}
 		?>

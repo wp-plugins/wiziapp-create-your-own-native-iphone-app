@@ -29,19 +29,10 @@ class WiziappCompatibilitiesChecker{
 			$html .= $token->getHTML();
 		}
 
-		$buttons = '<div class="buttons">';
-		$buttons .= '<a href=javascript:void(0); id="wiziapp_report_problem">'.__('Report a Problem', 'wiziapp') .'</a>';
-		if ( $this->foundCriticalIssues() ){
-			$buttons .= '<a href=javascript:window.location.reload(); id="wiziapp_retry_compatibilities">'.__('Retry', 'wiziapp') .'</a>';
-		} else {
-			$buttons .= '<a href=javascript:void(0); id="wiziapp_close_compatibilities" class="close">'.__('OK', 'wiziapp') .'</a>';
-		}
-		$buttons .= '</div>';
-
-		if ( !empty($html) ){
-			$html = '<div id="wiziapp_compatibilities_errors" class="wiziapp_errors_container"><div class="errors_container"><div class="errors">' . $html . '</div>' . $buttons . '</div><div class="hidden report_container"></div></div>';
-		}
-		return $html;
+		return array(
+			'text' => $html,
+			'is_critical' => $this->foundCriticalIssues()
+		);
 	}
 
 	public function fullTestAsHtml(){
@@ -77,19 +68,11 @@ class WiziappCompatibilitiesChecker{
 			$html .= $dirs->getHTML();
 		}
 
-		$buttons = '<div class="buttons">';
-		$buttons .= '<a href=javascript:void(0); id="wiziapp_report_problem">'.__('Report a Problem', 'wiziapp') .'</a>';
-		if ( $this->foundCriticalIssues() ){
-			$buttons .= '<a href=javascript:window.location.reload(); id="wiziapp_retry_compatibilities">'.__('Retry', 'wiziapp') .'</a>';
-		} else {
-			$buttons .= '<a href=javascript:void(0); id="wiziapp_close_compatibilities" class="close">'.__('OK', 'wiziapp') .'</a>';
+		if ( empty($html) ){
+			return '';
 		}
-		$buttons .= '</div>';
 
-		if ( !empty($html) ){
-			$html = '<div id="wiziapp_compatibilities_errors" class="wiziapp_errors_container"><div class="errors_container"><div class="errors">' . $html . '</div>' . $buttons . '</div><div class="hidden report_container"></div></div>';
-		}
-		return $html;
+		return self::create_error_block( array( 'text' => $html, 'is_critical' => $this->foundCriticalIssues(), ) );
 	}
 
 	public function foundCriticalIssues(){
@@ -132,21 +115,22 @@ class WiziappCompatibilitiesChecker{
 	}
 
 	public function testDatabase(){
-		if ( !WiziappDB::getInstance()->isInstalled() ){
-			// Try to recover
-			WiziappDB::getInstance()->install();
-			if ( !WiziappDB::getInstance()->isInstalled() ){
-				$this->critical = TRUE;
-				return new WiziappError('database_error', __('Your WordPress installation does not have permission to create tables in your database.', 'wiziapp'));
-			}
+		if ( WiziappDB::getInstance()->isInstalled() ){
+			return TRUE;
 		}
 
-		return TRUE;
+		// Try to recover
+		WiziappDB::getInstance()->install();
+
+		if ( ! WiziappDB::getInstance()->isInstalled() ){
+			$this->critical = TRUE;
+			return new WiziappError('database_error', __('Your WordPress installation does not have permission to create tables in your database.', 'wiziapp'));
+		}
 	}
 
 	public function testToken(){
 		// If we don't have a token, try to get it again
-		$activated = !empty(WiziappConfig::getInstance()->app_token);
+		$activated = ! empty(WiziappConfig::getInstance()->plugin_token);
 		if (  !$activated ){
 			$cms = new WiziappCms();
 			$activated = $cms->activate();
@@ -260,8 +244,8 @@ class WiziappCompatibilitiesChecker{
 		} else {
 			return TRUE;
 		}
-
 	}
+
 
 	/**
 	 * Check for the ability to issue outgoing requests
@@ -282,7 +266,7 @@ class WiziappCompatibilitiesChecker{
 		$this->testedConnection = TRUE;
 
 		$r = new WiziappHTTPRequest();
-		$response = $r->api( array( 'url' => urlencode(home_url()), ), '/cms/checkUrl', 'POST' );
+		$response = $r->api( array( 'url' => urlencode( WiziappContentHandler::getInstance()->get_blog_property('url') ), ), '/cms/checkUrl', 'POST' );
 
 		if ( is_wp_error($response) ){
 			// If we couldn't connect to the host, outbound connections might be blocked
@@ -319,11 +303,42 @@ class WiziappCompatibilitiesChecker{
 
 		// The response is ok, let's check when our server is saying
 		if ( ! $checkResult->header->status ){
-			return new WiziappError('testing_connection_failed', $checkResult->header->message);
+			$rewrite_rules_message = WiziappHelpers::check_rewrite_rules();
+			$appropriate_message = ( $rewrite_rules_message !== '' ) ? $rewrite_rules_message : $checkResult->header->message;
+
+			return new WiziappError('testing_connection_failed', $appropriate_message);
 		}
 
 		// If we made it this far, all is good
 		return TRUE;
 	}
 
+	public static function create_error_block( array $error){
+		ob_start();
+		?>
+		<div id="wiziapp_compatibilities_errors" class="wiziapp_errors_container">
+			<div class="errors_container">
+				<div class="errors"><?php echo $error['text']; ?></div>
+
+				<div class="buttons">
+					<a href=javascript:void(0); id="wiziapp_report_problem"><?php echo __('Report a Problem', 'wiziapp'); ?></a>
+					<?php
+					if ( $error['is_critical'] ){
+						?>
+						<a href=javascript:window.location.reload(); id="wiziapp_retry_compatibilities"><?php echo __('Retry', 'wiziapp'); ?></a>
+						<?php
+					} else {
+						?>
+						<a href=javascript:void(0); id="wiziapp_close_compatibilities" class="close"><?php echo __('OK', 'wiziapp'); ?></a>
+						<?php
+					}
+					?>
+				</div>
+			</div>
+			<div class="hidden report_container"></div>
+		</div>
+		<?php
+
+		return ob_get_clean();
+	}
 }

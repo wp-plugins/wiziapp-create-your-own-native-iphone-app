@@ -31,8 +31,7 @@ class WiziappTheme{
 				$params[] = "{$key}={$value}";
 			}
 			header('content_meta_data: ' . implode('&', $params));
-			WiziappLog::getInstance()->write('DEBUG', 'Headers in place: ' . print_r($headers, TRUE),
-											'theme_functions.wiziapp_do_content_get_post_headers');
+			WiziappLog::getInstance()->write('DEBUG', 'Headers in place: ' . print_r($headers, TRUE), 'theme_functions.wiziapp_do_content_get_post_headers');
 		}
 
 		return $headers;
@@ -87,12 +86,9 @@ class WiziappTheme{
 			"postID" => $post->ID,
 			"title" => strip_tags($post->post_title),
 			'screenTitle' => WiziappConfig::getInstance()->app_name,
-			//"numOfComments" => $totalComments,
-			//"author" => "{$authorName}",
-			//"date" => $postDate,
 			"imageURL" => $imageURL,
 			"canComment" => ('open' == $post->comment_status),
-			"showCommentsIcon" =>$showCommentsIcon,
+			"showCommentsIcon" => $showCommentsIcon,
 		);
 
 		if ( isset($c->themeRemoveAttr) ){

@@ -61,4 +61,8 @@ return array(
 	'2.0.3' => array(
 		'classes' => array(),
 	),
+
+	'2.0.4' => array(
+		'classes' => array(),
+	),
 );

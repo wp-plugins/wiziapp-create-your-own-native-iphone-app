@@ -7,7 +7,34 @@
 
 class WiziappWebappDisplay{
 
+	/**
+	* Need to deactivate the Webapp feature on the "Wiziapp plugin upgrade" process,
+	* as the "wiziapp/themes/webapp/resources" folder is not exist already,
+	* so, the Webapp feature will not work.
+	* First, need to be safe, it is really the "Wiziapp plugin upgrade" process
+	*/
+	public static function deactivate_on_upgrade(){
+		if ( ! is_admin() || ! isset($_SERVER['HTTP_REFERER']) || ! isset($_SERVER['REQUEST_URI']) ){
+			return;
+		}
+
+		$http_referer = urldecode($_SERVER['HTTP_REFERER']);
+		$request_uri  = urldecode($_SERVER['REQUEST_URI']);
+
+		$is_upgrade_process =
+		preg_match('/\/wp-admin\/update\.php\?action=upgrade-plugin.*?&plugin=wiziapp[a-z\-]*?\/wiziapp.php/i', $http_referer) &&
+		preg_match('/\/wp-admin\/update\.php\?action=activate-plugin.*?&plugin=wiziapp[a-z\-]*?\/wiziapp.php/i', $request_uri);
+		if ( ! $is_upgrade_process ) {
+			return;
+		}
+
+		WiziappConfig::getInstance()->webapp_installed = FALSE;
+	}
+
 	public function installFinish(){
+		// Copy the CSS file to Resorces folder, as he has paths, relative to the Resorces folder
+		@copy(WIZI_DIR_PATH.'themes/webapp/style_aux.css', WiziappContentHandler::getInstance()->get_blog_property('data_files_dir').'/resources/style_aux.css');
+
 		WiziappLog::getInstance()->write('INFO', "The webapp install is finished, marking it", 'WiziappWebappDisplay.installFinish');
 
 		$r = new WiziappHTTPRequest();
@@ -61,7 +88,7 @@ class WiziappWebappDisplay{
 			$this->_returnResults('retry', 'The '.$resources.' directory is not writable, please set the directory permission to 0777 and try again.');
 		}
 
-		$imagesBase = plugins_url( dirname( WP_WIZIAPP_BASE ) ).'/themes/webapp/resources/';
+		$imagesBase = WiziappContentHandler::getInstance()->get_blog_property('data_files_url').'/resources/';
 		$contentPrefix = "var jsInstructionsBase = '{$imagesBase}';var jsInstructions = ";
 		$contentSuffix = ';';
 
@@ -148,12 +175,14 @@ class WiziappWebappDisplay{
 				WiziappLog::getInstance()->write('ERROR', '! class_exists(\'ZipArchive\')', 'WiziappWebappDisplay._update');
 
 				$url = wp_nonce_url('admin.php?page=wiziapp_webapp_display','wiziapp-webapp-options');
+				ob_start();
 				if ( ( $creds = request_filesystem_credentials($url, '', FALSE, FALSE, NULL) ) === FALSE ){
 					WiziappLog::getInstance()->write('ERROR', "Dont have permissions to upload the file", 'WiziappWebappDisplay.update');
 				}
 				if ( ! WP_Filesystem($creds) ){
 					WiziappLog::getInstance()->write('ERROR', "Cant start the filesystem object", 'WiziappWebappDisplay.update');
 				}
+				ob_end_clean();
 				if ( ! @unzip_file($file, $dirPath) ){
 					WiziappLog::getInstance()->write('ERROR', 'Can not unzip the file '.$file.' by WP function unzip_file()', 'WiziappWebappDisplay._update');
 					$this->_returnResults('fatal', 'fatal');
@@ -195,7 +224,7 @@ class WiziappWebappDisplay{
 	}
 
 	private function _get_resources_path(){
-		return realpath( WIZI_DIR_PATH.'themes/webapp/resources' );
+		return WiziappContentHandler::getInstance()->get_blog_property('data_files_dir').'/resources';
 	}
 
 	public function display(){
@@ -250,11 +279,6 @@ class WiziappWebappDisplay{
 				height:  93px;
 				width: 235px;
 			}
-			#current_progress_label{
-				/**position: absolute;
-				top: 40px;
-				right: 4px;*/
-			}
 			.text_label{
 				color: #0ca0f5;
 				font-weight: bold;
@@ -304,6 +328,7 @@ class WiziappWebappDisplay{
 
 				var wiziapp_errors_container;
 				var wiziapp_message_wrapper;
+				var current_progress_label;
 				var fatal_error_message = "There was a problem installing the Webapp, please contact support.";
 				var try_again_message = "Connection error, please try again.";
 				var retry_button;
@@ -311,6 +336,7 @@ class WiziappWebappDisplay{
 				var progressWait = 30;
 				var step_number = 0;
 				var retry_amount = 0;
+				var backward_stopwatch;
 				var recycle_start_time = 0;
 				var update_steps = ['handshake', 'config', 'display', 'effects', 'images', 'icons', 'splash'];
 				var update_msg = [
@@ -387,7 +413,21 @@ class WiziappWebappDisplay{
 					.click(reaction_to_error);
 
 					// Start sending requests to generate content till we are getting a flag showing we are done
-					startProcessing();
+					current_progress_label = $("#current_progress_label");
+					stopwatch = progressWait;
+					var intervalID = window.setInterval(function(){
+						--stopwatch;
+						if ( stopwatch > ( progressWait - 5 ) ) {
+							return;
+						}
+
+						current_progress_label.text(stopwatch);
+						}, 1000);
+					setTimeout(function(){
+						clearInterval(intervalID);
+						current_progress_label.text("Continue...");
+						startProcessing();
+						}, 1000 * progressWait);
 				});
 
 				function startProcessing(){
@@ -514,9 +554,9 @@ class WiziappWebappDisplay{
 					var done = (step_number / total_items) * 100;
 
 					if (step_number < update_steps.length){
-						$("#current_progress_label").text(update_msg[step_number]+"...");
+						current_progress_label.text(update_msg[step_number]+"...");
 					} else {
-						$("#current_progress_label").text("<?php echo __('Finalizing...', 'wiziapp'); ?>");
+						current_progress_label.text("<?php echo __('Finalizing...', 'wiziapp'); ?>");
 					}
 
 					$("#main_progress_bar").css('width', done + '%');
@@ -534,7 +574,7 @@ class WiziappWebappDisplay{
 				function handleFinalizingProcessing(data){
 					$("#wiziapp_finalize_title").show();
 
-					var url = document.location.href;
+					var url = window.location.href;
 
 					if ( url.indexOf("wiziapp_webapp_display") !== -1 || url.indexOf("&wiziapp_reload_webapp=1") !== -1 ){
 						var replace_get = "";
@@ -556,7 +596,7 @@ class WiziappWebappDisplay{
 						} catch(e) {}
 					}
 
-					document.location.replace(url);
+					window.location.replace(url);
 				}
 
 			})(jQuery);
@@ -567,7 +607,7 @@ class WiziappWebappDisplay{
 			<p id="wizi_be_patient" class="text_label"><?php echo __('Please be patient while we activate your mobile App. It may take several minutes.', 'wiziapp');?></p>
 			<div id="wizi_icon_wrapper">
 				<div id="wizi_icon_processing"></div>
-				<div id="current_progress_label" class="text_label"><?php echo __('Initializing...', 'wiziapp'); ?></div>
+				<div id="current_progress_label" class="text_label"><?php echo __('Initializing... Please wait.', 'wiziapp'); ?></div>
 			</div>
 			<div id="main_progress_bar_container">
 				<div id="main_progress_bar"></div>

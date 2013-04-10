@@ -17,7 +17,7 @@ class WiziappDB implements WiziappIInstallable{
 
 	private $media_table = 'wiziapp_content_media';
 	private $user_table = 'wiziapp_user_info';
-	private $internal_version = '0.21';
+	private $internal_version = '0.22';
 	private static $_instance = null;
 
 	/**
@@ -738,28 +738,29 @@ class WiziappDB implements WiziappIInstallable{
 
 		// Handle charset
 		$charset_collate = '';
-		if (version_compare(mysql_get_server_info(), '4.1.0', '>=')) {
-			if (!empty($wpdb->charset))
+		if ( version_compare(mysql_get_server_info(), '4.1.0', '>=') ) {
+			if ( ! empty($wpdb->charset) )
 				$charset_collate = "DEFAULT CHARACTER SET {$wpdb->charset}";
-			if (!empty($wpdb->collate))
+			if ( ! empty($wpdb->collate) )
 				$charset_collate .= " COLLATE {$wpdb->collate}";
 		}
 
-		// NOTE: Before changing the sql here read the function doc block...
-		$sql = "CREATE TABLE {$wpdb->prefix}{$this->media_table} (
-		id BIGINT(20) NOT NULL AUTO_INCREMENT ,
-		content_id BIGINT(20) NOT NULL ,
-		content_type INT(4) NOT NULL ,
-		original_code MEDIUMTEXT NOT NULL ,
-		attachment_info MEDIUMTEXT NOT NULL,
-		attachment_type INT(4) NOT NULL,
-		created_at DATETIME NULL ,
-		updated_at DATETIME NULL ,
-		PRIMARY KEY id (id),
-		KEY content_id (content_id)
-		) {$charset_collate} ENGINE=INNODB;";
+		// Before changing the sql here read the function doc block.
+		// dbDelta adds fields nicely but does not seem to remove them.
+		$sql =
+		"CREATE TABLE IF NOT EXISTS ".$wpdb->prefix.$this->media_table." (
+		`id` BIGINT(20) NOT NULL AUTO_INCREMENT ,
+		`content_id` BIGINT(20) NOT NULL ,
+		`content_type` INT(4) NOT NULL ,
+		`original_code` MEDIUMTEXT NOT NULL ,
+		`attachment_info` MEDIUMTEXT NOT NULL,
+		`attachment_type` INT(4) NOT NULL,
+		`created_at` DATETIME NULL ,
+		`updated_at` DATETIME NULL ,
+		PRIMARY KEY id (`id`),
+		KEY (`content_id`)
+		) ".$charset_collate." ENGINE=INNODB;";
 
-		// Note: dbDelta adds fields nicely but does not seem to remove them...
 		$create_table_errors = '';
 		ob_start();
 		dbDelta($sql);
@@ -768,7 +769,8 @@ class WiziappDB implements WiziappIInstallable{
 			WiziappLog::getInstance()->write('ERROR', $create_table_errors, 'WiziappDB.install');
 		}
 
-		$userSql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}{$this->user_table} (
+		$userSql =
+		"CREATE TABLE IF NOT EXISTS {$wpdb->prefix}{$this->user_table} (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`udid` varchar(72) NOT NULL,
 		`appId` int(8) NOT NULL DEFAULT 0,
@@ -793,10 +795,8 @@ class WiziappDB implements WiziappIInstallable{
 			WiziappLog::getInstance()->write('ERROR', $create_table_errors, 'WiziappDB.install');
 		}
 
-		// save the database version for easy upgrades
+		// Save the database version for easy upgrades
 		update_option("wiziapp_db_version", $this->internal_version);
-
-		return $this->isInstalled();
 	}
 
 	public function uninstall() {

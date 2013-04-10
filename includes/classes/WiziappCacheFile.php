@@ -7,13 +7,9 @@
 * @todo add support for memcache configuration, will require configuration, maybe from wordpress cache plugins?
 */
 
-class WiziappCacheFile extends WiziappCache
-{
-	/**
-	* path to directory with cache files
-	* @var string
-	*/
-	private $_fileDir = 'WP_ROOT_PATH/wp-content/uploads/wiziapp_cache/';
+class WiziappCacheFile extends WiziappCache {
+
+	private $_fileDir = '';
 
 	public function __construct( array $options = array()) {
 		parent::__construct($options);
@@ -21,19 +17,7 @@ class WiziappCacheFile extends WiziappCache
 		WiziappLog::getInstance()->write('INFO', "Did not find APC installed, using File caching", "WiziappCacheFile.__construct");
 
 		$uploads_dir = wp_upload_dir();
-		$this->_fileDir = str_replace('WP_ROOT_PATH/wp-content/uploads', $uploads_dir['basedir'], $this->_fileDir);
-
-		if ( ! file_exists($this->_fileDir)) {
-			if ( ! @mkdir($this->_fileDir, 0777, true)) {
-				WiziappLog::getInstance()->write('ERROR', 'Could not create the wiziapp file caching directory: '.$this->_fileDir, "WiziappCacheFile.__construct");
-				$this->_is_enabled = FALSE;
-			}
-		} elseif ( ! @is_readable($this->_fileDir) || ! @is_writable($this->_fileDir)) {
-			if ( ! @chmod($this->_fileDir, 0777)) {
-				WiziappLog::getInstance()->write('ERROR', 'The upload directory exists, but its not readable or not writable: '.$this->_fileDir, "WiziappCacheFile.__construct");
-				$this->_is_enabled = FALSE;
-			}
-		}
+		$this->_fileDir = $uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_data_files'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR;
 
 		if ( ! WiziappConfig::getInstance()->wiziapp_cache_enabled ) {
 			$this->_is_enabled = FALSE;

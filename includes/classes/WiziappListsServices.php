@@ -7,6 +7,7 @@
 */
 
 class WiziappListsServices{
+
 	public function categories(){
 		$header = array(
 			'action' => 'wiziapp_getAllCategories',

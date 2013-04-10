@@ -150,21 +150,9 @@ class WiziappLinks{
 	}
 
 	public static function linkToImage($url){
-		/**
-		* Make sure the image doesn't exceed the device size,
-		* but only do this if we haven't converted it yet
-		*/
-
-		/** We dont resize images anymore!!! Only thumbnails, on demand.
-		if (strpos($url, 'wiziapp/cache/') === FALSE){
-		$image = new WiziappImageHandler($url);
-		$size = wiziapp_getImageSize('full_image');
-		$url = $image->getResizedImageUrl($url, $size['width'], 0);
-		} */
-
 		$part2 = strrchr($url, "/");
-		$pos = strpos  ( $url  , $part2);
-		$part1 = substr_replace ($url, "", $pos);
+		$pos = strpos($url, $part2);
+		$part1 = substr_replace($url, "", $pos);
 
 		return "cmd://open/image/" . urlencode($part1) . $part2;
 	}
@@ -179,6 +167,7 @@ class WiziappLinks{
 		if (self::$append === null) {
 			self::$append = 'wizi_ver='.WIZIAPP_P_VERSION.((isset($_GET['androidapp']) && $_GET['androidapp'] == 1)?'&androidapp=1':'').'&ap=1&output=html';
 		}
+
 		return $sep.self::$append;
 	}
 }

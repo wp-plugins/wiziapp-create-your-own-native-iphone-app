@@ -48,7 +48,7 @@ function pageShowEvent(event){
 	if ( $page.is('.got_empty_state') ){
 		if ( $page.find('.screen').find('li').length == 0 ){
 			var cssClass = $page.attr('data-class');
-			$page.find('.screen').addClass(cssClass+'_empty');
+			$page.find('.screen').addClass(cssClass + '_empty');
 		}
 	}
 
@@ -97,7 +97,7 @@ function pageShowEvent(event){
 	.bind('click', function(event){
 		var $el = jQuery(this);
 		var audioElId = $el.attr('data-audio-id');
-		var $audioEl = jQuery('#'+audioElId);
+		var $audioEl = jQuery('#' + audioElId);
 
 		if ( $audioEl.parents('.playing').length > 0 ){
 			$el.removeClass('audio_button_play_selected');
@@ -119,7 +119,7 @@ function pageShowEvent(event){
 	.bind('click', function(event){
 		var $el = jQuery(this);
 		var audioElId = $el.attr('data-audio-id');
-		var $audioEl = jQuery('#'+audioElId);
+		var $audioEl = jQuery('#' + audioElId);
 
 		$audioEl[0].pause();
 		$audioEl[0].currentTime=0;// rewind
@@ -273,10 +273,10 @@ function prepareActionURL(elements){
 			var ind = screenURL.indexOf('?');
 			if ( ind >= 0 ){
 				sep = '&';
-				if ( screenURL.indexOf('output=html', ind+1) < 0 ){
+				if ( screenURL.indexOf('output=html', ind + 1) < 0 ){
 					sep += 'output=html&';
 				}
-				if ( screenURL.indexOf('androidapp=1', ind+1) < 0 ){
+				if ( screenURL.indexOf('androidapp=1', ind + 1) < 0 ){
 					sep += 'androidapp=1&';
 				}
 			}
@@ -300,7 +300,7 @@ function prepareActionURL(elements){
 							var $im = $el.find("img[data-wiziapp-id]");
 							if ($im.length){
 								$im.attr("data-wiziapp-full-image", decodeURIComponent($el.attr('href').substr(17)));
-								$el.attr('href', "#image-"+encodeURIComponent($im.attr("data-wiziapp-id")));
+								$el.attr('href', "#image-" + encodeURIComponent($im.attr("data-wiziapp-id")));
 							}
 						}
 						else if ( screenParams[1] == 'video' ){
@@ -312,7 +312,7 @@ function prepareActionURL(elements){
 				} else {
 					if ( actionType == 'http' || actionType == 'https' ){
 						$el.attr("rel", "external");
-//						$el.attr('href', "?wiziapp/external/"+encodeURIComponent(encodeURIComponent(href))+'&output=html&ap=1&wizi_ver=' + window.WiziappPlatformVersion);
+//						$el.attr('href', "?wiziapp/external/" + encodeURIComponent(encodeURIComponent(href)) + '&output=html&ap=1&wizi_ver=' + window.WiziappPlatformVersion);
 					}
 				}
 			}
@@ -492,10 +492,10 @@ function applyEffects($wantedContainer){
 				for (var i=0; i<jsInstructions[jsInstruction].length;++i){
 					var func = jsInstructions[jsInstruction][i]['func'];
 					var params = jsInstructions[jsInstruction][i]['params'];
-					var $el = $wantedContainer.find("."+jsInstruction+":not(.ignore_effect)");
+					var $el = $wantedContainer.find("." + jsInstruction + ":not(.ignore_effect)");
 
 					if ( $el.length > 0 ){
-						$el.data('effectSelector', '.ui-page[data-url="'+$wantedContainer.attr('data-url') + '"] .'+jsInstruction);
+						$el.data('effectSelector', '.ui-page[data-url="' + $wantedContainer.attr('data-url') + '"] .' + jsInstruction);
 						$el.data('effectFor', jsInstruction);
 						$el[func](params);
 					}
@@ -513,7 +513,7 @@ function applyEffects($wantedContainer){
 		return this.each(function(){
 			var src = params[0];
 			if ( src.indexOf('url(') == 0 ){
-				src = src.replace('url(', 'url('+jsInstructionsBase);
+				src = src.replace('url(', 'url(' + jsInstructionsBase);
 			}
 
 			var $el = jQuery(this);
@@ -523,7 +523,7 @@ function applyEffects($wantedContainer){
 				$styleEl = $el.parent('div');
 			}
 
-			if ( $el.parent().find('.'+$el.data('effectFor')+'_effect').length == 0 ){
+			if ( $el.parent().find('.' + $el.data('effectFor') + '_effect').length == 0 ){
 				var $effect = jQuery('<div class="effect"></div>');
 
 				$styleEl.after($effect);
@@ -531,13 +531,13 @@ function applyEffects($wantedContainer){
 				.data('buttonSelector', $el.data('effectSelector'))
 				.css({
 					'backgroundImage': src,
-					'width'     : (parseInt($styleEl.width())-0)+'px',
-					'height'    : (parseInt($styleEl.height())-0)+'px',
+					'width'     : (parseInt($styleEl.width())-0) + 'px',
+					'height'    : (parseInt($styleEl.height())-0) + 'px',
 					'position'  : 'absolute',
 					'top'       : $styleEl.css('top'),
 					'left'      : $styleEl.css('left')
 				})
-				.addClass($el.data('effectFor')+'_effect')
+				.addClass($el.data('effectFor') + '_effect')
 				.click(function(event){
 					event.preventDefault();
 					$( $(this).data('buttonSelector') ).click();
@@ -556,18 +556,18 @@ function applyEffects($wantedContainer){
 		return this.each(function(){
 			var src = params[0];
 			if ( src.indexOf('url(') == 0 ){
-				src = src.replace('url(', 'url('+jsInstructionsBase);
+				src = src.replace('url(', 'url(' + jsInstructionsBase);
 			}
 
 			var $el = jQuery(this);
-			var classes = $el.data('effectFor')+'_decor ';
+			var classes = $el.data('effectFor') + '_decor ';
 			if ( $el.data('effectFor') === 'featured_post' ){
 				classes = 'featured_webapp_decor ';
 			}
-			var $effect = jQuery('<div class="'+classes+'"></div>');
+			var $effect = jQuery('<div class="' + classes + '"></div>');
 
 			// Make sure it's not there already
-			if ( $el.find('.'+classes).length == 0 ){
+			if ( $el.find('.' + classes).length == 0 ){
 				if ( $el.find('.imageURL').length > 0 ){
 					if (  $el.find('.imageURL').parent('div').is('.image_ph')){
 						$el
@@ -606,7 +606,8 @@ function applyEffects($wantedContainer){
 		var sharing_options = {
 			"facebook":	"http://www.facebook.com/share.php?u=",
 			"tweeter":	"https://twitter.com/share?url=",
-			"email":	"mailto:?subject=The%20page%20to%20share&body="
+			"email":	"mailto:?subject=The%20page%20to%20share&body=",
+			"google+":	"https://plus.google.com/share?url="
 		}
 
 		var share_buttons = $(event.currentTarget).find("div:jqmData(role='content') p a");
@@ -736,6 +737,13 @@ function applyEffects($wantedContainer){
 		});
 
 		DoComments.init(comments_page_wrapper);
+	})
+	.on("pageinit", ".recent_loaded_event", function(event){
+		$(event.currentTarget)
+		.find("div:jqmData(role='content') ul:jqmData(role='listview') li")
+		.click(function(){
+			$.mobile.showPageLoadingMsg();
+		});
 	});
 
 	var DoComments = function(){
@@ -762,9 +770,9 @@ function applyEffects($wantedContainer){
 
 			comments_page_wrapper
 			.on( "click", "div.comment_replyButton", self.show_form )
-			.on( "click", "#comment_reply_root", 	 self.show_form)
-			.on( "click", 'input[type="button"][name="submit"]', self.send_form)
-			.on( "click", "#webapp_send_comments_form", 		 self.send_form);
+			.on( "click", "#comment_reply_root", 	 self.show_form )
+			.on( "click", 'input[type="button"][name="submit"]', self.send_form )
+			.on( "click", "#webapp_send_comments_form", 		 self.send_form );
 		}
 
 		this.show_form = function(event){
@@ -899,13 +907,13 @@ function applyEffects($wantedContainer){
 		var p = $this.parent();
 		if (w*ch > h*cw) {
 			var r = ((h*cw/w) << 0);
-			$this.width(cw+"px");
-			$this.height(((h*cw/w) << 0)+"px");
-			p.css("margin-top", ((ch-r) >> 1)+"px");
+			$this.width(cw + "px");
+			$this.height(((h*cw/w) << 0) + "px");
+			p.css("margin-top", ((ch-r) >> 1) + "px");
 		}
 		else {
-			$this.width(((w*ch/h) << 0)+"px");
-			$this.height(ch+"px");
+			$this.width(((w*ch/h) << 0) + "px");
+			$this.height(ch + "px");
 			p.css("margin-top", "0px");
 		}
 		p.css("top", "0px");
@@ -933,7 +941,7 @@ function applyEffects($wantedContainer){
 					$.mobile.loadPage(l[0], data.options).done(function(url, options, page) {
 						options.fromPageForce = page;
 						options.transition = "none";
-						$.mobile.changePage("#"+l[1], options);
+						$.mobile.changePage("#" + l[1], options);
 					});
 				}
 				return;
@@ -957,7 +965,7 @@ function applyEffects($wantedContainer){
 			return;
 		}
 		var fh = $.mobile.path.parseUrl(f.attr("data-url")).hrefNoHash;
-		if (o.fromHashChange && u.hrefNoHash && u.hrefNoHash != fh && u.hrefNoHash != u.domain+fh) {
+		if (o.fromHashChange && u.hrefNoHash && u.hrefNoHash != fh && u.hrefNoHash != u.domain + fh) {
 			e.preventDefault();
 			$.mobile.loadPage(u.hrefNoHash, o).done(function(url, options, page) {
 				options.fromPageForce = page;
@@ -965,7 +973,7 @@ function applyEffects($wantedContainer){
 			});
 			return;
 		}
-		o.dataUrl = fh+u.hash;
+		o.dataUrl = fh + u.hash;
 		var id = decodeURIComponent((u.hash == "#image_viewer")?"":u.hash.substr(7));
 		var h = jQuery(t.html());
 		h.bind("pagehide", function() {
@@ -1040,9 +1048,9 @@ function applyEffects($wantedContainer){
 		if (b === !1) {
 			b = a;
 		}
-		$(".image-viewer-back", h).attr("href", "#image-"+encodeURIComponent(b.data("thumbnail-id")));
-		$(".image-viewer-play", h).attr("href", "#image-"+encodeURIComponent(c.data("thumbnail-id")));
-		$(".image-viewer-forward", h).attr("href", "#image-"+encodeURIComponent(a.data("thumbnail-id")));
+		$(".image-viewer-back", h).attr("href", "#image-" + encodeURIComponent(b.data("thumbnail-id")));
+		$(".image-viewer-play", h).attr("href", "#image-" + encodeURIComponent(c.data("thumbnail-id")));
+		$(".image-viewer-forward", h).attr("href", "#image-" + encodeURIComponent(a.data("thumbnail-id")));
 		if (b.is(c)){
 			$(".image-viewer-back", h).addClass("ui-disabled");
 		}
@@ -1063,10 +1071,10 @@ function applyEffects($wantedContainer){
 				ind = screenURL.indexOf('?');
 				if ( ind >= 0 ){
 					sep = '&';
-					if ( screenURL.indexOf('output=html', ind+1) < 0 ){
+					if ( screenURL.indexOf('output=html', ind + 1) < 0 ){
 						sep += 'output=html&';
 					}
-					if ( screenURL.indexOf('androidapp=1', ind+1) < 0 ){
+					if ( screenURL.indexOf('androidapp=1', ind + 1) < 0 ){
 						sep += 'androidapp=1&';
 					}
 				}
@@ -1089,10 +1097,10 @@ function applyEffects($wantedContainer){
 				ind = screenURL.indexOf('?');
 				if ( ind >= 0 ){
 					sep = '&';
-					if ( screenURL.indexOf('output=html', ind+1) < 0 ){
+					if ( screenURL.indexOf('output=html', ind + 1) < 0 ){
 						sep += 'output=html&';
 					}
-					if ( screenURL.indexOf('androidapp=1', ind+1) < 0 ){
+					if ( screenURL.indexOf('androidapp=1', ind + 1) < 0 ){
 						sep += 'androidapp=1&';
 					}
 				}
@@ -1192,7 +1200,7 @@ function applyEffects($wantedContainer){
 		}
 		var url = $page.jqmData("url");
 		if (url == $page.attr("id")) {
-			url = "#"+url;
+			url = "#" + url;
 		}
 		stack.push({url: url, title: $title.text(), type: type});
 		if ($back.length < 1 || stack.length < 2){

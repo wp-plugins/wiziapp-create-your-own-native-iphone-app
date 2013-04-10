@@ -18,7 +18,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 	public function runByRecent(){
 		$screen_conf = $this->getConfig();
 
-		$title = WiziappConfig::getInstance()->app_name;
+		$title = htmlspecialchars( WiziappConfig::getInstance()->app_name );
 
 		if ( isset($screen_conf['items_inner']) ){
 			$this->scrollingCategories($screen_conf, $title);
@@ -37,7 +37,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 			'posts_per_page' => $numberOfPosts
 		);
 
-		if ( !empty($page) ){
+		if ( ! empty($page) ){
             $query['pageOffset'] = $query['offset'] = ( $numberOfPosts * $page );
 		} else {
             $query['pageOffset'] = $query['offset'] = 0;
@@ -58,8 +58,8 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		}
 
 		/**
-		* Only show the first section on the first request (main page)
-		* the rest of the requests needs to update the recent section
+		* Only show the first section on the first request (Main Page).
+		* The rest of the requests need to update the recent section.
 		*/
 		if ( empty($page) || $page == 0 ) {
 			$firstQuery = array(
@@ -68,34 +68,39 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 				'ignore_sticky_posts' => 1,
 				'orderby'             => 'post_date'
 			);
+
 			$featuredPostSection = array(
-				'section'   => array(
+				'section' => array(
 					'title' => '',
 					'id'    => 'featured_post',
 					'items' => array(),
 				)
 			);
+
             $GLOBALS['wp_posts_listed'] = array();
 			$featuredPostSection['section']['items'] = $this->build($firstQuery, '', $screen_conf['header'], true);
 
 			$query['post__not_in'] = $GLOBALS['wp_posts_listed'];
+
             $stickPosts = get_option('sticky_posts');
             $stickPostsCount = count($stickPosts);
             if ( $stickPostsCount > 1 ){
                 $postsIncludedAnyway = $stickPostsCount - 1 + intval( $wiziapp_featured_post !== '' );
                 $query['posts_per_page'] = $query['posts_per_page'] - $postsIncludedAnyway;
             }
-            /**if ( $stickPostsCount > 1 ){
-                $query['offset'] -=
-            }*/
+			/*
+			if ( $stickPostsCount > 1 ){
+			$query['offset'] -=
+			}
+			*/
 		} else {
             /*
-             * We are retrieving an update page to add to the first, the first displayed the featured post
-             * this might have more sticky so we can't ignore them... but we need to exclude some of them
-             * since they might already be shown...
+             * We are retrieving an update page to add to the first, the first displayed the featured post.
+             * This might have more sticky so we can't ignore them, but we need to exclude some of them,
+             * since they might already be shown.
              */
             $stickPosts = get_option('sticky_posts');
-            if ( !empty($stickPosts) ){
+            if ( ! empty($stickPosts) ){
                 $query['post__not_in'] = array_slice ($stickPosts , 0, $query['offset']);
                 $query['pageOffset'] = $query['offset'];
                 $query['offset'] -= count($query['post__not_in']);
@@ -114,7 +119,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 
 		$recentSection['section']['items'] = $this->build($query, '', $screen_conf['items'], true, $showMore);
 
-		if ( !empty($featuredPostSection) ){
+		if ( ! empty($featuredPostSection) ){
 			$mergedSections = array($featuredPostSection, $recentSection);
 		} else {
 			$mergedSections = array($recentSection);

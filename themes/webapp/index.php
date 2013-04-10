@@ -1,24 +1,19 @@
 <?php
 
-/*
-// Prepare the classes
-global $pageScripts;
-$pageScripts = array('wiziapp_favorites');
-*/
-
 global $tabBar;
 $tabBar = new WiziappTabbarBuilder();
 
 get_header();
 ?>
+
 <div data-role="page" class="index" data-fullscreen="true" data-theme="z">
 	<?php
 	if ( ! ( isset($_GET['androidapp']) && $_GET['androidapp'] === '1' ) ) {
-	?>
-		<div id="splash">
-			<img src="<?php echo wiziapp_get_splash(); ?>" />
-		</div>
-	<?php
+		?>
+			<div id="splash">
+				<img src="<?php echo wiziapp_get_splash(); ?>" />
+			</div>
+		<?php
 	}
 	?>
 

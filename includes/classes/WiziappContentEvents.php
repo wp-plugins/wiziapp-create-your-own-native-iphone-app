@@ -9,6 +9,7 @@
 *
 */
 class WiziappContentEvents{
+
 	public function savePost($post){
 		if (!is_object($post)){
 			$post_id = $post;
@@ -296,27 +297,7 @@ class WiziappContentEvents{
 		WiziappConfig::getInstance()->last_recorded_save = time();
 	}
 
-	/**
-	* Add the "RewriteCond" for the Wiziapp plugin,
-	* to avoid collision with the WP Super Cache plugin.
-	*
-	* @param array $condition_rules - The multiple "RewriteCond"-s of the WP Super Cache plugin, from his .htaccess file
-	*/
-	function add_wiziapp_condition( $condition_rules ) {
-		if ( ! is_array($condition_rules) ) {
-			return $condition_rules;
-		}
-
-		// Avoid Wiziapp interference
-		$condition_rules[] = 'RewriteCond %{QUERY_STRING} !^wiziapp';
-		// Avoid Webapp interference
-		// 	$condition_rules[] = 'RewriteCond %{HTTP_USER_AGENT} !(iPhone.*Mac.*OS.*X)|(iPod.*Mac.*OS.*X)|(Android.*AppleWebKit)';
-
-		return $condition_rules;
-	}
-
 	public static function getCacheTimestampKey(){
 		return WiziappConfig::getInstance()->last_recorded_save;
 	}
-
 }

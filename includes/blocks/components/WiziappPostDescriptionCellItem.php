@@ -27,7 +27,6 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
 		'L2' => array('title', 'author', 'date', 'numOfComments', 'pages', 'numOfUserComments', 'imageURL', 'actionURL', 'contents'),
 		'L3' => array('title', 'author', 'date', 'numOfComments', 'pages', 'categories', 'imageURL', 'actionURL', 'contents'),
 		'L4' => array('title', 'date', 'numOfComments', 'pages', 'imageURL', 'actionURL', 'contents'),
-		//'L5' => array('title', 'author', 'description', 'date', 'rating', 'imageURL', 'actionURL', 'contents'),
 		'L5' => array('title', 'author', 'date', 'pages', 'rating', 'imageURL', 'actionURL', 'contents'),
 		'L6' => 'L1',
 		'L7' => array('title', 'imageURL', 'actionURL', 'contents'),
@@ -97,7 +96,7 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
 		ob_start();
 		?>
 		<li class="postDescriptionCellItem __ATTR_class__ cellItem default" data-post-id="__ATTR_id__">
-			<a href="__ATTR_actionURL__" class="actionURL __ATTR_class__" data-transition="slide">
+			<a href="__ATTR_actionURL__" class="actionURL __ATTR_class__" data-transition="slide" data-ajax="false">
 				<div class="attribute imageURL __ATTR_classOf-imageURL-webapp__" data-image-src="__ATTR_imageURL__">
 					<img class="hidden ignore_effect" src="" data-class=""/>
 				</div>
@@ -246,13 +245,6 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
 		if ( strlen($authorName) > 15 ){
 			$authorName = substr($authorName, 0, 12).'...';
 		}
-		//return __('By')." {$authorName}";
-		/**$prefix = "| ";
-		if ( isset($this->themeRemoveAttr) ){
-		if ( in_array('date', $this->themeRemoveAttr) ){
-		$prefix = '';
-		}
-		}*/
 		$prefix = ' ';
 		return "{$prefix}{$authorName}";
 	}
