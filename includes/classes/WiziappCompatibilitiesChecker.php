@@ -246,7 +246,6 @@ class WiziappCompatibilitiesChecker{
 		}
 	}
 
-
 	/**
 	 * Check for the ability to issue outgoing requests
 	 * and accept requests from the api server.
