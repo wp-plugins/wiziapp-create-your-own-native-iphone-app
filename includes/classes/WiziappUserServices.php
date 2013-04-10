@@ -198,15 +198,16 @@ class WiziappUserServices{
 		return $result;
 	}
 
+	/**
+	* load user push settings
+	* first try loading from wiziapp_end_users table.
+	* end_users is more important b/c it stores according to udid (and not by user_id),
+	* so it works also for unregisterred users.
+	*/
 	public function getUserPushSettings($udid){
-		//load user push settings
-		//first try loading from wiziapp_end_users table.
-		// end_users is more important b/c it stores according to udid (and not by user_id),
-		// so it works also for unregisterred users.
+		$pushSettings = array();
 
-		$pushSettings=array();
-
-		//getUserData
+		// getUserData
 		$userData = $this->getUserData($udid);
 		if ($userData){
 			if (!isset($userData[0]['authors'])) {
@@ -223,8 +224,8 @@ class WiziappUserServices{
 			$pushSettings['tags']=json_decode($userData[0]['tags']);
 		}
 
-		//If not exist - try loading from user_meta
-		if (empty($pushSettings)){
+		if ( empty($pushSettings) ){
+			// If not exist - try loading from user_meta
 			$userId = $this->checkUserId($udid);
 			if ($userId){
 				$wiziapp_push_settings = get_user_meta($userId, 'wiziapp_push_settings', TRUE);
@@ -254,7 +255,6 @@ class WiziappUserServices{
 		}
 
 		return $pushSettings;
-
 	}
 
 	public function getAllUdids(){

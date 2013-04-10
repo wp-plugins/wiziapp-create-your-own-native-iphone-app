@@ -18,24 +18,14 @@ class WiziappCmsUserAccountHandler{
 			WiziappLog::getInstance()->write('INFO', 'After register user: ' . $username, 'account.wiziapp_user_registration');
 
 			if (is_int($user_id)) {
-				//            $status = TRUE;
 				$result = __('Registration successfull', 'wiziapp');
 			} else {
 				$result = implode('<br>', $user_id->get_error_messages());
-				//            $status = FALSE;
 			}
 		} else {
 			$result = '';
 		}
 
-		//    $header = array(
-		//        'action' => 'register',
-		//        'status' => $status,
-		//        'code' => ($status) ? 200 : 4004,
-		//        'message' => ($status) ? '' : 'Invalid registartion',
-		//    );
-		//    echo json_encode(array_merge(array('header' => $header), $result));
-		//    exit;
 		return ($result);
 	}
 
@@ -51,23 +41,15 @@ class WiziappCmsUserAccountHandler{
 			ob_end_clean();
 
 			$status = retrieve_password();
-			if($status === true) {
-				//            $status = TRUE;
+			if ($status === true) {
 				$result = __("Success", 'wiziapp');
 			} else {
 				$result = implode('<br>', $status->get_error_messages());
-				//            $status = FALSE;
 			}
 		} else {
 			$result = '';
 		}
 
-		//    $header = array(
-		//        'action' => 'forgot_password',
-		//        'status' => $status,
-		//        'code' => ($status) ? 200 : 4004,
-		//        'message' => ($status) ? '' : 'Invalid forgot password',
-		//    );
 		return ($result);
 	}
 
@@ -77,63 +59,39 @@ class WiziappCmsUserAccountHandler{
 	* Handles the push notifications subscriptions for the user
 	* POST   /user/track/{key}/{value}
 	* DELETE /user/track/{key}/{value}
-	*
 	*/
 	public function pushSubscription($key = '', $value = '') {
             $lot_keys = array('authors', 'categories', 'tags',);
-            // $single_keys = array('is_allow', 'is_new_posts', 'is_new_comments',);
-            // $default_value = array('is_allow' => '1', 'is_new_posts' => '1', 'is_new_comments' => '1',);
             $result = array('action' => '', 'status' => TRUE, 'code' => 200, 'message' => '',);
 
             try {
-                // Validate the user
-    //			if (isset($_REQUEST['username']) && $_REQUEST['username'] != '' && isset($_REQUEST['password']) && $_REQUEST['password'] != '') {
-    //				$ls = new WiziappLoginServices;
-    //				$user = $ls->check(TRUE);
-    //			} elseif (isset($_REQUEST['user_id']) && (($user_id = intval($_REQUEST['user_id'])) > 0)) {
-    //				$user = get_userdata($user_id);
-    //			} else {
-    //				throw new Exception('User validation error.');
-    //			}
-    //			if ($user == NULL && $user == FALSE) {
-    //				throw new Exception('User validation error.');
-    //			}
-                // Retrieve wiziapp_push_settings Array for a user.
-    //			$wiziapp_push_settings = get_user_meta($user->ID, 'wiziapp_push_settings', TRUE);
                 $udid = isset($_REQUEST['user_id']) ? $_REQUEST['user_id'] : $_SERVER['HTTP_UDID'];
                 $endUser = new WiziappUserServices;
                 $wiziapp_push_settings = $endUser->getUserPushSettings($udid);
 
                 if ($wiziapp_push_settings == '') {
                     $wiziapp_push_settings = array();
-                    // $auxiliary_flag = add_user_meta($user->ID, 'wiziapp_push_settings', $wiziapp_push_settings, TRUE);
-                } elseif (!is_array($wiziapp_push_settings)) {
+                } elseif ( ! is_array($wiziapp_push_settings) ) {
                     // If $wiziapp_push_settings not empty, but not Array, it not proper condition.
                     $wiziapp_push_settings = array();
-                    // $auxiliary_flag = update_user_meta($user->ID, 'wiziapp_push_settings', $wiziapp_push_settings);
                     ob_start();
                     var_dump($wiziapp_push_settings);
                     WiziappLog::getInstance()->write('WARNING', 'Got $wiziapp_push_settings = ' . ob_get_clean(), "WiziappCmsUserAccountHandler.pushSubscription");
                 }
-                /*
-                if ( ! $auxiliary_flag) {
-                throw new Exception('Error happened on set $wiziapp_push_settings');
-                }
-                */
 
                 // Main Process
                 if ($_SERVER['REQUEST_METHOD'] === 'GET' && $key === '') {
                     $result['action'] = 'Get the user tracking list';
 
                     foreach ($lot_keys as $lot_key) {
-                        if (!isset($wiziapp_push_settings[$lot_key]))
+                        if ( ! isset($wiziapp_push_settings[$lot_key]) )
                             continue;
 
-                        if (is_array($wiziapp_push_settings[$lot_key])) {
+                        if ( is_array($wiziapp_push_settings[$lot_key]) ) {
                             // Check, if Items exist in blog yet.
                             $wiziapp_push_settings[$lot_key] = array_filter($wiziapp_push_settings[$lot_key], array($this, '_check_' . $lot_key));
 
-                            if (empty($wiziapp_push_settings[$lot_key])) {
+                            if ( empty($wiziapp_push_settings[$lot_key]) ) {
                                 unset($wiziapp_push_settings[$lot_key]);
                             }
 
@@ -148,43 +106,21 @@ class WiziappCmsUserAccountHandler{
                         }
                     }
                     $result['tracking'] = $wiziapp_push_settings;
-                    
-                } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    /*
-                    if (in_array($key, $single_keys)) {
-                    $result['action'] = 'Subscribe the user for a specific list';
 
-                    if (in_array($value, array('0', '1'))) {
-                    $wiziapp_push_settings = array_merge($wiziapp_push_settings, array($key => $value,));
-                    } else {
-                    throw new Exception('Got not proper value = '.$value.' for key = '.$key);
-                    }
-                    } else
-                    */
+                } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (in_array($key, $lot_keys)) {
                         $result['action'] = 'Subscribe the user for a specific list';
 
                         if (preg_match('/\d+(,\d+)*/', $value)) {
                             $wiziapp_push_settings = array_merge($wiziapp_push_settings, array($key => explode(',', $value),));
                         } else {
-                            //throw new Exception('Got not proper value = ' . $value . ' for key = ' . $key);
                             // delete $wiziapp_push_settings for $key (Assaf)
                             $wiziapp_push_settings[$key] = '';
                             }
-                        //}
                     } elseif ($key === '') {
                         $result['action'] = 'Update the user tracking list';
 
                         foreach ($_POST as $key => $value) {
-                            /*
-                            if (in_array($key, $single_keys) && $value != '') {
-                            if (in_array($value, array('0', '1'))) {
-                            $wiziapp_push_settings = array_merge($wiziapp_push_settings, array($key => $value,));
-                            } else {
-                            throw new Exception('Got not proper value = '.$value.' for key = '.$key);
-                            }
-                            } else
-                            */
                             if (in_array($key, $lot_keys) && is_array($value) && !empty($value)) {
                                 for ($i = 0, $count = count($value); $i < $count; $i++) {
                                     if (!ctype_digit($value[$i]) || $value[$i] <= 0) {
@@ -195,7 +131,7 @@ class WiziappCmsUserAccountHandler{
                             }
                         }
                     }
-                 
+
                 // Assaf: DELETE is not in use. deletion is done via POST by sending an empty list
                 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE' && in_array($key, $lot_keys)) {
                     if ($value === '') {
@@ -214,17 +150,6 @@ class WiziappCmsUserAccountHandler{
                     throw new Exception('Service request is not proper');
                 }
 
-//                if (empty($wiziapp_push_settings)) {
-//                    if (!delete_user_meta($user->ID, 'wiziapp_push_settings')) {
-//                        WiziappLog::getInstance()->write('WARNING', 'Not deleted empty $wiziapp_push_settings', "WiziappCmsUserAccountHandler.pushSubscription");
-//                    }
-//                } else {
-//                    if (!update_user_meta($user->ID, 'wiziapp_push_settings', $wiziapp_push_settings)) {
-//                        ob_start();
-//                        print_r($wiziapp_push_settings);
-//                        WiziappLog::getInstance()->write('WARNING', 'Not updated new setting: ' . $wiziapp_push_settings, "WiziappCmsUserAccountHandler.pushSubscription");
-//                    }
-
                     $params = array();
                     foreach ($lot_keys as $lot_key) {
                         if (!isset($wiziapp_push_settings[$lot_key])) {
@@ -233,9 +158,7 @@ class WiziappCmsUserAccountHandler{
                             $params[$lot_key] = json_encode($wiziapp_push_settings[$lot_key]);
                         }
                     }
-//                  $endUser = new WiziappUserServices();
                     $endUser->updateUserData($udid, $params);
-//                }
             } catch (Exception $e) {
                 $error_message = $e->getMessage();
                 WiziappLog::getInstance()->write('ERROR', $error_message, "WiziappCmsUserAccountHandler.pushSubscription");
@@ -266,5 +189,4 @@ class WiziappCmsUserAccountHandler{
 		"SELECT `term_taxonomy_id` FROM ".$wpdb->term_taxonomy." WHERE `term_id` = ".intval($tag)." AND `taxonomy` = 'post_tag' LIMIT 1";
 		return (bool) $wpdb->query($query);
 	}
-
 }

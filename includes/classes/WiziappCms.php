@@ -2,8 +2,9 @@
 
 class WiziappCms {
 
+	private $_wiziapp_user = 'wiziappuser';
+
 	public function activate() {
-		$updatedApi = FALSE;
 		$profile = $this->generateProfile();
 
 		$blogUrl = get_bloginfo('url');
@@ -18,22 +19,17 @@ class WiziappCms {
 		}
 
 		$tokenResponse = json_decode($response['body'], TRUE);
-		if (empty($tokenResponse) || ! $tokenResponse['header']['status']) {
+		if ( empty($tokenResponse) || ! $tokenResponse['header']['status'] ) {
 			return FALSE;
 		}
 
 		WiziappConfig::getInstance()->startBulkUpdate();
 
 		/**
-		* Do Common settings
+		* Set Common config
 		*/
-		if (isset($tokenResponse['plugin_token'])){
-			WiziappConfig::getInstance()->app_token = $tokenResponse['plugin_token'];
-		}
 		$common_settings = array(
-			'app_id', 'main_tab_index', 'settings_done', 'app_live', 'app_description', 'appstore_url', 'playstore_url', 'app_icon', 'app_name', 'email_verified',
-			'thumb_min_size', 'display_download_from_appstore', 'notify_on_new_post', 'notify_on_new_page', 'push_message',
-			'webapp_active',
+			'plugin_token',	'app_id', 'main_tab_index', 'settings_done', 'app_live', 'app_description', 'appstore_url', 'playstore_url', 'apk_file_url', 'app_icon', 'app_name', 'email_verified', 'thumb_min_size', 'display_download_from_appstore', 'endorse_download_android_app', 'notify_on_new_post', 'notify_on_new_page', 'push_message', 'webapp_active', 'adsense',
 		);
 		$this->_apply_setting($common_settings, $tokenResponse);
 
@@ -41,65 +37,29 @@ class WiziappCms {
 		* Set Thumbnails config
 		*/
 		$thumbs = json_decode($tokenResponse['thumbs'], TRUE);
-
-		WiziappConfig::getInstance()->full_image_height = $thumbs['full_image_height'];
-		WiziappConfig::getInstance()->full_image_width = $thumbs['full_image_width'];
-
-		WiziappConfig::getInstance()->images_thumb_height = $thumbs['images_thumb_height'];
-		WiziappConfig::getInstance()->images_thumb_width = $thumbs['images_thumb_width'];
-
-		WiziappConfig::getInstance()->posts_thumb_height = $thumbs['posts_thumb_height'];
-		WiziappConfig::getInstance()->posts_thumb_width = $thumbs['posts_thumb_width'];
-
-		WiziappConfig::getInstance()->featured_post_thumb_height = $thumbs['featured_post_thumb_height'];
-		WiziappConfig::getInstance()->featured_post_thumb_width = $thumbs['featured_post_thumb_width'];
-
-		WiziappConfig::getInstance()->mini_post_thumb_height = $thumbs['mini_post_thumb_height'];
-		WiziappConfig::getInstance()->mini_post_thumb_width = $thumbs['mini_post_thumb_width'];
-
-		WiziappConfig::getInstance()->comments_avatar_height = $thumbs['comments_avatar_height'];
-		WiziappConfig::getInstance()->comments_avatar_width = $thumbs['comments_avatar_width'];
-
-		WiziappConfig::getInstance()->album_thumb_width = $thumbs['album_thumb_width'];
-		WiziappConfig::getInstance()->album_thumb_height = $thumbs['album_thumb_height'];
-
-		WiziappConfig::getInstance()->video_album_thumb_width = $thumbs['video_album_thumb_width'];
-		WiziappConfig::getInstance()->video_album_thumb_height = $thumbs['video_album_thumb_height'];
-
-		WiziappConfig::getInstance()->audio_thumb_width = $thumbs['audio_thumb_width'];
-		WiziappConfig::getInstance()->audio_thumb_height = $thumbs['audio_thumb_height'];
+		$thumbs_settings = array(
+			'full_image_height', 'full_image_width', 'images_thumb_height', 'images_thumb_width', 'posts_thumb_height', 'posts_thumb_width', 'featured_post_thumb_height', 'featured_post_thumb_width', 'mini_post_thumb_height', 'mini_post_thumb_width', 'comments_avatar_height', 'comments_avatar_width', 'album_thumb_height', 'album_thumb_width', 'video_album_thumb_height', 'video_album_thumb_width', 'audio_thumb_height', 'audio_thumb_width',
+		);
+		$this->_apply_setting($thumbs_settings, $thumbs);
 
 		/**
-		* If the app is configured update the titles
+		* Set Titles config, if the app is configured
 		*/
 		if ( ! empty($tokenResponse['screen_titles']) ) {
 			$titles_settings = array('categories_title', 'tags_title', 'albums_title', 'videos_title', 'audio_title', 'links_title', 'pages_title', 'favorites_title', 'about_title', 'search_title', 'archive_title',);
 			$this->_apply_setting($titles_settings, $tokenResponse['screen_titles']);
 		}
 
-		$screens = array();
-		if ( isset($tokenResponse['screens']) ){
-			$screens = json_decode(stripslashes($tokenResponse['screens']), TRUE);
-		}
-		$components = array();
-		if ( isset($tokenResponse['components']) ){
-			$components = json_decode(stripslashes($tokenResponse['components']), TRUE);
-		}
-		$pages = array();
-		if ( isset($tokenResponse['pages']) ){
-			$pages = json_decode(stripslashes($tokenResponse['pages']), TRUE);
-		}
-		update_option('wiziapp_pages', $pages, '', 'no');
-		update_option('wiziapp_screens', $screens, '', 'no');
-		update_option('wiziapp_components', $components, '', 'no');
+		/**
+		* Set Titles config
+		*/
+		$elements = array('pages', 'screens', 'components',);
+		$this->_update_elements($elements, $tokenResponse);
 
 		WiziappConfig::getInstance()->bulkSave();
-		$updatedApi = TRUE;
-
-		return TRUE;
 	}
 
-	public function deactivate(){
+	public function deactivate() {
 		// Inform the system control
 		$blogUrl = get_bloginfo('url');
 		$urlData = explode('://', $blogUrl);
@@ -110,55 +70,57 @@ class WiziappCms {
 		$this->deleteUser();
 	}
 
-	protected function deleteUser(){
-		$userId = username_exists('wiziapp');
+	private function deleteUser() {
+		$userId = username_exists($this->_wiziapp_user);
 
-		if ( ! $userId){
+		if ( ! $userId) {
 			return;
 		}
 
-		if ( ! wp_delete_user($userId) ){
+		if ( ! wp_delete_user($userId) ) {
 			WiziappLog::getInstance()->write('ERROR', "Error deleting user wiziapp", "install.delete_user_wiziapp");
 		}
 	}
 
-	// If the blog allows to create users, we register our user to be able to give to apple for appstore approval
-	protected function registerUser() {
+	/**
+	*  If the blog allows to create users, we register our user to be able to give to apple for appstore approval
+	*/
+	private function registerUser() {
 		$userData = array();
 		$blogAllowRegistration = intval( get_option('users_can_register') );
-		$userName = 'wiziappuser';
 		$password = 'ERROR';
 
-		if ($blogAllowRegistration) {
+		if ( $blogAllowRegistration ) {
 			$blogName = get_bloginfo('name');
-			$userId = username_exists($userName);
+			$userId = username_exists($this->_wiziapp_user);
 
-			$password = substr(str_replace(" " , "", $blogName), 0, 5) . '1324'; // wp_generate_password(12, false);
-			if (!$userId) {
-				$userId = wp_create_user($userName, $password); //wp_create_user($userName, $password, $user_email)
+			// $password = wp_generate_password(12, false);
+			$password = substr(str_replace(" " , "", $blogName), 0, 5) . '1324';
+			if ( ! $userId) {
+				$userId = wp_create_user($this->_wiziapp_user, $password);
 				if (!$userId) {
-					WiziappLog::getInstance()->write('ERROR', "Error creating user " . $userName, "install.register_user_wiziapp");
+					WiziappLog::getInstance()->write('ERROR', "Error creating user " . $this->_wiziapp_user, "install.register_user_wiziapp");
 				} else {
-					WiziappLog::getInstance()->write('INFO', "User " . $userName . " created successfully.", "install.register_user_wiziapp");
+					WiziappLog::getInstance()->write('INFO', "User " . $this->_wiziapp_user . " created successfully.", "install.register_user_wiziapp");
 				}
 			} else {
 				// Might be our user... should see if we can login with our password
-				$user = wp_authenticate($userName, $password);
-				if ( is_wp_error($user) ){
+				$user = wp_authenticate($this->_wiziapp_user, $password);
+				if ( is_wp_error($user) ) {
 					$password = 'ERROR';
-					WiziappLog::getInstance()->write('ERROR', "User " . $userName . " already exists and was NOT created.", "install.register_user_wiziapp");
+					WiziappLog::getInstance()->write('ERROR', "User " . $this->_wiziapp_user . " already exists and was NOT created.", "install.register_user_wiziapp");
 				}
 			}
 		}
 
 		$userData['blog_allows_registration'] = $blogAllowRegistration;
-		$userData['blog_username'] = $userName;
+		$userData['blog_username'] = $this->_wiziapp_user;
 		$userData['blog_password'] = $password;
 
 		return $userData;
 	}
 
-	protected function generateProfile(){
+	protected function generateProfile() {
 		$version = get_bloginfo('version');
 		$admin_email = get_option('admin_email');
 		/**
@@ -281,11 +243,23 @@ class WiziappCms {
 		return $stats;
 	}
 
-	private function _apply_setting($variables, $incoming) {
+	private function _apply_setting(array $variables, $incoming) {
 		foreach ($variables as $variable) {
-			if (isset($incoming[$variable])){
+			if ( isset($incoming[$variable]) ) {
 				WiziappConfig::getInstance()->$variable = $incoming[$variable];
 			}
+		}
+	}
+
+	private function _update_elements(array $elements_names, $tokenResponse) {
+		for ($i=0, $elements_amount=count($elements_names); $i<$elements_amount; $i++) {
+			$element = array();
+
+			if ( isset($tokenResponse[ $elements_names[$i] ]) ) {
+				$element = json_decode( stripslashes( $tokenResponse[ $elements_names[$i] ] ), TRUE );
+			}
+
+			update_option('wiziapp_'.$elements_names[$i], $element, '', 'no');
 		}
 	}
 }

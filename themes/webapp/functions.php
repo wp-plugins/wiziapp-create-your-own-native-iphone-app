@@ -33,11 +33,11 @@ function wiziapp_get_webapp_title(){
 }
 
 function wiziapp_get_splash(){
-	return get_bloginfo('template_url').'/resources/default.png';
+	return WiziappContentHandler::getInstance()->get_blog_property('data_files_url').'/resources/default.png';
 }
 
 function wiziapp_get_app_icon(){
-	$url = get_bloginfo('template_url').'/resources/icons/';
+	$url = WiziappContentHandler::getInstance()->get_blog_property('data_files_url').'/resources/icons/';
 	$name = basename(WiziappConfig::getInstance()->getAppIcon());
 
 	return $url . $name;

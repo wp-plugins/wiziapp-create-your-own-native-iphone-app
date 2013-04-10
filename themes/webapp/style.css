@@ -18,10 +18,6 @@
 body{
 	font-family: Helvetica, Arial;
 }
-/*
-.ui-mobile [data-role="page"], .ui-mobile [data-role="dialog"], .ui-page {
-width: auto !important;
-}*/
 
 /* Start of the main.css rules overriding */
 
@@ -90,14 +86,6 @@ div.ui-content{
 .ui-page .ui-content .ui-listview{
 	margin:  0px;
 }
-/*
-.ui-page .ui-content {
-padding:  0px;
-}
-*/
-.nav-tabbar .ui-btn .ui-btn-inner {
-	/* padding-top: 40px !important; */
-}
 .nav-tabbar .ui-btn .ui-icon {
 	width: 30px!important;
 	height: 30px!important;
@@ -133,12 +121,6 @@ padding:  0px;
 	top: 6px;
 }
 
-/*
-.ui-page .ui-btn-up-c{
-background: none;
-border: 0px none;
-}
-*/
 .ui-page .ui-btn-hover-c{
 	background: none;
 	border: 0px none;
@@ -154,7 +136,7 @@ div.comments_screen ul li.ui-li-static.ui-li.sep{
 /*
 This rule cause broken arrows in the left side of the data-role="listview" screen
 .ui-page .ui-li .ui-icon-arrow-r{
-background: transparent url(images/more_cell_item.png) no-repeat center center;
+background: transparent url("images/more_cell_item.png") no-repeat center center;
 }
 */
 .ui-page .ui-icon-shadow {
@@ -182,11 +164,11 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 }
 
 .navigation_back_button_wrapper, .navigation_back_button_wrapper:active, .navigation_back_button_wrapper:visited {
-	background: url(images/back-but-left.png) no-repeat top left !important;
+	background: url("images/back-but-left.png") no-repeat top left !important;
 	position: relative;
 	height: 30px;
 	float: left;
-	padding-right: 18px; /* button left + closer width */
+	padding-right: 18px;
 	z-index: 2;
 	font-weight: bold;
 }
@@ -196,14 +178,14 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 	line-height: 30px;
 	font-size: 12px;
 	cursor: pointer;
-	background: url(images/back-but-mid.png) repeat-x top left;
+	background: url("images/back-but-mid.png") repeat-x top left;
 	margin-left:13px;
 	padding: 0 20px;
 	margin-right:5px;
 }
 
 .navigation_back_button_closer{
-	background: url(images/back-but-right.png) no-repeat top left;
+	background: url("images/back-but-right.png") no-repeat top left;
 	right: 0;
 	position: absolute;
 	height: 30px;
@@ -212,7 +194,7 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 	z-index: 2;
 }
 .navigation_back_button_opener{
-	background: url(images/back-but-opener.png) no-repeat top left;
+	background: url("images/back-but-opener.png") no-repeat top left;
 	left: 8px;
 	position: absolute;
 	height: 30px;
@@ -301,7 +283,6 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 	top: -60px;
 }
 .general_post_numOfComments_webapp{
-	background-image: url("resources/images/CommentsNew.png");
 	height: 40px;
 	right: 36px;
 	text-align: center;
@@ -424,9 +405,6 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 .navigation_button_favorite_effect{
 	z-index:100;
 }
-.webview_bar{
-	background: url(resources/images/cuts_nav_bar.png) repeat-x;
-}
 .webview_bar.ui-navbar ul{
 	height: 44px;
 	overflow: visible;
@@ -452,12 +430,10 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 .webview_bar .share_button_wrapper{
 	left: 16px;
 }
-/* .webview_bar .fontsize_button_wrapper{} */
 .post_button_share{
 	width: 26px;
 	height: 22px;
 	margin: 9px auto auto auto !important;
-	background-image: url("resources/images/cuts_send.png") !important;
 	border: none !important;
 }
 .font_panel{
@@ -500,26 +476,22 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 }
 .left_enabled{
 	margin: 10px 40px 0 0 !important;
-	background-image: url("resources/images/cuts_arrow_left.png") !important;
 	border: medium none !important;
 }
 .left_disabled{
 	cursor: default !important;
 	margin: 10px 40px 0 0 !important;
-	background-image: url("resources/images/cuts_arrow_left_dis.png") !important;
 	border: medium none !important;
 }
 .right_enabled{
 	margin: 10px 0 0 0 !important;
-	background-image: url("resources/images/cuts_arrow_right.png") !important;
 }
 .right_disabled{
 	cursor: default !important;
 	margin: 10px 0 0 0 !important;
-	background-image: url("resources/images/cuts_arrow_right_dis.png") !important;
 }
 .ratingPopup{
-	background: url(/images/dialogbox.png) no-repeat;
+	background: url("images/dialogbox.png") no-repeat;
 	width: 286px;
 	height: 182px;
 	color: #fff;
@@ -537,7 +509,7 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 .ratingStars{
 	height: 24px;
 	width: 120px;
-	background: url(/images/rating_star.png) repeat-x;
+	background: url("images/rating_star.png") repeat-x;
 	margin: 5px auto;
 
 }
@@ -546,7 +518,7 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 	margin: 0px 0px 7px 0px;
 }
 .ratingPopup button{
-	background: url(/images/dialogbox-but.png) repeat-x;
+	background: url("images/dialogbox-but.png") repeat-x;
 	width: 128px;
 	height: 44px;
 	border: 0px none;
@@ -555,7 +527,7 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 	outline: none;
 }
 .ratingPopup button.selected{
-	background: url(/images/dialogbox-but.png) repeat-x;
+	background: url("images/dialogbox-but.png") repeat-x;
 }
 .ratingPopup .notice{
 	color: #FFFF00;
@@ -565,7 +537,7 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 	left: -16px;
 	background: #434955;
 	z-index: 999;
-	background: #454B57 url(images/sharing_panel_bg.png) repeat-x top left;
+	background: #454B57 url("images/sharing_panel_bg.png") repeat-x top left;
 }
 .sharing_menu .title{
 	font-size: 12px;
@@ -745,7 +717,7 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 	display: block;
 	width: 28px;
 	float: left;
-	background: url(images/delete_icon_bg.png) no-repeat center center;
+	background: url("images/delete_icon_bg.png") no-repeat center center;
 }
 
 #favorites .delete_icon.btn_mode{
@@ -766,7 +738,7 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 	position: absolute;
 	right: 5px;
 	top: 35%;
-	background: url(images/delete_button_bg.png) no-repeat center center;
+	background: url("images/delete_button_bg.png") no-repeat center center;
 	color: #fff;
 	z-index:2;
 	width: 50px;
@@ -811,7 +783,6 @@ background: transparent url(images/more_cell_item.png) no-repeat center center;
 	padding-top: 12px;
 }
 .post_button_show_comments{
-	background-image: url("resources/images/icon-com.png") !important;
 	width: 20px;
 	height: 28px;
 	margin: 9px auto auto auto !important;
@@ -847,7 +818,7 @@ div.comment_reply_form input.ui-input-text{
 	right: 5px;
 	width: 36px;
 	height: 30px;
-	background-image: url("images/add_comment.png");
+	background: url("images/add_comment.png");
 	cursor: pointer;
 }
 #webapp_send_comments_form{
@@ -855,9 +826,7 @@ div.comment_reply_form input.ui-input-text{
 	display: none;
 }
 li.comment_welcome_main div{
-	background-image: url("images/welcome_to_comments.png");
-	background-position: top right;
-	background-repeat: no-repeat;
+	background: url("images/welcome_to_comments.png") no-repeat top right;
 	background-size: 100%;
 	height: 700px;
 	margin: -10px -20px 0 0;
@@ -881,6 +850,7 @@ li.comment_welcome_main div{
 
 /* End jQuery-Mobile-SimpleDialog Plugin */
 /* Image viewer */
+
 .image_viewer .content {
 	background-color: #101010 !important;
 	background-image: none !important;
@@ -908,22 +878,5 @@ li.comment_welcome_main div{
 	top: -10px;
 	line-height: 0;
 }
-.image_viewer_tabbar .image-viewer-share .ui-icon {
-	background: url("resources/images/cuts_send.png") 50% 50% no-repeat;
-}
-.image_viewer_tabbar .image-viewer-back .ui-icon {
-	background: url("resources/images/arrows1.png") 50% 50% no-repeat;
-}
-.image_viewer_tabbar .image-viewer-play .ui-icon {
-	background: url("resources/images/cuts_arrow_right.png") 50% 50% no-repeat;
-}
-.image_viewer_tabbar .image-viewer-play.image-viewer-play-active .ui-icon {
-	background: url("resources/images/stop_but.png") 50% 50% no-repeat;
-}
-.image_viewer_tabbar .image-viewer-forward .ui-icon {
-	background: url("resources/images/arrows2.png") 50% 50% no-repeat;
-}
-.image_viewer_tabbar .image-viewer-post .ui-icon {
-	background: url("resources/images/cuts_post_icon.png") 50% 50% no-repeat;
-}
+
 /* End Image viewer */

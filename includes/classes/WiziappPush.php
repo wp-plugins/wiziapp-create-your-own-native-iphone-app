@@ -18,23 +18,14 @@ class WiziappPush {
 		self::$post = $post;
 		self::$post_id = $post_id;
 
-		if ( wp_is_post_revision($post_id) ) {
-			// If the Post is a revision
+		if ( wp_is_post_revision($post_id) || ! is_object($post) ) {
+			// The Post is a revision
 			return;
 		}
-		if ( ! isset( $_POST['original_publish'] ) ) {
-			// If this is not the Publish or Update event from the Post or Page Edit Form.
-			return;
-		}
-		if ( ! isset( $_POST['publish'] ) ) {
-			// don't send push notifications for drafts
-			WiziappLog::getInstance()->write('INFO', "not set _POST['publish'] - don't send push notifications for drafts", 'WiziappPush.publishPost');
-			if ($_POST['original_publish'] != 'Update'){
-				WiziappLog::getInstance()->write('INFO', "_POST['original_publish'] not 'Update'", 'WiziappPush.publishPost');
-				return;
-			}
-		}
-		if ( empty(WiziappConfig::getInstance()->settings_done) || ! is_object($post) ) {
+
+		if ( ! isset($post->post_status) || strtolower($post->post_status) !== 'publish' ){
+			// This is not the Publish or just Update event from the Post or Page Edit Form or this is drafts or the scheduled publish
+			WiziappLog::getInstance()->write('INFO', 'This is not the Publish or just Update event from the Post or Page Edit Form or this is drafts or the scheduled publish', 'WiziappPush.publishPost');
 			return;
 		}
 
@@ -44,45 +35,27 @@ class WiziappPush {
 			return;
 		}
 
-		if ( ! (bool) WiziappConfig::getInstance()->notify_on_new_post && $post->post_type === 'post' ) {
-			WiziappLog::getInstance()->write('INFO', "We are set not to notify on new post.", 'WiziappPush.publishPost');
+		$is_set_not =
+		( $post->post_type === 'post' && ! ( bool ) WiziappConfig::getInstance()->notify_on_new_post ) ||
+		( $post->post_type === 'page' && ! ( bool ) WiziappConfig::getInstance()->notify_on_new_page );
+		if ( $is_set_not ) {
+			WiziappLog::getInstance()->write('INFO', "We are set not to notify on new post or page.", 'WiziappPush.publishPost');
 			return;
 		}
-		if ( ! (bool) WiziappConfig::getInstance()->notify_on_new_page && $post->post_type === 'page' ) {
-			WiziappLog::getInstance()->write('INFO', "We are set not to notify on new page.", 'WiziappPush.publishPost');
-			return;
-		}
-/*
-		if ( $post->post_type === 'post' ) {
-			// If done the Publish or Update of the Post from the Post Edit Form.
-			$is_post_publishing = $_POST['original_publish'] === 'Publish' && isset( $_POST['publish'] ) && $_POST['publish'] === 'Publish';
-			$is_post_updating   = $_POST['original_publish'] === 'Update'  && isset( $_POST['save'] )    && $_POST['save'] === 'Update';
 
-			if ( $is_post_publishing && ! isset( $_POST['wizi_published_push'] ) ) {
-				WiziappLog::getInstance()->write('INFO', "post settings: do not notify on new post.", 'WiziappPush.publishPost');
-				// If done the Publish, but the Push Notification on publish event is not permitted from the Wiziapp Metabox
-				return;
-			} elseif ( $is_post_updating && ! isset( $_POST['wizi_updated_push'] ) ) {
-				WiziappLog::getInstance()->write('INFO', "post settings: do not notify on update.", 'WiziappPush.publishPost');
-				// If done the Updating, but the Push Notification on updating event is not permitted from the Wiziapp Metabox
-				return;
-			}
-		}
-*/
-		// $ownerSettings = true;
 		// @todo Get this from the saved options
 		$tabId = WiziappConfig::getInstance()->main_tab_index;
-		$request = null;
+		$request = NULL;
 		$excluded_users = array();
 		WiziappLog::getInstance()->write('INFO', "Notifying on new post", 'WiziappPush.publishPost');
 
 		if ( WiziappConfig::getInstance()->aggregate_notifications ) {
 			WiziappLog::getInstance()->write('INFO', "We need to aggregate the messages", 'WiziappPush.publishPost');
-			// We might need to send this later...
-			// let's check
-			if (!isset(WiziappConfig::getInstance()->counters)) {
+			// We might need to send this later... let's check
+			if ( ! isset(WiziappConfig::getInstance()->counters) ) {
 				WiziappConfig::getInstance()->counters = array('posts' => 0);
 			}
+
 			// Increase the posts count
 			WiziappConfig::getInstance()->counters['posts'] += 1;
 
@@ -99,15 +72,18 @@ class WiziappPush {
 						'badge' => $badge,
 						'excluded_users' => $excluded_users,
 					);
+
 					if ( WiziappConfig::getInstance()->show_notification_text ) {
 						$request['content'] = urlencode(stripslashes(WiziappConfig::getInstance()->counters['posts'] . ' new posts published'));
 						$request['params'] = "{\"tab\": \"{$tabId}\"}";
 					}
-					// reset the counter
+
+					// Reset the counter
 					WiziappConfig::getInstance()->counters['posts'] = 0;
 				}
 			}
-		} else { // We are not aggragating the message
+		} else {
+			// We are not aggragating the message
 			$allUdids = self::$endUser->getAllUdids();
 
 			//get post data:
@@ -117,40 +93,10 @@ class WiziappPush {
 
 			foreach ($allUdids as $udid) {
 				$userPushSettings = self::getPushSettings4udid($udid);
-				//foreach (get_users(array('fields' => 'ID',)) as $user_id) {
-				//$wiziapp_push_settings = get_user_meta($user_id, 'wiziapp_push_settings', TRUE);
+
 				if ($userPushSettings === false) {
 					$excluded_users[] = $udid;
-				} elseif ($userPushSettings === true) {
-					// don't check owner's settings; go ahead and send notification
-				} elseif ($userPushSettings === 0) { // no user data, use owner's settings
-					//                        if (!$ownerSettings) {
-					//                            $excluded_users[] = $udid;
-					//                        }
 				}
-
-				//                            $is_generally_not_chosen =
-				//                            ( ! isset($wiziapp_push_settings['tags']) || empty($wiziapp_push_settings['tags'])) &&
-				//                            ( ! isset($wiziapp_push_settings['categories']) || empty($wiziapp_push_settings['categories'])) &&
-				//                            ( ! isset($wiziapp_push_settings['authors']) || empty($wiziapp_push_settings['authors']));
-				//
-				//                            if ($is_generally_not_chosen) {
-				//                                    continue;
-				//                            } else {
-				//                                    if (isset($wiziapp_push_settings['authors']) && is_array($wiziapp_push_settings['authors']) && in_array($post->post_author, $wiziapp_push_settings['authors'])) {
-				//                                            continue;
-				//                                    }
-				//
-				//                                    foreach (wp_get_object_terms($post_id, array('category', 'post_tag',)) as $product_term) {
-				//                                            if ($product_term->taxonomy === 'category' && in_array($product_term->term_id, $wiziapp_push_settings['categories'])) {
-				//                                                    continue;
-				//                                            } elseif ($product_term->taxonomy === 'post_tag' && in_array($product_term->term_id, $wiziapp_push_settings['tags'])) {
-				//                                                    continue;
-				//                                            }
-				//                                    }
-				//
-				//                                    $excluded_users[] = $user_id;
-				//                            }
 			}
 
 			$sound = WiziappConfig::getInstance()->trigger_sound;
@@ -161,52 +107,59 @@ class WiziappPush {
 				'badge' => $badge,
 				'excluded_users' => $excluded_users,
 			);
+
 			if ( WiziappConfig::getInstance()->show_notification_text ) {
 				$request['content'] = urlencode( stripslashes( WiziappConfig::getInstance()->push_message ));
 				$request['params'] = "{\"tab\": \"{$tabId}\"}";
 			}
 		}
-		// Done setting up what to send, now send it..
 
 		// Make sure we have a reason to even send this message
-		if ( $request == null || (!$request['sound'] && !$request['badge'] && !$request['content'] )) {
+		if ( $request == NULL || ( ! $request['sound'] && ! $request['badge'] && ! $request['content'] ) ) {
 			return;
 		}
-		// We have something to send
-		WiziappLog::getInstance()->write('INFO', "About to send a single notification event...", 'WiziappPush.publishPost');
+
+		// Done setting up what to send, now send it.
 		$r = new WiziappHTTPRequest();
-		$response = $r->api($request, '/push', 'POST');
+		$r->api($request, '/push', 'POST');
 	}
 
 	public static function intervalPush($period, $period_text) {
-		if ( !WiziappConfig::getInstance()->notify_on_new_post ) {
+		if ( ! WiziappConfig::getInstance()->notify_on_new_post ) {
 			return;
 		}
-		$request = null;
-		$tabId = WiziappConfig::getInstance()->main_tab_index;
-		if ( WiziappConfig::getInstance()->aggregate_notifications && WiziappConfig::getInstance()->notify_periods == $period) {
-			if (!isset(WiziappConfig::getInstance()->counters)) {
-				// We don't have any counters in place yet, no need to run
-				return;
-			}
-			if ( WiziappConfig::getInstance()->counters['posts'] > 0 ) {
-				$sound = WiziappConfig::getInstance()->trigger_sound;
-				$badge = (WiziappConfig::getInstance()->show_badge_number) ? WiziappConfig::getInstance()->counters['posts'] : 0;
-				$users = 'all';
-				$request = array(
-					'type' => 1,
-					'sound' => $sound,
-					'badge' => $badge,
-					'users' => $users,
-				);
-				if ( WiziappConfig::getInstance()->show_notification_text ) {
-					$request['content'] = urlencode(stripslashes(WiziappConfig::getInstance()->counters['posts'].__(' new posts published ', 'wiziapp').$period_text));
-					$request['params'] = "{\"tab\": \"{$tabId}\"}";
-				}
-				// reset the counter
-				WiziappConfig::getInstance()->counters['posts'] = 0;
-			}
+
+		if ( ! WiziappConfig::getInstance()->aggregate_notifications || WiziappConfig::getInstance()->notify_periods != $period ) {
+			return;
 		}
+
+		if ( ! isset(WiziappConfig::getInstance()->counters) ) {
+			// We don't have any counters in place yet, no need to run
+			return;
+		}
+
+		if ( WiziappConfig::getInstance()->counters['posts'] == 0 ) {
+			return;
+		}
+
+		$sound = WiziappConfig::getInstance()->trigger_sound;
+		$badge = (WiziappConfig::getInstance()->show_badge_number) ? WiziappConfig::getInstance()->counters['posts'] : 0;
+		$users = 'all';
+		$request = array(
+			'type' => 1,
+			'sound' => $sound,
+			'badge' => $badge,
+			'users' => $users,
+		);
+
+		if ( WiziappConfig::getInstance()->show_notification_text ) {
+			$request['content'] = urlencode(stripslashes(WiziappConfig::getInstance()->counters['posts'].__(' new posts published ', 'wiziapp').$period_text));
+			$tabId = WiziappConfig::getInstance()->main_tab_index;
+			$request['params'] = "{\"tab\": \"{$tabId}\"}";
+		}
+
+		// reset the counter
+		WiziappConfig::getInstance()->counters['posts'] = 0;
 	}
 
 	public static function daily() {

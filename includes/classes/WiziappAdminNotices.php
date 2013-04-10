@@ -26,6 +26,7 @@ class WiziappAdminNotices {
 	public static function set_admin_notices() {
 		global $wp_version;
 		$wp_ponters_compatible = version_compare($wp_version, '3.4', '>=');
+		$installer = new WiziappInstaller();
 
 		if ( ! WiziappConfig::getInstance()->install_notice_showed ) {
 			WiziappConfig::getInstance()->install_notice_showed = TRUE;
@@ -35,10 +36,7 @@ class WiziappAdminNotices {
 			} else {
 				add_action('admin_notices', array('WiziappAdminNotices', 'finish_install_regular_notice'));
 			}
-		}
-
-		$installer = new WiziappInstaller();
-		if ( $installer->needUpgrade() && ! ( isset($_GET['page']) && $_GET['page'] === 'wiziapp' ) ) {
+		} elseif ( $installer->needUpgrade() && ! ( isset($_GET['page']) && $_GET['page'] === 'wiziapp' ) ) {
 			if ( $wp_ponters_compatible && WiziappConfig::getInstance()->upgrade_notice_new_mode ) {
 				WiziappConfig::getInstance()->upgrade_notice_new_mode = FALSE;
 

@@ -72,7 +72,7 @@ final class WiziappLog {
 	}
 
 	private function __construct(){
-		$this->path = dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR;
+		$this->path = WiziappContentHandler::getInstance()->get_blog_property('data_files_dir').DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
 		if (!$this->checkPath() || $this->isIIS()){
 			$this->enabled = FALSE;
 		}

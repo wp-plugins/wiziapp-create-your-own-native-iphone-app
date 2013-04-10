@@ -2,18 +2,19 @@
 if ( $screen_content['screen']['update'] === TRUE ){
 	echo $components;
 } else {
-	/*
-	// Prepare the classes
-	global $pageScripts;
-	$pageScripts = array('wiziapp_favorites');
-	*/
-
 	$is_comments = ( $this->name === 'comments' );
 
 	get_header();
+
+	$loaded_event_trigger = '';
+	if ( $is_comments && isset($screen_content['post_id']) ){
+		$loaded_event_trigger = ' class="comments_loaded_event"';
+	} elseif ( isset($this->type) && $this->type === 'list' && isset($this->name) && $this->name === 'posts' ){
+		$loaded_event_trigger = ' class="recent_loaded_event"';
+	}
 	?>
 
-	<div data-role="page" data-theme="c"<?php echo ( $is_comments && isset($screen_content['post_id']) ) ? ' class="comments_loaded_event"' : ''; ?>>
+	<div data-role="page" data-theme="c"<?php echo $loaded_event_trigger; ?>>
 		<div data-role="header" data-id="header" data-position="fixed" class="navigation">
 			<?php
 				if ($back_content === false || $tabBar->getTabFromURL() !== false){

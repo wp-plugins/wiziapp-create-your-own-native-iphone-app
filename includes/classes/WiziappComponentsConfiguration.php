@@ -14,7 +14,7 @@ class WiziappComponentsConfiguration{
     }
 
     public static function getInstance(){
-        if (!isset(self::$instance)) {
+        if ( ! isset(self::$instance) ) {
             $c = __CLASS__;
             self::$instance = new $c;
         }
@@ -24,9 +24,7 @@ class WiziappComponentsConfiguration{
 
     function getAttrToAdd($name){
         $attrs = array();
-        if ( isset($this->config[$name]) &&
-            isset($this->config[$name]['extra'])){
-
+        if ( isset($this->config[$name]) && isset($this->config[$name]['extra']) ){
             $attrs = $this->config[$name]['extra'];
         }
 
@@ -35,9 +33,7 @@ class WiziappComponentsConfiguration{
 
     function getAttrToRemove($name){
         $attrs = array();
-        if ( isset($this->config[$name]) &&
-            isset($this->config[$name]['remove'])){
-
+        if ( isset($this->config[$name]) && isset($this->config[$name]['remove']) ){
             $attrs = $this->config[$name]['remove'];
         }
 

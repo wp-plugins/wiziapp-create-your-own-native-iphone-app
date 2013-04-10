@@ -12,6 +12,9 @@
 function wiziapp_attach_hooks(){
 	$ce = new WiziappContentEvents();
 
+	// Deactivate the Webapp feature on the "Wiziapp plugin upgrade" process.
+	WiziappWebappDisplay::deactivate_on_upgrade();
+
 	add_action( 'admin_menu', array( 'WiziappAdminDisplay', 'setup' ) );
 
 	/* Add a custom column to the users table to indicate that the user
@@ -36,8 +39,8 @@ function wiziapp_attach_hooks(){
 		add_filter('wp_die_handler', array(&$comment_screen, 'set_error_function'), 1);
 	}
 
-	if ( !empty(WiziappConfig::getInstance()->settings_done) ){
-		add_action( 'edit_post', array( 'WiziappPush', 'create_push_notification' ), 10, 2 );
+	if ( ! empty(WiziappConfig::getInstance()->settings_done) || ! empty(WiziappConfig::getInstance()->playstore_url) ){
+		add_action( 'wp_insert_post', array( 'WiziappPush', 'create_push_notification' ), 10, 2 );
 	}
 
 	add_action( 'edit_post', array( &$ce, 'updateCacheTimestampKey' ) );
@@ -48,24 +51,23 @@ function wiziapp_attach_hooks(){
 	add_action('untrashed_post', array(&$ce, 'recoverPost'));
 
 	add_action('created_term', array(&$ce, 'updateCacheTimestampKey'));
-	add_action('edited_term', array(&$ce, 'updateCacheTimestampKey'));
+	add_action('edited_term',  array(&$ce, 'updateCacheTimestampKey'));
 
 	if ( ! empty(WiziappConfig::getInstance()->settings_done) ){
-		add_action('wiziapp_daily_function_hook', array('WiziappPush', 'daily'));
-		add_action('wiziapp_weekly_function_hook', array('WiziappPush', 'weekly'));
+		add_action('wiziapp_daily_function_hook',   array('WiziappPush', 'daily'));
+		add_action('wiziapp_weekly_function_hook',  array('WiziappPush', 'weekly'));
 		add_action('wiziapp_monthly_function_hook', array('WiziappPush', 'monthly'));
 	}
 
 	// The hook to avoid the Collision with the WP Super Cache
-	add_filter('supercacherewriteconditions', array(&$ce, 'add_wiziapp_condition'));
+	add_filter('supercacherewriteconditions', array('WiziappHelpers', 'add_wiziapp_condition'));
 
 	// Add "Delete Old Log Files" and "Delete Old Cache Files" daily Wordpress Cron job
 	add_action('wiziapp_daily_function_hook', array(WiziappLog::getInstance(), 'deleteOldFiles'));
 	add_action('wiziapp_daily_function_hook', array(WiziappCache::getCacheInstance(), 'delete_old_files'));
 
-	// Handle installation functions
+	// Handle uninstallation functions
 	register_deactivation_hook(WP_WIZIAPP_BASE, array('WiziappInstaller', 'uninstall'));
-	register_activation_hook(WP_WIZIAPP_BASE, array('WiziappInstaller', 'install'));
 	add_action('delete_blog', array('WiziappInstaller', 'deleteBlog'), 10, 2);
 
 	/**
@@ -91,6 +93,7 @@ function wiziapp_attach_hooks(){
 	// Upgrade
 	add_action('wp_ajax_wiziapp_upgrade_database', 		array('WiziappUpgradeDisplay', 'upgradeDatabase'));
 	add_action('wp_ajax_wiziapp_upgrade_configuration', array('WiziappUpgradeDisplay', 'upgradeConfiguration'));
+	add_action('wp_ajax_wiziapp_create_directories', 	array('WiziappUpgradeDisplay', 'create_wiziapp_directories'));
 	add_action('wp_ajax_wiziapp_upgrading_finish', 		array('WiziappUpgradeDisplay', 'upgradingFinish'));
 
 	// admin

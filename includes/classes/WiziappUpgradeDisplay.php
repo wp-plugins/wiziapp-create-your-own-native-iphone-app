@@ -8,7 +8,7 @@
 
 class WiziappUpgradeDisplay{
 
-	function upgradingFinish(){
+	public static function upgradingFinish(){
 		WiziappLog::getInstance()->write('INFO', "The upgrading is finished, letting the admin know", "post_upgrade.wiziapp_upgrading_finish");
 
 		$ch = new WiziappContentEvents();
@@ -31,7 +31,7 @@ class WiziappUpgradeDisplay{
 		exit;
 	}
 
-	function upgradeDatabase(){
+	public static function upgradeDatabase(){
 		$installer = new WiziappInstaller();
 		$status = $installer->upgradeDatabase();
 
@@ -46,7 +46,7 @@ class WiziappUpgradeDisplay{
 		exit;
 	}
 
-	function upgradeConfiguration(){
+	public static function upgradeConfiguration(){
 		$installer = new WiziappInstaller();
 		$status = $installer->upgradeConfiguration();
 
@@ -61,6 +61,25 @@ class WiziappUpgradeDisplay{
 		exit;
 	}
 
+	public static function create_wiziapp_directories(){
+		$header = array(
+			'action' => 'create_wiziapp_directories',
+			'status' => TRUE,
+			'code' => 200,
+			'message' => '',
+		);
+
+		try{
+			WiziappInstaller::create_wiziapp_directories();
+		} catch (Exception $e) {
+			$header['status'] = FALSE;
+			$header['code'] = 500;
+			$header['text'] = $e->getMessage();
+		}
+
+		echo json_encode(array('header' => $header));
+		exit;
+	}
 
 	function display(){
 		?>
@@ -164,11 +183,13 @@ class WiziappUpgradeDisplay{
 			#wizi_be_patient{
 				margin: 15px 0px 9px 32px;
 			}
-
 		</style>
+
 		<div id="wiziapp_activation_container">
 			<div id="just_a_moment"></div>
-			<p id="wizi_be_patient" class="text_label"><?php echo __('Please be patient while we upgrade the plugin. It may take several minutes.', 'wiziapp');?></p>
+			<p id="wizi_be_patient" class="text_label">
+			<?php echo __('Please be patient while we upgrade the plugin. It may take several minutes.', 'wiziapp');?>
+			</p>
 			<div id="wizi_icon_wrapper">
 				<div id="wizi_icon_processing"></div>
 				<div id="current_progress_label" class="text_label"><?php echo __('Initializing...', 'wiziapp'); ?></div>
@@ -179,24 +200,50 @@ class WiziappUpgradeDisplay{
 			</div>
 			<p id="current_progress_indicator" class="text_label"></p>
 
-			<p id="wiziapp_finalize_title" class="text_label"><?php echo __('Ready, if the page doesn\'t change in a couple of seconds click ', 'wiziapp'); ?><span id="finializing_activation"><?php echo __('here', 'wiziapp'); ?></span></p>
+			<p id="wiziapp_finalize_title" class="text_label">
+				<?php echo __('Ready, if the page doesn\'t change in a couple of seconds click ', 'wiziapp'); ?>
+				<span id="finializing_activation"><?php echo __('here', 'wiziapp'); ?></span>
+			</p>
 
-			<div id="error_activating" class="wiziapp_error hidden"><div class="icon"></div><div class="text"><?php echo __('There was an error loading the wizard, please contact support', 'wiziapp');?></div></div>
-			<div id="internal_error" class="wiziapp_error hidden"><div class="icon"></div><div class="text"><?php echo __('Connection error. Please try again.,', 'wiziapp');?> <a href="javscript:void(0);" class="retry_processing"><?php echo __('retry', 'wiziapp'); ?></a></div></div>
-			<div id="internal_error_2" class="wiziapp_error hidden"><div class="icon"></div><div class="text"><?php echo __('There were still errors contacting your server, please contact support', 'wiziapp');?></div></div>
-			<div id="error_network" class="wiziapp_error hidden"><div class="icon"></div><div class="text"><?php echo __('Connection error. Please try again.', 'wiziapp');?> <a href="javscript:void(0);" class="retry_processing"><?php echo __('retry', 'wiziapp'); ?></a></div></div>
+			<div id="error_activating" class="wiziapp_error hidden">
+				<div class="icon"></div>
+				<div class="text"><?php echo __('There was an error loading the wizard, please contact support', 'wiziapp');?></div>
+			</div>
+			<div id="internal_error" class="wiziapp_error hidden">
+				<div class="icon"></div>
+				<div class="text">
+					<?php echo __('Connection error. Please try again.,', 'wiziapp');?>
+					<a href="javscript:void(0);" class="retry_processing"><?php echo __('retry', 'wiziapp'); ?></a>
+				</div>
+			</div>
+			<div id="internal_error_2" class="wiziapp_error hidden">
+				<div class="icon"></div>
+				<div class="text"><?php echo __('There were still errors contacting your server, please contact support', 'wiziapp');?></div>
+			</div>
+			<div id="error_network" class="wiziapp_error hidden">
+				<div class="icon"></div>
+				<div class="text">
+					<?php echo __('Connection error. Please try again.', 'wiziapp');?>
+					<a href="javscript:void(0);" class="retry_processing"><?php echo __('retry', 'wiziapp'); ?></a>
+				</div>
+			</div>
 
-			<div id="error_upgrading_db" class="wiziapp_error hidden"><div class="icon"></div><div class="text"><?php echo __('There was a problem upgrading, please contact support', 'wiziapp');?></div></div>
-			<div id="error_upgrading_config" class="wiziapp_error hidden"><div class="icon"></div><div class="text"><?php echo __('There was a problem updating, please contact support', 'wiziapp');?></div></div>
+			<div id="error_upgrading_db" class="wiziapp_error hidden">
+				<div class="icon"></div>
+				<div class="text"><?php echo __('There was a problem upgrading, please contact support', 'wiziapp');?></div>
+			</div>
+			<div id="error_upgrading_config" class="wiziapp_error hidden">
+				<div class="icon"></div>
+				<div class="text"><?php echo __('There was a problem updating, please contact support', 'wiziapp');?></div>
+			</div>
 		</div>
 
 		<script type="text/javascript">
 			var progressTimer = null;
 			var progressWait = 30;
 			var upgrade_step = 0;
-			var upgrade_steps = [requestDatabaseUpgrade, requestConfigurationUpgrade, requestFinalizingProcessing];
+			var upgrade_steps = [requestDatabaseUpgrade, requestConfigurationUpgrade, requestDirectoriesCreate, requestFinalizingProcessing];
 			var webapp_installed = "<?php echo intval(WiziappConfig::getInstance()->webapp_installed); ?>";
-
 
 			jQuery(document).ready(function(){
 				wiziappRegisterAjaxErrorHandler();
@@ -214,6 +261,7 @@ class WiziappUpgradeDisplay{
 						}
 						data[index] = text;
 					});
+
 					var params = {
 						action: 'wiziapp_report_issue',
 						data: jQuery.param(data, true)
@@ -222,8 +270,8 @@ class WiziappUpgradeDisplay{
 					$el.load(ajaxurl, params, function(){
 						var $mainEl = jQuery(".wiziapp_errors_container");
 						$mainEl
-								.find(".errors_container").hide().end()
-								.find(".report_container").show().end();
+						.find(".errors_container").hide().end()
+						.find(".report_container").show().end();
 						$mainEl = null;
 					});
 
@@ -243,9 +291,11 @@ class WiziappUpgradeDisplay{
 				$el.parents('.wiziapp_error').hide();
 
 				var request = $el.parents('.wiziapp_error').data('reqObj');
-				/**request.error = function(req, error){
-					retryingFailed();
-				};*/
+				/*
+				request.error = function(req, error){
+				retryingFailed();
+				};
+				*/
 				delete request.context;
 				delete request.accepts;
 
@@ -324,7 +374,8 @@ class WiziappUpgradeDisplay{
 							}
 						} else if(error == 'parsererror'){
 							jQuery("#error_activating").show();
-						/**} else if(error == 'timeout'){
+							/*
+							} else if(error == 'timeout'){
 							//jQuery("#error_network").show();
 							jQuery("#internal_error").data('reqObj', this).show();
 							*/
@@ -347,15 +398,6 @@ class WiziappUpgradeDisplay{
 
 				return newArr;
 			}
-
-			function requestDatabaseUpgrade(){
-				var params = {
-					action: 'wiziapp_upgrade_database'
-				};
-
-				jQuery.post(ajaxurl, params, handleDatabaseUpgrade, 'json');
-				progressTimer = setTimeout(updateProgressBarByTimer, 1000 * progressWait);
-			};
 
 			function updateProgressBarByTimer(){
 				var current = jQuery("#current_progress_indicator").text();
@@ -395,6 +437,15 @@ class WiziappUpgradeDisplay{
 				jQuery("#current_progress_indicator").text(Math.floor(done) + '%');
 			};
 
+			function requestDatabaseUpgrade(){
+				var params = {
+					action: 'wiziapp_upgrade_database'
+				};
+
+				jQuery.post(ajaxurl, params, handleDatabaseUpgrade, 'json');
+				progressTimer = setTimeout(updateProgressBarByTimer, 1000 * progressWait);
+			};
+
 			function handleDatabaseUpgrade(data){
 				++upgrade_step;
 				// Update the progress bar
@@ -425,7 +476,33 @@ class WiziappUpgradeDisplay{
 				++upgrade_step;
 				// Update the progress bar
 				updateProgressBar();
-				if ( typeof(data) == 'undefined'  || !data ){
+				if ( typeof(data) == 'undefined' || !data ){
+					// The request failed from some reason... skip it
+					jQuery("#error_upgrading_config").show();
+					return;
+				}
+
+				if (data.header.status){
+					startProcessing();
+				} else {
+					jQuery("#error_upgrading_config").show();
+				}
+			}
+
+			function requestDirectoriesCreate(){
+				var params = {
+					action: 'wiziapp_create_directories'
+				};
+
+				jQuery.post(ajaxurl, params, handleDirectoriesCreate, 'json');
+				progressTimer = setTimeout(updateProgressBarByTimer, 1000 * progressWait);
+			};
+
+			function handleDirectoriesCreate(data){
+				++upgrade_step;
+				// Update the progress bar
+				updateProgressBar();
+				if ( typeof(data) == 'undefined' || !data ){
 					// The request failed from some reason... skip it
 					jQuery("#error_upgrading_config").show();
 					return;

@@ -39,34 +39,34 @@ class WiziappRequestHandler {
 	*/
 	function handleRequest($wp){
 		$request = $wp->request;
-		if (empty($request)){
+		if ( empty($request) ){
 			// doesn't rewrite the requests, try to get the query string
 			$request = urldecode($_SERVER['QUERY_STRING']);
 		}
+		WiziappLog::getInstance()->write('DEBUG', "Got a request for the blog: ".print_r($request, TRUE), "WiziappRequestHandler.handleRequest");
 
-		WiziappLog::getInstance()->write('DEBUG', "Got a request for the blog: ".print_r($request, TRUE),
-			"WiziappRequestHandler.handleRequest");
-
-		if ( ( $pos = strpos($request, 'wiziapp/') ) !== FALSE ){
-			if ($pos != 0){
-				$request = substr($request, $pos);
-			}
-
-			$request = str_replace('?', '&', $request);
-
-			//check udid
-			$udid = isset( $_SERVER['HTTP_UDID'] ) ? $_SERVER['HTTP_UDID'] : '';
-			$wus =  new WiziappUserServices();
-			if (!$wus->checkUdid($udid)){
-				// if doesn't exist - add it
-				$wus->newUdidUser($udid);
-			}
-
-			//TODO -
-			// 4. store push settings... where is it done?
-
-			$this->_routeRequest($request);
+		if ( ( $pos = strpos($request, 'wiziapp/') ) === FALSE ){
+			return;
 		}
+
+		if ( $pos != 0 ){
+			$request = substr($request, $pos);
+		}
+
+		$request = str_replace('?', '&', $request);
+
+		// check udid
+		$udid = isset( $_SERVER['HTTP_UDID'] ) ? $_SERVER['HTTP_UDID'] : '';
+		$wus =  new WiziappUserServices();
+		if ( ! $wus->checkUdid($udid) ){
+			// if doesn't exist - add it
+			$wus->newUdidUser($udid);
+		}
+
+		//TODO -
+		// 4. store push settings... where is it done?
+
+		$this->_routeRequest($request);
 	}
 
 	public function handleGeneralError(){
@@ -120,18 +120,18 @@ class WiziappRequestHandler {
 		$service = $req[1];
 		$action = $req[2];
 
-		if ($service == 'user') {
-			if ($action == 'check' || $action == 'login') {
+		if ( $service == 'user' ) {
+			if ( $action == 'check' || $action == 'login' ) {
 				$this->runService('Login', 'check', FALSE);
-			} elseif ($action == 'track') {
+			} elseif ( $action == 'track' ) {
 				$parameter_key = (isset($req[3])) ? $req[3] : '';
 				$parameter_value = (isset($req[4])) ? $req[4] : '';
 				$cms_user_account_handler = new WiziappCmsUserAccountHandler;
 				$cms_user_account_handler->pushSubscription($parameter_key, $parameter_value);
-			} elseif ($action == 'forgot_pass'){
+			} elseif ( $action == 'forgot_pass' ){
 				$this->runScreenBy('System', 'ForgotPassword', null);
 			}
-		} elseif ($service == 'content' || $service == 'search') {
+		} elseif ( $service == 'content' || $service == 'search' ) {
 			ob_start();
 			// Content requests should trigger a the caching
 			$cache = WiziappCache::getCacheInstance(array('duration' => 1800));

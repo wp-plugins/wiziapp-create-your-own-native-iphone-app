@@ -37,7 +37,7 @@
 * @property string  $api_server
 * @property boolean $configured
 * @property integer $app_id
-* @property string  $app_token
+* @property string  $plugin_token
 * @property string  $app_description
 * @property string  $app_name
 * @property string  $app_icon
@@ -56,6 +56,7 @@
 * @property string  $archive_title
 * @property string  $appstore_url
 * @property string  $playstore_url
+* @property string  $apk_file_url
 * @property boolean $app_live
 * @property integer $appstore_url_timeout
 * @property boolean $allow_grouped_lists
@@ -85,11 +86,14 @@
 * @property boolean $skip_reload_webapp
 * @property integer $thumb_min_size
 * @property integer $display_download_from_appstore
+* @property integer $endorse_download_android_app
 * @property integer $rtl
 * @property integer $wiziapp_log_threshold
 * @property string  $wiziapp_qrcode_widget_id_base
 * @property string  $wiziapp_qrcode_widget_name
 * @property string  $wiziapp_qrcode_widget_decription
+* @property array   $wiziapp_data_files
+* @property array   $adsense
 */
 // As long as we are supporting php < 5.3 we shouldn't extent the singleton class
 //class WiziappConfig extends WiziappSingleton implements WiziappIInstallable{
@@ -101,13 +105,14 @@ class WiziappConfig implements WiziappIInstallable{
 
 	private $name = 'wiziapp_settings';
 
-	private $internalVersion =  64;
+	private $internalVersion =  65;
 
 	private static $_instance = null;
 
 	public $integer_values = array(
 		'thumb_min_size',
 		'display_download_from_appstore',
+		'endorse_download_android_app',
 		'rtl',
 		'notify_on_new_post',
 		'notify_on_new_page',
@@ -148,11 +153,9 @@ class WiziappConfig implements WiziappIInstallable{
 		// Add here the keys to reset to the default value;
 		$resetOptions = array();
 		// Add here the keys add with the default value, if they don't already exists;
-		$addOptions = array( 'verify_email_notice', 'install_notice_showed', 'upgrade_notice_new_mode', );
+		$addOptions = array( 'wiziapp_data_files', 'playstore_url', 'apk_file_url', 'endorse_download_android_app', 'plugin_token', 'adsense', );
 		// Add here the keys to remove from the options array;
-		$removeOptions = array(
-			'show_email_verified_msg', 'wiziapp_showed_config_once', 'wiziapp_avail_version', 'show_need_upgrade_msg', 'reset_settings_on_uninstall', 'wiziapp_rtl_theme_name', 'theme_name',
-		);
+		$removeOptions = array( 'app_token', );
 
 		$newDefaults = $this->getDefaultConfig();
 		foreach($addOptions as $optionName) {
@@ -184,13 +187,13 @@ class WiziappConfig implements WiziappIInstallable{
 	}
 
 	public function install() {
-		if ( ! $this->isInstalled() ) {
-			$this->loadDefaultOptions();
-			$this->options['options_version'] = $this->internalVersion;
-			$this->save();
+		if ( $this->isInstalled() ) {
+			return;
 		}
 
-		return $this->isInstalled();
+		$this->loadDefaultOptions();
+		$this->options['options_version'] = $this->internalVersion;
+		$this->save();
 	}
 
 	public function isInstalled() {
@@ -229,7 +232,7 @@ class WiziappConfig implements WiziappIInstallable{
 	public function saveUpdate($option, $value) {
 		$saved = FALSE;
 
-		if ( isset($this->options[$option]) || ( in_array( $option, array('appstore_url', 'playstore_url',) ) && array_key_exists($option, $this->options) ) ) {
+		if ( isset($this->options[$option]) || ( in_array( $option, array( 'appstore_url', 'playstore_url', 'apk_file_url', 'adsense', ) ) && array_key_exists($option, $this->options) ) ) {
 			$this->options[$option] = $value;
 			$this->save();
 			// If the value is the same it will not be updated but thats still ok.
@@ -240,7 +243,7 @@ class WiziappConfig implements WiziappIInstallable{
 	}
 
 	public function __isset($option) {
-		return isset($this->options[$option]) || ( in_array( $option, array('appstore_url', 'playstore_url',) ) && array_key_exists($option, $this->options) );
+		return isset($this->options[$option]) || ( in_array( $option, array( 'appstore_url', 'playstore_url', 'apk_file_url', ) ) && array_key_exists($option, $this->options) );
 	}
 
 	public function __set($option, $value) {
@@ -285,21 +288,27 @@ class WiziappConfig implements WiziappIInstallable{
 	}
 
 	public function getCdnServer() {
-		$cdn = $this->options['cdn_server'];
-		$protocol = 'http://';
+		if ( isset($this->options['cdn_server']) ) {
+			$cdn = $this->options['cdn_server'];
+		} else {
+			require WIZI_DIR_PATH . 'includes/blocks/conf/' . WIZIAPP_ENV . '_config.inc.php';
+			$cdn = $envSettings['cdn_server'];
+		}
 
-		if ( isset($_GET['secure']) && $_GET['secure']==1 ) {
+		$protocol = 'http://';
+		if ( isset($_GET['secure']) && $_GET['secure'] == 1 ) {
 			$cdn = $this->options['secure_cdn_server'];
 			$protocol = 'https://';
 		}
+
 		return $protocol.$cdn;
 	}
 
 	public function getCommonApiHeaders() {
-		$app_token = $this->options['app_token'];
+		$plugin_token = $this->options['plugin_token'];
 
 		$headers = array(
-			'Application' => $app_token,
+			'Application' => $plugin_token,
 			'wiziapp_version' => WIZIAPP_P_VERSION,
 			'app_version' => 2,
 			'udid' => 'wordpress-cms',
@@ -332,7 +341,7 @@ class WiziappConfig implements WiziappIInstallable{
 
 	function getDefaultConfig() {
 		$envSettings = array();
-		require_once('conf/' . WIZIAPP_ENV . '_config.inc.php');
+		require WIZI_DIR_PATH . 'includes/blocks/conf/' . WIZIAPP_ENV . '_config.inc.php';
 
 		$settings = array(
 			// Push notifications
@@ -363,6 +372,7 @@ class WiziappConfig implements WiziappIInstallable{
 			// Control Panel - Settings
 			'thumb_min_size' => 150,
 			'display_download_from_appstore' => 1,
+			'endorse_download_android_app' => 1,
 			'rtl' => 0,
 
 			'comments_avatar_height' => 58,
@@ -396,7 +406,7 @@ class WiziappConfig implements WiziappIInstallable{
 			'wiziapp_theme_name' => 'default',
 
 			// app
-			'app_token' => '',
+			'plugin_token' => '',
 			'app_id' => 0,
 			'app_description' => 'Here you will see the description about your app. You will be able to provide the description in the app store information form (step 3).',
 			'app_name' => get_bloginfo('name'),
@@ -427,12 +437,15 @@ class WiziappConfig implements WiziappIInstallable{
 			'app_live' => FALSE,
 			'appstore_url'  => '',
 			'playstore_url' => '',
+			'apk_file_url' => '',
 			'appstore_url_timeout' => 1, //How many days will pass before we will show the user the "download app from appstore" confirmation alert again, 0 will make it not display at all
 			'email_verified' => FALSE,
 			'verify_email_notice' => TRUE,
 			'install_notice_showed' => FALSE,
 			'upgrade_notice_new_mode' => TRUE,
 			'wiziapp_log_threshold' => 2, // Initial default level
+			'wiziapp_data_files' => array( 'wiziapp_data_files' => array( 'cache' => array(), 'logs' => array(), 'resources' => array(), ), ),
+			'adsense' => array(),
 
 			// Wiziapp QR Code Widget
 			'wiziapp_qrcode_widget_id_base' => 'wiziapp_qr_code',

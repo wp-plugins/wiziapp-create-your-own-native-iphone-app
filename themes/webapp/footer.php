@@ -1,7 +1,6 @@
 <?php
 	global $tabBar;
-	if (!isset($tabBar))
-	{
+	if ( ! isset($tabBar) ){
 		$tabBar = new WiziappTabbarBuilder();
 	}
 ?>
@@ -68,11 +67,14 @@
 			<a href="" data-role="button">Email</a>
 		</p>
 		<p>
+			<a href="" data-role="button" target="_blank">Google+</a>
+		</p>
+		<p>
 			<a href="#" data-rel="back" data-theme="e" data-role="button">Cancel</a>
 		</p>
 		<?php
 			/*
-			$file = dirname(__FILE__).'/resources/config.js';
+			$file = WiziappContentHandler::getInstance()->get_blog_property('data_files_dir').'/resources/config.js';
 			$config = file_get_contents($file);
 			$config = str_replace('var config = ', '', substr($config, 0, strlen($config)-1));
 			$configObj = json_decode($config);

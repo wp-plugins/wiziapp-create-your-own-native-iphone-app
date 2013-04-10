@@ -4,9 +4,9 @@
 	-webkit-text-size-adjust: none;
 }
 body{
-	background-color: #E8E8E8;
-}
-body{
+	margin: 0;
+	padding: 0;
+	background-image: url(background.png);
 	font-family: Helvetica, Arial;
 	color: #6E6E6E;
 }
@@ -14,40 +14,49 @@ div{
 	margin: 14px auto;
 	text-align: center;
 }
-.button{
+p{
+	text-align: center;
+	font-weight: bold;
+	font-size: 14px;
+}
+#intro_page_postclick{
+	width: 180px;
+	margin: 0 auto 120px auto;
+	padding: 0 0 0 62px;
+	background: url(v_mark.png) no-repeat;
+	text-align: left;
+	color: #000000;
+}
+#download_from_store{
+	width: 320px;
+	margin: 14px auto 70px auto;
+}
+#mobile_site{
+	background-image: url(mobile_site.png);
+	width: 245px;
 	height: 49px;
 	color: white;
 	font-size: 15px;
+	font-weight: bold;
 	line-height: 338%;
 	cursor: pointer;
 }
-#download_from_store{
-	padding-left: 18px;
-	width: 266px;
+img.intro_page_arrow{
+	margin-bottom: 30px;
 }
-.mobile_site{
-	background-image: url(mobile_site.png);
-	width: 287px;
-}
-.app_store{
-	background-image: url(iphone.png);
-}
-.play_store{
-	background-image: url(android.png);
-}
-.title{
+#title{
 	height: 57px;
-	margin: 40px 10px;
+	margin: 14px 10px;
 	text-align: left;
 }
-.title div{
+#title div{
 	margin: 0;
 }
-.title div:first-child{
+#title div:first-child{
 	float: left;
 	width: 57px;
 }
-.title div:first-child + div{
+#title div:first-child + div{
 	display: inline-block;
 	margin-left: 14px;
 	height: 57px;
@@ -55,8 +64,20 @@ div{
 	font-weight: bold;
 	line-height: 274%;
 }
+#arrow_up{
+	display: none;
+	height: 104px;
+	margin: 0 0 6px 10px;
+	background: url(arrow_up.png) no-repeat;
+}
 #desktop_site{
 	width: 114px;
 	cursor: pointer;
 	text-decoration: underline;
+}
+.display_block{
+	display: block !important;
+}
+.display_none{
+	display: none;
 }

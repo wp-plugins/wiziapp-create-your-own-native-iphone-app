@@ -8,32 +8,31 @@
 class WiziappAdminDisplay {
 	/**
 	* Sets up the admin menu according to the application configuration state.
-	* for a fully installed app we show a full menu but until then
-	* way make things more complicated for the user
+	* For a fully installed app we show a full menu,
+	* but until then way make things more complicated for the user.
 	*/
 	public function setup(){
 		$configured = WiziappConfig::getInstance()->settings_done;
 
-		//$configured = FALSE;
-		if (isset($_GET['wiziapp_configured']) && $_GET['wiziapp_configured'] == 1){
+		if ( isset($_GET['wiziapp_configured']) && $_GET['wiziapp_configured'] == 1 ){
 			$configured = TRUE;
 		}
 		if ( isset($_GET['skip_reload_webapp']) && $_GET['skip_reload_webapp'] == 1 ){
 			WiziappConfig::getInstance()->skip_reload_webapp = TRUE;
 		}
 
-		$iconPath = WiziappConfig::getInstance()->getCdnServer() . "/images/cms/WiziSmallIcon.png";
-
-		$installer = new WiziappInstaller();
-
 		if ( current_user_can('administrator') ){
 			WiziappAdminNotices::set_admin_notices();
 
+			$iconPath = WiziappConfig::getInstance()->getCdnServer() . "/images/cms/WiziSmallIcon.png";
+			$installer = new WiziappInstaller();
 			$webapp_create_resources =
 			( $configured === TRUE && ! WiziappConfig::getInstance()->webapp_installed && ! WiziappConfig::getInstance()->skip_reload_webapp ) ||
 			( isset($_GET['wiziapp_reload_webapp']) && $_GET['wiziapp_reload_webapp'] === '1' );
 
 			if ( WiziappConfig::getInstance()->finished_processing === FALSE || is_null($configured) ){
+				add_action( 'admin_enqueue_scripts', 	  array( 'WiziappPostInstallDisplay', 'styles_javascripts' ) );
+				add_action( 'admin_print_footer_scripts', array( 'WiziappPostInstallDisplay', 'google_analytics' ), 1 );
 				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappPostInstallDisplay', 'display'), $iconPath);
 			} elseif ( $installer->needUpgrade() ){
 				add_menu_page('WiziApp', 'WiziApp', 'administrator', 'wiziapp', array('WiziappUpgradeDisplay', 	   'display'), $iconPath);

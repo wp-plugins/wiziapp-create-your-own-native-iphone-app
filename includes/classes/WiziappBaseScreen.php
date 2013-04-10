@@ -55,7 +55,6 @@ class WiziappBaseScreen{
 				'update'  => (isset($_GET['wizipage']) && $_GET['wizipage']) ? TRUE : FALSE,
 				'grouped' => $grouped,
 				'showAds' => $show_ads,
-				//'hideCellSeparator' => $hide_separator,
 			)
 		);
 

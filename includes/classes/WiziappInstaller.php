@@ -1,119 +1,124 @@
 <?php if (!defined('WP_WIZIAPP_BASE')) exit();
 
-class WiziappInstaller
-{
-    public function needUpgrade() {
-		/*
-		if ( ! WiziappDB::getInstance()->isInstalled() ) {
-		// We are not installed, we don't have nothing to upgrade, we need a full scan...
-		return FALSE;
+class WiziappInstaller{
+
+	public static function create_wiziapp_directories() {
+		$wiziapp_data_directories = WiziappConfig::getInstance()->wiziapp_data_files;
+		if ( empty($wiziapp_data_directories) || ! is_array($wiziapp_data_directories) ){
+			throw new Exception('Wiziapp installation encountered errors. Try deactivate the Wiziapp plugin and activate it again');
 		}
-		*/
 
+		$uploads_dir = wp_upload_dir();
+		self::_create_data_directories(WiziappConfig::getInstance()->wiziapp_data_files, $uploads_dir['basedir']);
+	}
+
+	public function needUpgrade() {
+		// We are not installed, we don't have nothing to upgrade, we need a full scan.
 		return ( WiziappDB::getInstance()->needUpgrade() || WiziappConfig::getInstance()->needUpgrade() );
-    }
+	}
 
-    public function upgradeDatabase() {
-        $upgraded = TRUE;
+	public function upgradeDatabase() {
+		if ( WiziappDB::getInstance()->needUpgrade() ) {
+			WiziappDB::getInstance()->upgrade();
+		}
 
-        if ( WiziappDB::getInstance()->needUpgrade() ) {
-            $upgraded = WiziappDB::getInstance()->upgrade();
-        }
+		return TRUE;
+	}
 
-        return $upgraded;
-    }
+	public function upgradeConfiguration() {
+		$upgraded = TRUE;
 
-    public function upgradeConfiguration() {
-        $upgraded = TRUE;
+		if ( WiziappConfig::getInstance()->needUpgrade() ) {
+			$upgraded = WiziappConfig::getInstance()->upgrade();
+		}
 
-        if ( WiziappConfig::getInstance()->needUpgrade() ) {
-            $upgraded = WiziappConfig::getInstance()->upgrade();
-        }
+		return $upgraded;
+	}
 
-        return $upgraded;
-    }
-
-    public function install(){
-        // Check for capability
-        if (!current_user_can('activate_plugins')) {
-            return;
-        }
-
-        WiziappDB::getInstance()->install();
-        WiziappConfig::getInstance()->install();
+	public static function post_install(){
+		WiziappDB::getInstance()->install();
+		WiziappConfig::getInstance()->install();
 		WiziappPluginCompatibility::getInstance()->install();
 
-        // Register tasks
-        if (!wp_next_scheduled('wiziapp_daily_function_hook')) {
-            wp_schedule_event(time(), 'daily', 'wiziapp_daily_function_hook' );
-            wp_schedule_event(time(), 'weekly', 'wiziapp_weekly_function_hook' );
-            wp_schedule_event(time(), 'monthly', 'wiziapp_monthly_function_hook' );
-        }
+		// Create the Wiziapp plugin directories
+		self::create_wiziapp_directories();
 
-        // Activate the blog with the global services
-        $cms = new WiziappCms();
-        $cms->activate();
+		// Register tasks
+		if ( ! wp_next_scheduled('wiziapp_daily_function_hook') ) {
+			wp_schedule_event(time(), 'daily', 'wiziapp_daily_function_hook' );
+			wp_schedule_event(time(), 'weekly', 'wiziapp_weekly_function_hook' );
+			wp_schedule_event(time(), 'monthly', 'wiziapp_monthly_function_hook' );
+		}
 
-        $restoreHandler = new WiziappUserServices();
-        $restoreHandler->restoreUserData();
-    }
+		// Activate the blog with the global services
+		$cms = new WiziappCms();
+		$cms->activate();
+
+		$restoreHandler = new WiziappUserServices();
+		$restoreHandler->restoreUserData();
+	}
 
 	protected static function doUninstall(){
+		$uploads_dir = wp_upload_dir();
+		self::_delete($uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_data_files');
+
 		WiziappDB::getInstance()->uninstall();
 		WiziappPluginCompatibility::getInstance()->uninstall();
 
-        // Remove scheduled tasks
-        wp_clear_scheduled_hook('wiziapp_daily_function_hook');
-        wp_clear_scheduled_hook('wiziapp_weekly_function_hook');
-        wp_clear_scheduled_hook('wiziapp_monthly_function_hook');
+		// Remove scheduled tasks
+		wp_clear_scheduled_hook('wiziapp_daily_function_hook');
+		wp_clear_scheduled_hook('wiziapp_weekly_function_hook');
+		wp_clear_scheduled_hook('wiziapp_monthly_function_hook');
 
-        // Deactivate the blog with the global services
-        try{
-            $cms = new WiziappCms();
-            $cms->deactivate();
-        } catch(Exception $e){
-            // If it failed, it's ok... move on
-        }
+		// Deactivate the blog with the global services
+		try{
+			$cms = new WiziappCms();
+			$cms->deactivate();
+		} catch(Exception $e){
+			// If it failed, it's ok... move on
+		}
 
-        // Remove option of the "Wiziapp QR Code Widget" on it exist case.
+		// Remove option of the "Wiziapp QR Code Widget" on it exist case.
 		if ( get_option( $wiziapp_qrcode_widget_option = 'widget_' . WiziappConfig::getInstance()->wiziapp_qrcode_widget_id_base ) ) {
 			delete_option( $wiziapp_qrcode_widget_option );
 		}
 
-        // Remove all options - must be done last
-        delete_option('wiziapp_screens');
-        delete_option('wiziapp_components');
-        delete_option('wiziapp_pages');
-        delete_option('wiziapp_last_processed');
-        delete_option('wiziapp_featured_post');
+		// Remove all options - must be done last
+		delete_option('wiziapp_screens');
+		delete_option('wiziapp_components');
+		delete_option('wiziapp_pages');
+		delete_option('wiziapp_last_processed');
+		delete_option('wiziapp_featured_post');
 
-        WiziappConfig::getInstance()->uninstall();
+		WiziappConfig::getInstance()->uninstall();
 	}
 
-    /**
-    * Revert the installation to remove everything the plugin added
-    */
-    public function uninstall(){
-		if (function_exists('is_multisite') && is_multisite()) {
+	/**
+	* Revert the installation to remove everything the plugin added
+	*/
+	public function uninstall(){
+		if ( function_exists('is_multisite') && is_multisite() ) {
+			// If it is a network de-activation - if so, run the de-activation function for each blog id
 			global $wpdb;
-			// check if it is a network de-activation - if so, run the de-activation function for each blog id
-			if (isset($_GET['networkwide']) && ($_GET['networkwide'] == 1)) {
-				$old_blog = $wpdb->blogid;
-				// Get all blog ids
-				$blogids = $wpdb->get_col($wpdb->prepare("SELECT blog_id FROM $wpdb->blogs"));
-				foreach ($blogids as $blog_id) {
-					switch_to_blog($blog_id);
-					self::doUninstall();
-				}
-				switch_to_blog($old_blog);
-				return;
+
+			$old_blog = $wpdb->blogid;
+			// Get all blog ids
+			$blogids = $wpdb->get_col( 'SELECT `blog_id` FROM '.$wpdb->blogs );
+
+			foreach ($blogids as $blog_id) {
+				switch_to_blog($blog_id);
+				self::doUninstall();
 			}
+
+			switch_to_blog($old_blog);
+
+			return;
 		} else {
 			self::doUninstall();
-        }
-    }
+		}
+	}
 
-    public function deleteBlog($blog_id, $drop){
+	public function deleteBlog($blog_id, $drop){
 		global $wpdb;
 		$switched = false;
 		$currentBlog = $wpdb->blogid;
@@ -128,6 +133,57 @@ class WiziappInstaller
 			switch_to_blog($currentBlog);
 		}
 	}
-}
 
-// End of file
+	private static function _create_data_directories( array $directories, $parent_path){
+		if ( empty($directories) ){
+			return;
+		}
+
+		foreach ( $directories as $directory => $sub_directories ){
+			$directory = $parent_path.DIRECTORY_SEPARATOR.$directory;
+
+			if ( ! file_exists($directory) ) {
+				if ( ! @mkdir($directory) ) {
+					WiziappLog::getInstance()->write('ERROR', 'Could not create the Wiziapp Data Files directory: '.$directory, "WiziappInstaller._create_data_directories");
+					throw new Exception('Could not create the Wiziapp Data Files directory: '.$directory);
+				}
+
+				if ( ! @chmod($directory, 0777) ) {
+					WiziappLog::getInstance()->write('ERROR', 'The Wiziapp Data Files directory exists, but its not readable or not writable: '.$directory, "WiziappInstaller._create_data_directories");
+					throw new Exception('Could not to do the Wiziapp Data Files directory '.$directory.' readable and writable');
+				}
+			} elseif ( ! @is_readable($directory) || ! @is_writable($directory) ) {
+				if ( ! @chmod($directory, 0777) ) {
+					WiziappLog::getInstance()->write('ERROR', 'Could not to do the Wiziapp Data Files directory '.$directory.' readable and writable', "WiziappInstaller._create_data_directories");
+					throw new Exception('Could not to do the Wiziapp Data Files directory '.$directory.' readable and writable');
+				}
+			}
+		}
+
+		self::_create_data_directories($sub_directories, $directory);
+	}
+
+	private static function _delete($path){
+		if ( ! file_exists($path) ) {
+			return;
+		}
+
+		$directoryIterator = new DirectoryIterator($path);
+
+		foreach ( $directoryIterator as $fileInfo ){
+			$filePath = $fileInfo->getPathname();
+
+			if ( $fileInfo->isDot() ){
+				continue;
+			}
+
+			if ( $fileInfo->isFile() ){
+				unlink($filePath);
+			} elseif ( $fileInfo->isDir() ){
+				self::_delete($filePath);
+			}
+		}
+
+		rmdir($path);
+	}
+}
