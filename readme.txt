@@ -120,7 +120,7 @@ In most cases, the App will be available in the Appstore within 1 to 2 weeks, de
 The Android App should be available on the Google Play Android Market within 1-2 business days.
 
 = What are the main features of WiziApp? =
-To find out about WiziApp's features, take our[quick Tour](http://www.wiziapp.com/tour).
+To find out about WiziApp's features, take our [quick Tour](http://www.wiziapp.com/tour).
 
 = Can I brand my mobile App? =
 1. Yes, upload your own splash screen design (The image that appears while the mobile App is loading) & your own  icon for an easy access to your mobile App from the mobile phone's home screen.
