@@ -1,6 +1,6 @@
 === WiziApp - Create Mobile App (HTML5, Android, iPhone) ===
 Contributors: wiziapp
-Tags: mobile, iphone, android, Mobile app, mobile theme, HTML5 app, web app, webapp, smartphones, wptouch
+Tags: mobile, iphone, android, Mobile app, mobile theme, HTML5 app, web app, webapp, smartphones, wptouch, adsense for mobile
 Requires at least: 3.3
 Tested up to: 3.5
 Stable tag: v2.0.4b
@@ -40,6 +40,7 @@ The WiziApp plugin integrates seamlessly with WordPress, delivering all of your 
 - Support multiple languages.
 - Compatible with WPtouch and WPtouch Pro Smartphone mobile theme.
 - Notify your readers about new content by sending push notifications directly to their mobile devices.
+- Use Adsense for mobile to monetize your App.
 
 == Installation ==
 
@@ -83,8 +84,8 @@ As soon as you will complete your mobile App creation we will review and advice 
 An Apple developer account is required in order to publish your mobile native iPhone App.
 
 = How do I Publish my mobile Android App to the Google Play Android market? =
-We will upload your Android App on the Google Play Android Market for you.
-A Google Play account is required in order to publish your mobile native Android App.
+Please see a guide at:
+[Publishing your Android App](http://www.wiziapp.com/blog/guides-tutorials/publishing-your-android-app/)
 
 = How does the Push notification service works? =
 The Push notification is a service that enables you to notify your readers about new content directly on their mobile device. The push notification service runs and maintained on the WiziApp servers.
@@ -105,9 +106,10 @@ Yes, you can sell your native mobile App.
 Enjoy all the revenues, WiziApp take no cut of your revenues.
 Please note that revenues are split 70:30 between you and Apple OR Google and you will get paid directly by them.
 
-= Can I monetize my mobile App? =
-Yes, you can monetize your mobile App:
-1. Display Ads using your AdMob account (This feature  is currently available only for the native iPhone App).
+= Can I monetize my mobile Apps? =
+Yes, you can monetize your mobile Apps:
+
+1. Display Ads using your AdMob or Adsense accounts.
 2. Sell your native mobile App in the App Store or Google Play Android Market.
 3. Enjoy all the revenues, WiziApp take no cut of your revenues nor do we share the ad space.
 
@@ -118,7 +120,7 @@ In most cases, the App will be available in the Appstore within 1 to 2 weeks, de
 The Android App should be available on the Google Play Android Market within 1-2 business days.
 
 = What are the main features of WiziApp? =
-To find out about WiziApp's features, take our quick Tour.
+To find out about WiziApp's features, take our[quick Tour](http://www.wiziapp.com/tour).
 
 = Can I brand my mobile App? =
 1. Yes, upload your own splash screen design (The image that appears while the mobile App is loading) & your own  icon for an easy access to your mobile App from the mobile phone's home screen.
@@ -188,11 +190,25 @@ The user can also save a shortcut for a quick access to your mobile App from his
 A native mobile App is an App that is installed directly onto the mobile device. The mobile users usually download it through a marketplace such as The App Store for iPhone Apps or Google Play for Android Apps.
 
 = How do I distribute my Android App? =
-We will publish your Android mobile App to Google Play Android market for you, however you can publish your Android mobile App also in the following markets:
+Besides publishing it to the Google Play Store, you can also publish your Android App to the following leading Android stores:
+
 1. Amazon's App Store for Android.
-1. GetJar - Android mobile apps.
-2. SlideME Android apps market.
-1. The Opera Mobile Store for Android.
+2. GetJar - Android mobile apps.
+3. SlideME Android apps market.
+4. The Opera Mobile Store for Android.
+
+= How do I find my Adsense publisher ID? =
+You will find the Adsense publisher ID on your Google Adsense account - Account settings tab - Account information section.
+
+Don't have an Adsense account? Please click below in order to open one:
+[How to create a Google AdSense account](http://support.google.com/affiliatenetwork/publisher/answer/156883?hl=en)
+
+= How do I upload an update to my Android App? =
+Please see a guide at:
+[Updating your Android App](http://www.wiziapp.com/blog/uncategorized/updating-your-android-app/)
+
+= Can I use adsense for mobile App? =
+Yes, you can use adsense and enjoy all the revenues, WiziApp take no cut of your revenues nor do we share the ad space.
 
 == Screenshots ==
 
@@ -208,6 +224,15 @@ We will publish your Android mobile App to Google Play Android market for you, h
 10. Select Sharing Options for your mobile App
 
 == Changelog ==
+
+= 2.0.4 =
+
+- Create your own Native Android App for Free.
+- Monetize your Apps using your Google AdSense account.
+- Sharing via Google Plus.
+- Performance improvements.
+- Bug fixes.
+- Additional new cool features.
 
 = 2.0.0 =
 
