@@ -100,13 +100,9 @@
 class WiziappConfig implements WiziappIInstallable{
 
 	private $options = array();
-
 	private $saveAsBulk = FALSE;
-
 	private $name = 'wiziapp_settings';
-
-	private $internalVersion =  65;
-
+	private $internalVersion =  66;
 	private static $_instance = null;
 
 	public $integer_values = array(
