@@ -13,11 +13,9 @@ class WiziappSupportDisplay{
 
 	public function display(){
 		/**
-		 * The display is depended on the app status
-		 * it needs to fitted to the rest of the menu
-		 * so if the app has finished the wizard, and the
-		 * blog is scanned, it needs to show the proper tabs
-		 * else it needs to show only the support tab
+		 * The display is depended on the app status it needs to fitted to the rest of the menu
+		 * so if the app has finished the wizard, and the blog is scanned,
+		 * it needs to show the proper tabs else it needs to show only the support tab.
 		 */
 		$configured = WiziappConfig::getInstance()->settings_done;
 
@@ -286,11 +284,11 @@ class WiziappSupportDisplay{
 						</thead>
 						<tbody>
 							<?php
-								echo $this->_getStatusRow('WritingPermissions', 'Writing Permissions');
-								echo $this->_getStatusRow('PhpGraphicRequirements', 'GD / ImageMagick', 'v_odd');
-								echo $this->_getStatusRow('AllowUrlFopen', 'allow_url_fopen');
-								echo $this->_getStatusRow('WebServer', 'Web Server', 'v_odd');
-								echo $this->_getStatusRow('Connection', 'Network Connection');
+								// echo $this->_getStatusRow('WritingPermissions', 'Writing Permissions');
+								echo $this->_getStatusRow('PhpGraphicRequirements', 'GD / ImageMagick');
+								echo $this->_getStatusRow('AllowUrlFopen', 			'allow_url_fopen', 	  'v_odd');
+								echo $this->_getStatusRow('WebServer', 				'Web Server');
+								echo $this->_getStatusRow('Connection', 			'Network Connection', 'v_odd');
 							?>
 						</tbody>
 					</table>

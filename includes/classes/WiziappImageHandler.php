@@ -36,7 +36,7 @@ class WiziappImageHandler {
 	*
 	* @var mixed
 	*/
-	private $cache = 'cache';
+	private $cache = '';
 
 	/**
 	* holds the image src as was given
@@ -53,12 +53,7 @@ class WiziappImageHandler {
 	* @return WiziappImageHandler
 	*/
 	public function __construct ($imageFile='') {
-		/**
-		* Init the cache path under our plugin installation, if the user deletes the plugin
-		* there is no need to leave traces in his wordpress installation
-		*/
-		$basePath = dirname(__FILE__) . '/../..';
-		$this->cache = $basePath . '/' . $this->cache;
+		$this->cache = WiziappContentHandler::getInstance()->get_blog_property('data_files_dir').DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'images';
 
 		if (!empty($imageFile)) {
 			$this->imageFile = $imageFile;

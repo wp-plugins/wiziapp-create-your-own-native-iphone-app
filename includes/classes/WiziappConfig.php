@@ -440,7 +440,16 @@ class WiziappConfig implements WiziappIInstallable{
 			'install_notice_showed' => FALSE,
 			'upgrade_notice_new_mode' => TRUE,
 			'wiziapp_log_threshold' => 2, // Initial default level
-			'wiziapp_data_files' => array( 'wiziapp_data_files' => array( 'cache' => array(), 'logs' => array(), 'resources' => array(), ), ),
+			'wiziapp_data_files' => array(
+				'wiziapp_data_files' => array(
+					'cache' => array(
+						'images' => array(),
+						'content' => array(),
+					),
+					'logs' => array(),
+					'resources' => array(),
+				),
+			),
 			'adsense' => array(),
 
 			// Wiziapp QR Code Widget

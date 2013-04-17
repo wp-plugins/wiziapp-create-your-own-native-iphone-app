@@ -16,8 +16,7 @@ class WiziappCacheFile extends WiziappCache {
 
 		WiziappLog::getInstance()->write('INFO', "Did not find APC installed, using File caching", "WiziappCacheFile.__construct");
 
-		$uploads_dir = wp_upload_dir();
-		$this->_fileDir = $uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_data_files'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR;
+		$this->_fileDir = WiziappContentHandler::getInstance()->get_blog_property('data_files_dir').DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'content'.DIRECTORY_SEPARATOR;
 
 		if ( ! WiziappConfig::getInstance()->wiziapp_cache_enabled ) {
 			$this->_is_enabled = FALSE;

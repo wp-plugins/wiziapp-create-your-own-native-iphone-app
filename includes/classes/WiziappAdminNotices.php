@@ -38,6 +38,8 @@ class WiziappAdminNotices {
 			}
 		} elseif ( $installer->needUpgrade() && ! ( isset($_GET['page']) && $_GET['page'] === 'wiziapp' ) ) {
 			if ( $wp_ponters_compatible && WiziappConfig::getInstance()->upgrade_notice_new_mode ) {
+				// Show the WP Notice by new design (WP Pointer)
+				// as the WP Version > 3.4 and it is the first show of the Notice (WiziappConfig::getInstance()->upgrade_notice_new_mode == TRUE)
 				WiziappConfig::getInstance()->upgrade_notice_new_mode = FALSE;
 
 				self::_set_wp_pointer('finish_upgrade_pointer');
