@@ -60,7 +60,10 @@ class WiziappInstaller{
 
 	protected static function doUninstall(){
 		$uploads_dir = wp_upload_dir();
+		// Delete the wiziapp_data_files directory of the Wiziapp plugin current version
 		self::_delete($uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_data_files');
+		// Delete the wiziapp_cache directory of the Wiziapp plugin old version if exist yet
+		self::_delete($uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_cache');
 
 		WiziappDB::getInstance()->uninstall();
 		WiziappPluginCompatibility::getInstance()->uninstall();
@@ -158,9 +161,9 @@ class WiziappInstaller{
 					throw new Exception('Could not to do the Wiziapp Data Files directory '.$directory.' readable and writable');
 				}
 			}
-		}
 
-		self::_create_data_directories($sub_directories, $directory);
+			self::_create_data_directories($sub_directories, $directory);
+		}
 	}
 
 	private static function _delete($path){

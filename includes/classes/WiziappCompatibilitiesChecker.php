@@ -81,7 +81,6 @@ class WiziappCompatibilitiesChecker{
 
 	public function testWritingPermissions($return_as_html = true){
 		$logs = WiziappLog::getInstance()->checkPath();
-
 		$is_cache_enabled = WiziappCache::getCacheInstance()->is_cache_enabled();
 
 		$thumbsHandler = new WiziappImageHandler();
