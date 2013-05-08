@@ -219,6 +219,11 @@ function pageShowEvent(event){
 		return false;
 	});
 
+	// To avoid collision with "Contact Form 7" plugin
+	$page
+	.find("form.wpcf7-form")
+	.attr("data-ajax", "false");
+
 	// Bind favorite button
 	// Apply effects
 	applyEffects($page);
