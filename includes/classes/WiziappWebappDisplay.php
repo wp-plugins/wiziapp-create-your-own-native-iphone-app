@@ -50,10 +50,12 @@ class WiziappWebappDisplay{
 		$ch = new WiziappContentEvents();
 		$ch->updateCacheTimestampKey();
 
+		/*
 		// On upgrade from v2.0.3 to v2.0.4 only need additional process, create the APK file
 		// as the APK file creation could not be performed by Admin version before v2.0.4.
 		$r = new WiziappHTTPRequest();
 		$r->api(array(), '/generator/saveOnUpgrade?app_id='.WiziappConfig::getInstance()->app_id, 'POST');
+		*/
 
 		$this->_returnResults('success', 'success');
 	}
