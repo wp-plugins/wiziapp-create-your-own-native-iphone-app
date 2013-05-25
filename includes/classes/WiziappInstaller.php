@@ -153,12 +153,12 @@ class WiziappInstaller{
 
 				if ( ! @chmod($directory, 0777) ) {
 					WiziappLog::getInstance()->write('ERROR', 'The Wiziapp Data Files directory exists, but its not readable or not writable: '.$directory, "WiziappInstaller._create_data_directories");
-					throw new Exception('Could not to do the Wiziapp Data Files directory '.$directory.' readable and writable');
+					throw new Exception('It seems the PHP user can\'t set permission 777 for the folder: '.$directory.' . Please set this permission or contact your server hosting support in order to do it.');
 				}
 			} elseif ( ! @is_readable($directory) || ! @is_writable($directory) ) {
 				if ( ! @chmod($directory, 0777) ) {
-					WiziappLog::getInstance()->write('ERROR', 'Could not to do the Wiziapp Data Files directory '.$directory.' readable and writable', "WiziappInstaller._create_data_directories");
-					throw new Exception('Could not to do the Wiziapp Data Files directory '.$directory.' readable and writable');
+					WiziappLog::getInstance()->write('ERROR', 'The Wiziapp Data Files directory exists, but its not readable or not writable: '.$directory, "WiziappInstaller._create_data_directories");
+					throw new Exception('It seems the PHP user can\'t set permission 777 for the folder: '.$directory.' . Please set this permission or contact your server hosting support in order to do it.');
 				}
 			}
 
