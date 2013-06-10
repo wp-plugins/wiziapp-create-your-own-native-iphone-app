@@ -59,19 +59,22 @@
 		</h2>
 
 		<div class="pageitem">
-			<div class="single-post-meta-top">
-				<div id="author_and_date">
-					<span class="postDescriptionCellItem_author">
-						By <a href="<?php echo WiziappLinks::authorLink($post->post_author); ?>"><?php the_author(); ?></a>
-					</span>
-					&nbsp;
-					<span class="postDescriptionCellItem_date"><?php echo WiziappTheme::formatDate($post->post_date); ?></span>
-				</div>
-			</div>
-
-			<div class="clear"></div>
-
 			<?php
+				if ( isset($post->post_type) && $post->post_type === 'post' ) {
+					?>
+					<div class="single-post-meta-top">
+						<div id="author_and_date">
+							<span class="postDescriptionCellItem_author">
+								By <a href="<?php echo WiziappLinks::authorLink($post->post_author); ?>"><?php the_author(); ?></a>
+							</span>
+							&nbsp;
+							<span class="postDescriptionCellItem_date"><?php echo WiziappTheme::formatDate($post->post_date); ?></span>
+						</div>
+					</div>
+					<div class="clear"></div>
+					<?php
+				}
+
 				if ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['upper_mask'] ) {
 					echo $wiziapp_google_adsense['code'];
 				}

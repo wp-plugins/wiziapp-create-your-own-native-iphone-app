@@ -207,7 +207,9 @@ class WiziappCompatibilitiesChecker{
 				$error_message =
 				'Your host is blocking the PHP directive allow_url_fopen which is required by the WiziApp plugin.
 				Please change the "allow_url_fopen=Off" with "allow_url_fopen=On".
-				In most cases you can do this by editing your php.ini file, in other cases you should be able to change these settings on your hosting cPanel.';
+				In most cases you can do this by editing your php.ini file, in other cases you should be able to change these settings on your hosting cPanel.
+				Once this is done, please deactivate and activate the Wiziapp plugin and click the Wiziapp on the Wordpress sidebar to complete this process.';
+
 				return new WiziappError('missing_php_requirements', __($error_message, 'wiziapp'));
 			} else {
 				return FALSE;

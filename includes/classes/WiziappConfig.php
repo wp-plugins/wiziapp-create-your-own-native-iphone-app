@@ -57,6 +57,7 @@
 * @property string  $appstore_url
 * @property string  $playstore_url
 * @property string  $apk_file_url
+* @property string  $android_app_version
 * @property boolean $app_live
 * @property integer $appstore_url_timeout
 * @property boolean $allow_grouped_lists
@@ -102,7 +103,7 @@ class WiziappConfig implements WiziappIInstallable{
 	private $options = array();
 	private $saveAsBulk = FALSE;
 	private $name = 'wiziapp_settings';
-	private $internalVersion =  66;
+	private $internalVersion =  67;
 	private static $_instance = null;
 
 	public $integer_values = array(
@@ -147,11 +148,11 @@ class WiziappConfig implements WiziappIInstallable{
 		* This is depended per version, each version might remove or add values...
 		*/
 		// Add here the keys to reset to the default value;
-		$resetOptions = array();
+		$resetOptions = array( 'wiziapp_data_files', );
 		// Add here the keys add with the default value, if they don't already exists;
-		$addOptions = array( 'wiziapp_data_files', 'playstore_url', 'apk_file_url', 'endorse_download_android_app', 'plugin_token', 'adsense', );
+		$addOptions = array( 'android_app_version', );
 		// Add here the keys to remove from the options array;
-		$removeOptions = array( 'app_token', );
+		$removeOptions = array();
 
 		$newDefaults = $this->getDefaultConfig();
 		foreach($addOptions as $optionName) {
@@ -170,6 +171,9 @@ class WiziappConfig implements WiziappIInstallable{
 
 		// save the updated options
 		$this->options['options_version'] = $this->internalVersion;
+
+		// Delete the wiziapp_cache directory of the Wiziapp plugin old version if exist yet
+		WiziappInstaller::temporal_delete();
 
 		return $this->save();
 	}
@@ -225,10 +229,28 @@ class WiziappConfig implements WiziappIInstallable{
 		return $value;
 	}
 
+	public function is_rtl() {
+		$rtl = intval($this->rtl);
+
+		if ( $rtl & bindec('100') ){
+			// Get the Direction from manual selection
+			return ( $rtl & bindec('10') );
+		}
+
+		// Get the Direction from automatic selection
+		return  ( $rtl & 1 );
+	}
+
 	public function saveUpdate($option, $value) {
 		$saved = FALSE;
 
-		if ( isset($this->options[$option]) || ( in_array( $option, array( 'appstore_url', 'playstore_url', 'apk_file_url', 'adsense', ) ) && array_key_exists($option, $this->options) ) ) {
+		$is_proper_condition =
+		isset($this->options[$option]) ||
+		(
+			in_array( $option, array( 'appstore_url', 'playstore_url', 'apk_file_url', 'android_app_version', 'adsense', ) ) &&
+			array_key_exists($option, $this->options)
+		);
+		if ( $is_proper_condition ) {
 			$this->options[$option] = $value;
 			$this->save();
 			// If the value is the same it will not be updated but thats still ok.
@@ -239,7 +261,12 @@ class WiziappConfig implements WiziappIInstallable{
 	}
 
 	public function __isset($option) {
-		return isset($this->options[$option]) || ( in_array( $option, array( 'appstore_url', 'playstore_url', 'apk_file_url', ) ) && array_key_exists($option, $this->options) );
+		return
+		isset($this->options[$option]) ||
+		(
+			in_array( $option, array( 'appstore_url', 'playstore_url', 'apk_file_url', 'android_app_version', ) ) &&
+			array_key_exists($option, $this->options)
+		);
 	}
 
 	public function __set($option, $value) {
@@ -434,6 +461,7 @@ class WiziappConfig implements WiziappIInstallable{
 			'appstore_url'  => '',
 			'playstore_url' => '',
 			'apk_file_url' => '',
+			'android_app_version' => '',
 			'appstore_url_timeout' => 1, //How many days will pass before we will show the user the "download app from appstore" confirmation alert again, 0 will make it not display at all
 			'email_verified' => FALSE,
 			'verify_email_notice' => TRUE,

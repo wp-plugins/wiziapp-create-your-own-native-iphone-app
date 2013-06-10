@@ -22,7 +22,8 @@
 			window.intro_page_parameters = {
 				store_url: '<?php echo $store_url; ?>',
 				delay_period: '<?php echo $delay_period; ?>',
-				site_url: '<?php echo WiziappContentHandler::getInstance()->get_blog_property('url'); ?>'
+				site_url: '<?php echo $site_url; ?>',
+				desktop_site_url: '<?php echo $desktop_site_url; ?>'
 			};
 		</script>
 	</head>
@@ -44,9 +45,7 @@
 		</p>
 
 		<p id="download_button_title">
-			Get the ultimate <?php echo  $download_place; ?> experience
-			<br />
-			with our new App!
+			<?php echo  $download_text; ?>
 		</p>
 
 		<div id="download_from_store">
@@ -56,11 +55,25 @@
 		</div>
 
 		<p>
-			<span id="no_thanks_notation">No thanks.</span> Continue to:
+			<?php
+			if ( $is_update ) {
+				?>
+				<span id="no_thanks_notation"></span>
+				<?php
+			} else {
+				?>
+				<span id="no_thanks_notation">No thanks.</span> Continue to:
+				<?php
+			}
+			?>
 		</p>
 
 		<?php
-		if ( $is_show_desktop ) {
+		if ( $is_update ) {
+			?>
+			<div id="mobile_site">Not Now</div>
+			<?php
+		} elseif ( $is_show_desktop ) {
 			?>
 			<div id="mobile_site">Mobile Site</div>
 

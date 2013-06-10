@@ -4,7 +4,7 @@
 * Plugin Name: Wiziapp
 * Description: Create your own free HTML5 mobile App for iPhone, Android and WP8 users. Publish your App as a native App to the App Store and Google Play Market!
 * Author: Wiziapp Solutions Ltd.
-* Version: v2.0.5a
+* Version: v2.0.6a
 * Author URI: http://www.wiziapp.com/
 */
 /**
@@ -22,8 +22,8 @@ if ( ! defined('WP_WIZIAPP_BASE') ) {
 	define('WIZI_ABSPATH', realpath(ABSPATH));
 	define( 'WIZI_DIR_PATH', dirname(__FILE__) . DIRECTORY_SEPARATOR );
 	define('WIZIAPP_ENV', 'prod'); // can be dev/test/prod
-	define('WIZIAPP_VERSION', 'v2.0.5a');   // MAKE SURE TO UPDATE BOTH THIS AND THE UPPER VALUE
-	define('WIZIAPP_P_VERSION', '2.0.5');   // The platform version
+	define('WIZIAPP_VERSION', 'v2.0.6a');   // MAKE SURE TO UPDATE BOTH THIS AND THE UPPER VALUE
+	define('WIZIAPP_P_VERSION', '2.0.6');   // The platform version
 
 	if ( version_compare(PHP_VERSION, "5.2", ">=") && version_compare(get_bloginfo("version"), "3.3", ">=") ) {
 		include dirname (__FILE__) . "/includes/classes/WiziappExceptions.php";

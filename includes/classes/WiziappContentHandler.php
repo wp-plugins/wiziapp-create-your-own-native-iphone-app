@@ -280,7 +280,14 @@ class WiziappContentHandler {
 	*/
 	function convert_content($content) {
 		WiziappLog::getInstance()->write('INFO', "In the_content filter callback the contentHandler", "WiziappContentHandler.convert_content");
-		if ( ! $this->inApp && ! $this->mobile) {
+
+		// Avoid collision with "Events Manager" plugin,
+		// as the "Simple HTML DOM" lib corrupt the File Input of the "Events Manager" plugin form
+		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		$is_collision =
+		is_plugin_active('events-manager/events-manager.php') &&
+		strpos($content, "<input id='event-image' name='event_image' id='event_image' type='file' size='40' />") !== FALSE;
+		if ( ( ! $this->inApp && ! $this->mobile ) || $is_collision ) {
 			return $content;
 		}
 		WiziappLog::getInstance()->write('INFO', "Converting content like we are inside the app", "WiziappContentHandler.convert_content");
@@ -689,7 +696,7 @@ class WiziappContentHandler {
 		wp_localize_script(
 			'wiziapp_helper_object',
 			'wiziapp_name_space',
-			array( 'ajaxurl' => $this->inApp ? '' : admin_url('admin-ajax.php'), 'home_url' => $this->inApp ? '' : $this->_blog_properties['url'], )
+			array( 'home_url' => $this->inApp ? '' : $this->_blog_properties['url'], )
 		);
 	}
 
@@ -743,6 +750,7 @@ class WiziappContentHandler {
 		is_admin() ||
 		( session_id() == '' && ! session_start() ) ||
 		( isset($_SESSION['not_first_request']) && $_SESSION['not_first_request'] === '1' ) ||
+		( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest' ) ||
 		( isset($_GET['androidapp']) && $_GET['androidapp'] === '1' );
 
 		if( $abort_show_splash ) {

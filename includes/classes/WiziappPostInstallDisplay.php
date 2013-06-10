@@ -193,12 +193,19 @@ class WiziappPostInstallDisplay{
 			'total_items' => 0,
 		);
 
-		try {
+		try{
 			// Wiziapp plugin installation
 			WiziappInstaller::post_install();
 
 			// If we are here, we already seen the message...
 			WiziappConfig::getInstance()->install_notice_showed = TRUE;
+
+			$post_types_string = '';
+			$post_types_array = WiziappComponentsConfiguration::getInstance()->get_post_types();
+			for ($i=0, $amount=count($post_types_array); $i<$amount; $i++){
+				$post_types_string .= '"'.$post_types_array[$i].'",';
+			}
+			$post_types_string = rtrim($post_types_string, ',');
 
 			$querystr =
 			"SELECT DISTINCT(wposts.id), wposts.post_title
@@ -209,7 +216,7 @@ class WiziappPostInstallDisplay{
 			WHERE meta_key = 'wiziapp_processed' AND meta_value = '1'
 			)
 			AND wposts.post_status = 'publish'
-			AND wposts.post_type = 'post'
+			AND wposts.post_type IN (".$post_types_string.")
 			ORDER BY wposts.post_date DESC
 			LIMIT 0, 50";
 

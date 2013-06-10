@@ -81,16 +81,6 @@
 					</a>
 				</h2>
 				<div class="pageitem">
-					<div class="single-post-meta-top">
-						<div id="author_and_date">
-							<span class="postDescriptionCellItem_author">By
-								<a href="<?php echo WiziappLinks::authorLink($post->post_author); ?>" data-transition="slide"><?php the_author(); ?></a>
-							</span>&nbsp;<span class="postDescriptionCellItem_date"><?php echo WiziappTheme::formatDate($post->post_date); ?></span>
-						</div>
-						<?php //wiziapp_the_rating(); ?>
-					</div>
-
-					<div class="clear"></div>
 					<div class="post" id="post-<?php the_ID(); ?>">
 						<div id="singlentry">
 							<?php

@@ -13,7 +13,7 @@ class WiziappRequestHandler {
 
 	private $errorReportingLevel = 0;
 
-	function __construct() {
+	function __construct(){
 		add_action('parse_request', array(&$this, 'handleRequest'));
 		add_action('init', array(&$this, 'logInitRequest'), 1);
 	}
@@ -81,7 +81,7 @@ class WiziappRequestHandler {
 				'message' => 'There was a critical error running the service',
 			);
 
-			if(stripos($error['message'], 'Allowed memory size of ') === false) {
+			if(stripos($error['message'], 'Allowed memory size of ') === false){
 				WiziappLog::getInstance()->write('Error', "Caught an error: " . print_r($error, TRUE),
 					"WiziappRequestHandler.handleGeneralError");
 			}
@@ -94,10 +94,6 @@ class WiziappRequestHandler {
 			exit();
 		}
 	}
-
-    function isAjaxRequest() {
-        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH']==='XMLHttpRequest';
-    }
 
 	/*
 	* Serves as a routing table, if the incoming request has our prefix,
@@ -120,10 +116,10 @@ class WiziappRequestHandler {
 		$service = $req[1];
 		$action = $req[2];
 
-		if ( $service == 'user' ) {
-			if ( $action == 'check' || $action == 'login' ) {
+		if ( $service == 'user' ){
+			if ( $action == 'check' || $action == 'login' ){
 				$this->runService('Login', 'check', FALSE);
-			} elseif ( $action == 'track' ) {
+			} elseif ( $action == 'track' ){
 				$parameter_key = (isset($req[3])) ? $req[3] : '';
 				$parameter_value = (isset($req[4])) ? $req[4] : '';
 				$cms_user_account_handler = new WiziappCmsUserAccountHandler;
@@ -131,14 +127,14 @@ class WiziappRequestHandler {
 			} elseif ( $action == 'forgot_pass' ){
 				$this->runScreenBy('System', 'ForgotPassword', null);
 			}
-		} elseif ( $service == 'content' || $service == 'search' ) {
+		} elseif ( $service == 'content' || $service == 'search' ){
 			ob_start();
 			// Content requests should trigger a the caching
 			$cache = WiziappCache::getCacheInstance(array('duration' => 1800));
 
 			// Prepare the Key to search the Content in Cache.
 			$key = str_replace('/', '_', $request);
-			if (function_exists('is_multisite') && is_multisite()) {
+			if (function_exists('is_multisite') && is_multisite()){
 				global $wpdb;
 				$key .= $wpdb->blogid;
 			}
@@ -148,14 +144,14 @@ class WiziappRequestHandler {
 
 			// Added the accept encoding headers, so we won't try to return zip when we can't
 			$encoding = '';
-			if ( isset($_SERVER["HTTP_ACCEPT_ENCODING"]) ) {
+			if ( isset($_SERVER["HTTP_ACCEPT_ENCODING"]) ){
 				$encoding = $_SERVER["HTTP_ACCEPT_ENCODING"];
 			} elseif ( isset($_SERVER["HTTP_X_CEPT_ENCODING"]) ){
 				$encoding = $_SERVER["HTTP_X_CEPT_ENCODING"];
 			}
-			if ( strpos($encoding, 'x-gzip') !== FALSE ) {
+			if ( strpos($encoding, 'x-gzip') !== FALSE ){
 				$encoding = 'x-gzip';
-			} elseif ( strpos($encoding,'gzip') !== FALSE ) {
+			} elseif ( strpos($encoding,'gzip') !== FALSE ){
 				$encoding = 'gzip';
 			}
 			$key .= $encoding;
@@ -177,7 +173,7 @@ class WiziappRequestHandler {
 
 			$cache->getContent($output);
 
-			if ($output['content'] == '') {
+			if ($output['content'] == ''){
 				/**
 				* If the Content, the corresponding to Request, has not been found in Cache,
 				* or has been exceeded the Duration,
@@ -197,29 +193,33 @@ class WiziappRequestHandler {
 			* if they weren't able to process the request due to missing parameters and such.
 			*/
 			exit();
-		} elseif ($service == 'getrate') {
+		} elseif ($service == 'getrate'){
 			//wiziapp_the_rating_wrapper($req);
 			echo " "; // Currently disabled
 			exit();
-		} elseif ($service == "getimage") {
+		} elseif ($service == "getimage"){
 			WiziappImageServices::getByRequest();
 			exit();
-		} elseif ($service == "getthumb") {
+		} elseif ($service == "getthumb"){
 			$wth = new WiziappThumbnailHandler($action);
 			$wth->doPostThumbnail();
 			exit();
-		} elseif($service == 'post') {
-			if ($req[3] == "comments") {
+		} elseif($service == 'post'){
+			if ($req[3] == "comments"){
 				$this->runService('Comment', 'getCount', $action);
 			}
-		} elseif($service == 'comment') {
+		} elseif($service == 'comment'){
 			$this->runService('Comment', 'add', $request);
-		} elseif ($service == 'keywords') {
+		} elseif ($service == 'keywords'){
 			$this->runScreenBy('Search', 'Keywords', null);
 		} elseif($service == "intropage"){
-			$this->runScreen('IntroPage');
+			if ($action === 'screen'){
+				$this->runScreen('IntroPage');
+			} elseif ($action === 'information'){
+				WiziappIntroPageScreen::get_intro_page_info();
+			}
 			exit;
-		} elseif ($service == 'system') {
+		} elseif ($service == 'system'){
 			if ($action == 'screens'){
 				$this->runService('System', 'updateScreenConfiguration');
 			} else if ($action == 'components'){
@@ -239,7 +239,7 @@ class WiziappRequestHandler {
 			} else if ( $action == 'getLog' ){
 				$this->runService('System', 'getLogFile', $req[3]);
 			}
-		} elseif ($service == 'external') {
+		} elseif ($service == 'external'){
 			$this->runScreenBy('External', 'Link', urldecode($req[2]));
 		}
 	}
@@ -333,7 +333,7 @@ class WiziappRequestHandler {
 					}
 				} elseif( $sub_type == 'alllinks' ){
 					$this->runService('Lists', 'links');
-				} elseif ($sub_type == 'links') {
+				} elseif ($sub_type == 'links'){
 					if (!empty($req[4])){
 						$show = $req[4];
 						if ($show == 'categories'){
@@ -371,11 +371,11 @@ class WiziappRequestHandler {
 					$show = $req[4];
 					if ($show == "images"){
 						$this->runScreen('Images');
-					} elseif($show == 'videos') {
+					} elseif($show == 'videos'){
 						$this->runScreen('Videos');
-						//} elseif ($show == 'video') {
+						//} elseif ($show == 'video'){
 
-						// } elseif ($show == 'videoembed') {
+						// } elseif ($show == 'videoembed'){
 						// 		$vid_id = $req[5];
 						//      wiziapp_buildVideoEmbedPage($vid_id);
 					} elseif ($show == 'audios'){
@@ -403,7 +403,7 @@ class WiziappRequestHandler {
 
 		$contents = ob_get_clean();
 		WiziappLog::getInstance()->write('DEBUG', "BTW the get params were:".print_r($_GET, TRUE), "WiziappRequestHandler._routeContent");
-		if (isset($_GET['callback'])) {
+		if (isset($_GET['callback'])){
 			WiziappLog::getInstance()->write('DEBUG', "The callback GET param set:".$_GET["callback"] . "(" . $contents . ")", "WiziappRequestHandler._routeContent");
 			// Support cross-domain ajax calls for webclients
 			// @todo Add a check to verify this is a web client
