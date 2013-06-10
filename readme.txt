@@ -227,10 +227,10 @@ Yes, you can use adsense and enjoy all the revenues, WiziApp take no cut of your
 
 = 2.0.6 =
 
-- Edit the push notification text message for each published post. 
-- Uploading files from end user’s mobile devices is now supported. 
-- Custom post types are now supported. 
-- Send push notification message for scheduled posts. 
+- Edit the push notification text message for each published post.
+- Uploading files from end user's mobile devices is now supported.
+- Custom post types are now supported.
+- Send push notification message for scheduled posts.
 - Performance improvements.
 - Bug fixes.
 
