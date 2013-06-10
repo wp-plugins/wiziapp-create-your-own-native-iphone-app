@@ -6,37 +6,64 @@
 *
 */
 class WiziappComponentsConfiguration{
-    private $config = array();
-    private static $instance;
+	private $config = array();
+	private static $instance;
+	private $_post_types = array(
+		'is_prepared' => FALSE,
+		'types' => array(),
+	);
 
-    private function __construct() {
-        $this->config = get_option('wiziapp_components');
-    }
+	private function __construct() {
+		$this->config = get_option('wiziapp_components');
+	}
 
-    public static function getInstance(){
-        if ( ! isset(self::$instance) ) {
-            $c = __CLASS__;
-            self::$instance = new $c;
-        }
+	public static function getInstance(){
+		if ( ! isset(self::$instance) ) {
+			$c = __CLASS__;
+			self::$instance = new $c;
+		}
 
-        return self::$instance;
-    }
+		return self::$instance;
+	}
 
-    function getAttrToAdd($name){
-        $attrs = array();
-        if ( isset($this->config[$name]) && isset($this->config[$name]['extra']) ){
-            $attrs = $this->config[$name]['extra'];
-        }
+	function getAttrToAdd($name){
+		$attrs = array();
+		if ( isset($this->config[$name]) && isset($this->config[$name]['extra']) ){
+			$attrs = $this->config[$name]['extra'];
+		}
 
-        return $attrs;
-    }
+		return $attrs;
+	}
 
-    function getAttrToRemove($name){
-        $attrs = array();
-        if ( isset($this->config[$name]) && isset($this->config[$name]['remove']) ){
-            $attrs = $this->config[$name]['remove'];
-        }
+	function getAttrToRemove($name){
+		$attrs = array();
+		if ( isset($this->config[$name]) && isset($this->config[$name]['remove']) ){
+			$attrs = $this->config[$name]['remove'];
+		}
 
-        return $attrs;
-    }
+		return $attrs;
+	}
+
+	public function get_post_types(){
+		if ( ! $this->_post_types['is_prepared'] ){
+			$this->_set_post_types();
+		}
+
+		return $this->_post_types['types'];
+	}
+
+	private function _set_post_types(){
+		$args = array(
+			'public'   => true,
+			'_builtin' => false,
+		);
+
+		$post_types = array_values( get_post_types( $args ) );
+		$post_types[] = 'post';
+
+		$this->_post_types = array(
+			'is_prepared' => TRUE,
+			'types' => $post_types,
+		);
+	}
 }

@@ -11,8 +11,9 @@
 class WiziappContentEvents{
 
 	public function savePost($post){
-		if (!is_object($post)){
+		if ( ! is_object($post) ){
 			$post_id = $post;
+			$post = get_post($post_id);
 		} else {
 			$post_id = $post->ID;
 		}
@@ -22,7 +23,7 @@ class WiziappContentEvents{
 		if (is_object($post) && property_exists($post, 'post_type') && $post->post_type == 'page') {
 			$this->save($post_id, 'page');
 		} else {
-			$this->save($post_id, 'post');
+			$this->save($post_id, $post->post_type);
 		}
 	}
 
@@ -96,8 +97,7 @@ class WiziappContentEvents{
 	}
 
 	/**
-	* Saves media found in the requested content in a special media table
-	* for later retrieval
+	* Saves media found in the requested content in a special media table for later retrieval
 	*
 	* @param integer $id the content id
 	* @param string $type can be post/comment/page
@@ -109,44 +109,13 @@ class WiziappContentEvents{
 			return FALSE;
 		}
 
-        if (is_rtl()){
-            WiziappConfig::getInstance()->saveUpdate('rtl',1);
-            WiziappLog::getInstance()->write('INFO', "set RTL true", "WiziappContentEvents.save");
-
-            //save to server
-            $r = new WiziappHTTPRequest();
-            $params['rtl']=1;
-            $jsonParams = array(
-                'params' => json_encode($params)
-            );
-
-            $app_id = WiziappConfig::getInstance()->app_id;
-            $url = '/application/'. $app_id . '/setRtl';
-            $response = $r->api($jsonParams, $url , 'POST');
-
-            WiziappLog::getInstance()->write('DEBUG', "The response is " . print_r($response, TRUE), "WiziappUserServices.updateWiziappServer");
-            if (is_wp_error($response)) {
-                WiziappLog::getInstance()->write('INFO', "failed to updated server config", "WiziappContentEvents.save");
-            }
-            $tokenResponse = json_decode($response['body'], TRUE);
-            if (empty($tokenResponse) || ! $tokenResponse['header']['status']) {
-                WiziappLog::getInstance()->write('INFO', "empty token updating server config", "WiziappContentEvents.save");
-            } else {
-                WiziappLog::getInstance()->write('INFO', "success updating server config", "WiziappContentEvents.save");
-            }
-
-        } else {
-            WiziappLog::getInstance()->write('INFO', "left RTL false", "WiziappContentEvents.save");
-        }
-
 		global $more;
 
 		$more = 1;
-
 		$content = '';
 
-		if ($type == 'post'){
-			$postslist = get_posts("include={$id}&numberposts=1");
+		if ( in_array( $type, WiziappComponentsConfiguration::getInstance()->get_post_types() ) ){
+			$postslist = get_posts('include='.$id.'&numberposts=1&post_type='.$type);
 			// For posts we need to force the loop
 			global $post, $wp_query;
 			$wp_query->in_the_loop = true;
@@ -195,7 +164,7 @@ class WiziappContentEvents{
 		$this->saveSpecialMediaDetails('audio', $audios, $id, $type);
 
 		// Mark the content as processed to avoid processing when already processed
-		if ($type == 'post' || $type == 'page'){
+		if ( in_array( $type, WiziappComponentsConfiguration::getInstance()->get_post_types() ) || $type == 'page') {
 			add_post_meta($id, 'wiziapp_processed', true, true);
 		}
 	}

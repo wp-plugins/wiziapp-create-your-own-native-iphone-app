@@ -17,7 +17,6 @@ class WiziappMediaExtractor{
 	var $audios = array();
 
 	function WiziappMediaExtractor($html) {
-//        WiziappLog::getInstance()->write('INFO', ">>>The html for the post is {$html}", 'WiziappMediaExtractor');
 		$encoding = get_bloginfo('charset');
 
 		if (!empty($html)){
@@ -51,9 +50,9 @@ class WiziappMediaExtractor{
 					WiziappProfiler::getInstance()->write("Handling Flash Object", "WiziappMediaExtractor._process");
 					$processed = $this->_handleFlashObjects($element_val, '', $element);
 					WiziappProfiler::getInstance()->write("Done Handling Flash Object", "WiziappMediaExtractor._process");
-				// vimeo might be loaded as an iframe
+					// vimeo might be loaded as an iframe
 				} elseif (strtolower($element_key) == 'iframe') {
-//                    WiziappLog::getInstance()->write('INFO', ">>> Found iframe::" . print_r($element_val, TRUE), '_process');
+					//                    WiziappLog::getInstance()->write('INFO', ">>> Found iframe::" . print_r($element_val, TRUE), '_process');
 					WiziappProfiler::getInstance()->write("Handling Iframe as Flash Object", "WiziappMediaExtractor._process");
 					$processed = $this->_handleFlashObjects($element_val, '', $element);
 					WiziappProfiler::getInstance()->write("Done Handling Iframe as Flash Object", "WiziappMediaExtractor._process");
@@ -77,14 +76,14 @@ class WiziappMediaExtractor{
 					WiziappProfiler::getInstance()->write("Done Handling link", "WiziappMediaExtractor._process");
 					// Use the main parsing method
 					/**if ( !$processed ){ - Removing the support for video embed via links
-						$processed = $this->_handleFlashObjects($element_val, $element_val['attributes']['href'], $element);
+					$processed = $this->_handleFlashObjects($element_val, $element_val['attributes']['href'], $element);
 					}*/
 				}
 				// The childs of this array can be: text, attributes, childs
 				if ( !empty($element_val['childs']) && !$processed ){
 					//$this->_process($element_val['childs']);
-						$childs = $element_val['childs'];
-						$this->_process($childs);
+					$childs = $element_val['childs'];
+					$this->_process($childs);
 				}
 
 			}
@@ -153,7 +152,7 @@ class WiziappMediaExtractor{
 		}
 		$apiUrl = "http://blip.tv/players/episode/{$identifier}?skin=json&no_wrap=1&version=2";
 		/**WiziappLog::getInstance()->write('INFO', ">>> Getting blip.tv data with {$apiUrl} :: {$src} :: {$identifier}",
-			'_handleBlipTvVideo' );*/
+		'_handleBlipTvVideo' );*/
 		$r = new WiziappHTTPRequest();
 		$response = $r->external(array(), $apiUrl, 'GET', array());
 		if (!is_wp_error($response)) {
@@ -168,16 +167,16 @@ class WiziappMediaExtractor{
 				/**WiziappLog::getInstance()->write('INFO', ">>> Got the blip data :: ".print_r($blipResponse, TRUE),
 				'_handleBlipTvVideo' );*/
 
-//                $blipMpg4 = '';
-//                for($a = 0, $total = count($blipResponse['additionalMedia']); $a < $total; ++$a){
-//                    if ($blipResponse['additionalMedia'][$a]['role'] == 'Portable (iPod)'){
-//                        $blipMpg4 = $blipResponse['additionalMedia'][$a]['url'];
-//                    }
-//                }
-//
-//                if ($blipMpg4 == ''){
-//                    $blipMpg4 = $blipResponse['url'];
-//                }
+				//                $blipMpg4 = '';
+				//                for($a = 0, $total = count($blipResponse['additionalMedia']); $a < $total; ++$a){
+				//                    if ($blipResponse['additionalMedia'][$a]['role'] == 'Portable (iPod)'){
+				//                        $blipMpg4 = $blipResponse['additionalMedia'][$a]['url'];
+				//                    }
+				//                }
+				//
+				//                if ($blipMpg4 == ''){
+				//                    $blipMpg4 = $blipResponse['url'];
+				//                }
 
 				$obj = array(
 					'title' => str_replace('&amp;', '&', $blipResponse['title']),
@@ -327,7 +326,7 @@ class WiziappMediaExtractor{
 				WiziappLog::getInstance()->write('DEBUG', ">>> The obj is {$src}::" . print_r($obj, TRUE), '_handleFlashObjects');
 			} elseif (strpos($src, 'blip.tv') !== FALSE){
 				// we removed support for blip coz of bugs and no time to fix, might come back in the future...
-//                $obj = $this->_handleBlipTvVideo($src);
+				//                $obj = $this->_handleBlipTvVideo($src);
 			} elseif (strpos($src, 'youtube.com') !== FALSE){
 				$obj = $this->_handleYouTubeVideo($src);
 			} else {
@@ -385,7 +384,7 @@ class WiziappMediaExtractor{
 	* @param array $full_element
 	*/
 	function _handleImage($element, $full_element){
-//    list($width, $height) = @getimagesize(str_replace(' ', '%20', $element['attributes']['src']));
+		//    list($width, $height) = @getimagesize(str_replace(' ', '%20', $element['attributes']['src']));
 
 		// @todo move the image element building from the screens to here
 		$attributes = $element['attributes'];
@@ -401,10 +400,10 @@ class WiziappMediaExtractor{
 			$element['metadata'] = $metadata;
 		}
 		/**if(empty($element['attributes']['width'])){
-		   $element['attributes']['width'] = $width;
+		$element['attributes']['width'] = $width;
 		}
 		if(empty($element['attributes']['height'])){
-		   $element['attributes']['height'] = $height;
+		$element['attributes']['height'] = $height;
 		}  */
 
 		/** We dont resize images anymore!!! Only thumbnails, on demand.
@@ -417,15 +416,15 @@ class WiziappMediaExtractor{
 		$element['attributes']['height'] = $image->getNewHeight(); */
 
 		return $this->_appendToArray($element, $full_element, 'images');
-//    }
+		//    }
 	}
 
 	function _handleAudio($src, $element, $full_element, $just_return = false) {
 		$duration = 0;
 		$id3formats = array('mp3', 'ogg', 'avi', 'mov',
-							'.qt', 'mp4', 'm4v', 'm4a',
-							'wma', 'wmv', 'mpg', 'peg',
-							'flv', 'swf');
+			'.qt', 'mp4', 'm4v', 'm4a',
+			'wma', 'wmv', 'mpg', 'peg',
+			'flv', 'swf');
 
 		// Are we supporting this file
 		if(in_array(strtolower(substr($src, -3, 3)), $id3formats)) {

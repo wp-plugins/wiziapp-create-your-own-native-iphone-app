@@ -171,12 +171,11 @@ window.WIZIAPP = (function($){
 		},
 
 		condition_for_intro_page: function(){
-			var not_show_intro_page =
+			var is_not_passed =
 			typeof navigator !== "object" || typeof navigator.userAgent !== "string" ||
-			window.location.href.indexOf("androidapp=1") > 0 ||
-			wiziapp_name_space.ajaxurl == '' || wiziapp_name_space.home_url == '' ||
-			Boolean( self.getCookie("WIZI_SHOW_STORE_URL") );
-			if ( not_show_intro_page ){
+			wiziapp_name_space.home_url == '';
+			if ( is_not_passed ){
+				// Not passed the Error Checking
 				return;
 			}
 
@@ -193,25 +192,20 @@ window.WIZIAPP = (function($){
 			// Show "Appstore URL" message, if "WIZI_SHOW_STORE_URL" cookie not exist
 			$.ajax({
 				type: "post",
-				url: wiziapp_name_space.ajaxurl,
+				url: wiziapp_name_space.home_url + "/?wiziapp/intropage/information",
 				data: {
-					action: "intro_page_info",
-					device_type: device_type
+					device_type: device_type,
+					query_string: window.location.search,
+					wizi_show_store_url: ( typeof self.getCookie("WIZI_SHOW_STORE_URL") === "string" ) ? self.getCookie("WIZI_SHOW_STORE_URL") : 0
 				},
 				dataType : "text",
-				timeout: 10*1000,
+				timeout: 20*1000,
 				success: function(response_text) {
-					if ( response_text.indexOf("allow_show_intro_page") < 0 ){
+					if ( response_text.indexOf("update-application") < 0 ){
 						return;
 					}
 
-					self.setCookie("WIZI_SHOW_STORE_URL", 1, 7);
-					if ( ! Boolean( self.getCookie("WIZI_SHOW_STORE_URL") ) ) {
-						// We are not able to create the cookie, so it is not ok.
-						return;
-					}
-
-					window.location.href = wiziapp_name_space.home_url + "/?wiziapp/intropage&device=" + device_type;
+					window.location.href = wiziapp_name_space.home_url + "/?wiziapp/intropage/screen&device=" + device_type + "&" + response_text;
 				}
 			});
 		}

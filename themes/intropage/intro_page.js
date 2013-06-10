@@ -30,6 +30,6 @@ function wiziapp_intro_page_load(){
 		// Clear the Cookie
 		document.cookie = "WIZI_SHOW_STORE_URL=1; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 
-		window.location = window.intro_page_parameters.site_url + "?setsession=desktopsite";
+		window.location = window.intro_page_parameters.desktop_site_url;
 	};
 }

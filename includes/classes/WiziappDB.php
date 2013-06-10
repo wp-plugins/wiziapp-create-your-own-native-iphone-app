@@ -17,7 +17,7 @@ class WiziappDB implements WiziappIInstallable{
 
 	private $media_table = 'wiziapp_content_media';
 	private $user_table = 'wiziapp_user_info';
-	private $internal_version = '0.23';
+	private $internal_version = '0.24';
 	private static $_instance = null;
 
 	/**
@@ -386,11 +386,14 @@ class WiziappDB implements WiziappIInstallable{
 
 	function add_content_medias($media_type, $items, $content_id, $content_type) {
 		global $wpdb;
-		//$wpdb->show_errors();
+
+		if ( in_array( $content_type, WiziappComponentsConfiguration::getInstance()->get_post_types() ) ) {
+			$content_type = 'post';
+		}
 
 		$sql = "INSERT INTO {$wpdb->prefix}{$this->media_table} (content_id, content_type, original_code, attachment_info, attachment_type, created_at, updated_at) VALUES ";
 
-		//        $sql .= '(%d, %d, %s, %s, %d, %s, %s),';
+		// $sql .= '(%d, %d, %s, %s, %d, %s, %s),';
 		$sql = substr_replace($sql, "", -1);
 
 		$params = array();

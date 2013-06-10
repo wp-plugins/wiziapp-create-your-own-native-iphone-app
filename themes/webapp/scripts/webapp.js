@@ -219,9 +219,9 @@ function pageShowEvent(event){
 		return false;
 	});
 
-	// To avoid collision with "Contact Form 7" plugin
+	// To avoid collision with "Contact Form 7", "FV Community News" and "Events Manager" plugins
 	$page
-	.find("form.wpcf7-form")
+	.find("form.wpcf7-form, form.fvcn-post-form-new-post, #event-form")
 	.attr("data-ajax", "false");
 
 	// Bind favorite button
@@ -745,9 +745,17 @@ function applyEffects($wantedContainer){
 	})
 	.on("pageinit", ".recent_loaded_event", function(event){
 		$(event.currentTarget)
-		.find("div:jqmData(role='content') ul:jqmData(role='listview') li")
+		.find("div:jqmData(role='content') ul:jqmData(role='listview') li.postDescriptionCellItem a")
 		.click(function(){
 			$.mobile.showPageLoadingMsg();
+
+			var post_link = $(this);
+
+			setTimeout(function(){
+				window.location = post_link.attr("href");
+				}, 100);
+
+				return false;
 		});
 	});
 

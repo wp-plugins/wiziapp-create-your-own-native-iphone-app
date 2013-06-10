@@ -29,7 +29,7 @@ class WiziappThumbnailHandler{
 		@include_once(ABSPATH . 'wp-includes/post-thumbnail-template.php');
 
 		if ( function_exists('get_the_post_thumbnail') ) {
-			//first we try to get the wordpress post thumbnail
+			// First we try to get the wordpress post thumbnail.
 			WiziappLog::getInstance()->write('INFO', "The blog supports post thumbnails (get_the_post_thumbnail method exists)", "WiziappThumbnailHandler.doPostThumbnail");
 			if ( has_post_thumbnail($this->post) ) {
 				$foundImage = $this->_tryWordpressThumbnail();
@@ -39,22 +39,22 @@ class WiziappThumbnailHandler{
 		}
 
 		if ( ! $foundImage) {
-			// if no wordpress thumbnail, we take the thumb from a gallery
+			// If no wordpress thumbnail, we take the thumb from a gallery.
 			$foundImage = $this->_tryGalleryThumbnail();
 		}
 
 		if ( ! $foundImage ) {
-			// if no thumb from a gallery, we take the thumb from a video
+			// If no thumb from a gallery, we take the thumb from a video.
 			$foundImage = $this->_tryVideoThumbnail();
 		}
 
 		if ( ! $foundImage ) {
-			// if no thumb from a video, we take the thumb from a single image
+			// If no thumb from a video, we take the thumb from a single image.
 			$foundImage = $this->_trySingleImageThumbnail();
 		}
 
 		if ( ! $foundImage ) {
-			// If we reached this point we couldn't find a thumbnail.... Throw 404
+			// If we reached this point we couldn't find a thumbnail. Throw 404.
 			header("HTTP/1.0 404 Not Found");
 		}
 	}

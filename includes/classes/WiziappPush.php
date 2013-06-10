@@ -109,7 +109,7 @@ class WiziappPush {
 			);
 
 			if ( WiziappConfig::getInstance()->show_notification_text ) {
-				$request['content'] = urlencode( stripslashes( WiziappConfig::getInstance()->push_message ));
+				$request['content'] = urlencode( stripslashes( WiziappSettingMetabox::get_push_message( $post_id ) ) );
 				$request['params'] = "{\"tab\": \"{$tabId}\"}";
 			}
 		}
@@ -249,5 +249,4 @@ class WiziappPush {
 		}
 		return false;
 	}
-
 }

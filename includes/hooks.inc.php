@@ -17,6 +17,11 @@ function wiziapp_attach_hooks(){
 
 	add_action( 'admin_menu', array( 'WiziappAdminDisplay', 'setup' ) );
 
+	$setting_metabox = new WiziappSettingMetabox;
+	if ( is_admin() ) {
+		add_action( 'admin_init', array( $setting_metabox, 'admin_init' ) );
+	}
+
 	/* Add a custom column to the users table to indicate that the user
 	* logged in from his mobile device via our app
 	* NOTE: Some plugins might not handle other plugins columns very nicely and cause the data not to show...
@@ -99,10 +104,6 @@ function wiziapp_attach_hooks(){
 	// admin
 	add_action('wp_ajax_wiziapp_hide_verify_msg', 		array('WiziappAdminNotices', 'hideVerifyMsg'));
 	add_action('wp_ajax_wiziapp_plugin_compatibility',	array(WiziappPluginCompatibility::getInstance(), 'configure'));
-
-	// Get info about the Intro Page
-	add_action('wp_ajax_intro_page_info', 		 array('WiziappIntroPageScreen', 'get_intro_page_info',));
-	add_action('wp_ajax_nopriv_intro_page_info', array('WiziappIntroPageScreen', 'get_intro_page_info',));
 
 	// Wizard
 	add_action('wp_ajax_wiziapp_register_license', array('WiziappLicenseUpdater', 'register'));

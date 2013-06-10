@@ -54,7 +54,7 @@ if ( WiziappConfig::getInstance()->usePostsPreloading() ){
 	ob_start();
 
 	foreach ($waPosts as $waPost){
-		query_posts( array( 'p' => $waPost, ) );
+		query_posts( array( 'p' => $waPost, 'post_type' => WiziappComponentsConfiguration::getInstance()->get_post_types(), ) );
 
 		if ( have_posts() ){
 			the_post();

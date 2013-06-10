@@ -54,8 +54,16 @@ class WiziappInstaller{
 		$cms = new WiziappCms();
 		$cms->activate();
 
+		/*
 		$restoreHandler = new WiziappUserServices();
 		$restoreHandler->restoreUserData();
+		*/
+	}
+
+	public static function temporal_delete(){
+		// Delete the wiziapp_cache directory of the Wiziapp plugin old version if exist yet
+		$uploads_dir = wp_upload_dir();
+		self::_delete($uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_cache');
 	}
 
 	protected static function doUninstall(){
@@ -181,12 +189,12 @@ class WiziappInstaller{
 			}
 
 			if ( $fileInfo->isFile() ){
-				unlink($filePath);
+				@unlink($filePath);
 			} elseif ( $fileInfo->isDir() ){
 				self::_delete($filePath);
 			}
 		}
 
-		rmdir($path);
+		@rmdir($path);
 	}
 }
