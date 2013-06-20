@@ -610,7 +610,7 @@ function applyEffects($wantedContainer){
 	.on("pagebeforeshow", "#sharing_menu", function(event, data){
 		var sharing_options = {
 			"facebook":	"http://www.facebook.com/share.php?u=",
-			"tweeter":	"https://twitter.com/share?url=",
+			"twitter":	"https://twitter.com/share?url=",
 			"email":	"mailto:?subject=The%20page%20to%20share&body=",
 			"google+":	"https://plus.google.com/share?url="
 		}
