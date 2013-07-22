@@ -340,7 +340,7 @@ class WiziappWebappDisplay{
 				var try_again_message = "Connection error, please try again.";
 				var retry_button;
 				var progressTimer = null;
-				var progressWait = 30;
+				var progressWait = 65;
 				var step_number = 0;
 				var retry_amount = 0;
 				var backward_stopwatch;
