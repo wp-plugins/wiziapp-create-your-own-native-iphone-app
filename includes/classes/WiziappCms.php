@@ -28,7 +28,7 @@ class WiziappCms {
 		* Set Common config
 		*/
 		$common_settings = array(
-			'plugin_token',	'app_id', 'main_tab_index', 'settings_done', 'app_live', 'app_description', 'appstore_url', 'playstore_url', 'apk_file_url', 'android_app_version', 'app_icon', 'app_name', 'email_verified', 'thumb_min_size', 'display_download_from_appstore', 'endorse_download_android_app', 'notify_on_new_post', 'notify_on_new_page', 'push_message', 'webapp_active', 'adsense', 'rtl',
+			'plugin_token',	'app_id', 'main_tab_index', 'settings_done', 'app_live', 'app_description', 'appstore_url', 'playstore_url', 'apk_file_url', 'android_app_version', 'app_icon', 'app_name', 'email_verified', 'thumb_min_size', 'display_download_from_appstore', 'endorse_download_android_app', 'notify_on_new_post', 'notify_on_new_page', 'push_message', 'webapp_active', 'analytics', 'admob', 'adsense', 'rtl',
 		);
 		$this->_apply_setting($common_settings, $tokenResponse);
 

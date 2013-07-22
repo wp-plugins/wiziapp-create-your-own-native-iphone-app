@@ -275,7 +275,15 @@ background: transparent url("images/more_cell_item.png") no-repeat center center
 }
 .webapp_image_overriding{
 	position: relative !important;
-	text-align: center;
+}
+div.webapp_image_overriding.featured_post_image{
+	width: 100%;
+	background-repeat: no-repeat;
+}
+div.webapp_image_overriding.featured_post_image img{
+	width: 100%;
+	position: absolute;
+	top: -20%;
 }
 .featured_webapp_decor{
 	height: 60px;
@@ -426,6 +434,7 @@ background: transparent url("images/more_cell_item.png") no-repeat center center
 	height: 31px;
 	width:87px;
 	margin: 0 auto;
+	direction: ltr;
 }
 .webview_bar .share_button_wrapper{
 	left: 16px;
@@ -654,7 +663,7 @@ background: transparent url("images/more_cell_item.png") no-repeat center center
 /** Gallery screen */
 
 .screen.gallery_screen_grid {
-	background-color: #101010 !important;
+	background-color: #FFFFFF !important;
 	background-image: none !important;
 	padding-left: 3px !important;
 	padding-top: 5px !important;
@@ -880,3 +889,7 @@ li.comment_welcome_main div{
 }
 
 /* End Image viewer */
+
+#wiziapp_openxad_body div.ui-content {
+	text-align: center;
+}

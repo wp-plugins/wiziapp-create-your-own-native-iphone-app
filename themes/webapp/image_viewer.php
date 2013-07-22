@@ -7,12 +7,12 @@
 			<h1></h1>
 		</div><!-- /header -->
 
-		<div data-role="content" class="content ui-scrollview-clip">
+		<div data-role="content" class="content">
 			<div class="all-wrapper">
 				<div class="template">
 					<div class="single-wrapper single-wrapper-displaced">
 						<div class="direct-wrapper ui-loading">
-							<img class="thumbnail" src="" border="0" />
+							<img class="thumbnail" src="<?php echo WiziappHelpers::get_pixelSRC_attr(); ?>" border="0" />
 							<div class="ui-loader ui-corner-all ui-body-a ui-loader-default" style="position: absolute">
 								<span class="ui-icon ui-icon-loading"></span>
 							</div>
@@ -21,7 +21,7 @@
 				</div>
 				<div class="single-wrapper single-wrapper-displaced">
 					<div class="direct-wrapper">
-						<img class="fullsize" src="" border="0" />
+						<img class="fullsize" src="<?php echo WiziappHelpers::get_pixelSRC_attr(); ?>" border="0" />
 					</div>
 				</div>
 			</div>

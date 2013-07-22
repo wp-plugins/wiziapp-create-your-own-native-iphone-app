@@ -42,8 +42,7 @@ class WiziappSystemServices{
 		$thumbs = json_decode($thumbsJson, TRUE);
 		$message = '';
 
-		WiziappLog::getInstance()->write('DEBUG', "The params are ".print_r($_POST, TRUE),
-											"system_webservices.wiziapp_updateThumbsConfiguration");
+		WiziappLog::getInstance()->write('DEBUG', "The params are ".print_r($_POST, TRUE), "system_webservices.wiziapp_updateThumbsConfiguration");
 
 		if ( !$thumbs ){
 			$status = FALSE;
@@ -119,7 +118,7 @@ class WiziappSystemServices{
 		} else {
 			$value = stripslashes($_POST['value']);
 
-			if ( $key === 'adsense' ){
+			if ( in_array( $key, array( 'adsense', 'admob', 'analytics', ) ) ){
 				$value = json_decode($value, TRUE);
 			}
 		}
@@ -232,7 +231,7 @@ class WiziappSystemServices{
 				$ce = new WiziappContentEvents();
 				$ce->updateCacheTimestampKey();
 			} else {
-				$message = __('Unable to update components', 'wiziapp');
+				$message = __('Unable to update components, may be just the old value equal the new value', 'wiziapp');
 			}
 		} else {
 			$status = FALSE;

@@ -11,13 +11,14 @@
 *
 * @param boolean $only_validate a flag indicating if the function should return a full response or just true/false
 * @return boolean|array if $only_validate the function will return true/false but if not,
-*                       the websrvice will return the user information: (id, name, package, next_billing, direction)
-*                       along with the usual information
+* the websrvice will return the user information: (id, name, package, next_billing, direction)
+* along with the usual information
 *
 * @todo Calculate the next billing date according to the membership plugin
 * @todo Get this from the user/blog
 */
 class WiziappLoginServices{
+
 	public function check($only_validate=FALSE){
 		@header('Content-Type: application/json');
 		$username = $_REQUEST['username'];
@@ -32,24 +33,24 @@ class WiziappLoginServices{
 			if ( is_wp_error($user) ){
 				$status = FALSE;
 			} else {
-                // check if wiziapp_users has user info
-                $wus = new WiziappUserServices();
-                if (!$wus->checkUserId($udid)){
-                    // no user data yet - add 'em
-                    $wp_user_id = get_current_user_id(); //are we logged in yet?
-                    $params = array(
-                        'wp_user_id' => $wp_user_id,
-                        'username' => $username,
-                        'password' => $password,
-                    );
-                    $wus->updateUserData($udid, $params);
-                }
+				// check if wiziapp_users has user info
+				$wus = new WiziappUserServices();
+				if (!$wus->checkUserId($udid)){
+					// no user data yet - add 'em
+					$wp_user_id = get_current_user_id(); //are we logged in yet?
+					$params = array(
+						'wp_user_id' => $wp_user_id,
+						'username' => $username,
+						'password' => $password,
+					);
+					$wus->updateUserData($udid, $params);
+				}
 				/*
-				 * Notify the global admin of the CMS user id that is connected
-				 * to the device token
-				 */
-				 if ( !empty($deviceToken) ){
-					 $params = array(
+				* Notify the global admin of the CMS user id that is connected
+				* to the device token
+				*/
+				if ( !empty($deviceToken) ){
+					$params = array(
 						'device_token' => $deviceToken,
 					);
 					$headers = array(
@@ -60,7 +61,7 @@ class WiziappLoginServices{
 
 					// Mark the user so we will know he has a device token
 					update_usermeta($user->ID, 'wiziapp_got_valid_mobile_token', $deviceToken);
-				 }
+				}
 
 				$status = TRUE;
 			}

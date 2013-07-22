@@ -95,6 +95,8 @@
 * @property string  $wiziapp_qrcode_widget_decription
 * @property array   $wiziapp_data_files
 * @property array   $adsense
+* @property array   $admob
+* @property array   $analytics
 */
 // As long as we are supporting php < 5.3 we shouldn't extent the singleton class
 //class WiziappConfig extends WiziappSingleton implements WiziappIInstallable{
@@ -103,7 +105,7 @@ class WiziappConfig implements WiziappIInstallable{
 	private $options = array();
 	private $saveAsBulk = FALSE;
 	private $name = 'wiziapp_settings';
-	private $internalVersion =  67;
+	private $internalVersion =  68;
 	private static $_instance = null;
 
 	public $integer_values = array(
@@ -148,9 +150,9 @@ class WiziappConfig implements WiziappIInstallable{
 		* This is depended per version, each version might remove or add values...
 		*/
 		// Add here the keys to reset to the default value;
-		$resetOptions = array( 'wiziapp_data_files', );
+		$resetOptions = array( 'adsense', 'thumb_min_size', );
 		// Add here the keys add with the default value, if they don't already exists;
-		$addOptions = array( 'android_app_version', );
+		$addOptions = array( 'admob', 'analytics', );
 		// Add here the keys to remove from the options array;
 		$removeOptions = array();
 
@@ -247,7 +249,7 @@ class WiziappConfig implements WiziappIInstallable{
 		$is_proper_condition =
 		isset($this->options[$option]) ||
 		(
-			in_array( $option, array( 'appstore_url', 'playstore_url', 'apk_file_url', 'android_app_version', 'adsense', ) ) &&
+			in_array( $option, array( 'appstore_url', 'playstore_url', 'apk_file_url', 'android_app_version', 'adsense', 'admob', 'analytics', ) ) &&
 			array_key_exists($option, $this->options)
 		);
 		if ( $is_proper_condition ) {
@@ -384,7 +386,7 @@ class WiziappConfig implements WiziappIInstallable{
 			'full_image_height' => 480,
 			'full_image_width' => 320,
 			'multi_image_height' => 320, // 350-30 pixels for the scroller and surrounding space
-			'multi_image_width' => 298, //300-2 pixels for the rounded border
+			'multi_image_width' => 298,  // 300-2 pixels for the rounded border
 			'images_thumb_height' => 55,
 			'images_thumb_width' => 73,
 			'posts_thumb_height' => 55,
@@ -393,7 +395,7 @@ class WiziappConfig implements WiziappIInstallable{
 			'featured_post_thumb_width' => 73,
 
 			// Control Panel - Settings
-			'thumb_min_size' => 150,
+			'thumb_min_size' => 80,
 			'display_download_from_appstore' => 1,
 			'endorse_download_android_app' => 1,
 			'rtl' => 0,
@@ -478,7 +480,9 @@ class WiziappConfig implements WiziappIInstallable{
 					'resources' => array(),
 				),
 			),
-			'adsense' => array(),
+			'adsense' 	=> array(),
+			'admob' 	=> array(),
+			'analytics' => array(),
 
 			// Wiziapp QR Code Widget
 			'wiziapp_qrcode_widget_id_base' => 'wiziapp_qr_code',

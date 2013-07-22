@@ -46,8 +46,10 @@ class WiziappInstaller{
 		// Register tasks
 		if ( ! wp_next_scheduled('wiziapp_daily_function_hook') ) {
 			wp_schedule_event(time(), 'daily', 'wiziapp_daily_function_hook' );
+			/*
 			wp_schedule_event(time(), 'weekly', 'wiziapp_weekly_function_hook' );
 			wp_schedule_event(time(), 'monthly', 'wiziapp_monthly_function_hook' );
+			*/
 		}
 
 		// Activate the blog with the global services
@@ -78,8 +80,10 @@ class WiziappInstaller{
 
 		// Remove scheduled tasks
 		wp_clear_scheduled_hook('wiziapp_daily_function_hook');
+		/*
 		wp_clear_scheduled_hook('wiziapp_weekly_function_hook');
 		wp_clear_scheduled_hook('wiziapp_monthly_function_hook');
+		*/
 
 		// Deactivate the blog with the global services
 		try{

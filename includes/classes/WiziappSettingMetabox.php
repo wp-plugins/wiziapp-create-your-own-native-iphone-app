@@ -36,18 +36,27 @@ class WiziappSettingMetabox {
 	}
 
 	public function save_push_message( $post_id, $post ) {
+		$push_message = isset($_POST['wiziapp_push_message']) ? $_POST['wiziapp_push_message'] : '';
+		if ( function_exists('mb_strlen') ) {
+			if ( mb_strlen($push_message) < 5 || mb_strlen($push_message) > 105 ) {
+				return;
+			}
+		} else {
+			if ( strlen($push_message) < 5 || strlen($push_message) > 105 ) {
+				return;
+			}
+		}
+
 		$not_proper_condition =
 		! ( is_object( $post ) && $post->post_type === 'post' ) ||
-		! ( isset($_POST['wiziapp_push_message']) && preg_match('/^[a-z\d\!\.\,\s]{10,105}$/i', $_POST['wiziapp_push_message']) ) ||
 		// If the Post is a revision
 		wp_is_post_revision( $post_id ) ||
-		self::get_push_message($post_id) === $_POST['wiziapp_push_message'];
-
+		self::get_push_message($post_id) === $push_message;
 		if ( $not_proper_condition ){
 			return;
 		}
 
-		update_post_meta( $post_id, 'wiziapp_push_message', $_POST['wiziapp_push_message'] );
+		update_post_meta( $post_id, 'wiziapp_push_message', $push_message );
 	}
 
 	public static function get_push_message($post_id) {

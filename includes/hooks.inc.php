@@ -58,11 +58,13 @@ function wiziapp_attach_hooks(){
 	add_action('created_term', array(&$ce, 'updateCacheTimestampKey'));
 	add_action('edited_term',  array(&$ce, 'updateCacheTimestampKey'));
 
+	/*
 	if ( ! empty(WiziappConfig::getInstance()->settings_done) ){
-		add_action('wiziapp_daily_function_hook',   array('WiziappPush', 'daily'));
-		add_action('wiziapp_weekly_function_hook',  array('WiziappPush', 'weekly'));
-		add_action('wiziapp_monthly_function_hook', array('WiziappPush', 'monthly'));
+	add_action('wiziapp_daily_function_hook',   array('WiziappPush', 'daily'));
+	add_action('wiziapp_weekly_function_hook',  array('WiziappPush', 'weekly'));
+	add_action('wiziapp_monthly_function_hook', array('WiziappPush', 'monthly'));
 	}
+	*/
 
 	// The hook to avoid the Collision with the WP Super Cache
 	add_filter('supercacherewriteconditions', array('WiziappHelpers', 'add_wiziapp_condition'));

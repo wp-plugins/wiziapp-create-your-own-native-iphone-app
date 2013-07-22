@@ -18,6 +18,12 @@ class WiziappPush {
 		self::$post = $post;
 		self::$post_id = $post_id;
 
+		$appropriate_types = array_merge(array('page'), WiziappComponentsConfiguration::getInstance()->get_post_types());
+		if ( ! in_array($post->post_type, $appropriate_types) ) {
+			// The incoming object is not a Post or Page
+			return;
+		}
+
 		if ( wp_is_post_revision($post_id) || ! is_object($post) ) {
 			// The Post is a revision
 			return;
@@ -124,55 +130,57 @@ class WiziappPush {
 		$r->api($request, '/push', 'POST');
 	}
 
+	/*
 	public static function intervalPush($period, $period_text) {
-		if ( ! WiziappConfig::getInstance()->notify_on_new_post ) {
-			return;
-		}
+	if ( ! WiziappConfig::getInstance()->notify_on_new_post ) {
+	return;
+	}
 
-		if ( ! WiziappConfig::getInstance()->aggregate_notifications || WiziappConfig::getInstance()->notify_periods != $period ) {
-			return;
-		}
+	if ( ! WiziappConfig::getInstance()->aggregate_notifications || WiziappConfig::getInstance()->notify_periods != $period ) {
+	return;
+	}
 
-		if ( ! isset(WiziappConfig::getInstance()->counters) ) {
-			// We don't have any counters in place yet, no need to run
-			return;
-		}
+	if ( ! isset(WiziappConfig::getInstance()->counters) ) {
+	// We don't have any counters in place yet, no need to run
+	return;
+	}
 
-		if ( WiziappConfig::getInstance()->counters['posts'] == 0 ) {
-			return;
-		}
+	if ( WiziappConfig::getInstance()->counters['posts'] == 0 ) {
+	return;
+	}
 
-		$sound = WiziappConfig::getInstance()->trigger_sound;
-		$badge = (WiziappConfig::getInstance()->show_badge_number) ? WiziappConfig::getInstance()->counters['posts'] : 0;
-		$users = 'all';
-		$request = array(
-			'type' => 1,
-			'sound' => $sound,
-			'badge' => $badge,
-			'users' => $users,
-		);
+	$sound = WiziappConfig::getInstance()->trigger_sound;
+	$badge = (WiziappConfig::getInstance()->show_badge_number) ? WiziappConfig::getInstance()->counters['posts'] : 0;
+	$users = 'all';
+	$request = array(
+	'type' => 1,
+	'sound' => $sound,
+	'badge' => $badge,
+	'users' => $users,
+	);
 
-		if ( WiziappConfig::getInstance()->show_notification_text ) {
-			$request['content'] = urlencode(stripslashes(WiziappConfig::getInstance()->counters['posts'].__(' new posts published ', 'wiziapp').$period_text));
-			$tabId = WiziappConfig::getInstance()->main_tab_index;
-			$request['params'] = "{\"tab\": \"{$tabId}\"}";
-		}
+	if ( WiziappConfig::getInstance()->show_notification_text ) {
+	$request['content'] = urlencode(stripslashes(WiziappConfig::getInstance()->counters['posts'].__(' new posts published ', 'wiziapp').$period_text));
+	$tabId = WiziappConfig::getInstance()->main_tab_index;
+	$request['params'] = "{\"tab\": \"{$tabId}\"}";
+	}
 
-		// reset the counter
-		WiziappConfig::getInstance()->counters['posts'] = 0;
+	// reset the counter
+	WiziappConfig::getInstance()->counters['posts'] = 0;
 	}
 
 	public static function daily() {
-		self::intervalPush('day', __('today', 'wiziapp'));
+	self::intervalPush('day', __('today', 'wiziapp'));
 	}
 
 	public static function weekly() {
-		self::intervalPush('week', __('this week', 'wiziapp'));
+	self::intervalPush('week', __('this week', 'wiziapp'));
 	}
 
 	public static function monthly() {
-		self::intervalPush('month', __('this month', 'wiziapp'));
+	self::intervalPush('month', __('this month', 'wiziapp'));
 	}
+	*/
 
 	/**
 	* load user push settings

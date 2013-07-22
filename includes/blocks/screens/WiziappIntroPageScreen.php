@@ -58,6 +58,9 @@ class WiziappIntroPageScreen{
 			// Not passed the Error Checking
 			return;
 		}
+		if ( session_id() == '' ) {
+			session_start();
+		}
 
 		$retun_string = 'update-application=';
 		$response = '';
@@ -73,10 +76,6 @@ class WiziappIntroPageScreen{
 				break;
 			case 'android':
 				if ( $query_string['androidapp'] === '1' ) {
-					if ( session_id() == '' ) {
-						session_start();
-					}
-
 					$proper_condition =
 					! empty(WiziappConfig::getInstance()->android_app_version) && ! empty($query_string['abv']) &&
 					! ( isset($_SESSION['wiziapp_android_download']) && $_SESSION['wiziapp_android_download'] === 'none' ) &&
@@ -100,6 +99,7 @@ class WiziappIntroPageScreen{
 
 		if ( $response !== '' ) {
 			setcookie('WIZI_SHOW_STORE_URL', 1, time()+(60*60*24*7));
+			$_SESSION['wizi_intro_page_shown'] = '1';
 		}
 
 		echo $response;

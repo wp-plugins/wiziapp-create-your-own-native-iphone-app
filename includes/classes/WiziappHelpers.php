@@ -65,16 +65,23 @@ class WiziappHelpers{
 		$result_array = array(
 			'upper_mask' => 1,
 			'lower_mask' => 2,
+			'css' => '',
 			'code' => '',
 			'show_in_post' => 0,
+			'is_shown' => FALSE,
 		);
 
 		$adsense = WiziappConfig::getInstance()->adsense;
+		$admob 	 = WiziappConfig::getInstance()->admob;
 		$proper_condition =
-		isset($adsense['provider_id']) && strlen($adsense['provider_id']) > 5 &&
+		isset($adsense['id']) && is_array($adsense['id']) && strlen($adsense['id']['id']) > 5 &&
 		isset($adsense['show_in_post']) && $adsense['show_in_post'] > 0 &&
-		// For now, the AdSense is not work in the Post of the Native App, so do not show it.
-		strpos( urldecode($_SERVER['QUERY_STRING']), 'wiziapp/content/list/posts/recent' ) === FALSE;
+		// Do not show the AdSense in the iPhone Native App
+		WiziappContentHandler::getInstance()->isHTML() && ! WiziappContentHandler::getInstance()->isInApp() &&
+		// Do not show the AdSense in the Android native App, if the AdMob set
+		! (	! ( isset($_GET['webapp']) && $_GET['webapp'] === '1' )	&& isset($admob['id']) && strlen($admob['id']) > 5 ) &&
+		// This is not iPad
+		! WiziappContentHandler::getInstance()->is_ipad_device();
 
 		if ( ! $proper_condition ) {
 			return $result_array;
@@ -82,10 +89,19 @@ class WiziappHelpers{
 
 		ob_start();
 		?>
+		<style type="text/css">
+		.page_content.wiziapp_google_adsenes ins{
+			margin-<?php echo WiziappConfig::getInstance()->is_rtl() ? 'right' : 'left'; ?> : -7px !important;
+		}
+		</style>
+		<?php
+		$result_array['css'] = ob_get_clean();
+		ob_start();
+		?>
 		<script type="text/javascript"><!--
-			google_ad_client = "ca-pub-<?php echo $adsense['provider_id']; ?>";
-			/* testMobile */
-			google_ad_slot = "";
+			google_ad_client = "ca-pub-<?php echo $adsense['id']['id']; ?>";
+			/* Wiziapp */
+			google_ad_slot = "<?php echo ( isset($adsense['id']['slot']) && strlen($adsense['id']['slot']) > 5 ) ? $adsense['id']['slot'] : ""; ?>";
 			google_ad_width = 320;
 			google_ad_height = 50;
 			//-->
@@ -97,5 +113,62 @@ class WiziappHelpers{
 		$result_array['is_shown'] = TRUE;
 
 		return $result_array;
+	}
+
+	public static function get_analytics() {
+		$result_array = array(
+			'code' => '',
+			'is_shown' => FALSE,
+		);
+
+		$analytics = WiziappConfig::getInstance()->analytics;
+		if ( ! isset($analytics['id']) || strlen($analytics['id']) < 6 ) {
+			return $result_array;
+		}
+
+		ob_start();
+		?>
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-<?php echo $analytics['id']; ?>']);
+			_gaq.push(['_trackPageview']);
+
+			(function() {
+				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+			})();
+		</script>
+		<?php
+		$result_array['code'] = ob_get_clean();
+		$result_array['is_shown'] = TRUE;
+
+		return $result_array;
+	}
+
+	public static function check_open_x_condition() {
+		if ( session_id() == '' ) {
+			session_start();
+		}
+
+		$proper_condition =
+		// The Open X Ad has not been show less than a week ago
+		! ( isset($_COOKIE['wiziapp_openxad_shown']) && $_COOKIE['wiziapp_openxad_shown'] === '1' ) &&
+		// The Intro Page has not been show by this Session
+		! ( isset($_SESSION['wizi_intro_page_shown']) && $_SESSION['wizi_intro_page_shown'] === '1' ) &&
+		// This is not native application - there is not "androidapp=1
+		! ( isset($_GET['androidapp']) && $_GET['androidapp'] === '1' );
+
+		if ( ! $proper_condition ){
+			return FALSE;
+		}
+
+		$_SESSION['wizi_intro_page_shown'] = '1';
+		return TRUE;
+	}
+
+	public static function get_pixelSRC_attr(){
+		$wiziapp_plugin_url = plugins_url( dirname( WP_WIZIAPP_BASE ) );
+		return $wiziapp_plugin_url.'/themes/webapp/images/pixel.png';
 	}
 }

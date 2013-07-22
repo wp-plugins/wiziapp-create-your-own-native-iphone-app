@@ -10,9 +10,6 @@
 .page_content.wiziapp_google_adsenes{
 	overflow-x: visible !important;
 }
-.page_content.wiziapp_google_adsenes ins{
-	margin-left: -7px !important;
-}
 .page_content.wiziapp_google_adsenes ins iframe{
 	max-width: 320px !important;
 }

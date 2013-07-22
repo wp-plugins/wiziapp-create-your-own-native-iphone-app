@@ -28,7 +28,6 @@ if ( function_exists("show_admin_bar") ){
 	<link rel="stylesheet" href="<?php echo WiziappContentHandler::getInstance()->get_blog_property('data_files_url').'/resources/style_aux.css'; ?>" type="text/css" />
 	<link rel="stylesheet" href="<?php echo WiziappContentHandler::getInstance()->get_blog_property('data_files_url').'/resources/main.css'; ?>" type="text/css" />
 	<link rel="stylesheet" href="<?php echo get_bloginfo('template_url').'/jquery.mobile-1.1.1.css'; ?>" type="text/css" />
-	<link rel="stylesheet" href="<?php echo get_bloginfo('template_url').'/jquery.mobile.scrollview.css'; ?>" type="text/css" />
 	<link rel="stylesheet" href="https://<?php echo WiziappConfig::getInstance()->api_server.'/application/postViewCss/'.WiziappConfig::getInstance()->app_id.'?v='.WIZIAPP_VERSION.'&c='.(WiziappConfig::getInstance()->configured ? 1 : 0);  ?>" type="text/css" id="themeCss" />
 	<link rel="stylesheet" href="<?php echo dirname(get_bloginfo('template_url')).'/iphone/'.WiziappConfig::getInstance()->wiziapp_theme_name.'.css'; ?>" type="text/css" />
 	<link rel="stylesheet" href="<?php echo dirname(get_bloginfo('template_url')).'/iphone/style.css'; ?>" type="text/css" />
@@ -42,6 +41,7 @@ if ( function_exists("show_admin_bar") ){
 	</script>
 	<!-- wp_head start -->
 	<?php
+		echo get_query_var('wiziapp_google_adsense_css');
 		WiziappContentHandler::getInstance()->registerWebAppScripts();
 		WiziappContentHandler::getInstance()->registerPluginScripts();
 		/*
@@ -53,6 +53,11 @@ if ( function_exists("show_admin_bar") ){
 		}
 		*/
 		wp_head();
+
+		$wiziapp_google_analytics = WiziappHelpers::get_analytics();
+		if ( $wiziapp_google_analytics['is_shown'] ) {
+			echo $wiziapp_google_analytics['code'];
+		}
 	?>
 	<!-- wp_head end -->
 </head>

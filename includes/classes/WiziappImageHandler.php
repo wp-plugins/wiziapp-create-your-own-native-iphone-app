@@ -63,7 +63,7 @@ class WiziappImageHandler {
 			*/
 			$this->_checkImp();
 			$imageClass = "Wiziapp{$this->imp}Resizer";
-            WiziappLog::getInstance()->write('INFO', 'About to load image handler class::'.$imageClass, 'WiziappImageHandler._checkImp');
+			WiziappLog::getInstance()->write('INFO', 'About to load image handler class::'.$imageClass, 'WiziappImageHandler._checkImp');
 			require_once('imageResizers/' . $imageClass . '.php');
 			$this->handler = new $imageClass();
 		}
@@ -80,9 +80,10 @@ class WiziappImageHandler {
 
 	public function wiziapp_getResizedImage($width, $height, $type = 'adaptiveResize', $allow_up = FALSE){
 		if ($this->handler == null){
-            WiziappLog::getInstance()->write('error', 'No images handler', 'WiziappImageHandler.wiziapp_getResizedImage');
+			WiziappLog::getInstance()->write('error', 'No images handler', 'WiziappImageHandler.wiziapp_getResizedImage');
 			return false;
 		}
+
 		// Get the ext
 		$tmp = explode('?', $this->imageFile);
 		$ext = substr($tmp[0], strrpos($tmp[0], '.'));
@@ -94,7 +95,7 @@ class WiziappImageHandler {
 
 		$extraForKey = '';
 		if (function_exists('is_multisite') && is_multisite()) {
-            WiziappLog::getInstance()->write('info', 'The blog is a multisite installation, adding the blog id to the key', 'WiziappImageHandler.wiziapp_getResizedImage');
+			WiziappLog::getInstance()->write('info', 'The blog is a multisite installation, adding the blog id to the key', 'WiziappImageHandler.wiziapp_getResizedImage');
 			global $wpdb;
 			$extraForKey = $wpdb->blogid;
 		}
@@ -102,7 +103,7 @@ class WiziappImageHandler {
 
 		$cacheFile = realpath($this->cache) . '/' . $cacheFileImageKey . $ext;
 
-        WiziappLog::getInstance()->write('info', 'Checking for cache key: '.$cacheFileImageKey.' in '.$cacheFile, 'WiziappImageHandler.wiziapp_getResizedImage');
+		WiziappLog::getInstance()->write('info', 'Checking for cache key: '.$cacheFileImageKey.' in '.$cacheFile, 'WiziappImageHandler.wiziapp_getResizedImage');
 
 		if ($this->_cacheExists($cacheFile)){
 			$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $cacheFile);
@@ -114,34 +115,35 @@ class WiziappImageHandler {
 			WiziappLog::getInstance()->write('info', "Before resizing image: " . $this->imageFile, "image_resizing.getResizedImage");
 			$url = $this->imageFile;
 			if (strpos($this->imageFile, get_bloginfo('wpurl')) === 0){
-                WiziappLog::getInstance()->write('info', 'Looks like a local image: '.$this->imageFile, 'WiziappImageHandler.wiziapp_getResizedImage');
+				WiziappLog::getInstance()->write('info', 'Looks like a local image: '.$this->imageFile, 'WiziappImageHandler.wiziapp_getResizedImage');
 				$url = str_replace(get_bloginfo('wpurl'), WIZI_ABSPATH, $url);
 				// Make sure we can read it like this
 				if ( !file_exists($url) ){
-                    WiziappLog::getInstance()->write('WARNING', 'Local file: '.$url.' but does not exists? will try access by url if the blogs allows', 'WiziappImageHandler.wiziapp_getResizedImage');
+					WiziappLog::getInstance()->write('WARNING', 'Local file: '.$url.' but does not exists? will try access by url if the blogs allows', 'WiziappImageHandler.wiziapp_getResizedImage');
 					if ( ini_get('allow_url_fopen') == '1' ){
 						$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl'), $url);
 					} else {
-                        WiziappLog::getInstance()->write('WARNING', 'allow_url_fopen is off, the '.$url.' will most likely fail to load', 'WiziappImageHandler.wiziapp_getResizedImage');
-                    }
+						WiziappLog::getInstance()->write('WARNING', 'allow_url_fopen is off, the '.$url.' will most likely fail to load', 'WiziappImageHandler.wiziapp_getResizedImage');
+					}
 				}
 			}
-            WiziappLog::getInstance()->write('INFO', 'Calling handler resize on::'.$url, 'WiziappImageHandler.wiziapp_getResizedImage');
+			WiziappLog::getInstance()->write('INFO', 'Calling handler resize on::'.$url, 'WiziappImageHandler.wiziapp_getResizedImage');
 			$url = $this->handler->resize($url, $cacheFile, $width, $height, $type, $allow_up, $this->checkPath());
 			WiziappLog::getInstance()->write('INFO', "After resizing image: " . $this->imageFile.' url:: '.$url, "image_resizing.getResizedImage");
 		}
 
-		/**$thumb = PhpThumbFactory::create($url);
-		$thumb->show();*/
+		// $thumb = PhpThumbFactory::create($url);
+		// $thumb->show();
+
 		if ( $url === FALSE || strlen($url) > 0 ){
-            WiziappLog::getInstance()->write('INFO', "Trying to show the image: " . $this->imageFile.' url:: '.$url, "image_resizing.getResizedImage");
+			WiziappLog::getInstance()->write('INFO', "Trying to show the image: " . $this->imageFile.' url:: '.$url, "image_resizing.getResizedImage");
 			$this->handler->show();
-            WiziappLog::getInstance()->write('INFO', "The image was sent to the browser: " . $this->imageFile.' url:: '.$url, "image_resizing.getResizedImage");
+			WiziappLog::getInstance()->write('INFO', "The image was sent to the browser: " . $this->imageFile.' url:: '.$url, "image_resizing.getResizedImage");
 		} else {
-            WiziappLog::getInstance()->write('INFO', "There was some kind of problem processing the image: " . $this->imageFile.' url:: '.$url, "image_resizing.getResizedImage");
+			WiziappLog::getInstance()->write('INFO', "There was some kind of problem processing the image: " . $this->imageFile.' url:: '.$url, "image_resizing.getResizedImage");
 			// If the image is not local, just redirect to it
 			if ( strpos($this->imageFile, 'https://') !== FALSE || strpos($this->imageFile, 'http://') !== FALSE ){
-                WiziappLog::getInstance()->write('INFO', "The image is a full url so will just try to redirect to it: " . $this->imageFile, "image_resizing.getResizedImage");
+				WiziappLog::getInstance()->write('INFO', "The image is a full url so will just try to redirect to it: " . $this->imageFile, "image_resizing.getResizedImage");
 				header('Location: '.$this->imageFile);
 				// On this special case we need to halt the functions from moving on
 				exit;
@@ -151,12 +153,17 @@ class WiziappImageHandler {
 		// If we show the image it means the output was sent and we should stop the request
 		return true;
 
-		//$imginfo = getimagesize($url);
-//        header("Content-Type: " . $imginfo['mime']);
-//        return file_get_contents($url);
+		// $imginfo = getimagesize($url);
+		// header("Content-Type: " . $imginfo['mime']);
+		// return file_get_contents($url);
 	}
 
 	public function load(){
+		if ($this->handler == null){
+			WiziappLog::getInstance()->write('error', 'No images handler', 'WiziappImageHandler.wiziapp_getResizedImage');
+			return FALSE;
+		}
+
 		/**
 		* If the image is local, use the local path.
 		* If we will access via the url we might end up stuck with allow_url_open off
@@ -164,39 +171,54 @@ class WiziappImageHandler {
 		$imagePath = $this->imageFile;
 		$calcResize = TRUE; // Try to calc the size of the image, unless remote and allow_url_fopen is off
 		if ( strpos($imagePath, get_bloginfo('wpurl')) === 0 ){
-            WiziappLog::getInstance()->write('INFO', 'Loading local image::'.$imagePath, 'WiziappImageHandler.load');
+			WiziappLog::getInstance()->write('INFO', 'Loading local image::'.$imagePath, 'WiziappImageHandler.load');
 			$imagePath = str_replace(get_bloginfo('wpurl'), WIZI_ABSPATH, $imagePath);
-			// Make sure we can read this image file, if the filename is with special encoding, the os might not find it...
-			if ( !file_exists($imagePath) ){
-                WiziappLog::getInstance()->write('WARNING', 'Local image::'.$imagePath.' does not exists? Avoid calculations', 'WiziappImageHandler.load');
+
+			if ( ! file_exists($imagePath) ){
+				// We can not read this image file, if the filename is with special encoding, the os might not find it...
+				WiziappLog::getInstance()->write('WARNING', 'Local image::'.$imagePath.' does not exists? Avoid calculations', 'WiziappImageHandler.load');
 				if ( ini_get('allow_url_fopen') != '1' ){
 					$calcResize = FALSE;
 				}
+
 				$imagePath = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl'), $imagePath);
 			}
-		} else {
+		} elseif ( ini_get('allow_url_fopen') != '1' ){
 			// The image is not local, if allow_url_fopen is off throw an alert
-			if ( ini_get('allow_url_fopen') != '1' ){
-				$calcResize = FALSE; // Will affect the ability to make the image a thumbnail
-				WiziappLog::getInstance()->write('ERROR', "allow_url_fopen is turned off, can't check the image size for: " . $imagePath, "WiziappImageHandler.load");
-			}
+			// Will affect the ability to make the image a thumbnail
+			$calcResize = FALSE;
+			WiziappLog::getInstance()->write('ERROR', "allow_url_fopen is turned off, can't check the image size for: " . $imagePath, "WiziappImageHandler.load");
 		}
-        WiziappLog::getInstance()->write('INFO', 'Going to request loading the image::'.$imagePath.' from the image handler', 'WiziappImageHandler.load');
+
+		WiziappLog::getInstance()->write('INFO', 'Going to request loading the image::'.$imagePath.' from the image handler', 'WiziappImageHandler.load');
 		$this->handler->load($imagePath, $calcResize);
 	}
+
 	public function getNewWidth(){
+		if ($this->handler == null){
+			WiziappLog::getInstance()->write('error', 'No images handler', 'WiziappImageHandler.wiziapp_getResizedImage');
+			return false;
+		}
+
 		$width = $this->handler->getNewWidth();
 		if ($width == 0){
 			$width = "auto";
 		}
+
 		return $width;
 	}
 
 	public function getNewHeight(){
+		if ($this->handler == null){
+			WiziappLog::getInstance()->write('error', 'No images handler', 'WiziappImageHandler.wiziapp_getResizedImage');
+			return false;
+		}
+
 		$height = $this->handler->getNewHeight();
 		if ($height == 0){
 			$height = "auto";
 		}
+
 		return $height;
 	}
 
@@ -210,7 +232,7 @@ class WiziappImageHandler {
 	* Fallback to wiziapp global services if nothing local was found
 	*/
 	private function _checkImp(){
-		if(extension_loaded('gd') || extension_loaded('imagick')){
+		if ( extension_loaded('gd') || extension_loaded('imagick') ){
 			$this->imp = 'PhpThumb';
 		}
 	}

@@ -12,6 +12,7 @@ class WiziappContentHandler {
 
 	private $mobile = FALSE;
 	private $inApp = FALSE;
+	private $_is_ipad_device = FALSE;
 	private $_is_access_checked = FALSE;
 	private $inSave = FALSE;
 
@@ -96,6 +97,10 @@ class WiziappContentHandler {
 
 	public function isInApp() {
 		return $this->inApp;
+	}
+
+	public function is_ipad_device() {
+		return $this->_is_ipad_device;
 	}
 
 	public function isInSave() {
@@ -189,11 +194,12 @@ class WiziappContentHandler {
 
 			$is_iPhone	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPhone')  !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
 			$is_iPod	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPod')    !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
+			$is_iPad	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPad')    !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
 			$is_android	= stripos($_SERVER['HTTP_USER_AGENT'], 'Android') !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'AppleWebKit') !== FALSE;
 			$is_windows	= stripos($_SERVER['HTTP_USER_AGENT'], 'Windows') !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'IEMobile')	   !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Phone') !== FALSE;
-			$is_iPad	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPad')    !== FALSE || stripos($_SERVER['HTTP_USER_AGENT'], 'webOS') 	   !== FALSE;
+			$this->_is_ipad_device = $is_iPad;
 
-			if ( ( $is_iPhone || $is_iPod || $is_android || $is_windows ) && ! $is_iPad ) {
+			if ( $is_iPhone || $is_iPod || ( $is_iPad && isset($_GET['androidapp']) && $_GET['androidapp'] === '1' )  || $is_android || $is_windows ) {
 				$this->mobile = TRUE;
 
 				$this->_show_splash();
@@ -615,11 +621,6 @@ class WiziappContentHandler {
 		if ( $this->mobile ) {
 			$pluginUrl = plugins_url( dirname( WP_WIZIAPP_BASE ) ).'/themes/webapp';
 
-			wp_register_script('scrollview',
-				$pluginUrl.'/scripts/scrollview.js',
-				array('jquery_mobile_scrollview'),
-				WIZIAPP_P_VERSION, FALSE );
-
 			wp_register_script('wiziapp_effects',
 				$this->_blog_properties['data_files_url'].'/resources/effects_config.js',
 				array(),
@@ -627,7 +628,7 @@ class WiziappContentHandler {
 
 			wp_register_script('wiziapp_webapp',
 				$pluginUrl.'/scripts/webapp.js',
-				array('jquery', 'jquery_mobile_scrollview'),
+				array('jquery',),
 				WIZIAPP_P_VERSION, FALSE );
 
 			wp_register_script('wiziapp_favorites',
@@ -640,7 +641,6 @@ class WiziappContentHandler {
 				array('jquery_mobile'),
 				WIZIAPP_P_VERSION, FALSE );
 
-			wp_enqueue_script('scrollview');
 			wp_enqueue_script('wiziapp_effects');
 			wp_enqueue_script('jquery_mobile_simple_dialog');
 			wp_enqueue_script('wiziapp_webapp');
@@ -666,11 +666,6 @@ class WiziappContentHandler {
 			array('jquery'),
 			WIZIAPP_P_VERSION, FALSE );
 
-		wp_register_script('jquery_mobile_scrollview',
-			$pluginUrl.'/scripts/jquery.mobile.scrollview.js',
-			array('jquery_mobile','jquery_easing'),
-			WIZIAPP_P_VERSION, FALSE );
-
 		wp_register_script('jquery_mousewheel',
 			$pluginUrl.'/scripts/jquery.mousewheel.min.js',
 			array('jquery'),
@@ -680,7 +675,6 @@ class WiziappContentHandler {
 		wp_enqueue_script('jquery_easing');
 		wp_enqueue_script('jquery_mousewheel');
 		wp_enqueue_script('jquery_mobile');
-		wp_enqueue_script('jquery_mobile_scrollview');
 	}
 
 	function do_head_section() {
@@ -751,6 +745,7 @@ class WiziappContentHandler {
 		( session_id() == '' && ! session_start() ) ||
 		( isset($_SESSION['not_first_request']) && $_SESSION['not_first_request'] === '1' ) ||
 		( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest' ) ||
+		( ! empty($_SERVER['HTTP_REFERER']) ) ||
 		( isset($_GET['androidapp']) && $_GET['androidapp'] === '1' );
 
 		if( $abort_show_splash ) {
@@ -1028,27 +1023,27 @@ class WiziappContentHandler {
 
 			if ($this->hasClass($anchor, 'alignleft') || $this->hasClass($anchor, 'alignright') || $this->hasClass($anchor, 'ngg-left') || $this->hasClass($anchor, 'ngg-right') || $this->hasStyle($anchor, 'float', 'right') || $this->hasStyle($anchor, 'float', 'left')) {
 				if ($image->width > 90 && $image->height > 90) {
-					$new_height = intval(100*$image->height/$image->width);
-					$image->width = 100;
+					$multiplier = $this->_is_ipad_device ? 300 : 100;
+					$new_height = intval($multiplier*$image->height/$image->width);
+					$image->width = $multiplier;
 					$image->height = $new_height;
 
-					$this->setStyle($anchor, 'width', '105px');
-				}
-				else {
+					$this->setStyle($anchor, 'width', ($multiplier + 10).'px');
+				} else {
 					$size = $this->calcResize($image->width, $image->height);
 					$image->width = $size['width'];
 					$image->height = $size['height'];
 				}
 				$image->border = '0';
 
-				if($this->hasClass($anchor, 'alignright') || (isset($anchor->align) && !strcasecmp($anchor->align, 'right')) || $this->hasClass($anchor, 'ngg-right') || $this->hasStyle($anchor, 'float', 'right')) {
+				if ($this->hasClass($anchor, 'alignright') || (isset($anchor->align) && !strcasecmp($anchor->align, 'right')) || $this->hasClass($anchor, 'ngg-right') || $this->hasStyle($anchor, 'float', 'right')) {
 					$this->setStyle($anchor, 'float', 'right');
 					$this->setStyle($anchor, 'margin', '5px 6px 4px 5px');
 					$this->unsetStyle($anchor, 'margin-top');
 					$this->unsetStyle($anchor, 'margin-right');
 					$this->unsetStyle($anchor, 'margin-bottom');
 					$this->unsetStyle($anchor, 'margin-left');
-				} else if($this->hasClass($anchor, 'alignleft') || (isset($anchor->align) && !strcasecmp($anchor->align, 'left')) || $this->hasClass($anchor, 'ngg-left') || $this->hasStyle($anchor, 'float', 'left')) {
+				} elseif ($this->hasClass($anchor, 'alignleft') || (isset($anchor->align) && !strcasecmp($anchor->align, 'left')) || $this->hasClass($anchor, 'ngg-left') || $this->hasStyle($anchor, 'float', 'left')) {
 					$this->setStyle($anchor, 'float', 'left');
 					$this->setStyle($anchor, 'margin', '5px 6px 4px 5px');
 					$this->unsetStyle($anchor, 'margin-top');
@@ -1067,10 +1062,15 @@ class WiziappContentHandler {
 			} else {
 				$large = ($image->width > 90 && $image->height > 90);
 
-				// First thing's first - Rescale the image before we change the DOM structure around it, because the attributes cannot be edited afterwards
-				$size = $this->calcResize($image->width, $image->height);
-				$image->width = $size['width'];
-				$image->height = $size['height'];
+				if ( $this->_is_ipad_device ) {
+					$this->setStyle($image, 'height', 'auto');
+					$this->setStyle($image, 'max-width', '100%');
+				} else {
+					// First thing's first - Rescale the image before we change the DOM structure around it, because the attributes cannot be edited afterwards
+					$size = $this->calcResize($image->width, $image->height);
+					$image->width = $size['width'];
+					$image->height = $size['height'];
+				}
 				$image->border = '0';
 
 				if($this->hasClass($anchor, 'ngg-center') || $this->hasStyle($anchor, 'float', 'center')) {

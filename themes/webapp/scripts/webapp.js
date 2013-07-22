@@ -19,7 +19,21 @@ jQuery(document).delegate(".index:jqmData(role='page')", "pageshow", function() 
 		a.click();
 	} else {
 		setTimeout(function() {
-			a.click();
+			// Add the webapp=1 to mark what is the Android browser request and not the Android native app
+			var href = a.attr("href");
+			var webapp = "?webapp=1";
+			var ind = href.indexOf('?');
+			if ( ind > 0 ){
+				webapp = "";
+				if ( href.indexOf('webapp=1', ind + 1) < 0 ){
+					webapp = '&webapp=1';
+				}
+			}
+			href += webapp;
+
+			a
+			.attr("href", href)
+			.click();
 			}, 1000);
 	}
 });
@@ -221,14 +235,30 @@ function pageShowEvent(event){
 
 	// To avoid collision with "Contact Form 7", "FV Community News" and "Events Manager" plugins
 	$page
-	.find("form.wpcf7-form, form.fvcn-post-form-new-post, #event-form")
+	.find("form.wpcf7-form, form.fvcn-post-form-new-post, #event-form, form[id^='gform']")
 	.attr("data-ajax", "false");
+
+	// Open X Ad
+	if ( $page.attr("data-url").indexOf('output=html') > 0 && jQuery("#wiziapp_openxad_body div:jqmData(role='content') [id^='beacon_']").length > 0 ){
+		setTimeout(function(){
+			// The proper way "jQuery.mobile.changePage( "#open_x_ad", { role: "dialog" } );"
+			// is not work fine, so need a trick
+			jQuery("#wiziapp_openxad_open").click();
+
+			// set Cookie to show the Ad next after some week.
+			var exp_date = new Date();
+			exp_date.setDate(exp_date.getDate() + 7);
+			document.cookie = "wiziapp_openxad_shown=1; expires=" + exp_date.toUTCString();
+
+			setTimeout(function(){
+				jQuery("#wiziapp_openxad_close").click();
+				}, 6000);
+			}, 2000);
+	}
 
 	// Bind favorite button
 	// Apply effects
 	applyEffects($page);
-
-	resizePageContentHeight($page);
 }
 
 function handleActionURL(page){
@@ -242,7 +272,7 @@ function handleActionURL(page){
 
 	for (var key in elements){
 		if ( elements[key].length > 0 ){
-			prepareActionURL(elements[key]);
+			prepareActionURL(elements[key], page.jqmData("url"));
 		}
 	}
 
@@ -251,7 +281,9 @@ function handleActionURL(page){
 	elements = page = null;
 }
 
-function prepareActionURL(elements){
+function prepareActionURL(elements, doc_href){
+	var is_webapp = typeof doc_href === "string" && doc_href.indexOf('webapp=1') > 0;
+
 	elements.filter("[href]").each(function(){
 		var $el = jQuery(this);
 		$el.attr("data-nav-processed", "processed");
@@ -284,6 +316,10 @@ function prepareActionURL(elements){
 				if ( screenURL.indexOf('androidapp=1', ind + 1) < 0 ){
 					sep += 'androidapp=1&';
 				}
+			}
+			if (is_webapp){
+				// Pass on an existing GET element "webapp=1"
+				sep += 'webapp=1&';
 			}
 
 			if ( actionType == 'nav' ){
@@ -457,8 +493,6 @@ function loadMoreInPage(event){
 		});
 
 		applyEffects($data);
-
-		resizePageContentHeight($page);
 
 		$page = $showMore = $data = $list = null;
 	});
@@ -752,8 +786,9 @@ function applyEffects($wantedContainer){
 			var post_link = $(this);
 
 			setTimeout(function(){
+				$.mobile.hidePageLoadingMsg();
 				window.location = post_link.attr("href");
-				}, 100);
+				}, 1000);
 
 				return false;
 		});
@@ -801,8 +836,6 @@ function applyEffects($wantedContainer){
 				comment_parent = comment_parent_element.attr("data-comment-id");
 				collapsible_wrapper = comment_parent_element.children("div:jqmData(role='collapsible')");
 			}
-
-			data_role_content.scrollview( "scrollTo", 0, 0 );
 
 			$(document).on("pagebeforechange", function(event, data){
 				event.preventDefault();

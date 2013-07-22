@@ -72,46 +72,48 @@
 		<p>
 			<a href="#" data-rel="back" data-theme="e" data-role="button">Cancel</a>
 		</p>
-		<?php
-			/*
-			$file = WiziappContentHandler::getInstance()->get_blog_property('data_files_dir').'/resources/config.js';
-			$config = file_get_contents($file);
-			$config = str_replace('var config = ', '', substr($config, 0, strlen($config)-1));
-			$configObj = json_decode($config);
-			$sharingServices = $configObj->sharing;
-			$providerNames = array();
-
-			foreach ( $sharingServices as $provider => $enabled ){
-			if ( ! ( is_bool($enabled) && $enabled ) ) {
-			continue;
-			}
-
-			$providerName = $provider;
-			if ( ( $pos = strpos($providerName, '_') ) !== FALSE ){
-			$providerName = substr($providerName, 0, $pos);
-			}
-
-			$providerNames[] = $providerName;
-			}
-
-			$providerNames = array_unique($providerNames);
-			sort($providerNames);
-
-			if ( ( $amount = count($providerNames) ) > 0 ){
-			for ($i = 0, $amount; $i < $amount; $i++){
-			?>
-			<a class="sharing_provider <?php echo $enabled ? 'enabled' : 'hidden'; ?>" data-provider="<?php echo $providerNames[$i]; ?>" data-transition="slidedown" data-rel="dialog" data-role="button">
-			<?php echo $providerNames[$i]; ?>
-			</a>
-			<?php
-			}
-			}
-			*/
-		?>
 	</div><!-- /content -->
 </div><!-- /page -->
 
-<?php require(dirname(__FILE__).'/image_viewer.php') ?>
+<?php
+	if ( WiziappHelpers::check_open_x_condition() ) {
+		?>
+		<a href="#wiziapp_openxad_body" id="wiziapp_openxad_open" data-transition="slide" data-rel="dialog"></a>
+		<div id="wiziapp_openxad_body" data-role="dialog">
+			<div data-role="content" data-theme="c">
+				<!--	<div style="height: 480px; width: 320px; background-color: blue; margin: 0 auto;"></div>	-->
+				<script type='text/javascript'>
+					<!--//<![CDATA[
+					var m3_u = (location.protocol=='https:'?'https://50.56.70.210/openx/www/delivery/ajs.php':'http://50.56.70.210/openx/www/delivery/ajs.php');
+					var m3_r = Math.floor(Math.random()*99999999999);
+					if (!document.MAX_used) document.MAX_used = ',';
+					document.write ("<scr"+"ipt type='text/javascript' src='"+m3_u);
+					document.write ("?zoneid=255");
+					document.write ('&amp;cb=' + m3_r);
+					if (document.MAX_used != ',') document.write ("&amp;exclude=" + document.MAX_used);
+					document.write (document.charset ? '&amp;charset='+document.charset : (document.characterSet ? '&amp;charset='+document.characterSet : ''));
+					document.write ("&amp;loc=" + escape(window.location));
+					if (document.referrer) document.write ("&amp;referer=" + escape(document.referrer));
+					if (document.context) document.write ("&context=" + escape(document.context));
+					if (document.mmm_fo) document.write ("&amp;mmm_fo=1");
+					document.write ("'><\/scr"+"ipt>");
+					//]]>-->
+				</script>
+				<noscript>
+					<a href='http://50.56.70.210/openx/www/delivery/ck.php?n=ac139345&amp;cb=INSERT_RANDOM_NUMBER_HERE' target='_blank'>
+						<img src='http://50.56.70.210/openx/www/delivery/avw.php?zoneid=255&amp;cb=INSERT_RANDOM_NUMBER_HERE&amp;n=ac139345' border='0' alt='' />
+					</a>
+				</noscript>
+			</div><!-- /content -->
+			<div data-role="footer" data-theme="d">
+				<a id="wiziapp_openxad_close" href="#" data-role="button" data-rel="back" data-theme="c">Skip</a>
+			</div><!-- /header -->
+		</div><!-- /page -->
+		<?php
+	}
+
+	require(dirname(__FILE__).'/image_viewer.php')
+?>
 
 <div id="dialogs" class="hidden"></div>
 <div id="sandbox" class="hidden"></div>
