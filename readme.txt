@@ -225,6 +225,15 @@ Yes, you can use adsense and enjoy all the revenues, WiziApp take no cut of your
 
 == Changelog ==
 
+= 2.0.7 =
+
+- Google Adsense "Slot ID" is now supported - Go-to the Wiziapp control panel -> "App Settings" in order to add your "Slot ID".
+- AdMob Ads for Android native App is now supported - Go-to the Wiziapp control panel -> "Settings" in order to add your [AdMob Publisher ID](http://www.wiziapp.com/blog/guides-tutorials/admob-on-iphone/).
+- Google Analytics is now supported - Track your WebApp and Android App data directly from your google analytics account.
+- Multilingual support for App name & Push notifications custom text message.
+- RTL - Bug fixes on "Latest Screen"
+- Thumbnails display bug fixes.
+
 = 2.0.6 =
 
 - Edit the push notification text message for each published post.
