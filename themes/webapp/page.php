@@ -1,21 +1,21 @@
 <?php
-	if (have_posts()) {
-		ob_start();
-		global $post, $tabBar;
-		setup_postdata($post);
-		$tabBar = new WiziappTabbarBuilder();
+if ( have_posts() ) {
+	ob_start();
+	global $post, $tabBar;
+	setup_postdata($post);
+	$tabBar = new WiziappTabbarBuilder();
 
-		WiziappTheme::getPostHeaders(true);
-		ob_end_clean();	// Do NOT write anything before the template header
+	WiziappTheme::getPostHeaders(true);
+	ob_end_clean();	// Do NOT write anything before the template header
 
-		// Before handing the content, make sure this post is scanned
-		$processed = get_post_meta($post->ID, 'wiziapp_processed');
-		if (empty($processed)){
-			$ce = new WiziappContentEvents();
-			$ce->savePost($post);
-		}
+	// Before handing the content, make sure this post is scanned
+	$processed = get_post_meta($post->ID, 'wiziapp_processed');
+	if (empty($processed)) {
+		$ce = new WiziappContentEvents();
+		$ce->savePost($post);
+	}
 
-		get_header();
+	get_header();
 ?>
 <div data-role="page" data-theme="z">
 	<div data-role="header" data-id="header" data-position="fixed">
@@ -41,9 +41,10 @@
 				<?php
 					$pLink = WiziappLinks::postLink($post->ID);
 
-					if (is_page($post->ID)) {
+					if ( is_page($post->ID) ) {
 						$config = WiziappComponentsConfiguration::getInstance();
-						if (in_array('pages', $config->getAttrToAdd('postDescriptionCellItem'))) {
+
+						if ( in_array( 'pages', $config->getAttrToAdd('postDescriptionCellItem') ) ) {
 							$subPages = get_pages(array(
 								'child_of' => $post->ID,
 								'sort_column' => 'menu_order',
@@ -80,6 +81,7 @@
 						<?php the_title(); ?>
 					</a>
 				</h2>
+
 				<div class="pageitem">
 					<div class="post" id="post-<?php the_ID(); ?>">
 						<div id="singlentry">
@@ -102,7 +104,9 @@
 						</div>
 					</div>
 				</div>
-				<?php if (!is_page()) { ?>
+				<?php
+				if ( ! is_page() ) {
+			?>
 					<div class="clear"></div>
 					<ul class="wiziapp_bottom_nav">
 						<?php
@@ -111,7 +115,10 @@
 						?>
 					</ul>
 					<div class="clear"></div>
-					<?php } ?>
+			<?php
+		}
+
+					?>
 			</div>
 			<br />
 			<div id="debug" style="background-color: #c0c0c0;">
@@ -123,15 +130,9 @@
 				<a id="swipeLeft" href="cmd://event/swipeRight"></a>
 				<a id="swipeRight" href="cmd://event/swipeLeft"></a>
 			</div>
-			<?php
-				/**
-				* The link below is for handing video in the simulator, the application shows the video itself
-				* while the simulator only shows an image.
-				*/
-			?>
+			<!-- The link below is for handing video in the simulator, the application shows the video itself while the simulator only shows an image. -->
 			<a href="cmd://open/video" id="dummy_video_opener"></a>
 		</div><!-- page_content -->
-
 
 		<script type="text/javascript">
 			<?php
@@ -153,13 +154,13 @@
 		</script>
 	</div><!-- Content -->
 
-<?php echo $tabBar->getBar(); ?>
+	<?php echo $tabBar->getBar(); ?>
 </div><!-- page -->
-	<?php
-		get_footer();
-	}
-	else {
-		// No content???
-		get_header();
-		get_footer();
-	}
+
+<?php
+	get_footer();
+} else {
+	// No content???
+	get_header();
+	get_footer();
+}

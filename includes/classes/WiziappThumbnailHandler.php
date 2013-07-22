@@ -53,10 +53,12 @@ class WiziappThumbnailHandler{
 			$foundImage = $this->_trySingleImageThumbnail();
 		}
 
-		if ( ! $foundImage ) {
-			// If we reached this point we couldn't find a thumbnail. Throw 404.
-			header("HTTP/1.0 404 Not Found");
+		if ( $foundImage ) {
+			return;
 		}
+
+		// We couldn't find a thumbnail.
+		header("HTTP/1.0 404 Not Found");
 	}
 
 	private function _tryWordpressThumbnail() {
@@ -75,6 +77,7 @@ class WiziappThumbnailHandler{
 		} else {
 			WiziappLog::getInstance()->write('INFO', "Will *NOT* use WP FEATURED IMAGE thumbnail for post: {$this->post}", "WiziappThumbnailHandler._tryWordpressThumbnail");
 		}
+
 		return $showedImage;
 	}
 
@@ -133,48 +136,41 @@ class WiziappThumbnailHandler{
 	}
 
 	private function _trySingleImageThumbnail() {
-		$showedImage = FALSE;
 		foreach($this->singles as $single) {
-			$image = new WiziappImageHandler($single);  // The original image
-			$image->load();
-			$width = $image->getNewWidth();
-			$height = $image->getNewHeight();
-			if (($width >= $this->_thumb_min_size) && ($height >= $this->_thumb_min_size)) {
-				if (($width >= ($this->size['width'] * 0.8)) && ($height >= ($this->size['height'] * 0.8))) {
-					$showedImage = $this->_processImageForThumb($single);
-					WiziappLog::getInstance()->write('INFO', "Found and will use SINGLE IMAGE thumbnail for post: " . $this->post, "WiziappThumbnailHandler._trySingleImageThumbnail");
-				} else {
-					WiziappLog::getInstance()->write('INFO', "Will *NOT* use SINGLE IMAGE thumbnail for post ".$this->post.". Size doesnt fit our requirements. Width: ".$width." Height: ".$height, "WiziappThumbnailHandler._trySingleImageThumbnail");
-				}
-			} else {
-				WiziappLog::getInstance()->write('INFO', "Will *NOT* use SINGLE IMAGE thumbnail for post " . $this->post . ". Size doesnt fit our requirements. Width: " . $width . " Height: " . $height, "WiziappThumbnailHandler._trySingleImageThumbnail");
+			if ( $this->_processImageForThumb($single) ) {
+				return TRUE;
 			}
 		}
 
-		return $showedImage;
+		return FALSE;
 	}
 
 	private function _processImageForThumb($src) {
-		$showedImage = FALSE;
-		if ( ! empty($src) ) {
-			$image = new WiziappImageHandler($src);  // The original image
-			$image->load();
-			$width = $image->getNewWidth();
-			$height = $image->getNewHeight();
-
-			if ( intval($width) >= $this->_thumb_min_size && intval($height) >= $this->_thumb_min_size ) {
-				if ( intval($width) >= ($this->size['width'] * 0.8) && intval($height) >= ($this->size['height'] * 0.8) ) {
-					//$imageUrl = $image->getResizedImageUrl($src, $size['width'], $size['height'], 'adaptiveResize', true);
-					try {
-						$image->wiziapp_getResizedImage( $this->size['width'], $this->size['height'], 'adaptiveResize', true );
-						$showedImage = TRUE;
-					} catch (Exception $e) {
-						WiziappLog::getInstance()->write('ERROR', $e->getMessage(), "WiziappThumbnailHandler._processImageForThumb");
-					}
-				}
-			}
+		if ( empty($src) ) {
+			return FALSE;
 		}
-		return $showedImage;
-	}
 
+		$image = new WiziappImageHandler($src);
+		$image->load();
+		$width  = intval($image->getNewWidth());
+		$height = intval($image->getNewHeight());
+		$not_passed =
+		empty($width) || empty($height) ||
+		( $width  < $this->_thumb_min_size ) ||
+		( $height < $this->_thumb_min_size ) ||
+		( $width  < ($this->size['width']  * 0.8) ) ||
+		( $height < ($this->size['height'] * 0.8) );
+		if ($not_passed) {
+			return FALSE;
+		}
+
+		try {
+			$image->wiziapp_getResizedImage( $this->size['width'], $this->size['height'], 'adaptiveResize', true );
+		} catch (Exception $e) {
+			WiziappLog::getInstance()->write('ERROR', $e->getMessage(), "WiziappThumbnailHandler._processImageForThumb");
+			return FALSE;
+		}
+
+		return TRUE;
+	}
 }

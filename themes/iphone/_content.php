@@ -1,64 +1,64 @@
 <?php
-	wiziapp_get_header();
-	$wiziapp_google_adsense = WiziappHelpers::get_adsense();
+wiziapp_get_header();
+$wiziapp_google_adsense = WiziappHelpers::get_adsense();
 
 	// Before handing the content, make sure this post is scanned
 	$processed = get_post_meta($post->ID, 'wiziapp_processed');
-	if (empty($processed)){
+	if (empty($processed)) {
 		$ce = new WiziappContentEvents();
 		$ce->savePost($post);
 	}
 ?>
-<div class="page_content<?php echo $wiziapp_google_adsense['is_shown'] ? ' wiziapp_google_adsenes' : ''; ?>">
-	<div class="post">
-		<?php
-			$pLink = WiziappLinks::postLink($post->ID);
+		<div class="page_content<?php echo $wiziapp_google_adsense['is_shown'] ? ' wiziapp_google_adsenes' : ''; ?>">
+			<div class="post">
+				<?php
+					$pLink = WiziappLinks::postLink($post->ID);
 
-			if ( is_page($post->ID) ) {
-				$config = WiziappComponentsConfiguration::getInstance();
-				if ( in_array('pages', $config->getAttrToAdd('postDescriptionCellItem')) ) {
-					$subPages = get_pages(array(
-						'child_of' => $post->ID,
-						'sort_column' => 'menu_order',
-						'exclude_tree' => 1,
-					));
+					if ( is_page($post->ID) ) {
+						$config = WiziappComponentsConfiguration::getInstance();
 
-					if ($subPages) {
-						// @todo change the pages to not be related to the post description cell item since it doesn't make sense
-						?>
-						<div class="postDescriptionCellItem_pages">
-							<ul class="wiziapp_bottom_nav wiziapp_pages_nav albums_list">
-								<?php
-									foreach ($subPages as $subPage) {
-										if ($subPage->post_parent == $post->ID) {
-											?>
-											<li>
-												<a href="<?php echo WiziappLinks::pageLink($subPage->ID); ?>">
-													<div class="album_item wiziapp_pages_item">
-														<p class="attribute text_attribute title wiziapp_pages_title"><?php echo ($subPage->post_title); ?></p>
-														<span class="rowCellIndicator"></span>
-													</div>
-												</a>
-											</li>
-											<?php
+						if ( in_array( 'pages', $config->getAttrToAdd('postDescriptionCellItem') ) ) {
+							$subPages = get_pages(array(
+								'child_of' => $post->ID,
+								'sort_column' => 'menu_order',
+								'exclude_tree' => 1,
+							));
+
+							if ($subPages) {
+							?>
+							<div class="postDescriptionCellItem_pages">
+								<ul class="wiziapp_bottom_nav wiziapp_pages_nav albums_list">
+									<?php
+										foreach ($subPages as $subPage) {
+							if ($subPage->post_parent == $post->ID) {
+										?>
+										<li>
+											<a href="<?php echo WiziappLinks::pageLink($subPage->ID); ?>">
+												<div class="album_item wiziapp_pages_item">
+													<p class="attribute text_attribute title wiziapp_pages_title"><?php echo ($subPage->post_title); ?></p>
+													<span class="rowCellIndicator"></span>
+												</div>
+											</a>
+										</li>
+										<?php
 										}
 									}
-								?>
-							</ul>
-						</div>
-						<?php
+									?>
+								</ul>
+							</div>
+							<?php
+							}
+						}
 					}
-				}
-			}
-		?>
+				?>
 
-		<h2 class="pageitem">
-			<a id="post_title" href="<?php echo $pLink ?>" rel="bookmark" title="<?php the_title(); ?>">
-				<?php the_title(); ?>
-			</a>
-		</h2>
+				<h2 class="pageitem">
+					<a id="post_title" href="<?php echo $pLink ?>" rel="bookmark" title="<?php the_title(); ?>">
+						<?php the_title(); ?>
+					</a>
+				</h2>
 
-		<div class="pageitem">
+				<div class="pageitem">
 			<?php
 				if ( isset($post->post_type) && $post->post_type === 'post' ) {
 					?>
@@ -78,80 +78,61 @@
 				if ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['upper_mask'] ) {
 					echo $wiziapp_google_adsense['code'];
 				}
-				/*
-				if ( isset($_SERVER['HTTP_UDID']) && $_SERVER['HTTP_UDID'] === 'simulator' ) {
-				?>
-				<div id="upper_adsense_mockup" class="google_adsense_mockup upper"></div>
-				<?php
-				}
-				*/
 			?>
 
-			<div class="post" id="post-<?php the_ID(); ?>">
-				<div id="singlentry">
-					<?php
-						WiziappProfiler::getInstance()->write('Before the thumb inside the post ' . $post->ID, 'theme._content');
+					<div class="post" id="post-<?php the_ID(); ?>">
+						<div id="singlentry">
+							<?php
+								WiziappProfiler::getInstance()->write('Before the thumb inside the post ' . $post->ID, 'theme._content');
 
-						@set_time_limit(60);
-						WiziappThumbnailHandler::getPostThumbnail($post, 'posts_thumb');
+								@set_time_limit(60);
+								WiziappThumbnailHandler::getPostThumbnail($post, 'posts_thumb');
 
-						WiziappProfiler::getInstance()->write('after the thumb inside the post ' . $post->ID, 'theme._content');
-						WiziappProfiler::getInstance()->write('Before the content inside the post ' . $post->ID, 'theme._content');
+								WiziappProfiler::getInstance()->write('after the thumb inside the post ' . $post->ID, 'theme._content');
+								WiziappProfiler::getInstance()->write('Before the content inside the post ' . $post->ID, 'theme._content');
 
-						global $more;
-						$more = -1;
+								global $more;
+								$more = -1;
 
-						the_content('');
+								the_content('');
 
-						WiziappProfiler::getInstance()->write('After the content inside the post ' . $post->ID, 'theme._content');
-					?>
+								WiziappProfiler::getInstance()->write('After the content inside the post ' . $post->ID, 'theme._content');
+							?>
+						</div>
+					</div>
 				</div>
-			</div>
-		</div>
-		<?php
-		if ( ! is_page() ) {
-			?>
-			<div class="clear"></div>
-			<ul class="wiziapp_bottom_nav">
 				<?php
-					WiziappTheme::getCategoriesNav();
-					WiziappTheme::getTagsNav();
-				?>
-			</ul>
-			<div class="clear"></div>
+				if ( ! is_page() ) {
+			?>
+					<div class="clear"></div>
+					<ul class="wiziapp_bottom_nav">
+						<?php
+							WiziappTheme::getCategoriesNav();
+							WiziappTheme::getTagsNav();
+						?>
+					</ul>
+					<div class="clear"></div>
 			<?php
 		}
 
 		if ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['lower_mask'] ) {
 			echo $wiziapp_google_adsense['code'];
 		}
-		/*
-		if ( isset($_SERVER['HTTP_UDID']) && $_SERVER['HTTP_UDID'] === 'simulator' ) {
-		?>
-		<div id="lower_adsense_mockup" class="google_adsense_mockup lower"></div>
-		<?php
-		}
-		*/
-		?>
-	</div>
-	<br />
-	<div id="debug" style="background-color: #c0c0c0;">
-		####AREA 51####
-		<div id="swipeme" style="height: 50px; background-color: #ccc;">
-			PLACE HOLDER
-		</div>
-		<a id="reload" href="#" onclick="top.location.reload(true)">RELOAD</a><br />
-		<a id="swipeLeft" href="cmd://event/swipeRight"></a>
-		<a id="swipeRight" href="cmd://event/swipeLeft"></a>
-	</div>
-	<?php
-		/**
-		* The link below is for handing video in the simulator, the application shows the video itself
-		* while the simulator only shows an image.
-		*/
-	?>
-	<a href="cmd://open/video" id="dummy_video_opener"></a>
-</div>
+					?>
+			</div>
+			<br />
+			<div id="debug" style="background-color: #c0c0c0;">
+				####AREA 51####
+				<div id="swipeme" style="height: 50px; background-color: #ccc;">
+					PLACE HOLDER
+				</div>
+				<a id="reload" href="#" onclick="top.location.reload(true)">RELOAD</a><br />
+				<a id="swipeLeft" href="cmd://event/swipeRight"></a>
+				<a id="swipeRight" href="cmd://event/swipeLeft"></a>
+			</div>
+			<!-- The link below is for handing video in the simulator, the application shows the video itself while the simulator only shows an image. -->
+			<a href="cmd://open/video" id="dummy_video_opener"></a>
+		</div><!-- page_content -->
 <?php
 	//wp_footer(); - no need for this
 	/**
@@ -197,6 +178,5 @@
 	window.wiziappCdn = "<?php echo WiziappConfig::getInstance()->getCdnServer(); ?>";
 	window.WIZIAPP.doLoad();
 </script>
-<?php
-	wiziapp_get_footer();
-?>
+		<?php
+			wiziapp_get_footer();

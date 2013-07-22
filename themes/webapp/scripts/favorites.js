@@ -62,7 +62,6 @@ var FavoritesPage = function(){
                             .append($data.find('.content-primary ul').html());
 
                     $page.trigger('pageshow');
-                    //resizePageContentHeight($page);
 
                     $page = $data = null;
                 });

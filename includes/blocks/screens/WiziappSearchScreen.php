@@ -124,20 +124,17 @@ class WiziappSearchScreen extends WiziappPostsScreen{
 			'message' => '',
 		);
 
-		$contents =  json_encode(array_merge(array('header' => $header),
-											array('keywords' => implode(',', $returnStrings))));
+		$contents =  json_encode(array_merge(array('header' => $header), array('keywords' => implode(',', $returnStrings))));
 
 		if (isset($_GET['callback'])){
-			WiziappLog::getInstance()->write('DEBUG', "The callback GET param set:" . $_GET["callback"] .
-										"(" . $contents . ")", "search.wiziapp_get_search_keywords");
+			WiziappLog::getInstance()->write('DEBUG', "The callback GET param set:" . $_GET["callback"] . "(" . $contents . ")", "search.wiziapp_get_search_keywords");
 			/**
 			* Support cross-domain ajax calls for web clients
 			* @todo Add a check to verify this is a web client
 			*/
 			 $contents = $_GET["callback"] . "({$contents})";
 		} else {
-			WiziappLog::getInstance()->write('WARNING', "The callback GET param is not set",
-													"remote.WiziappRequestHandler._routeContent");
+			WiziappLog::getInstance()->write('WARNING', "The callback GET param is not set", "remote.WiziappRequestHandler._routeContent");
 		}
 
 		echo $contents;

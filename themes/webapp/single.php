@@ -1,16 +1,16 @@
 <?php
-if ( have_posts() ){
+if ( have_posts() ) {
 	// ob_start();
-
 	global $post, $tabBar;
 	setup_postdata($post);
 	$tabBar = new WiziappTabbarBuilder();
 
 	$wiziapp_google_adsense = WiziappHelpers::get_adsense();
+	set_query_var('wiziapp_google_adsense_css', $wiziapp_google_adsense['css']);
 
 	// Before handing the content, make sure this post is scanned
 	$processed = get_post_meta($post->ID, 'wiziapp_processed');
-	if (empty($processed)){
+	if (empty($processed)) {
 		$ce = new WiziappContentEvents();
 		$ce->savePost($post);
 	}
@@ -73,16 +73,18 @@ if ( have_posts() ){
 						<div id="author_and_date">
 							<span class="postDescriptionCellItem_author">By
 								<a href="<?php echo WiziappLinks::authorLink($post->post_author); ?>" data-transition="slide"><?php the_author(); ?></a>
-							</span>&nbsp;<span class="postDescriptionCellItem_date"><?php echo WiziappTheme::formatDate($post->post_date); ?></span>
+							</span>
+							&nbsp;
+							<span class="postDescriptionCellItem_date"><?php echo WiziappTheme::formatDate($post->post_date); ?></span>
 						</div>
 					</div>
 					<div class="clear"></div>
 
 					<?php
-						if ( ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['upper_mask'] ) ) {
-							echo $wiziapp_google_adsense['code'];
-						}
-					 ?>
+				if ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['upper_mask'] ) {
+					echo $wiziapp_google_adsense['code'];
+				}
+			?>
 
 					<div class="post" id="post-<?php the_ID(); ?>">
 						<div id="singlentry">
@@ -107,7 +109,7 @@ if ( have_posts() ){
 				</div>
 				<?php
 				if ( ! is_page() ) {
-					?>
+			?>
 					<div class="clear"></div>
 					<ul class="wiziapp_bottom_nav">
 						<?php
@@ -116,13 +118,13 @@ if ( have_posts() ){
 						?>
 					</ul>
 					<div class="clear"></div>
-					<?php
-				}
+			<?php
+		}
 
-				if ( ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['lower_mask'] ) ) {
-					echo $wiziapp_google_adsense['code'];
-				}
-				?>
+		if ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['lower_mask'] ) {
+			echo $wiziapp_google_adsense['code'];
+		}
+					?>
 			</div>
 			<br />
 			<div id="debug" style="background-color: #c0c0c0;">
@@ -144,8 +146,8 @@ if ( have_posts() ){
 
 <?php
 	get_footer();
-}
-else{
+} else {
+	// No content???
 	get_header();
 	get_footer();
 }
