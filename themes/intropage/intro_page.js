@@ -1,24 +1,55 @@
-function wiziapp_intro_page_load(){
-	document.getElementById("download_from_store").onclick = function(event){
-		// If user choose to see Appstore URL,
-		// set Cookie to another expire date to show the message next after some months.
+var intro_page_parameters = intro_page_parameters || {};
+
+intro_page_parameters.action = function(action, url) {
+	var expiration = '';
+	if ( document.getElementById("remember").checked ) {
 		var exp_date = new Date();
-		exp_date.setDate(exp_date.getDate() + window.intro_page_parameters.delay_period);
-		document.cookie = "WIZI_SHOW_STORE_URL=1; expires=" + exp_date.toUTCString();
+		exp_date.setDate( exp_date.getDate() + this.delay_period );
+		expiration = " expires=" + exp_date.toUTCString();
+	}
+	document.cookie = "WIZI_SHOW_STORE_URL=1;" + expiration;
 
-		event.currentTarget.className								= "display_none";
-		document.getElementById("download_button_title").className	= "display_none";
-		document.getElementById("no_thanks_notation").className		= "display_none";
-		document.getElementById("title").className					= "display_none";
+	if ( typeof _gaq !== "object" ) {
+		window.location = this[url];
+		return;
+	}
 
-		document.getElementById("intro_page_postclick").className	= "display_block";
-		document.getElementById("arrow_up").className				= "display_block";
+	_gaq.push(['_trackEvent', "AndroidIntroScreen", action, this.app_id]);
 
-		window.location = window.intro_page_parameters.store_url;
+	setTimeout(function() {
+		window.location = intro_page_parameters[url];
+		}, 1000);
+};
+
+window.onload = function() {
+	document.getElementById("download_from_store").onclick = function(event) {
+		if ( intro_page_parameters.playstore_condition === "0" ) {
+			var objects_array = [
+				event.currentTarget,
+				document.getElementById("download_button_title"),
+				document.getElementById("title"),
+				document.getElementById("remember").parentNode,
+				document.getElementById("continue_to").parentNode,
+				document.getElementById("desktop_site")
+			];
+			for ( var i=0; i<objects_array.length; i++ ) {
+				if ( objects_array[i] == null ) {
+					continue;
+				}
+
+				objects_array[i].className = "display_none";
+			}
+
+			document.getElementById("android_app_download").className = "display_block";
+		}
+
+		intro_page_parameters.action("DownloadAndroidApp", "store_url");
 	};
 
-	document.getElementById("mobile_site").onclick = function(event){
-		window.location = window.intro_page_parameters.site_url;
+	document.getElementById("continue_to").onclick = function(event) {
+		intro_page_parameters.delay_period = 7;
+
+		intro_page_parameters.action("AndroidIntroScreenSkipped", "site_url");
 	};
 
 	var desktop_site = document.getElementById("desktop_site");
@@ -26,10 +57,10 @@ function wiziapp_intro_page_load(){
 		return;
 	}
 
-	desktop_site.onclick = function(event){
+	desktop_site.onclick = function(event) {
 		// Clear the Cookie
-		document.cookie = "WIZI_SHOW_STORE_URL=1; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+		intro_page_parameters.delay_period = -365;
 
-		window.location = window.intro_page_parameters.desktop_site_url;
+		intro_page_parameters.action("AndroidIntroScreenSkipped", "desktop_site_url");
 	};
-}
+};

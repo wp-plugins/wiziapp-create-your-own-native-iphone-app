@@ -4,6 +4,42 @@ class WiziappCms {
 
 	private $_wiziapp_user = 'wiziappuser';
 
+	public static function check_playstore_url() {
+		$app_id = intval(WiziappConfig::getInstance()->app_id);
+		if ( $app_id <= 0 ) {
+			return;
+		}
+
+		if ( ! empty(WiziappConfig::getInstance()->playstore_url) ) {
+			return;
+		}
+
+		$playstore_url = 'https://play.google.com/store/apps/details?id=com.wiziapp.app'.$app_id;
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $playstore_url);
+		curl_setopt($ch, CURLOPT_HEADER, FALSE);
+		curl_setopt($ch, CURLOPT_NOBODY, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_exec($ch);
+		if ( ! curl_errno($ch) ) {
+			$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		}
+		curl_close($ch);
+
+		if ( $http_code !== 200 ) {
+			return;
+		}
+
+		$is_saved = WiziappConfig::getInstance()->saveUpdate('playstore_url', $playstore_url);
+		if ( ! $is_saved ) {
+			return;
+		}
+
+		$r = new WiziappHTTPRequest();
+		$r->api(array('market_link' => $playstore_url), '/application/'. $app_id . '/updatemarketlink', 'POST');
+	}
+
 	public function activate() {
 		$profile = $this->generateProfile();
 		$blogUrl = WiziappContentHandler::getInstance()->get_blog_property('url');

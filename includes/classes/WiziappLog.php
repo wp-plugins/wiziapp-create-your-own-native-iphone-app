@@ -38,17 +38,17 @@ final class WiziappLog {
 	private $levels = array('DISABLED' => 0, 'ERROR' => 1, 'WARNING' => 2, 'DEBUG' => 3, 'INFO' => 4, 'ALL' => 5,);
 
 	/**
-	 * The file maximum size in bytes
-	 *
-	 * @var integer
-	 *
-	 */
+	* The file maximum size in bytes
+	*
+	* @var integer
+	*
+	*/
 	private $max_size = 1048576; // 1MB
 
 	/**
-	  * @var integer
-	  *
-	  */
+	* @var integer
+	*
+	*/
 	private $max_days = 10;
 
 	private $path = '';
@@ -56,18 +56,18 @@ final class WiziappLog {
 	private static $_instance = null;
 
 	/**
-	 * @static
-	 * @return WiziappLog
-	 */
-	public static function getInstance() {
-		if( is_null(self::$_instance) ) {
+	* @static
+	* @return WiziappLog
+	*/
+	public static function getInstance(){
+		if( is_null(self::$_instance) ){
 			self::$_instance = new WiziappLog();
 		}
 
 		return self::$_instance;
 	}
 
-	private function  __clone() {
+	private function  __clone(){
 		// Prevent cloning
 	}
 
@@ -77,7 +77,7 @@ final class WiziappLog {
 			$this->enabled = FALSE;
 		}
 		/*
-		if (isset(WiziappConfig::getInstance()->wiziapp_log_threshold)) {
+		if (isset(WiziappConfig::getInstance()->wiziapp_log_threshold)){
 		$this->threshold = intval(WiziappConfig::getInstance()->wiziapp_log_threshold);
 		}
 		*/
@@ -87,9 +87,9 @@ final class WiziappLog {
 		return is_writable($this->path);
 	}
 
-	public function isIIS () {
-		if (isset($_SERVER['SERVER_SOFTWARE'])) { // Microsoft-IIS/x.x (Windows xxxx)
-			if (stripos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== FALSE) {
+	public function isIIS (){
+		if (isset($_SERVER['SERVER_SOFTWARE'])){ // Microsoft-IIS/x.x (Windows xxxx)
+			if (stripos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== FALSE){
 				return true;
 			} else {
 				return false;
@@ -107,13 +107,13 @@ final class WiziappLog {
 		if(@filesize($filepath) > $this->max_size){
 			return true;
 		}else{
-		 return false;
+			return false;
 		}
 	}
 
 	private function getFileNamePrefix(){
 		$prefix = 'wiziapplog-';
-		if (function_exists('is_multisite') && is_multisite()) {
+		if (function_exists('is_multisite') && is_multisite()){
 			global $wpdb;
 			$details = get_blog_details((int) $wpdb->blogid, true);
 			$msPath = str_replace(array('/', '.', ':'), '_', $details->siteurl);
@@ -124,8 +124,7 @@ final class WiziappLog {
 		return $prefix;
 	}
 
-//    @todo Change this method to put the old file as .X and not the new, save the scanning of all the log files
-//    when adding a new message
+	// @todo Change this method to put the old file as .X and not the new, save the scanning of all the log files when adding a new message
 	private function getFilePath(){
 		$fileprefix = $this->getFileNamePrefix();
 
@@ -144,17 +143,18 @@ final class WiziappLog {
 		}
 	}
 
-	public function deleteOldFiles() {
+	public function delete_old_files(){
 		$oldest_date = mktime(0, 0, 0, date('m'), date('d') - $this->max_days, date('Y'));
-
 		$dirHandle = opendir($this->path);
-		while($file = readdir($dirHandle)){
+
+		while ( $file = readdir($dirHandle) ){
 			$fileinfo = pathinfo($file);
 			$basename = $fileinfo['basename'];
-			if(preg_match("/^wiziapplog-/", $basename)){
-				//$date = strtotime(substr($basename, strlen($this->getFileNamePrefix()), 10));
+
+			if ( preg_match("/^wiziapplog-/", $basename) ){
+				// $date = strtotime(substr($basename, strlen($this->getFileNamePrefix()), 10));
 				$date = filemtime($this->path . $fileinfo['basename']);
-				if($date <= $oldest_date){
+				if ( $date <= $oldest_date ){
 					@unlink($this->path . $fileinfo['basename']);
 				}
 			}
@@ -175,13 +175,13 @@ final class WiziappLog {
 	* @param string $component The component related to this message
 	* @return boolean success
 	*/
-	function write($level = 'error', $msg, $component='') {
+	function write($level = 'error', $msg, $component=''){
 		/**
-		 * NOTICE: Since this function is being run everywhere is, it might be run under the
-		 * an output handling method that wraps the entire content to do one last search and replace
-		 * like W3 Total Cache plugin with CDN configured, they replace the hostname with the CDN host name
-		 * From that reason, this function must never use output buffering
-		 */
+		* NOTICE: Since this function is being run everywhere is, it might be run under the
+		* an output handling method that wraps the entire content to do one last search and replace
+		* like W3 Total Cache plugin with CDN configured, they replace the hostname with the CDN host name
+		* From that reason, this function must never use output buffering
+		*/
 		@clearstatcache(); // We need to clear the cache of the file size function so that the size checks will work
 
 		if ($this->enabled === FALSE){
@@ -241,7 +241,7 @@ final class WiziappLog {
 			$sql_mode = $mysqlinfo[0]->Value;
 		}
 
-		if (empty($sql_mode)) {
+		if (empty($sql_mode)){
 			$sql_mode = 'Not Set';
 		}
 

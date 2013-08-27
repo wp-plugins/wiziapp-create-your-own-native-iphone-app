@@ -1,7 +1,7 @@
 <?php if (!defined('WP_WIZIAPP_BASE')) exit();
 /**
-* our integration with the wordpress CMS.
-* this file attaches the plugin to events in wordpress by using filters and actions
+* Our integration with the wordpress CMS.
+* This file attaches the plugin to events in wordpress by using filters and actions
 *
 * @todo Figure out which method is better, one place of inside the class like contentHandler
 *
@@ -24,12 +24,10 @@ function wiziapp_attach_hooks(){
 
 	/* Add a custom column to the users table to indicate that the user
 	* logged in from his mobile device via our app
-	* NOTE: Some plugins might not handle other plugins columns very nicely and cause the data not to show...
+	* NOTE: Some plugins might not handle other plugins columns very nicely and cause the data not to show.
 	*/
 	add_filter('manage_users_columns', array('WiziappUserList', 'column'));
 	add_filter('manage_users_custom_column', array('WiziappUserList', 'customColumn'), 10, 3);
-
-	add_filter('cron_schedules', array('WiziappCronSchedules','addSchedules'));
 
 	add_action('new_to_publish', 	 array(&$ce, 'savePost'));
 	add_action('pending_to_publish', array(&$ce, 'savePost'));
@@ -58,20 +56,13 @@ function wiziapp_attach_hooks(){
 	add_action('created_term', array(&$ce, 'updateCacheTimestampKey'));
 	add_action('edited_term',  array(&$ce, 'updateCacheTimestampKey'));
 
-	/*
-	if ( ! empty(WiziappConfig::getInstance()->settings_done) ){
-	add_action('wiziapp_daily_function_hook',   array('WiziappPush', 'daily'));
-	add_action('wiziapp_weekly_function_hook',  array('WiziappPush', 'weekly'));
-	add_action('wiziapp_monthly_function_hook', array('WiziappPush', 'monthly'));
-	}
-	*/
-
 	// The hook to avoid the Collision with the WP Super Cache
 	add_filter('supercacherewriteconditions', array('WiziappHelpers', 'add_wiziapp_condition'));
 
-	// Add "Delete Old Log Files" and "Delete Old Cache Files" daily Wordpress Cron job
-	add_action('wiziapp_daily_function_hook', array(WiziappLog::getInstance(), 'deleteOldFiles'));
+	// Add a Wiziapp daily Cron jobs
+	add_action('wiziapp_daily_function_hook', array(WiziappLog::getInstance(), 'delete_old_files'));
 	add_action('wiziapp_daily_function_hook', array(WiziappCache::getCacheInstance(), 'delete_old_files'));
+	add_action('wiziapp_daily_function_hook', array('WiziappCms', 'check_playstore_url'));
 
 	// Handle uninstallation functions
 	register_deactivation_hook(WP_WIZIAPP_BASE, array('WiziappInstaller', 'uninstall'));
@@ -86,16 +77,16 @@ function wiziapp_attach_hooks(){
 	add_action('wp_ajax_wiziapp_batch_process_finish',	array('WiziappPostInstallDisplay', 'batchProcess_Finish'));
 	add_action('wp_ajax_wiziapp_report_issue',			array('WiziappPostInstallDisplay', 'reportIssue'));
 
-    // Web App
-    $webapp_display = new WiziappWebappDisplay();
+	// Web App
+	$webapp_display = new WiziappWebappDisplay();
 	add_action('wp_ajax_wiziapp_update_handshake',		array(&$webapp_display, 'updateHandshake'));
 	add_action('wp_ajax_wiziapp_update_config',			array(&$webapp_display, 'updateConfig'));
 	add_action('wp_ajax_wiziapp_update_display',		array(&$webapp_display, 'updateDisplay'));
-    add_action('wp_ajax_wiziapp_update_effects',		array(&$webapp_display, 'updateEffects'));
+	add_action('wp_ajax_wiziapp_update_effects',		array(&$webapp_display, 'updateEffects'));
 	add_action('wp_ajax_wiziapp_update_images',			array(&$webapp_display, 'updateImages'));
-    add_action('wp_ajax_wiziapp_update_icons',			array(&$webapp_display, 'updateIcons'));
-    add_action('wp_ajax_wiziapp_update_splash',			array(&$webapp_display, 'updateSplash'));
-    add_action('wp_ajax_wiziapp_install_webapp_finish', array(&$webapp_display, 'installFinish'));
+	add_action('wp_ajax_wiziapp_update_icons',			array(&$webapp_display, 'updateIcons'));
+	add_action('wp_ajax_wiziapp_update_splash',			array(&$webapp_display, 'updateSplash'));
+	add_action('wp_ajax_wiziapp_install_webapp_finish', array(&$webapp_display, 'installFinish'));
 
 	// Upgrade
 	add_action('wp_ajax_wiziapp_upgrade_database', 		array('WiziappUpgradeDisplay', 'upgradeDatabase'));

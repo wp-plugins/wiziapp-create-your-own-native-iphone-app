@@ -17,7 +17,6 @@ class WiziappListsServices{
 		);
 
 		$categoriesLimit = WiziappConfig::getInstance()->categories_list_limit;
-
 		$pageNumber = isset($_GET['wizipage']) ? $_GET['wizipage'] : 0;
 
 		$categories = get_categories(array(
@@ -26,14 +25,16 @@ class WiziappListsServices{
 			'hide_empty' => FALSE,
 			'pad_counts' => 1,
 		));
+
 		$categoriesSummary = array();
 		foreach($categories as $category) {
 			$categoriesSummary[$category->cat_ID] = $category->cat_name;
 		}
+
 		// Get the total number of categories
 		$total = wp_count_terms('category');
 
-		echo json_encode(array('header' => $header, 'categories' => $categoriesSummary, 'total' => $total));
+		echo json_encode( array( 'header' => $header, 'categories' => $categoriesSummary, 'total' => $total, 'list_limit' => $categoriesLimit, ) );
 	}
 
 	public function tags(){
@@ -61,7 +62,7 @@ class WiziappListsServices{
 		// Get the total number of tags
 		$total = wp_count_terms('post_tag');
 
-		echo json_encode(array('header' => $header, 'tags' => $tagsSummary, 'total' => $total));
+		echo json_encode( array( 'header' => $header, 'tags' => $tagsSummary, 'total' => $total, 'list_limit' => $tagsLimit, ) );
 	}
 
 	public function authors(){
@@ -92,7 +93,7 @@ class WiziappListsServices{
 			$authorsSummary[$author->author_id] = $author->name;
 		}
 
-		echo json_encode(array('header' => $header, 'authors' => $authorsSummary, 'total' => count($authorsSummary)));
+		echo json_encode( array( 'header' => $header, 'authors' => $authorsSummary, 'total' => count($authorsSummary), 'list_limit' => $authorsLimit, ) );
 	}
 
 	public function pages(){
@@ -118,7 +119,7 @@ class WiziappListsServices{
 		// Get the total number of pages
 		$total  = wp_count_posts( 'page' );
 
-		echo json_encode( array( 'header' => $header, 'pages' => $pagesSummary, 'total' => $total->publish, ) );
+		echo json_encode( array( 'header' => $header, 'pages' => $pagesSummary, 'total' => $total->publish, 'list_limit' => $pagesLimit, ) );
 	}
 
 	public function links(){
@@ -145,6 +146,6 @@ class WiziappListsServices{
 		// Get the total number of pages
 		$total  = WiziappDB::getInstance()->get_links_count();
 
-		echo json_encode(array('header' => $header, 'links' => $linksSummary, 'total'=>$total));
+		echo json_encode( array( 'header' => $header, 'links' => $linksSummary, 'total' => $total, 'list_limit' => $linksLimit, ) );
 	}
 }

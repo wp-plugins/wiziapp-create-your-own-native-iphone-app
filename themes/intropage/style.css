@@ -16,22 +16,13 @@ div{
 }
 p{
 	text-align: center;
-	font-weight: bold;
 	font-size: 14px;
-}
-#intro_page_postclick{
-	width: 180px;
-	margin: 0 auto 120px auto;
-	padding: 0 0 0 62px;
-	background: url(v_mark.png) no-repeat;
-	text-align: left;
-	color: #000000;
 }
 #download_from_store{
 	width: 320px;
-	margin: 14px auto 70px auto;
+	margin: 14px auto 14px auto;
 }
-#mobile_site{
+div.mobile_site_button{
 	background-image: url(mobile_site.png);
 	width: 245px;
 	height: 49px;
@@ -64,11 +55,40 @@ img.intro_page_arrow{
 	font-weight: bold;
 	line-height: 274%;
 }
-#arrow_up{
+#android_app_download{
 	display: none;
-	height: 104px;
-	margin: 0 0 6px 10px;
-	background: url(arrow_up.png) no-repeat;
+}
+#android_app_download div, #android_app_download div p{
+	text-align: left;
+}
+#android_app_download div.first_child{
+	background: url(first.png) no-repeat;
+}
+#android_app_download div p:first-child{
+	font-weight: bold;
+}
+#android_app_download div.second_child{
+	background: url(second.png) no-repeat;
+}
+#android_app_download div.first_child, #android_app_download div.second_child{
+	margin: 30px 30px 0 30px;
+	padding: 10px 0 0 75px;
+}
+#android_app_download div.third_child{
+	height: 38px;
+	margin: 0 0 0 104px;
+	padding: 5px 0 0 0;
+	background: url(DownloadSymbol.png) no-repeat;
+}
+#android_app_download div.third_child p{
+	margin: 0 0 0 38px;
+	color: #FFF;
+}
+#android_app_download div.third_child p:last-child{
+	font-size: 10px;
+}
+#android_app_download div.fourth_child{
+	padding: 0 30px;
 }
 #desktop_site{
 	width: 114px;

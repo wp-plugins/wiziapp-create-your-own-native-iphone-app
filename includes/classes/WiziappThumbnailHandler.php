@@ -29,17 +29,16 @@ class WiziappThumbnailHandler{
 		@include_once(ABSPATH . 'wp-includes/post-thumbnail-template.php');
 
 		if ( function_exists('get_the_post_thumbnail') ) {
-			// First we try to get the wordpress post thumbnail.
-			WiziappLog::getInstance()->write('INFO', "The blog supports post thumbnails (get_the_post_thumbnail method exists)", "WiziappThumbnailHandler.doPostThumbnail");
+			// First we try to get the Featured Image (formerly known as Post Thumbnail)
 			if ( has_post_thumbnail($this->post) ) {
-				$foundImage = $this->_tryWordpressThumbnail();
+				$foundImage = $this->_try_featured_image();
 			}
 		} else {
 			WiziappLog::getInstance()->write('WARNING', "get_the_post_thumbnail method does not exists", "wiziapp_doPostThumbnail");
 		}
 
 		if ( ! $foundImage) {
-			// If no wordpress thumbnail, we take the thumb from a gallery.
+			// If no a Featured Image (formerly known as Post Thumbnail), we take the thumb from a gallery.
 			$foundImage = $this->_tryGalleryThumbnail();
 		}
 
@@ -61,21 +60,20 @@ class WiziappThumbnailHandler{
 		header("HTTP/1.0 404 Not Found");
 	}
 
-	private function _tryWordpressThumbnail() {
-		$post_thumbnail_id = get_post_thumbnail_id($this->post);
+	private function _try_featured_image() {
+		$featured_image_id = get_post_thumbnail_id($this->post);
 		$wpSize = array(
 			$this->size['width'],
 			$this->size['height'],
 		);
-		$image = wp_get_attachment_image_src($post_thumbnail_id, $wpSize);
-		WiziappLog::getInstance()->write('INFO', "Got WP FEATURED IMAGE thumbnail id: {$post_thumbnail_id} attachment: {$image[0]} for post: {$this->post}", "WiziappThumbnailHandler._tryWordpressThumbnail");
-		//$image = wp_get_attachment_image_src($post_thumbnail_id);
-		$showedImage = $this->_processImageForThumb($image[0]);
+		$image = wp_get_attachment_image_src($featured_image_id, $wpSize);
+		WiziappLog::getInstance()->write('INFO', "Got WP FEATURED IMAGE thumbnail id: {$featured_image_id} attachment: {$image[0]} for post: {$this->post}", "WiziappThumbnailHandler._try_featured_image");
+		$showedImage = $this->_processImageForThumb($image[0], FALSE);
 
 		if ($showedImage) {
-			WiziappLog::getInstance()->write('INFO', "Found and will use WP FEATURED IMAGE thumbnail: {$image[0]} for post: {$this->post}", "WiziappThumbnailHandler._tryWordpressThumbnail");
+			WiziappLog::getInstance()->write('INFO', "Found and will use WP FEATURED IMAGE thumbnail: {$image[0]} for post: {$this->post}", "WiziappThumbnailHandler._try_featured_image");
 		} else {
-			WiziappLog::getInstance()->write('INFO', "Will *NOT* use WP FEATURED IMAGE thumbnail for post: {$this->post}", "WiziappThumbnailHandler._tryWordpressThumbnail");
+			WiziappLog::getInstance()->write('INFO', "Will *NOT* use WP FEATURED IMAGE thumbnail for post: {$this->post}", "WiziappThumbnailHandler._try_featured_image");
 		}
 
 		return $showedImage;
@@ -145,7 +143,7 @@ class WiziappThumbnailHandler{
 		return FALSE;
 	}
 
-	private function _processImageForThumb($src) {
+	private function _processImageForThumb($src, $check_size = TRUE) {
 		if ( empty($src) ) {
 			return FALSE;
 		}
@@ -154,12 +152,13 @@ class WiziappThumbnailHandler{
 		$image->load();
 		$width  = intval($image->getNewWidth());
 		$height = intval($image->getNewHeight());
-		$not_passed =
-		empty($width) || empty($height) ||
-		( $width  < $this->_thumb_min_size ) ||
-		( $height < $this->_thumb_min_size ) ||
-		( $width  < ($this->size['width']  * 0.8) ) ||
-		( $height < ($this->size['height'] * 0.8) );
+
+		$not_passed = $check_size && (
+			empty($width) || empty($height) ||
+			( $width  < $this->_thumb_min_size ) ||
+			( $height < $this->_thumb_min_size ) ||
+			( $width  < ($this->size['width']  * 0.8) ) ||
+			( $height < ($this->size['height'] * 0.8) ) );
 		if ($not_passed) {
 			return FALSE;
 		}

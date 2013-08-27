@@ -58,8 +58,8 @@
 * @property string  $playstore_url
 * @property string  $apk_file_url
 * @property string  $android_app_version
+* @property boolean  $android_app_updated
 * @property boolean $app_live
-* @property integer $appstore_url_timeout
 * @property boolean $allow_grouped_lists
 * @property boolean $zebra_lists
 * @property string  $wiziapp_theme_name
@@ -98,14 +98,12 @@
 * @property array   $admob
 * @property array   $analytics
 */
-// As long as we are supporting php < 5.3 we shouldn't extent the singleton class
-//class WiziappConfig extends WiziappSingleton implements WiziappIInstallable{
 class WiziappConfig implements WiziappIInstallable{
 
 	private $options = array();
 	private $saveAsBulk = FALSE;
 	private $name = 'wiziapp_settings';
-	private $internalVersion =  68;
+	private $internalVersion =  69;
 	private static $_instance = null;
 
 	public $integer_values = array(
@@ -150,11 +148,11 @@ class WiziappConfig implements WiziappIInstallable{
 		* This is depended per version, each version might remove or add values...
 		*/
 		// Add here the keys to reset to the default value;
-		$resetOptions = array( 'adsense', 'thumb_min_size', );
+		$resetOptions = array();
 		// Add here the keys add with the default value, if they don't already exists;
-		$addOptions = array( 'admob', 'analytics', );
+		$addOptions = array( 'android_app_updated', );
 		// Add here the keys to remove from the options array;
-		$removeOptions = array();
+		$removeOptions = array( 'appstore_url_timeout', );
 
 		$newDefaults = $this->getDefaultConfig();
 		foreach($addOptions as $optionName) {
@@ -173,9 +171,6 @@ class WiziappConfig implements WiziappIInstallable{
 
 		// save the updated options
 		$this->options['options_version'] = $this->internalVersion;
-
-		// Delete the wiziapp_cache directory of the Wiziapp plugin old version if exist yet
-		WiziappInstaller::temporal_delete();
 
 		return $this->save();
 	}
@@ -222,6 +217,10 @@ class WiziappConfig implements WiziappIInstallable{
 	}
 
 	public function __get($option) {
+		if ( $option === 'playstore_url' ) {
+			return $this->_proper_playstore_url();
+		}
+
 		$value = null;
 
 		if ( isset($this->options[$option]) ) {
@@ -253,6 +252,10 @@ class WiziappConfig implements WiziappIInstallable{
 			array_key_exists($option, $this->options)
 		);
 		if ( $is_proper_condition ) {
+			if ( $option === 'android_app_version' && version_compare( $value, $this->android_app_version, '>' ) ) {
+				$this->saveUpdate('android_app_updated', TRUE);
+			}
+
 			$this->options[$option] = $value;
 			$this->save();
 			// If the value is the same it will not be updated but thats still ok.
@@ -294,14 +297,18 @@ class WiziappConfig implements WiziappIInstallable{
 
 	public function getImageSize($type) {
 		if ( ! isset($this->options[$type . '_width']) || ! isset($this->options[$type . '_height']) ) {
-			throw new WiziappUnknownType('Clone is not allowed.');
+			WiziappLog::getInstance()->write('ERROR', '! isset($this->options[$type . \'_width\']) || ! isset($this->options[$type . \'_height\'])', 'WiziappConfig::getImageSize');
+
+			return array(
+				'width'  => 50,
+				'height' => 50,
+			);
 		}
 
-		$size = array(
-			'width' => $this->options[$type . '_width'],
+		return array(
+			'width'  => $this->options[$type . '_width'],
 			'height' => $this->options[$type . '_height'],
 		);
-		return $size;
 	}
 
 	public function getScreenTitle($screen) {
@@ -464,7 +471,7 @@ class WiziappConfig implements WiziappIInstallable{
 			'playstore_url' => '',
 			'apk_file_url' => '',
 			'android_app_version' => '',
-			'appstore_url_timeout' => 1, //How many days will pass before we will show the user the "download app from appstore" confirmation alert again, 0 will make it not display at all
+			'android_app_updated' => FALSE,
 			'email_verified' => FALSE,
 			'verify_email_notice' => TRUE,
 			'install_notice_showed' => FALSE,
@@ -496,5 +503,26 @@ class WiziappConfig implements WiziappIInstallable{
 		);
 
 		return array_merge($settings, $envSettings);
+	}
+
+	private function _proper_playstore_url() {
+		if ( empty($this->options['playstore_url']) ) {
+			return '';
+		}
+
+		$app_id = intval($this->app_id);
+		if ( $app_id <= 0 ) {
+			return '';
+		}
+
+		$proper_url = 'https://play.google.com/store/apps/details?id=com.wiziapp.app'.$app_id;
+
+		if ( $this->options['playstore_url'] !== $proper_url ) {
+			$this->options['playstore_url'] = '';
+			$this->save();
+			return '';
+		}
+
+		return $proper_url;
 	}
 }
