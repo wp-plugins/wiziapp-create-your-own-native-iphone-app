@@ -50,13 +50,6 @@ class WiziappWebappDisplay{
 		$ch = new WiziappContentEvents();
 		$ch->updateCacheTimestampKey();
 
-		/*
-		// On upgrade from v2.0.3 to v2.0.4 only need additional process, create the APK file
-		// as the APK file creation could not be performed by Admin version before v2.0.4.
-		$r = new WiziappHTTPRequest();
-		$r->api(array(), '/generator/saveOnUpgrade?app_id='.WiziappConfig::getInstance()->app_id, 'POST');
-		*/
-
 		$this->_returnResults('success', 'success');
 	}
 
@@ -340,10 +333,9 @@ class WiziappWebappDisplay{
 				var try_again_message = "Connection error, please try again.";
 				var retry_button;
 				var progressTimer = null;
-				var progressWait = 65;
+				var progressWait = 30;
 				var step_number = 0;
 				var retry_amount = 0;
-				var backward_stopwatch;
 				var recycle_start_time = 0;
 				var update_steps = ['handshake', 'config', 'display', 'effects', 'images', 'icons', 'splash'];
 				var update_msg = [
@@ -421,20 +413,7 @@ class WiziappWebappDisplay{
 
 					// Start sending requests to generate content till we are getting a flag showing we are done
 					current_progress_label = $("#current_progress_label");
-					stopwatch = progressWait;
-					var intervalID = window.setInterval(function(){
-						--stopwatch;
-						if ( stopwatch > ( progressWait - 5 ) ) {
-							return;
-						}
-
-						current_progress_label.text(stopwatch);
-						}, 1000);
-					setTimeout(function(){
-						clearInterval(intervalID);
-						current_progress_label.text("Continue...");
-						startProcessing();
-						}, 1000 * progressWait);
+					startProcessing();
 				});
 
 				function startProcessing(){
@@ -614,7 +593,7 @@ class WiziappWebappDisplay{
 			<p id="wizi_be_patient" class="text_label"><?php echo __('Please be patient while we activate your mobile App. It may take several minutes.', 'wiziapp');?></p>
 			<div id="wizi_icon_wrapper">
 				<div id="wizi_icon_processing"></div>
-				<div id="current_progress_label" class="text_label"><?php echo __('Initializing... Please wait.', 'wiziapp'); ?></div>
+				<div id="current_progress_label" class="text_label"><?php echo __('Initializing...', 'wiziapp'); ?></div>
 			</div>
 			<div id="main_progress_bar_container">
 				<div id="main_progress_bar"></div>

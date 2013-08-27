@@ -197,7 +197,7 @@ class WiziappPluginCompatibility {
 			'Phone.*Windows.*IEMobile',
 			'Phone.*IEMobile.*Windows',
 		);
-		$config = & w3_instance('W3_Config');
+		$config = w3_instance('W3_Config');
 		$groups = $config->get_array('mobile.rgroups');
 		if (isset($groups['wiziapp'])) {
 			$group = $groups['wiziapp'];
@@ -234,7 +234,7 @@ class WiziappPluginCompatibility {
 		if (!function_exists('w3_instance')) {
 			return false;
 		}
-		$config = & w3_instance('W3_Config');
+		$config = w3_instance('W3_Config');
 		$minify = $config->get_boolean('minify.enabled');
 		$minify_manual = !$config->get_boolean('minify.auto');
 		if (!$minify || ($minify_manual && !$config->get_boolean('minify.js.enabled'))) {

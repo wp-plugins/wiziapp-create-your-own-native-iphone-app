@@ -11,7 +11,7 @@ class WiziappAdminDisplay {
 	* For a fully installed app we show a full menu,
 	* but until then way make things more complicated for the user.
 	*/
-	public function setup(){
+	public static function setup(){
 		$configured = WiziappConfig::getInstance()->settings_done;
 
 		if ( isset($_GET['wiziapp_configured']) && $_GET['wiziapp_configured'] == 1 ){
@@ -90,7 +90,7 @@ class WiziappAdminDisplay {
 		self::includeGeneralDisplay('myAccount');
 	}
 
-	function appInfoDisplay(){
+	public static function appInfoDisplay(){
 		self::includeGeneralDisplay('appInfo', TRUE);
 	}
 

@@ -11,13 +11,11 @@
 * @subpackage Database
 * @author comobix.com plugins@comobix.com
 */
-// As long as we are supporting php < 5.3 we shouldn't extent the singleton class
-//class WiziappDB extends WiziappSingleton implements WiziappIInstallable{
 class WiziappDB implements WiziappIInstallable{
 
 	private $media_table = 'wiziapp_content_media';
 	private $user_table = 'wiziapp_user_info';
-	private $internal_version = '0.25';
+	private $internal_version = '0.26';
 	private static $_instance = null;
 
 	/**

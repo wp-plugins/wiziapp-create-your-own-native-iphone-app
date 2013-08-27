@@ -43,13 +43,9 @@ class WiziappInstaller{
 		// Create the Wiziapp plugin directories
 		self::create_wiziapp_directories();
 
-		// Register tasks
 		if ( ! wp_next_scheduled('wiziapp_daily_function_hook') ) {
-			wp_schedule_event(time(), 'daily', 'wiziapp_daily_function_hook' );
-			/*
-			wp_schedule_event(time(), 'weekly', 'wiziapp_weekly_function_hook' );
-			wp_schedule_event(time(), 'monthly', 'wiziapp_monthly_function_hook' );
-			*/
+			// Register Wiziapp cron job
+			wp_schedule_event(time(), 'daily', 'wiziapp_daily_function_hook');
 		}
 
 		// Activate the blog with the global services
@@ -62,28 +58,16 @@ class WiziappInstaller{
 		*/
 	}
 
-	public static function temporal_delete(){
-		// Delete the wiziapp_cache directory of the Wiziapp plugin old version if exist yet
-		$uploads_dir = wp_upload_dir();
-		self::_delete($uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_cache');
-	}
-
 	protected static function doUninstall(){
 		$uploads_dir = wp_upload_dir();
 		// Delete the wiziapp_data_files directory of the Wiziapp plugin current version
 		self::_delete($uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_data_files');
-		// Delete the wiziapp_cache directory of the Wiziapp plugin old version if exist yet
-		self::_delete($uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_cache');
 
 		WiziappDB::getInstance()->uninstall();
 		WiziappPluginCompatibility::getInstance()->uninstall();
 
-		// Remove scheduled tasks
+		// Remove Wiziapp cron job
 		wp_clear_scheduled_hook('wiziapp_daily_function_hook');
-		/*
-		wp_clear_scheduled_hook('wiziapp_weekly_function_hook');
-		wp_clear_scheduled_hook('wiziapp_monthly_function_hook');
-		*/
 
 		// Deactivate the blog with the global services
 		try{

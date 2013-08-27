@@ -130,58 +130,6 @@ class WiziappPush {
 		$r->api($request, '/push', 'POST');
 	}
 
-	/*
-	public static function intervalPush($period, $period_text) {
-	if ( ! WiziappConfig::getInstance()->notify_on_new_post ) {
-	return;
-	}
-
-	if ( ! WiziappConfig::getInstance()->aggregate_notifications || WiziappConfig::getInstance()->notify_periods != $period ) {
-	return;
-	}
-
-	if ( ! isset(WiziappConfig::getInstance()->counters) ) {
-	// We don't have any counters in place yet, no need to run
-	return;
-	}
-
-	if ( WiziappConfig::getInstance()->counters['posts'] == 0 ) {
-	return;
-	}
-
-	$sound = WiziappConfig::getInstance()->trigger_sound;
-	$badge = (WiziappConfig::getInstance()->show_badge_number) ? WiziappConfig::getInstance()->counters['posts'] : 0;
-	$users = 'all';
-	$request = array(
-	'type' => 1,
-	'sound' => $sound,
-	'badge' => $badge,
-	'users' => $users,
-	);
-
-	if ( WiziappConfig::getInstance()->show_notification_text ) {
-	$request['content'] = urlencode(stripslashes(WiziappConfig::getInstance()->counters['posts'].__(' new posts published ', 'wiziapp').$period_text));
-	$tabId = WiziappConfig::getInstance()->main_tab_index;
-	$request['params'] = "{\"tab\": \"{$tabId}\"}";
-	}
-
-	// reset the counter
-	WiziappConfig::getInstance()->counters['posts'] = 0;
-	}
-
-	public static function daily() {
-	self::intervalPush('day', __('today', 'wiziapp'));
-	}
-
-	public static function weekly() {
-	self::intervalPush('week', __('this week', 'wiziapp'));
-	}
-
-	public static function monthly() {
-	self::intervalPush('month', __('this month', 'wiziapp'));
-	}
-	*/
-
 	/**
 	* load user push settings
 	*
@@ -242,19 +190,16 @@ class WiziappPush {
 	}
 
 	public static function isArrayPartInArray($needleArray = array(), $haystack = array(), $strict = false) {
-		if (!is_array($needleArray)) {
-			WiziappLog::getInstance()->write('INFO', "needleArray not an array: $needleArray", 'WiziappPush.isArrayPartInArray');
+		if ( ! is_array($needleArray) || ! is_array($haystack) ) {
 			return false;
 		}
-		if (!is_array($haystack)) { //was a bug with $needleArray. added this on the way.
-			WiziappLog::getInstance()->write('INFO', "haystack not an array: $haystack", 'WiziappPush.isArrayPartInArray');
-			return false;
-		}
+
 		foreach ($needleArray as $needle) {
 			if (in_array($needle, $haystack, $strict)) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 }

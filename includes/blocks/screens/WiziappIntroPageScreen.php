@@ -8,6 +8,7 @@ class WiziappIntroPageScreen{
 			return;
 		}
 
+		$is_android_device = FALSE;
 		$is_update = isset($_GET['update-application']) && $_GET['update-application'] === '1';
 
 		switch ( $_GET['device'] ) {
@@ -18,16 +19,19 @@ class WiziappIntroPageScreen{
 				$delay_period = 30*6;
 				break;
 			case 'android':
+				$is_android_device = TRUE;
+				$playstore_condition = ! empty(WiziappConfig::getInstance()->playstore_url);
 				$download_text = $is_update ? 'A new version of our App is now available,<br>would you like to download it now?' : 'Get the ultimate Android experience<br>with our new App!';
+				$download_note = ( isset($_GET['gingerbread']) && $_GET['gingerbread'] === '1' ) ? 'In order to allow installation of non-Market application Go to settings > Applications and allow the "Unknown source"' : 'In order to allow installation of apps from sources other than the play store please Go to settings > security and allow the "Unknown source"';
 
-				if ( empty(WiziappConfig::getInstance()->playstore_url) ) {
-					$button_image = 'android.png';
-					$store_url = WiziappConfig::getInstance()->apk_file_url;
-					$delay_period = 30;
-				} else {
+				if ($playstore_condition) {
 					$button_image = 'playstore.png';
 					$store_url = WiziappConfig::getInstance()->playstore_url;
 					$delay_period = 30*6;
+				} else {
+					$button_image = 'android.png';
+					$store_url = WiziappConfig::getInstance()->apk_file_url;
+					$delay_period = 30;
 				}
 				break;
 		}
@@ -95,11 +99,6 @@ class WiziappIntroPageScreen{
 				}
 
 				break;
-		}
-
-		if ( $response !== '' ) {
-			setcookie('WIZI_SHOW_STORE_URL', 1, time()+(60*60*24*7));
-			$_SESSION['wizi_intro_page_shown'] = '1';
 		}
 
 		echo $response;

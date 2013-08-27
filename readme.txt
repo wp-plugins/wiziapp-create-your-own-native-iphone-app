@@ -3,7 +3,7 @@ Contributors: wiziapp
 Tags: mobile, iphone, android, Mobile app, mobile theme, HTML5 app, web app, webapp, smartphones, wptouch, adsense for mobile
 Requires at least: 3.3
 Tested up to: 3.5
-Stable tag: v2.0.7a
+Stable tag: v2.0.8a
 License: GPLv2
 
 Create your own free HTML5 mobile App for iPhone, Android and WP8 users. Publish your App as a native App to the App Store and Google Play Market!
@@ -224,6 +224,11 @@ Yes, you can use adsense and enjoy all the revenues, WiziApp take no cut of your
 10. Select Sharing Options for your mobile App
 
 == Changelog ==
+
+= 2.0.8 =
+
+- New Android App version - Important bug fixes and performance improvements, please upload a new APK version to the Google Play Android market, [see how](http://www.wiziapp.com/blog/guides-tutorials/updating-your-android-app/).
+- Improved plugin control panel interface..
 
 = 2.0.7 =
 

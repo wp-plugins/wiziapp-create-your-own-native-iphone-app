@@ -143,7 +143,7 @@ window.WIZIAPP = (function($){
 				clickSkip = true;
 				setTimeout(function() {
 					clickSkip = false;
-				}, 200);
+					}, 200);
 				e.stopPropagation();
 				e.preventDefault();
 				swipeImage($(this), "left");
@@ -152,7 +152,7 @@ window.WIZIAPP = (function($){
 				clickSkip = true;
 				setTimeout(function() {
 					clickSkip = false;
-				}, 200);
+					}, 200);
 				e.stopPropagation();
 				e.preventDefault();
 				swipeImage($(this), "right");
@@ -171,6 +171,8 @@ window.WIZIAPP = (function($){
 		},
 
 		condition_for_intro_page: function(){
+			var gingerbread = "";
+
 			var is_not_passed =
 			typeof navigator !== "object" || typeof navigator.userAgent !== "string" ||
 			wiziapp_name_space.home_url == '';
@@ -184,6 +186,10 @@ window.WIZIAPP = (function($){
 				device_type = "iphone";
 			} else if ( navigator.userAgent.search(/Android/i) > -1 ){
 				device_type = "android";
+
+				if ( navigator.userAgent.search(/gingerbread/i) > -1 ){
+					gingerbread = "&gingerbread=1";
+				}
 			}
 			if ( device_type === "" ){
 				return;
@@ -205,7 +211,7 @@ window.WIZIAPP = (function($){
 						return;
 					}
 
-					window.location.href = wiziapp_name_space.home_url + "/?wiziapp/intropage/screen&device=" + device_type + "&" + response_text;
+					window.location.href = wiziapp_name_space.home_url + "/?wiziapp/intropage/screen&device=" + device_type + "&" + response_text + gingerbread;
 				}
 			});
 		}
