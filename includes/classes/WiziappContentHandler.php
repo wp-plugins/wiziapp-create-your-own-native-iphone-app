@@ -229,7 +229,7 @@ class WiziappContentHandler {
 	*/
 	function getNewURL($url) {
 		$styling_page_links = '';
-		if (preg_match('!&page=\d+!is', $url, $match)) {
+		if (preg_match('@&page=\d+@is', $url, $match)) {
 			$styling_page_links = $match[0];
 		}
 
@@ -241,16 +241,9 @@ class WiziappContentHandler {
 			} elseif ($post->post_type == 'post') {
 				return WiziappLinks::postLink($post_id, $styling_page_links);
 			}
-		} else {
+		} elseif ( strpos($url, '.png') !== FALSE || strpos($url, '.gif') !== FALSE || strpos($url, '.jpg') !== FALSE || strpos($url, '.jpeg') !== FALSE ) {
 			// If it is an image, convert to open image
-			if (
-				strpos($url, '.png') !== FALSE ||
-				strpos($url, '.gif') !== FALSE ||
-				strpos($url, '.jpg') !== FALSE ||
-				strpos($url, '.jpeg') !== FALSE
-			) {
-				return WiziappLinks::linkToImage($url);
-			}
+			return WiziappLinks::linkToImage($url);
 		}
 
 		return $url;
@@ -812,7 +805,7 @@ class WiziappContentHandler {
 			}
 
 			if ( empty($info['imageURL'])) {
-			$style = '';
+				$style = '';
 			} else {
 				$style = "background-image: url({$this->_getAdminImagePath()}{$info['imageURL']}.png);";
 			}
@@ -900,14 +893,14 @@ class WiziappContentHandler {
 			} else {
 				?>
 				<div class="<?php echo $url_parts[4]; ?>_wrapper data-wiziapp-iphone-support">
-				<?php
-				if ( $this->isHTML() ) {
-					?>
-					<div class="iframe_protect_screen" style="position: absolute;" data-video-url="<?php echo $this->_blog_properties['url'].'/?wiziapp/content/video/'.$video['id'].WiziappLinks::getAppend(); ?>"></div>
 					<?php
-				}
-				 echo wp_oembed_get( $video_url.$url_parts[5], array('width' => 300, ) );
-				?>
+					if ( $this->isHTML() ) {
+						?>
+						<div class="iframe_protect_screen" style="position: absolute;" data-video-url="<?php echo $this->_blog_properties['url'].'/?wiziapp/content/video/'.$video['id'].WiziappLinks::getAppend(); ?>"></div>
+						<?php
+					}
+					echo wp_oembed_get( $video_url.$url_parts[5], array('width' => 300, ) );
+					?>
 				</div>
 				<?php
 			}

@@ -29,7 +29,7 @@ class WiziappPush {
 			return;
 		}
 
-		if ( ! isset($post->post_status) || strtolower($post->post_status) !== 'publish' ){
+		if ( ! isset($post->post_status) || strtolower($post->post_status) !== 'publish' || strtolower($_POST['original_publish']) !== 'publish' ){
 			// This is not the Publish or just Update event from the Post or Page Edit Form or this is drafts or the scheduled publish
 			WiziappLog::getInstance()->write('INFO', 'This is not the Publish or just Update event from the Post or Page Edit Form or this is drafts or the scheduled publish', 'WiziappPush.publishPost');
 			return;
