@@ -14,10 +14,7 @@
 
 		<link rel="stylesheet" href="<?php echo $wiziapp_plugin_url; ?>/themes/intropage/style.css" type="text/css" />
 
-		<?php
-		$this->_get_javascript($wiziapp_plugin_url);
-		?>
-
+		<script type="text/javascript" src="<?php echo $wiziapp_plugin_url.'/themes/intropage/intro_page.js'; ?>"></script>
 		<script type="text/javascript">
 			var intro_page_parameters = intro_page_parameters || {};
 

@@ -103,17 +103,4 @@ class WiziappIntroPageScreen{
 
 		echo $response;
 	}
-
-	private function _get_javascript($wiziapp_plugin_url) {
-		wp_register_script(
-			'intropage',
-			$wiziapp_plugin_url.'/themes/intropage/intro_page.js',
-			array(),
-			WIZIAPP_P_VERSION,
-			FALSE
-		);
-
-		wp_enqueue_script('intropage');
-		wp_head();
-	}
 }

@@ -103,7 +103,7 @@ class WiziappConfig implements WiziappIInstallable{
 	private $options = array();
 	private $saveAsBulk = FALSE;
 	private $name = 'wiziapp_settings';
-	private $internalVersion =  69;
+	private $internalVersion =  70;
 	private static $_instance = null;
 
 	public $integer_values = array(
@@ -150,9 +150,9 @@ class WiziappConfig implements WiziappIInstallable{
 		// Add here the keys to reset to the default value;
 		$resetOptions = array();
 		// Add here the keys add with the default value, if they don't already exists;
-		$addOptions = array( 'android_app_updated', );
+		$addOptions = array();
 		// Add here the keys to remove from the options array;
-		$removeOptions = array( 'appstore_url_timeout', );
+		$removeOptions = array();
 
 		$newDefaults = $this->getDefaultConfig();
 		foreach($addOptions as $optionName) {
