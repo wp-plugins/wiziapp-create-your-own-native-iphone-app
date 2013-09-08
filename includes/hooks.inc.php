@@ -42,9 +42,7 @@ function wiziapp_attach_hooks(){
 		add_filter('wp_die_handler', array(&$comment_screen, 'set_error_function'), 1);
 	}
 
-	if ( ! empty(WiziappConfig::getInstance()->settings_done) || ! empty(WiziappConfig::getInstance()->playstore_url) ){
-		add_action( 'wp_insert_post', array( 'WiziappPush', 'create_push_notification' ), 10, 2 );
-	}
+	add_action( 'wp_insert_post', array( 'WiziappPush', 'create_push_notification' ), 10, 2 );
 
 	add_action( 'edit_post', array( &$ce, 'updateCacheTimestampKey' ) );
 
