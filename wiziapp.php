@@ -25,15 +25,22 @@ if ( ! defined('WP_WIZIAPP_BASE') ) {
 	define('WIZIAPP_VERSION', 'v2.0.9a');   // MAKE SURE TO UPDATE BOTH THIS AND THE UPPER VALUE
 	define('WIZIAPP_P_VERSION', '2.0.9');   // The platform version
 
-	if ( version_compare(PHP_VERSION, "5.2", ">=") && version_compare(get_bloginfo("version"), "3.3", ">=") ) {
+	$wiziapp_plugin_supported = array(
+		'php_version' => '5.2',
+		'wp_version' => '3.3',
+	);
+
+	if ( version_compare(PHP_VERSION, $wiziapp_plugin_supported['php_version'], '<') ) {
+		if  ( is_admin() ) {
+			register_shutdown_function('wiziapp_shutdownWrongPHPVersion', $wiziapp_plugin_supported['php_version']);
+		}
+	} elseif ( version_compare(get_bloginfo("version"), $wiziapp_plugin_supported['wp_version'], '<') ) {
+		if  ( is_admin() ) {
+			register_shutdown_function('wiziapp_shutdownWrongWPVersion', $wiziapp_plugin_supported['wp_version']);
+		}
+	} else {
 		include dirname (__FILE__) . "/includes/blocks.inc.php";
 		include dirname (__FILE__) . "/includes/hooks.inc.php";
-	} elseif ( is_admin() ) {
-		if ( ! version_compare (PHP_VERSION, "5.2", ">=") ) {
-			register_shutdown_function('wiziapp_shutdownWrongPHPVersion');
-		} elseif ( ! version_compare(get_bloginfo("version"), "3.3", ">=") ) {
-			register_shutdown_function('wiziapp_shutdownWrongWPVersion');
-		}
 	}
 } else {
 	function wiziapp_getDuplicatedInstallMsg() {
@@ -45,14 +52,14 @@ if ( ! defined('WP_WIZIAPP_BASE') ) {
 	die(wiziapp_getDuplicatedInstallMsg());
 }
 
-function wiziapp_shutdownWrongPHPVersion() {
+function wiziapp_shutdownWrongPHPVersion($php_version) {
 	?>
-		<script type="text/javascript">alert("<?php echo __('You need PHP version 5.2 or higher to use the WiziApp plugin.', 'wiziapp');?>")</script>
+	<script type="text/javascript">alert("<?php echo __('You need PHP version '.$php_version.' or higher to use the WiziApp plugin.', 'wiziapp'); ?>")</script>
 	<?php
 }
 
-function wiziapp_shutdownWrongWPVersion() {
+function wiziapp_shutdownWrongWPVersion($wp_version) {
 	?>
-		<script type="text/javascript">alert("<?php echo __('You need WordPress® 2.8.4 or higher to use the WiziApp plugin.', 'wiziapp');?>")</script>
+	<script type="text/javascript">alert("<?php echo __('You need WordPress '.$wp_version.' or higher to use the WiziApp plugin.', 'wiziapp'); ?>")</script>
 	<?php
 }
