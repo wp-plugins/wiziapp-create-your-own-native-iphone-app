@@ -30,6 +30,6 @@ class WiziappVideoScreen extends WiziappBaseScreen{
 			'description' => $video['description'],
 		);
 
-		$this->output( $this->prepare($page, $video['title'], 'Video'), array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/media/videos'), 'text' => $this->getTitle('videos')) );
+		$this->output( $this->prepare($page, $video['title'], 'Video'), array('url' => 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/media/videos'), 'text' => $this->getTitle('videos')) );
 	}
 }

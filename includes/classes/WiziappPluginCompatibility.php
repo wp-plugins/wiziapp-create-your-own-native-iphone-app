@@ -74,8 +74,7 @@ class WiziappPluginCompatibility {
 ?>
 		<div class="error fade">
 			<p style="line-height: 150%">
-				The W3 Total Cache plugin has been detected on this blog. For the Wiziapp WebApp
-				to function correctly, W3 Total Cache must be properly configured.
+				The W3 Total Cache plugin has been detected on this blog. For the Wiziapp WebApp to function correctly, W3 Total Cache must be properly configured.
 			</p>
 			<p>
 				<input id="wiziappConfigureW3TotalCache" type="button" class="button" value="Configure now" />
@@ -123,6 +122,8 @@ class WiziappPluginCompatibility {
 <?php
 		}
 		if ($this->checkAllInOneEventCalendar()) {
+			WiziappLog::getInstance()->write('Error', 'the all-in-one-event-calendar plugin old version problem', "WiziappPluginCompatibility.notices");
+/*
 ?>
 		<div class="error fade">
 			<p style="line-height: 150%">
@@ -130,13 +131,13 @@ class WiziappPluginCompatibility {
 			</p>
 		</div>
 <?php
+*/
 		}
 		if ($this->checkQuickCache(false)) {
 ?>
 		<div class="error fade">
 			<p style="line-height: 150%">
-				The Quick Cache plugin has been detected on this blog. For the Wiziapp WebApp
-				to function correctly, Quick Cache must be properly configured.
+				The Quick Cache plugin has been detected on this blog. For the Wiziapp WebApp to function correctly, Quick Cache must be properly configured.
 			</p>
 			<p>
 				<input id="wiziappConfigureQuickCache" type="button" class="button" value="Configure now" />

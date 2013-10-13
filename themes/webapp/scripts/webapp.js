@@ -233,9 +233,9 @@ function pageShowEvent(event){
 		return false;
 	});
 
-	// To avoid collision with "Contact Form 7", "FV Community News" and "Events Manager" plugins
+	// To avoid collision with "Contact Form 7", "FV Community News", "Formidable Forms" and "Events Manager" plugins
 	$page
-	.find("form.wpcf7-form, form.fvcn-post-form-new-post, #event-form, form[id^='gform']")
+	.find("form.wpcf7-form, form.fvcn-post-form-new-post, #event-form, form[id^='gform'], form.frm-show-form[id^='form_']")
 	.attr("data-ajax", "false");
 
 	// Open X Ad

@@ -4,15 +4,15 @@
 		<meta charset="UTF-8">
 		<title><?php echo get_bloginfo('description', 'display'); ?></title>
 
-		<meta name="viewport" content="width=320, initial-scale=1.0, user-scalable=0">
-		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+		<meta name="viewport" content="width=320.1, initial-scale=1.0, user-scalable=0">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-		<link rel="shortcut icon" 	 href="<?php echo $app_icon; ?>" />
-		<link rel="apple-touch-icon" href="<?php echo $app_icon; ?>" />
-		<link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>" />
+		<link rel="shortcut icon" 	 href="<?php echo $app_icon; ?>">
+		<link rel="apple-touch-icon" href="<?php echo $app_icon; ?>">
+		<link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>">
 
-		<link rel="stylesheet" href="<?php echo $wiziapp_plugin_url; ?>/themes/intropage/style.css" type="text/css" />
+		<link rel="stylesheet" href="<?php echo $wiziapp_plugin_url; ?>/themes/intropage/style.css" type="text/css">
 
 		<script type="text/javascript" src="<?php echo $wiziapp_plugin_url.'/themes/intropage/intro_page.js'; ?>"></script>
 		<script type="text/javascript">
@@ -115,7 +115,7 @@
 		?>
 
 		<div>
-			<input type="checkbox" id="remember" name="remember" value="1" />
+			<input type="checkbox" id="remember" name="remember" value="1">
 			Remember my choice
 		</div>
 	</body>

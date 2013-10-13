@@ -29,7 +29,7 @@ if ( have_posts() ) {
 		}
 		else{
 			$pages_screen = new WiziappPagesScreen();
-			wiziapp_back_button('nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/pages'), $pages_screen->getTitle());
+			wiziapp_back_button('nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/pages'), $pages_screen->getTitle());
 		}
 ?>
 		<h1><?php echo WiziappConfig::getInstance()->app_name; ?></h1>
@@ -118,7 +118,12 @@ if ( have_posts() ) {
 			<?php
 		}
 
-					?>
+				if ( WiziappConfig::getInstance()->is_paid !== '1' ){
+				?>
+					<div style="text-align: center; font-size: 12px;">WordPress mobile theme by WiziApp</div>
+				<?php
+					}
+				?>
 			</div>
 			<br />
 			<div id="debug" style="background-color: #c0c0c0;">
@@ -145,8 +150,8 @@ if ( have_posts() ) {
 			window.galleryPrefix = "<?php echo WiziappLinks::postImagesGalleryLink($post->ID); ?>%2F";
 			window.wiziappDebug = <?php echo (isset(WiziappConfig::getInstance()->wiziapp_log_threshold) && intval(WiziappConfig::getInstance()->wiziapp_log_threshold) !== 0) ? "true" : "false"; ?>;
 			window.wiziappPostHeaders = <?php echo json_encode(WiziappTheme::getPostHeaders(FALSE)); ?>;
-			window.wiziappRatingUrl = '<?php echo get_bloginfo('url'); ?>/?wiziapp/getrate/post/<?php echo $post->ID ?>';
-			window.wiziappCommentsCountUrl = '<?php echo get_bloginfo('url'); ?>/?wiziapp/post/<?php echo $post->ID?>/comments';
+			window.wiziappRatingUrl = '<?php echo WiziappContentHandler::getInstance()->get_blog_property('url'); ?>/?wiziapp/getrate/post/<?php echo $post->ID ?>';
+			window.wiziappCommentsCountUrl = '<?php echo WiziappContentHandler::getInstance()->get_blog_property('url'); ?>/?wiziapp/post/<?php echo $post->ID?>/comments';
 			window.multiImageWidthLimit = "<?php echo WiziappConfig::getInstance()->multi_image_width; ?>";
 			window.multiImageHeightLimit = "<?php echo WiziappConfig::getInstance()->multi_image_height; ?>";
 			window.simMode = <?php echo (isset($_GET['sim']) && $_GET['sim']) ? 'true' : 'false'; ?>;

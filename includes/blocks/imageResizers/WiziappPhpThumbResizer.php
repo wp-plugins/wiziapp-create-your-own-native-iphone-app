@@ -122,7 +122,7 @@ class WiziappPhpThumbResizer{
 				$thumb->save($file);
 
 				// Convert the cache filesystem path to a public url
-				$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $file);
+				$url = str_replace(WIZI_ABSPATH, WiziappContentHandler::getInstance()->get_blog_property('url') . '/', $file);
 				$url = str_replace('\\', '/', $url);
 			} else {
 				$url = FALSE;

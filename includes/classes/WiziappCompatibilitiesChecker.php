@@ -2,48 +2,48 @@
 
 class WiziappCompatibilitiesChecker{
 
-	public $critical = FALSE;
-	public $testedConnection = FALSE;
-	public $hadConnectionError = FALSE;
+	private $_critical = FALSE;
+	private $_testedConnection = FALSE;
+	private $_hadConnectionError = FALSE;
 
 	public function scanningTestAsHtml(){
-		 $html = '';
+		$html = '';
 
-		$netCheck = $this->testConnection();
+		$netCheck = $this->_testConnection();
 		if ( WiziappError::isError($netCheck) ){
 			$html .= $netCheck->getHTML();
 		}
 
-		$php = $this->testPhpRequirements();
+		$php = $this->_testPhpRequirements();
 		if ( WiziappError::isError($php) ){
 			$html .= $php->getHTML();
 		}
 
-		$db = $this->testDatabase();
+		$db = $this->_testDatabase();
 		if ( WiziappError::isError($db) ){
 			$html .= $db->getHTML();
 		}
 
-		$token = $this->testToken();
+		$token = $this->_testToken();
 		if ( WiziappError::isError($token) ){
 			$html .= $token->getHTML();
 		}
 
 		return array(
 			'text' => $html,
-			'is_critical' => $this->foundCriticalIssues()
+			'is_critical' => $this->_foundCriticalIssues()
 		);
 	}
 
 	public function fullTestAsHtml(){
 		$html = '';
 
-		$netCheck = $this->testConnection();
+		$netCheck = $this->_testConnection();
 		if ( WiziappError::isError($netCheck) ){
 			$html .= $netCheck->getHTML();
 		}
 
-		$php = $this->testPhpRequirements();
+		$php = $this->_testPhpRequirements();
 		if ( WiziappError::isError($php) ){
 			$html .= $php->getHTML();
 		}
@@ -58,7 +58,7 @@ class WiziappCompatibilitiesChecker{
 			$html .= $allowFopen->getHTML();
 		}
 
-		$token = $this->testToken();
+		$token = $this->_testToken();
 		if ( WiziappError::isError($token) ){
 			$html .= $token->getHTML();
 		}
@@ -72,11 +72,7 @@ class WiziappCompatibilitiesChecker{
 			return '';
 		}
 
-		return self::create_error_block( array( 'text' => $html, 'is_critical' => $this->foundCriticalIssues(), ) );
-	}
-
-	public function foundCriticalIssues(){
-		return $this->critical;
+		return self::create_error_block( array( 'text' => $html, 'is_critical' => $this->_foundCriticalIssues(), ) );
 	}
 
 	public function testWritingPermissions($return_as_html = true){
@@ -111,47 +107,6 @@ class WiziappCompatibilitiesChecker{
 
 		// @todo format this i18n wordpress function usage to allow params and send the dir list as a parameter
 		return new WiziappError('writing_permissions_error', __($message, 'wiziapp'));
-	}
-
-	public function testDatabase(){
-		if ( WiziappDB::getInstance()->isInstalled() ){
-			return TRUE;
-		}
-
-		// Try to recover
-		WiziappDB::getInstance()->install();
-
-		if ( ! WiziappDB::getInstance()->isInstalled() ){
-			$this->critical = TRUE;
-			return new WiziappError('database_error', __('Your WordPress installation does not have permission to create tables in your database.', 'wiziapp'));
-		}
-	}
-
-	public function testToken(){
-		// If we don't have a token, try to get it again
-		$activated = ! empty(WiziappConfig::getInstance()->plugin_token);
-		if (  !$activated ){
-			$cms = new WiziappCms();
-			$activated = $cms->activate();
-		}
-
-		if ( !$activated ) {
-			$errors = new WiziappError();
-			if ( !$this->testedConnection ){
-				$connTest = $this->testConnection();
-				if ( WiziappError::isError($connTest) ){
-					$errors = $connTest;
-				}
-			}
-			if ( !$this->hadConnectionError ){
-				// If we already had connections errors, we are showing the problems from those errors
-				// Else...
-				$this->critical = TRUE;
-				$errors->add('missing_token', __('Oops! It seems that the main server is not responding. Please make sure that your internet connection is working, and try again.', 'wiziapp'));
-			}
-			return $errors;
-		}
-		return TRUE;
 	}
 
 	public function testWebServer($return_as_html = true){
@@ -220,99 +175,6 @@ class WiziappCompatibilitiesChecker{
 		return TRUE;
 	}
 
-	public function testPhpRequirements(){
-		//xml processing curl or other ways to open remote streams enabled allow_url_fopen as on/true gd / imagemagick lib installed
-		$errors = new WiziappError();
-
-		/*
-		$gotGD =extension_loaded('gd');
-		$gotImagick = extension_loaded('imagick');
-		if ( !$gotGD && !$gotImagick ){
-		$errors->add('missing_php_requirements', __('Wiziapp requires either the GD or the ImageMagick PHP extension to be installed on the server. Please contact your hosting provider to enable one of these extensions, otherwise the thumbnails will not function properly', 'wiziapp'));
-		}
-		if ( ini_get('allow_url_fopen') != '1' ){
-		$errors->add('missing_php_requirements', __('Your host blocked the PHP directive allow_url_fopen. Wiziapp needs allow_url_fopen to use images that are hosted on other websites as thumbnails', 'wiziapp'));
-		}
-		*/
-
-		if ( !extension_loaded('libxml') || !extension_loaded('dom') ){
-			$errors->add('missing_php_requirements', __('In order for WiziApp to operate, libxml and the DOM extension must be installed and enabled. ', 'wiziapp'));
-			$this->critical = TRUE;
-		}
-
-		if ( count($errors->get_error_codes()) > 0 ){
-			return $errors;
-		} else {
-			return TRUE;
-		}
-	}
-
-	/**
-	 * Check for the ability to issue outgoing requests
-	 * and accept requests from the api server.
-	 *
-	 * Send a request to the admin to check access to this address
-	 * it's POST since we need a more restrictive method, there is way
-	 * to allow Wordpress to send GET request but not POST
-	 *
-	 * The post request must have a value to avoid issues with Content-Length  invalid and
-	 * 413 Request Entity Too Large as a result...
-	 *
-	 * Covers the publicly accessible and out going requests tests
-	 *
-	 * @return bool|WiziappError can return true if everything is ok or an error object
-	 */
-	public function testConnection(){
-		$this->testedConnection = TRUE;
-
-		$r = new WiziappHTTPRequest();
-		$response = $r->api( array( 'url' => urlencode( WiziappContentHandler::getInstance()->get_blog_property('url') ), ), '/cms/checkUrl', 'POST' );
-
-		if ( is_wp_error($response) ){
-			// If we couldn't connect to the host, outbound connections might be blocked
-			if ( "couldn't connect to host" == $response->get_error_message() ){
-				$this->critical = TRUE;
-				$this->hadConnectionError = TRUE;
-
-				return new WiziappError(
-				'testing_connection_failed',
-				__('It seems that your server is blocked from issuing outgoing requests to our server. Please make sure your firewall and any other security measures enable outgoing connections.', 'wiziapp')
-				);
-			}
-
-			return new WiziappError($response->get_error_code(), $response->get_error_message());
-		}
-
-		// The request worked, but was our server able to contact our url?
-		$checkResult = json_decode($response['body']);
-
-		if ( empty($checkResult) ){
-			if ( isset($response['response']) && isset($response['response']['code']) && $response['response']['code'] === FALSE ){
-				$this->critical = TRUE;
-				$this->hadConnectionError = TRUE;
-
-				return new WiziappError(
-					'testing_connection_failed',
-					__('Your host does not allow any kind of outgoing requests. WiziApp requires either HTTP Extension, cURL, Streams, or Fsockopen to be installed and enabled. Please contact your hosting provider to address this issue.', 'wiziapp')
-				);
-			}
-
-			// The response wasn't in a json format
-			return new WiziappError('testing_connection_failed', 'The WiziApp plugin has encountered a problem. Please contact us at support@wiziapp.com to see how we can help you resolve this issue');
-		}
-
-		// The response is ok, let's check when our server is saying
-		if ( ! $checkResult->header->status ){
-			$rewrite_rules_message = WiziappHelpers::check_rewrite_rules();
-			$appropriate_message = ( $rewrite_rules_message !== '' ) ? $rewrite_rules_message : $checkResult->header->message;
-
-			return new WiziappError('testing_connection_failed', $appropriate_message);
-		}
-
-		// If we made it this far, all is good
-		return TRUE;
-	}
-
 	public static function create_error_block( array $error){
 		ob_start();
 		?>
@@ -340,5 +202,134 @@ class WiziappCompatibilitiesChecker{
 		<?php
 
 		return ob_get_clean();
+	}
+
+	private function _testPhpRequirements(){
+		//xml processing curl or other ways to open remote streams enabled allow_url_fopen as on/true gd / imagemagick lib installed
+		$errors = new WiziappError();
+
+		if ( ! extension_loaded('libxml') || !extension_loaded('dom') ){
+			$errors->add('missing_php_requirements', __('In order for WiziApp to operate, libxml and the DOM extension must be installed and enabled. ', 'wiziapp'));
+			$this->_critical = TRUE;
+		}
+
+		if ( count($errors->get_error_codes()) > 0 ){
+			return $errors;
+		}
+
+		return TRUE;
+	}
+
+	/**
+	* Check for the ability to issue outgoing requests
+	* and accept requests from the api server.
+	*
+	* Send a request to the admin to check access to this address
+	* it's POST since we need a more restrictive method, there is way
+	* to allow Wordpress to send GET request but not POST
+	*
+	* The post request must have a value to avoid issues with Content-Length  invalid and
+	* 413 Request Entity Too Large as a result...
+	*
+	* Covers the publicly accessible and out going requests tests
+	*
+	* @return bool|WiziappError can return true if everything is ok or an error object
+	*/
+	private function _testConnection(){
+		$this->_testedConnection = TRUE;
+
+		$r = new WiziappHTTPRequest();
+		$response = $r->api( array( 'url' => urlencode( WiziappContentHandler::getInstance()->get_blog_property('url') ), ), '/cms/checkUrl', 'POST' );
+
+		if ( is_wp_error($response) ){
+			// If we couldn't connect to the host, outbound connections might be blocked
+			if ( "couldn't connect to host" == $response->get_error_message() ){
+				$this->_critical = TRUE;
+				$this->_hadConnectionError = TRUE;
+
+				return new WiziappError(
+					'testing_connection_failed',
+					__('It seems that your server is blocked from issuing outgoing requests to our server. Please make sure your firewall and any other security measures enable outgoing connections.', 'wiziapp')
+				);
+			}
+
+			return new WiziappError($response->get_error_code(), $response->get_error_message());
+		}
+
+		// The request worked, but was our server able to contact our url?
+		$checkResult = json_decode($response['body']);
+
+		if ( empty($checkResult) ){
+			if ( isset($response['response']) && isset($response['response']['code']) && $response['response']['code'] === FALSE ){
+				$this->_critical = TRUE;
+				$this->_hadConnectionError = TRUE;
+
+				return new WiziappError(
+					'testing_connection_failed',
+					__('Your host does not allow any kind of outgoing requests. WiziApp requires either HTTP Extension, cURL, Streams, or Fsockopen to be installed and enabled. Please contact your hosting provider to address this issue.', 'wiziapp')
+				);
+			}
+
+			// The response wasn't in a json format
+			return new WiziappError('testing_connection_failed', 'The WiziApp plugin has encountered a problem. Please contact us at support@wiziapp.com to see how we can help you resolve this issue');
+		}
+
+		// The response is ok, let's check when our server is saying
+		if ( ! $checkResult->header->status ){
+			$rewrite_rules_message = WiziappHelpers::check_rewrite_rules();
+			$appropriate_message = ( $rewrite_rules_message !== '' ) ? $rewrite_rules_message : $checkResult->header->message;
+
+			return new WiziappError('testing_connection_failed', $appropriate_message);
+		}
+
+		// If we made it this far, all is good
+		return TRUE;
+	}
+
+	private function _foundCriticalIssues(){
+		return $this->_critical;
+	}
+
+	private function _testDatabase(){
+		if ( WiziappDB::getInstance()->isInstalled() ){
+			return TRUE;
+		}
+
+		// Try to recover
+		WiziappDB::getInstance()->install();
+
+		if ( ! WiziappDB::getInstance()->isInstalled() ){
+			$this->_critical = TRUE;
+			return new WiziappError('database_error', __('Your WordPress installation does not have permission to create tables in your database.', 'wiziapp'));
+		}
+	}
+
+	private function _testToken(){
+		// If we don't have a token, try to get it again
+		$activated = ! empty(WiziappConfig::getInstance()->plugin_token);
+		if (  ! $activated ){
+			$cms = new WiziappCms();
+			$activated = $cms->activate();
+		}
+
+		if ( ! $activated ) {
+			$errors = new WiziappError();
+			if ( ! $this->_testedConnection ){
+				$connTest = $this->_testConnection();
+				if ( WiziappError::isError($connTest) ){
+					$errors = $connTest;
+				}
+			}
+
+			if ( ! $this->_hadConnectionError ){
+				// If we already had connections errors, we are showing the problems from those errors. Else...
+				$this->_critical = TRUE;
+				$errors->add('missing_token', __('Oops! It seems that the main server is not responding. Please make sure that your internet connection is working, and try again.', 'wiziapp'));
+			}
+
+			return $errors;
+		}
+
+		return TRUE;
 	}
 }

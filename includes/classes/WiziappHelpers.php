@@ -76,6 +76,8 @@ class WiziappHelpers{
 		$proper_condition =
 		isset($adsense['id']) && is_array($adsense['id']) && strlen($adsense['id']['id']) > 5 &&
 		isset($adsense['show_in_post']) && $adsense['show_in_post'] > 0 &&
+		// Do not show the AdSense if the Application Plan is not premium
+		WiziappConfig::getInstance()->is_paid !== '0' &&
 		// Do not show the AdSense in the iPhone Native App
 		WiziappContentHandler::getInstance()->isHTML() && ! WiziappContentHandler::getInstance()->isInApp() &&
 		// Do not show the AdSense in the Android native App, if the AdMob set

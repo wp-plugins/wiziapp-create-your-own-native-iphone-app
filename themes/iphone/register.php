@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html>
+<html <?php language_attributes(); ?>>
     <head>
         <?php
         /**
@@ -12,9 +12,9 @@
             echo '@@@BASE@@@';
         }
         ?>
-        <meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php bloginfo('charset'); ?>" />
+        <meta charset="<?php bloginfo( 'charset' ); ?>">
         <title><?php wp_title('&laquo;', true, 'right'); ?> <?php bloginfo('name'); ?></title>
-        <meta name="viewport" content="width=device-width,user-scalable=no" />
+        <meta name="viewport" content="width=device-width, user-scalable=no">
         <?php
         /**
          * The application is preloading the posts as strings, we need to include as much

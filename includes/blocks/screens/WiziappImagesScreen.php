@@ -112,7 +112,7 @@ class WiziappImagesScreen extends WiziappBaseScreen{
          $screen = $this->prepare($page, $title, 'gallery', false, true);
 
          if ( isset($_GET['album']) ){
-            $back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/galleries'), 'text' => __(WiziappConfig::getInstance()->getScreenTitle('albums'), 'wiziapp'));
+            $back = array('url' => 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/galleries'), 'text' => __(WiziappConfig::getInstance()->getScreenTitle('albums'), 'wiziapp'));
          }
          else{
             $back = array('url' => WiziappLinks::postLink($post_id), 'text' => $title);

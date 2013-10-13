@@ -41,11 +41,13 @@ class WiziappContentHandler {
 
 		if ( function_exists('is_multisite') && is_multisite() ) {
 			$this->_blog_properties['id'] = get_current_blog_id();
-			$this->_blog_properties['url'] = get_blogaddress_by_id( $this->_blog_properties['id'] );
+			$url = get_blogaddress_by_id( $this->_blog_properties['id'] );
 		} else {
 			$this->_blog_properties['id'] = 0;
-			$this->_blog_properties['url'] = home_url();
+			$url = home_url();
 		}
+
+		$this->_blog_properties['url'] = untrailingslashit( $url );
 		$this->_blog_properties['data_files_dir'] = $uploads_dir['basedir'].'/wiziapp_data_files';
 		$this->_blog_properties['data_files_url'] = $uploads_dir['baseurl'].'/wiziapp_data_files';
 
@@ -192,14 +194,15 @@ class WiziappContentHandler {
 		} elseif ( isset($_SERVER['HTTP_USER_AGENT']) && ! $this->_desktop_site_mode() && $is_webapp_ready ) {
 			add_filter('body_class', array($this, 'getDeviceClass'), 10, 1);
 
-			$is_iPhone	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPhone')  !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
-			$is_iPod	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPod')    !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
-			$is_iPad	= stripos($_SERVER['HTTP_USER_AGENT'], 'iPad')    !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
-			$is_android	= stripos($_SERVER['HTTP_USER_AGENT'], 'Android') !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'AppleWebKit') !== FALSE;
-			$is_windows	= stripos($_SERVER['HTTP_USER_AGENT'], 'Windows') !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'IEMobile')	   !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Phone') !== FALSE;
+			$is_iPhone 		= stripos($_SERVER['HTTP_USER_AGENT'], 'iPhone')  !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
+			$is_iPod 		= stripos($_SERVER['HTTP_USER_AGENT'], 'iPod')    !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
+			$is_iPad 		= stripos($_SERVER['HTTP_USER_AGENT'], 'iPad')    !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Mac OS X')	   !== FALSE;
+			$is_android 	= stripos($_SERVER['HTTP_USER_AGENT'], 'Android') !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'AppleWebKit') !== FALSE;
+			$is_windows 	= stripos($_SERVER['HTTP_USER_AGENT'], 'Windows') !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'IEMobile')	   !== FALSE && stripos($_SERVER['HTTP_USER_AGENT'], 'Phone') !== FALSE;
+			$is_android_app	= $_SERVER['HTTP_USER_AGENT'] === WIZIAPP_ANDROID_APP;
 			$this->_is_ipad_device = $is_iPad;
 
-			if ( $is_iPhone || $is_iPod || ( $is_iPad && isset($_GET['androidapp']) && $_GET['androidapp'] === '1' )  || $is_android || $is_windows ) {
+			if ( $is_iPhone || $is_iPod || ( $is_iPad && isset($_GET['androidapp']) && $_GET['androidapp'] === '1' )  || $is_android || $is_android_app || $is_windows ) {
 				$this->mobile = TRUE;
 
 				$this->_show_splash();

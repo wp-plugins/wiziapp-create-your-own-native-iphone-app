@@ -138,6 +138,14 @@ if ( have_posts() ) {
 			</div>
 			<!-- The link below is for handing video in the simulator, the application shows the video itself while the simulator only shows an image. -->
 			<a href="cmd://open/video" id="dummy_video_opener"></a>
+
+<?php
+		if ( WiziappConfig::getInstance()->is_paid !== '1' ){
+?>
+			<div style="text-align: center; font-size: 12px;">WordPress mobile theme by WiziApp</div>
+<?php
+		}
+?>
 		</div><!-- page_content -->
 	</div><!-- Content -->
 

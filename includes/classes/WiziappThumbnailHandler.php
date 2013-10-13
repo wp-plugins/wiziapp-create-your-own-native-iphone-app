@@ -18,7 +18,7 @@ class WiziappThumbnailHandler{
 	}
 
 	public static function getPostThumbnail($post, $type) {
-		$thumb = get_bloginfo('url') . "/?wiziapp/getthumb/" . $post->ID . '&type=' . $type;
+		$thumb = WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/getthumb/" . $post->ID . '&type=' . $type;
 		WiziappLog::getInstance()->write('INFO', "Requesting the post thumbnail url: {$thumb}", "WiziappThumbnailHandler.getPostThumbnail");
 		return $thumb;
 	}

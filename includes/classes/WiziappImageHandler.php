@@ -75,7 +75,7 @@ class WiziappImageHandler {
 
 	public function getResizedImageUrl($url, $width, $height, $type = 'adaptiveResize', $allow_up = FALSE){
 		$url = urlencode($url);
-		return get_bloginfo('url') . "/?wiziapp/getimage/&width={$width}&height={$height}&type={$type}&allow_up={$allow_up}&url={$url}";
+		return WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/getimage/&width={$width}&height={$height}&type={$type}&allow_up={$allow_up}&url={$url}";
 	}
 
 	public function wiziapp_getResizedImage($width, $height, $type = 'adaptiveResize', $allow_up = FALSE){
@@ -106,7 +106,7 @@ class WiziappImageHandler {
 		WiziappLog::getInstance()->write('info', 'Checking for cache key: '.$cacheFileImageKey.' in '.$cacheFile, 'WiziappImageHandler.wiziapp_getResizedImage');
 
 		if ($this->_cacheExists($cacheFile)){
-			$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl') . '/', $cacheFile);
+			$url = str_replace(WIZI_ABSPATH, WiziappContentHandler::getInstance()->get_blog_property('url') . '/', $cacheFile);
 			WiziappLog::getInstance()->write('info', "Before loading image from cache: " . $cacheFile, "image_resizing.getResizedImage");
 			$this->handler->load($cacheFile, FALSE);
 			WiziappLog::getInstance()->write('info', "After loading image from cache: " . $cacheFile, "image_resizing.getResizedImage");
@@ -114,14 +114,14 @@ class WiziappImageHandler {
 			$this->imageFile = str_replace(' ', '%20', $this->imageFile);
 			WiziappLog::getInstance()->write('info', "Before resizing image: " . $this->imageFile, "image_resizing.getResizedImage");
 			$url = $this->imageFile;
-			if (strpos($this->imageFile, get_bloginfo('wpurl')) === 0){
+			if (strpos($this->imageFile, WiziappContentHandler::getInstance()->get_blog_property('url')) === 0){
 				WiziappLog::getInstance()->write('info', 'Looks like a local image: '.$this->imageFile, 'WiziappImageHandler.wiziapp_getResizedImage');
-				$url = str_replace(get_bloginfo('wpurl'), WIZI_ABSPATH, $url);
+				$url = str_replace(WiziappContentHandler::getInstance()->get_blog_property('url'), WIZI_ABSPATH, $url);
 				// Make sure we can read it like this
 				if ( !file_exists($url) ){
 					WiziappLog::getInstance()->write('WARNING', 'Local file: '.$url.' but does not exists? will try access by url if the blogs allows', 'WiziappImageHandler.wiziapp_getResizedImage');
 					if ( ini_get('allow_url_fopen') == '1' ){
-						$url = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl'), $url);
+						$url = str_replace(WIZI_ABSPATH, WiziappContentHandler::getInstance()->get_blog_property('url'), $url);
 					} else {
 						WiziappLog::getInstance()->write('WARNING', 'allow_url_fopen is off, the '.$url.' will most likely fail to load', 'WiziappImageHandler.wiziapp_getResizedImage');
 					}
@@ -170,9 +170,9 @@ class WiziappImageHandler {
 		*/
 		$imagePath = $this->imageFile;
 		$calcResize = TRUE; // Try to calc the size of the image, unless remote and allow_url_fopen is off
-		if ( strpos($imagePath, get_bloginfo('wpurl')) === 0 ){
+		if ( strpos($imagePath, WiziappContentHandler::getInstance()->get_blog_property('url')) === 0 ){
 			WiziappLog::getInstance()->write('INFO', 'Loading local image::'.$imagePath, 'WiziappImageHandler.load');
-			$imagePath = str_replace(get_bloginfo('wpurl'), WIZI_ABSPATH, $imagePath);
+			$imagePath = str_replace(WiziappContentHandler::getInstance()->get_blog_property('url'), WIZI_ABSPATH, $imagePath);
 
 			if ( ! file_exists($imagePath) ){
 				// We can not read this image file, if the filename is with special encoding, the os might not find it...
@@ -181,7 +181,7 @@ class WiziappImageHandler {
 					$calcResize = FALSE;
 				}
 
-				$imagePath = str_replace(WIZI_ABSPATH, get_bloginfo('wpurl'), $imagePath);
+				$imagePath = str_replace(WIZI_ABSPATH, WiziappContentHandler::getInstance()->get_blog_property('url'), $imagePath);
 			}
 		} elseif ( ini_get('allow_url_fopen') != '1' ){
 			// The image is not local, if allow_url_fopen is off throw an alert
