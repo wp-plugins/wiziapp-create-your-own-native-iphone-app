@@ -132,6 +132,14 @@ $wiziapp_google_adsense = WiziappHelpers::get_adsense();
 			</div>
 			<!-- The link below is for handing video in the simulator, the application shows the video itself while the simulator only shows an image. -->
 			<a href="cmd://open/video" id="dummy_video_opener"></a>
+
+<?php
+		if ( WiziappConfig::getInstance()->is_paid !== '1' ){
+?>
+			<div style="text-align: center; font-size: 12px;">WordPress mobile theme by WiziApp</div>
+<?php
+		}
+?>
 		</div><!-- page_content -->
 <?php
 	//wp_footer(); - no need for this
@@ -170,8 +178,8 @@ $wiziapp_google_adsense = WiziappHelpers::get_adsense();
 	window.galleryPrefix = "<?php echo WiziappLinks::postImagesGalleryLink($post->ID); ?>%2F";
 	window.wiziappDebug = <?php echo (isset(WiziappConfig::getInstance()->wiziapp_log_threshold) && intval(WiziappConfig::getInstance()->wiziapp_log_threshold) !== 0) ? "true" : "false"; ?>;
 	window.wiziappPostHeaders = <?php echo json_encode(WiziappTheme::getPostHeaders(FALSE)); ?>;
-	window.wiziappRatingUrl = '<?php echo get_bloginfo('url'); ?>/?wiziapp/getrate/post/<?php echo $post->ID ?>';
-	window.wiziappCommentsCountUrl = '<?php echo get_bloginfo('url'); ?>/?wiziapp/post/<?php echo $post->ID?>/comments';
+	window.wiziappRatingUrl = '<?php echo WiziappContentHandler::getInstance()->get_blog_property('url'); ?>/?wiziapp/getrate/post/<?php echo $post->ID ?>';
+	window.wiziappCommentsCountUrl = '<?php echo WiziappContentHandler::getInstance()->get_blog_property('url'); ?>/?wiziapp/post/<?php echo $post->ID?>/comments';
 	window.multiImageWidthLimit = "<?php echo WiziappConfig::getInstance()->multi_image_width; ?>";
 	window.multiImageHeightLimit = "<?php echo WiziappConfig::getInstance()->multi_image_height; ?>";
 	window.simMode = <?php echo (isset($_GET['sim']) && $_GET['sim']) ? 'true' : 'false'; ?>;

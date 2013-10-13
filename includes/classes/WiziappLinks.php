@@ -8,11 +8,11 @@
 class WiziappLinks{
 
 	public static function authorLink($author_id){
-		return 'nav://list/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/author/{$author_id}/posts");
+		return 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/author/{$author_id}/posts");
 	}
 
 	public static function postLink($post_id, $styling_page_links = ''){
-		//return get_bloginfo('url')."/wiziapp/content/post/{$post_id}";
+		//return WiziappContentHandler::getInstance()->get_blog_property('url')."/wiziapp/content/post/{$post_id}";
 		$link = urlencode(get_permalink($post_id) . $styling_page_links);
 		$url = '';
 		if ( !empty($link) ){
@@ -39,36 +39,36 @@ class WiziappLinks{
 	}
 
 	public static function categoryLink($category_id){
-		return 'nav://list/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/category/{$category_id}");
+		return 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/category/{$category_id}");
 	}
 
 	public static function tagLink($tag_id){
-		return 'nav://list/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/tag/{$tag_id}");
+		return 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/tag/{$tag_id}");
 	}
 
 	public static function  postTagsLink($post_id){
-		return 'nav://list/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/post/{$post_id}/tags");
+		return 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/post/{$post_id}/tags");
 	}
 
 	public static function linksByCategoryLink($cat_id){
-		return 'nav://list/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/links/category/{$cat_id}");
+		return 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/links/category/{$cat_id}");
 	}
 
 	public static function postCategoriesLink($post_id){
-		return 'nav://list/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/post/{$post_id}/categories");
+		return 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/post/{$post_id}/categories");
 	}
 
 	public static function postImagesGalleryLink($post_id){
-		return 'nav://gallery/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/post/{$post_id}/images");
+		return 'nav://gallery/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/post/{$post_id}/images");
 	}
 
 	public static function postCommentsLink($post_id){
-		//return 'nav://list/'.urlencode(get_bloginfo('url')."/?wiziapp/content/list/post/{$post_id}/comments");
-		return 'nav://comments/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/post/{$post_id}/comments");
+		//return 'nav://list/'.urlencode(WiziappContentHandler::getInstance()->get_blog_property('url')."/?wiziapp/content/list/post/{$post_id}/comments");
+		return 'nav://comments/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/post/{$post_id}/comments");
 	}
 
 	public static function postCommentSubCommentsLink($post_id, $comment_id){
-		return 'nav://comments/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/post/{$post_id}/comments/{$comment_id}");
+		return 'nav://comments/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/post/{$post_id}/comments/{$comment_id}");
 	}
 
 	/**
@@ -105,27 +105,27 @@ class WiziappLinks{
 	}
 
 	public static function videoPageLink($item_id){
-		return "nav://page/" . urlencode(get_bloginfo('url') . "/?wiziapp/content/video/{$item_id}");
+		return "nav://page/" . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/video/{$item_id}");
 	}
 
 	public static function videoDetailsLink($item_id){
-		return "nav://video/" . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/media/video/{$item_id}");
+		return "nav://video/" . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/media/video/{$item_id}");
 	}
 
 	public static function archiveYearLink($year){
-		return 'nav://list/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/archive/{$year}");
+		return 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/archive/{$year}");
 	}
 
 	public static function archiveMonthLink($year, $month){
-		return 'nav://list/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/archive/{$year}/{$month}");
+		return 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/archive/{$year}/{$month}");
 	}
 
 	public static function pluginAlbumLink($plugin='', $album_id){
-		return 'nav://gallery/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/gallery/{$plugin}/{$album_id}");
+		return 'nav://gallery/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/gallery/{$plugin}/{$album_id}");
 	}
 
 	public static function ratingLink(){
-		$url = urlencode(get_bloginfo('url') . "/?wiziapp/rate/post/");
+		$url = urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/rate/post/");
 		return "cmd://openRanking/{$url}";
 	}
 
@@ -140,7 +140,7 @@ class WiziappLinks{
 			$wsUrl = str_replace('?', '&', $wsUrl);
 		}
 
-		$url = 'nav://list/' . urlencode(get_bloginfo('url') . "/?{$wsUrl}{$sep}wizipage={$page}");
+		$url = 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?{$wsUrl}{$sep}wizipage={$page}");
 
 		return $url;
 	}

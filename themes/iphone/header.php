@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
-<html>
-<head profile="http://gmpg.org/xfn/11">
+<html <?php language_attributes(); ?>>
+<head>
 	<?php
 		// Disable the admin bar
 		if ( function_exists("show_admin_bar") ) {
@@ -8,9 +8,9 @@
 		}
 	?>
 	<base href="<?php bloginfo('url'); ?>/" />
-	<meta http-equiv="Content-Type" content="<?php bloginfo('html_type'); ?>; charset=<?php bloginfo('charset'); ?>" />
+	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<title dir="ltr"><?php echo WiziappTheme::applyRequestTitle(wp_title('&laquo;', false, 'right').get_bloginfo('name')); ?></title>
-	<meta name="viewport" content="width=device-width,user-scalable=no" />
+	<meta name="viewport" content="width=device-width, user-scalable=no">
 	<link rel="stylesheet" href="<?php bloginfo('stylesheet_url'); ?>" type="text/css" media="screen" />
 	<link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
 	<?php

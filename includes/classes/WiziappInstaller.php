@@ -58,63 +58,29 @@ class WiziappInstaller{
 		*/
 	}
 
-	protected static function doUninstall(){
-		$uploads_dir = wp_upload_dir();
-		// Delete the wiziapp_data_files directory of the Wiziapp plugin current version
-		self::_delete($uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_data_files');
-
-		WiziappDB::getInstance()->uninstall();
-		WiziappPluginCompatibility::getInstance()->uninstall();
-
-		// Remove Wiziapp cron job
-		wp_clear_scheduled_hook('wiziapp_daily_function_hook');
-
-		// Deactivate the blog with the global services
-		try{
-			$cms = new WiziappCms();
-			$cms->deactivate();
-		} catch(Exception $e){
-			// If it failed, it's ok... move on
-		}
-
-		// Remove option of the "Wiziapp QR Code Widget" on it exist case.
-		if ( get_option( $wiziapp_qrcode_widget_option = 'widget_' . WiziappConfig::getInstance()->wiziapp_qrcode_widget_id_base ) ) {
-			delete_option( $wiziapp_qrcode_widget_option );
-		}
-
-		// Remove all options - must be done last
-		delete_option('wiziapp_screens');
-		delete_option('wiziapp_components');
-		delete_option('wiziapp_pages');
-		delete_option('wiziapp_last_processed');
-		delete_option('wiziapp_featured_post');
-
-		WiziappConfig::getInstance()->uninstall();
-	}
-
 	/**
 	* Revert the installation to remove everything the plugin added
 	*/
 	public function uninstall(){
-		if ( function_exists('is_multisite') && is_multisite() ) {
-			// If it is a network de-activation - if so, run the de-activation function for each blog id
-			global $wpdb;
-
-			$old_blog = $wpdb->blogid;
-			// Get all blog ids
-			$blogids = $wpdb->get_col( 'SELECT `blog_id` FROM '.$wpdb->blogs );
-
-			foreach ($blogids as $blog_id) {
-				switch_to_blog($blog_id);
-				self::doUninstall();
-			}
-
-			switch_to_blog($old_blog);
+		if ( ! ( function_exists('is_multisite') && is_multisite() ) ) {
+			self::_doUninstall();
 
 			return;
-		} else {
-			self::doUninstall();
 		}
+
+		// If it is a network de-activation - if so, run the de-activation function for each blog id
+		global $wpdb;
+
+		$old_blog = $wpdb->blogid;
+		// Get all blog ids
+		$blogids = $wpdb->get_col( 'SELECT `blog_id` FROM '.$wpdb->blogs );
+
+		foreach ($blogids as $blog_id) {
+			switch_to_blog($blog_id);
+			self::_doUninstall();
+		}
+
+		switch_to_blog($old_blog);
 	}
 
 	public function deleteBlog($blog_id, $drop){
@@ -126,7 +92,7 @@ class WiziappInstaller{
 			$switched = true;
 		}
 
-		self::doUninstall();
+		self::_doUninstall();
 
 		if ( $switched ) {
 			switch_to_blog($currentBlog);
@@ -184,5 +150,39 @@ class WiziappInstaller{
 		}
 
 		@rmdir($path);
+	}
+
+	private static function _doUninstall(){
+		$uploads_dir = wp_upload_dir();
+		// Delete the wiziapp_data_files directory of the Wiziapp plugin current version
+		self::_delete($uploads_dir['basedir'].DIRECTORY_SEPARATOR.'wiziapp_data_files');
+
+		WiziappDB::getInstance()->uninstall();
+		WiziappPluginCompatibility::getInstance()->uninstall();
+
+		// Remove Wiziapp cron job
+		wp_clear_scheduled_hook('wiziapp_daily_function_hook');
+
+		// Deactivate the blog with the global services
+		try{
+			$cms = new WiziappCms();
+			$cms->deactivate();
+		} catch(Exception $e){
+			// If it failed, it's ok... move on
+		}
+
+		// Remove option of the "Wiziapp QR Code Widget" on it exist case.
+		if ( get_option( $wiziapp_qrcode_widget_option = 'widget_' . WiziappConfig::getInstance()->wiziapp_qrcode_widget_id_base ) ) {
+			delete_option( $wiziapp_qrcode_widget_option );
+		}
+
+		// Remove all options - must be done last
+		delete_option('wiziapp_screens');
+		delete_option('wiziapp_components');
+		delete_option('wiziapp_pages');
+		delete_option('wiziapp_last_processed');
+		delete_option('wiziapp_featured_post');
+
+		WiziappConfig::getInstance()->uninstall();
 	}
 }

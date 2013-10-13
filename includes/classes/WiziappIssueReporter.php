@@ -14,7 +14,7 @@ class WiziappIssueReporter{
         // show the iframe as an overlay
         $httpProtocol = 'https';
         $iframeSrc = $httpProtocol . '://' . WiziappConfig::getInstance()->api_server . '/cms/reportIssue/?v='.WIZIAPP_P_VERSION;
-        $iframeSrc .= '&d='.urlencode($this->data) . '&c=' . urlencode(get_bloginfo('url') . "/?wiziapp/system/frame&report=1");
+        $iframeSrc .= '&d='.urlencode($this->data) . '&c=' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/system/frame&report=1");
         ?>
             <script type="text/javascript" src="<?php echo esc_attr(plugins_url('themes/admin/scripts/report_issue.js', dirname(dirname(__FILE__)))); ?>"></script>
             <style>

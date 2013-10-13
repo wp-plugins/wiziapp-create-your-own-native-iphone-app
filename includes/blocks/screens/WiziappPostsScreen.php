@@ -192,7 +192,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		$pageNumber = isset($_GET['wizipage']) ? $_GET['wizipage'] : 0;
 		$numberOfPosts = WiziappConfig::getInstance()->posts_list_limit;
 		$offset = $numberOfPosts * $pageNumber;
-		$back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/tags'), 'text' => $this->getTitle('tags'));
+		$back = array('url' => 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/tags'), 'text' => $this->getTitle('tags'));
 
 		$tag = get_tag($tag_id);
 		$title = WiziappTheme::applyRequestTitle("{$tag->name}");
@@ -250,7 +250,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 
 		$cat = get_category($category_id);
 		$title = WiziappTheme::applyRequestTitle($cat->cat_name);
-		$back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/categories'), 'text' => $this->getTitle('categories'));
+		$back = array('url' => 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/categories'), 'text' => $this->getTitle('categories'));
 
 		$query = "cat={$category_id}&orderby=post_date&posts_per_page=" . $numberOfPosts . "&offset=" . $offset;
 
@@ -302,7 +302,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 
 		$title = sprintf(__('%3$d %1$s %2$d'), $wp_locale->get_month($month), $year, $day);
 		$cPage = $this->build($query, $title, $screen_conf['items'], true);
-		$back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/archive/'.$year.'/'.$month), 'text' => sprintf(__('%1$s %2$d'), $wp_locale->get_month($month), $year));
+		$back = array('url' => 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/archive/'.$year.'/'.$month), 'text' => sprintf(__('%1$s %2$d'), $wp_locale->get_month($month), $year));
 		$this->output($this->prepare($cPage, $title, 'list', false, true), $back);
 	}
 
@@ -328,7 +328,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 		$title = sprintf(__('%1$s %2$d'), $wp_locale->get_month($month), $year);
 
 		$cPage = $this->build($query, $title, $screen_conf['items'], true, $pager->leftToShow);
-		$back = array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/archive/'.$year), 'text' => $year);
+		$back = array('url' => 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/archive/'.$year), 'text' => $year);
 		$this->output($this->prepare($cPage, $title, 'list', false, true), $back);
 	}
 

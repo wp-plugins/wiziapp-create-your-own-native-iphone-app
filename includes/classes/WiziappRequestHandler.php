@@ -82,8 +82,7 @@ class WiziappRequestHandler {
 			);
 
 			if(stripos($error['message'], 'Allowed memory size of ') === false){
-				WiziappLog::getInstance()->write('Error', "Caught an error: " . print_r($error, TRUE),
-					"WiziappRequestHandler.handleGeneralError");
+				WiziappLog::getInstance()->write('Error', "Caught an error: " . print_r($error, TRUE), "WiziappRequestHandler.handleGeneralError");
 			}
 
 			if ( $this->errorReportingLevel !== 0 ){

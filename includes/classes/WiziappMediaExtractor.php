@@ -432,7 +432,7 @@ class WiziappMediaExtractor{
 			$full_path = '';
 			if (strpos($src, '://') !== FALSE){
 				// It a web path, but is it this site?
-				$blog_url = get_bloginfo('wpurl');
+				$blog_url = WiziappContentHandler::getInstance()->get_blog_property('url');
 				if (strpos($src, $blog_url) === 0){
 					// Its here, find the local file
 					$sub_src = str_replace($blog_url . "/", "", $src);

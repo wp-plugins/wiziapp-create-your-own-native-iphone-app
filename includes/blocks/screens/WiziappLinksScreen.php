@@ -76,6 +76,6 @@ class WiziappLinksScreen extends WiziappBaseScreen{
         $page = $pager->extractCurrentPage($page);
         $pager->addMoreCell(__("Load %s more items", 'wiziapp'), $page);
 
-        $this->output($this->prepare($page, $this->getTitle(), 'List', false, false, true), array('url' => 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/links/categories'), 'text' => $this->getTitle('categories')));
+        $this->output($this->prepare($page, $this->getTitle(), 'List', false, false, true), array('url' => 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/links/categories'), 'text' => $this->getTitle('categories')));
     }
 }

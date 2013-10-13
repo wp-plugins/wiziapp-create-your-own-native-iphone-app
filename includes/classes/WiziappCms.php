@@ -96,7 +96,7 @@ class WiziappCms {
 
 	public function deactivate() {
 		// Inform the system control
-		$blogUrl = get_bloginfo('url');
+		$blogUrl = WiziappContentHandler::getInstance()->get_blog_property('url');
 		$urlData = explode('://', $blogUrl);
 
 		$r = new WiziappHTTPRequest();

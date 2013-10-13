@@ -15,7 +15,7 @@ class WiziappDB implements WiziappIInstallable{
 
 	private $media_table = 'wiziapp_content_media';
 	private $user_table = 'wiziapp_user_info';
-	private $internal_version = '0.27';
+	private $internal_version = '0.28';
 	private static $_instance = null;
 
 	/**

@@ -266,7 +266,7 @@ class WiziappTabbarBuilder{
 	}
 
 	public function post_header_bar($post){
-		$url = 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/posts/recent');
+		$url = 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/posts/recent');
 		$title = WiziappConfig::getInstance()->app_name;
 
 		if ( isset($_GET['cat']) ){
@@ -302,7 +302,7 @@ class WiziappTabbarBuilder{
 		if (isset($_GET['commented'])){
 			foreach (get_approved_comments($post->ID) as $comment){
 				if ($_GET['commented'] == $comment->user_id){
-					$url = 'nav://list/' . urlencode(get_bloginfo('url') . "/?wiziapp/content/list/user/{$comment->user_id}/commented");
+					$url = 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/content/list/user/{$comment->user_id}/commented");
 					$title = __('My Commented Posts', 'wiziapp');
 					break;
 				}
@@ -324,7 +324,7 @@ class WiziappTabbarBuilder{
 		if (isset($_GET['from_attachment_id'])){
 			$attachment = get_post($_GET['from_attachment_id']);
 			if ($attachment && $attachment->post_parent == $post->ID){
-				$url = 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/attachment/'.$attachment->ID.'/posts');
+				$url = 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/attachment/'.$attachment->ID.'/posts');
 				$title = __('Related Posts', 'wiziapp');
 			}
 		}
@@ -332,11 +332,11 @@ class WiziappTabbarBuilder{
 		if (isset($_GET['year']) && isset($_GET['monthnum']) && preg_match('/^'.preg_quote($_GET['year']).'-0*'.preg_quote($_GET['monthnum']).'-[0-9]+( |$)/', $post->post_date)){
 			global $wp_locale;
 			if (isset($_GET['day']) && preg_match('/^'.preg_quote($_GET['year']).'-0*'.preg_quote($_GET['monthnum']).'-0*'.preg_quote($_GET['day']).'( |$)/', $post->post_date)){
-				$url = 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/archive/'.$_GET['year'].'/'.$_GET['monthnum'].'/'.$_GET['day']);
+				$url = 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/archive/'.$_GET['year'].'/'.$_GET['monthnum'].'/'.$_GET['day']);
 				$title = sprintf(__('%3$d %1$s %2$d'), $wp_locale->get_month($_GET['monthnum']), $_GET['year'], $_GET['day']);
 			}
 			else{
-				$url = 'nav://list/' . urlencode(get_bloginfo('url') . '/?wiziapp/content/list/archive/'.$_GET['year'].'/'.$_GET['monthnum']);
+				$url = 'nav://list/' . urlencode(WiziappContentHandler::getInstance()->get_blog_property('url') . '/?wiziapp/content/list/archive/'.$_GET['year'].'/'.$_GET['monthnum']);
 				$title = sprintf(__('%1$s %2$d'), $wp_locale->get_month($_GET['monthnum']), $_GET['year']);
 			}
 		}
