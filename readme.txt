@@ -225,10 +225,19 @@ Yes, you can use adsense and enjoy all the revenues, WiziApp take no cut of your
 
 == Changelog ==
 
+= 2.1.0 =
+
+- New pricing plan.
+- Bug Fixes.
+
+= 2.0.9 =
+
+- Bug Fixes.
+
 = 2.0.8 =
 
 - New Android App version - Important bug fixes and performance improvements, please upload a new APK version to the Google Play Android market, [see how](http://www.wiziapp.com/blog/guides-tutorials/updating-your-android-app/).
-- Improved plugin control panel interface..
+- Improved plugin control panel interface.
 
 = 2.0.7 =
 
