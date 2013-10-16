@@ -175,6 +175,10 @@ class WiziappCompatibilitiesChecker{
 		return TRUE;
 	}
 
+	public function testConnection(){
+		return $this->_testConnection();
+	}
+
 	public static function create_error_block( array $error){
 		ob_start();
 		?>
@@ -221,17 +225,12 @@ class WiziappCompatibilitiesChecker{
 	}
 
 	/**
-	* Check for the ability to issue outgoing requests
-	* and accept requests from the api server.
-	*
-	* Send a request to the admin to check access to this address
-	* it's POST since we need a more restrictive method, there is way
-	* to allow Wordpress to send GET request but not POST
-	*
-	* The post request must have a value to avoid issues with Content-Length  invalid and
-	* 413 Request Entity Too Large as a result...
-	*
-	* Covers the publicly accessible and out going requests tests
+	* Check for the ability to issue outgoing requests and accept requests from the api server.
+	* Send a request to the admin to check access to this address.
+	* It is POST since we need a more restrictive method.
+	* There is way to allow Wordpress to send GET request but not POST.
+	* The POST request must have a value to avoid issues with Content-Length invalid and 413 Request Entity Too Large as a result.
+	* Covers the publicly accessible and out going requests tests.
 	*
 	* @return bool|WiziappError can return true if everything is ok or an error object
 	*/
@@ -274,7 +273,7 @@ class WiziappCompatibilitiesChecker{
 			return new WiziappError('testing_connection_failed', 'The WiziApp plugin has encountered a problem. Please contact us at support@wiziapp.com to see how we can help you resolve this issue');
 		}
 
-		// The response is ok, let's check when our server is saying
+		// The response is ok, let's check when our server is saying.
 		if ( ! $checkResult->header->status ){
 			$rewrite_rules_message = WiziappHelpers::check_rewrite_rules();
 			$appropriate_message = ( $rewrite_rules_message !== '' ) ? $rewrite_rules_message : $checkResult->header->message;
@@ -282,7 +281,7 @@ class WiziappCompatibilitiesChecker{
 			return new WiziappError('testing_connection_failed', $appropriate_message);
 		}
 
-		// If we made it this far, all is good
+		// If we made it this far, all is good.
 		return TRUE;
 	}
 
