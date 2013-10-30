@@ -41,6 +41,8 @@ The WiziApp plugin integrates seamlessly with WordPress, delivering all of your 
 - Compatible with WPtouch and WPtouch Pro Smartphone mobile theme.
 - Notify your readers about new content by sending push notifications directly to their mobile devices.
 - Use Adsense for mobile to monetize your App.
+- Integrate your mobile App's stats with your google analytics account.
+- Monetize your iPhone and Android mobile Apps using Admob.
 
 == Installation ==
 
@@ -210,6 +212,9 @@ Please see a guide at:
 = Can I use adsense for mobile App? =
 Yes, you can use adsense and enjoy all the revenues, WiziApp take no cut of your revenues nor do we share the ad space.
 
+= Can I Integrate my mobile App's stats with my google analytics account? =
+Yes, you can Add your Google analytics account id on the WiziApp plugin settings and we will embed within your mobile Apps, so all of your mobile App's stat will be displayed on your Google Analytics account.
+
 == Screenshots ==
 
 1. Customize your mobile App and make it your own
@@ -222,6 +227,21 @@ Yes, you can use adsense and enjoy all the revenues, WiziApp take no cut of your
 8. Generate or upload your own designed Splash screen to your mobile App
 9. Build your mobile App Tab Bar Menu
 10. Select Sharing Options for your mobile App
+
+== Other Notes ==
+
+While you are creating your mobile Apps with the Wiziapp plugin, there are some other plugins you can install in order to extend the WiziApp powered mobile App, as follows:
+
+1. Exclude content from your mobile Apps OR create an exclusive content for your mobile App only, with The "Exclude Pages, Tags, Posts, Links & Categories".
+Exclude pages, tags, links & categories from your desktop site and keep them only on your mobile Apps by un checking the "Display on your web site" checkbox, you can also use an excluded Tag in order to exclude Posts from your mobile App.
+[Exclude Pages, Tags, Posts, Links & Categories](http://wordpress.org/plugins/exclude-or-include-pages-tags-posts-categories-integrate-with-wiziapp/)
+This plugin is integrated with your Wiziapp powered mobile Apps. For this purpose the plugin displays an additional checkbox named "Exclude from your mobile App". You can uncheck the "Display on your mobile App" checkbox and this content will not be displayed on the mobile App, but will still be displayed on your Web site.
+The "Exclude" plugin also enables you to include or create content exclusively for your Wiziapp powered mobile Apps. This can be done by un checking the "Display on your web site" and keeping the "Display on your mobile App" checked.
+
+2. Integrates Nextgen's images, galleries and albums with your WiziApp powered mobile Apps.
+This plugin integrates with your WiziApp powered mobile Apps.
+This plugin collects all of your Nextgen's images, Galleries and albums and add it to your WiziApp powered mobile App Albums.
+[NextGEN to WiziApp - Integrate image galleries & albums to your WiziApp powered iPhone App](http://wordpress.org/plugins/nextgen-to-wiziapp/)
 
 == Changelog ==
 
