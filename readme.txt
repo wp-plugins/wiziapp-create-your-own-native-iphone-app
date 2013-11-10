@@ -25,7 +25,7 @@ The WiziApp plugin integrates seamlessly with WordPress, delivering all of your 
 
 1. Expose your native Android mobile App to more than 350 million Android users through the Android Google Play market.
 2. Expose your native iPhone mobile App to more than 380 million iOS users through the Apple App Store.
-3. Notify your readers directly to their mobile devices about new content in real time using push notification service that runs and maintained by WiziApp
+3. Notify your readers directly to their mobile devices about new content in real time using push notification service that runs and maintained by WiziApp.
 
 = Features list: =
 
