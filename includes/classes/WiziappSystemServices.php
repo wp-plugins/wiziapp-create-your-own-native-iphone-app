@@ -8,11 +8,11 @@
 class WiziappSystemServices{
 
 	/**
-	 * Authenticate the request against the plugin token.
-	 * if the authentication fail, throw 404.
-	 *
-	 * @return bool
-	 */
+	* Authenticate the request against the plugin token.
+	* if the authentication fail, throw 404.
+	*
+	* @return bool
+	*/
 	public function checkSystemAuth(){
 		// Verify the plugin token against our plugin_token
 		$token = $_SERVER['HTTP_PLUGIN'];
@@ -51,30 +51,30 @@ class WiziappSystemServices{
 			WiziappConfig::getInstance()->startBulkUpdate();
 			// The request must be with the exact keys
 			WiziappConfig::getInstance()->full_image_height = $thumbs['full_image_height'];
-			WiziappConfig::getInstance()->full_image_width = $thumbs['full_image_width'];
+			WiziappConfig::getInstance()->full_image_width  = $thumbs['full_image_width'];
 
 			WiziappConfig::getInstance()->images_thumb_height = $thumbs['images_thumb_height'];
-			WiziappConfig::getInstance()->images_thumb_width = $thumbs['images_thumb_width'];
+			WiziappConfig::getInstance()->images_thumb_width  = $thumbs['images_thumb_width'];
 
 			WiziappConfig::getInstance()->posts_thumb_height = $thumbs['posts_thumb_height'];
-			WiziappConfig::getInstance()->posts_thumb_width = $thumbs['posts_thumb_width'];
+			WiziappConfig::getInstance()->posts_thumb_width  = $thumbs['posts_thumb_width'];
 
 			WiziappConfig::getInstance()->featured_post_thumb_height = $thumbs['featured_post_thumb_height'];
-			WiziappConfig::getInstance()->featured_post_thumb_width = $thumbs['featured_post_thumb_width'];
+			WiziappConfig::getInstance()->featured_post_thumb_width  = $thumbs['featured_post_thumb_width'];
 
 			WiziappConfig::getInstance()->mini_post_thumb_height = $thumbs['mini_post_thumb_height'];
-			WiziappConfig::getInstance()->mini_post_thumb_width = $thumbs['mini_post_thumb_width'];
+			WiziappConfig::getInstance()->mini_post_thumb_width  = $thumbs['mini_post_thumb_width'];
 
 			WiziappConfig::getInstance()->comments_avatar_height = $thumbs['comments_avatar_height'];
-			WiziappConfig::getInstance()->comments_avatar_width = $thumbs['comments_avatar_width'];
+			WiziappConfig::getInstance()->comments_avatar_width  = $thumbs['comments_avatar_width'];
 
-			WiziappConfig::getInstance()->album_thumb_width = $thumbs['album_thumb_width'];
+			WiziappConfig::getInstance()->album_thumb_width  = $thumbs['album_thumb_width'];
 			WiziappConfig::getInstance()->album_thumb_height = $thumbs['album_thumb_height'];
 
-			WiziappConfig::getInstance()->video_album_thumb_width = $thumbs['video_album_thumb_width'];
+			WiziappConfig::getInstance()->video_album_thumb_width  = $thumbs['video_album_thumb_width'];
 			WiziappConfig::getInstance()->video_album_thumb_height = $thumbs['video_album_thumb_height'];
 
-			WiziappConfig::getInstance()->audio_thumb_width = $thumbs['audio_thumb_width'];
+			WiziappConfig::getInstance()->audio_thumb_width  = $thumbs['audio_thumb_width'];
 			WiziappConfig::getInstance()->audio_thumb_height = $thumbs['audio_thumb_height'];
 
 			//$status = update_option('wiziapp_settings', $options);
@@ -99,12 +99,12 @@ class WiziappSystemServices{
 	}
 
 	/**
-	 * Used to update the wiziapp_settings option
-	 * Used by the system control services in case of changes done in the account.
-	 * POST /wiziapp/system/settings
-	 *
-	 * @return regular json status header.
-	 */
+	* Used to update the wiziapp_settings option
+	* Used by the system control services in case of changes done in the account.
+	* POST /wiziapp/system/settings
+	*
+	* @return regular json status header.
+	*/
 	public function updateConfiguration(){
 		$this->checkSystemAuth();
 		$status = FALSE;
@@ -169,13 +169,13 @@ class WiziappSystemServices{
 	}
 
 	/**
-	 * Used to update the wiziapp_screens option
-	 * Used by the system control services in case of changes done in the template the app uses.
-	 * POST /wiziapp/system/screens
-	 * @todo add validation to the content of the screens
-	 *
-	 * @returns regular json status header.
-	 */
+	* Used to update the wiziapp_screens option
+	* Used by the system control services in case of changes done in the template the app uses.
+	* POST /wiziapp/system/screens
+	* @todo add validation to the content of the screens
+	*
+	* @returns regular json status header.
+	*/
 	public function updateScreenConfiguration(){
 		$this->checkSystemAuth();
 		$screensJson = stripslashes($_POST['screens']);
@@ -207,17 +207,17 @@ class WiziappSystemServices{
 	}
 
 	/**
-	 * Used to update the wiziapp_components option
-	 *
-	 * Used by the system control services in case of changes done in the
-	 * theme customization the app uses.
-	 *
-	 * POST /wiziapp/system/components
-	 *
-	 * @todo add validation to the content of the components
-	 *
-	 * @returns regular json status header.
-	 */
+	* Used to update the wiziapp_components option
+	*
+	* Used by the system control services in case of changes done in the
+	* theme customization the app uses.
+	*
+	* POST /wiziapp/system/components
+	*
+	* @todo add validation to the content of the components
+	*
+	* @returns regular json status header.
+	*/
 	public function updateComponentsConfiguration(){
 		$this->checkSystemAuth();
 		$componentsJson = stripslashes($_POST['components']);
@@ -274,7 +274,7 @@ class WiziappSystemServices{
 			if ( empty($options) ){
 				$options = $pages;
 				$status = add_option('wiziapp_pages', $options, '', 'no');
-				 $message = __('Unable to create pages configuration', 'wiziapp');
+				$message = __('Unable to create pages configuration', 'wiziapp');
 			} else {
 				$options = $pages;
 				$status = update_option('wiziapp_pages', $options);
@@ -282,7 +282,7 @@ class WiziappSystemServices{
 			}
 
 			if ( $status )  {
-			   $ce = new WiziappContentEvents();
+				$ce = new WiziappContentEvents();
 				$ce->updateCacheTimestampKey();
 			}
 		}

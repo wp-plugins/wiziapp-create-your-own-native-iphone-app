@@ -378,11 +378,26 @@ class WiziappContentHandler {
 		}
 		WiziappProfiler::getInstance()->write("Done Handling links for post {$post->ID}", "WiziappContentHandler.convert_content");
 
+		// Reload DOM tree - Unfortunately, simple_html_dom_wiziapp doesn't update the DOM tree in response to changes
+		$content = $html->save();
+		$html->clear();
+		$html->load($content);
+
+		WiziappLog::getInstance()->write('INFO', "Remove Sharing From Content", "WiziappContentHandler.removeSharingFromContent");
+		$this->_removeSharingFromContent($html, $post->ID);
+
 		// Dumps the internal DOM tree back into string
+		$script_elements = $html->find('script');
 		$content = $html->save();
 		$html->clear();
 
-		$content = $this->removeSharingFromContent($content, $post->ID);
+		// Remove unused shortcodes from the content.
+		if ( is_array($script_elements) && count($script_elements) > 0 ) {
+			$pattern = '#(?>.+(?=<script\s)|(?<=<\/script>).+)#is';
+			$content = preg_replace_callback($pattern, array( 'WiziappHelpers', 'removeShorttags' ), $content);
+		} else {
+			$content = WiziappHelpers::removeShorttags($content);
+		}
 
 		WiziappProfiler::getInstance()->write("Done Content processing for post {$post->ID}", "WiziappContentHandler.convert_content");
 		WiziappLog::getInstance()->write('INFO', "Returning the converted content", "WiziappContentHandler.convert_content");
@@ -686,7 +701,7 @@ class WiziappContentHandler {
 		wp_localize_script(
 			'wiziapp_helper_object',
 			'wiziapp_name_space',
-			array( 'home_url' => $this->inApp ? '' : $this->_blog_properties['url'], )
+			array( 'home_url' => $this->inApp ? '' : $this->_blog_properties['url'], 'wiziapp_android_app' => WIZIAPP_ANDROID_APP, )
 		);
 	}
 
@@ -702,11 +717,22 @@ class WiziappContentHandler {
 		return self::$_instance;
 	}
 
-	private function removeSharingFromContent($content, $pid) {
-		WiziappLog::getInstance()->write('INFO', "Remove Sharing From Content", "WiziappContentHandler.removeSharingFromContent");
-		$sc = new SharingCompanion();
-		$content= $sc->removeSharing($content, $pid);
-		return $content;
+	private function _removeSharingFromContent( & $html, $post_id) {
+		// Remove add to any.
+		for ($i=1; $i<=10; $i++){
+			$divName = "div[id=wpa2a_{$i}]";
+			$e = $html->find($divName, 0);
+			if ( isset($e->outertext) ) {
+				$e->outertext = '';
+			}
+		}
+
+		// Remove sexybookmarks
+		$className = '.shr-publisher-'.$post_id;
+		$e = $html->find($className);
+		if ( isset($e->outertext) ) {
+			$e->outertext = '';
+		}
 	}
 
 	private function _desktop_site_mode() {
@@ -1207,4 +1233,3 @@ class WiziappContentHandler {
 }
 
 require_once(dirname(dirname(__FILE__)) . '/libs/simpleHtmlDom/simple_html_dom.php');
-require_once(dirname(dirname(__FILE__)) . '/libs/simpleHtmlDom/SharingCompanion.php');

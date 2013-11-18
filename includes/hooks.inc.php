@@ -94,6 +94,7 @@ function wiziapp_attach_hooks(){
 
 	// admin
 	add_action('wp_ajax_wiziapp_hide_verify_msg', 		array('WiziappAdminNotices', 'hideVerifyMsg'));
+	add_action('wp_ajax_wiziapp_plugins_page',	   		array('WiziappGeneratorDisplay', 'wiziapp_plugins_page'));
 	add_action('wp_ajax_wiziapp_plugin_compatibility',	array(WiziappPluginCompatibility::getInstance(), 'configure'));
 
 	// Wizard

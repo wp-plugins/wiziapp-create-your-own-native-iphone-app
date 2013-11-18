@@ -7,6 +7,7 @@
 */
 
 class WiziappPostsScreen extends WiziappBaseScreen{
+
 	// Yes, I know this is an ugly hack, but it's the most non-destructive way to pass this info
 	static public $postLinkAdd = false;
 
@@ -17,35 +18,30 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 
 	public function runByRecent(){
 		$screen_conf = $this->getConfig();
-
 		$title = htmlspecialchars( WiziappConfig::getInstance()->app_name );
-
 		if ( isset($screen_conf['items_inner']) ){
 			$this->scrollingCategories($screen_conf, $title);
 			return;
 		}
 
 		$numberOfPosts = WiziappConfig::getInstance()->posts_list_limit;
-
-		/**
-		* Handle paging
-		*/
-		$page = isset($_GET['wizipage']) ? $_GET['wizipage'] : 0;
-
 		$query = array(
 			'orderby' => 'post_date',
 			'posts_per_page' => $numberOfPosts
 		);
 
-		if ( ! empty($page) ){
-			$query['pageOffset'] = $query['offset'] = ( $numberOfPosts * $page );
-		} else {
+		// Handle paging
+		$page = isset($_GET['wizipage']) ? $_GET['wizipage'] : 0;
+		if ( empty($page) ){
 			$query['pageOffset'] = $query['offset'] = 0;
-			$query['posts_per_page'] = $numberOfPosts - 1; // Remove one for the featured post
+			// Remove one for the featured post
+			$query['posts_per_page'] = $numberOfPosts - 1;
+		} else {
+			$query['pageOffset'] = $query['offset'] = ( $numberOfPosts * $page );
 		}
 
 		// With the offset which post have we reached?
-		$totalShownPosts = $numberOfPosts + (($numberOfPosts * $page)+1);
+		$totalShownPosts = $numberOfPosts + ( ($numberOfPosts * $page) + 1 );
 
 		// Find the total number of posts in the blog
 		$publishedPosts = 0;
@@ -61,10 +57,8 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 			$showMore = FALSE;
 		}
 
-		/**
-		* Only show the first section on the first request (Main Page).
-		* The rest of the requests need to update the recent section.
-		*/
+		// Only show the first section on the first request (Main Page).
+		// The rest of the requests need to update the recent section.
 		if ( empty($page) || $page == 0 ){
 			$firstQuery = array(
 				'posts_per_page'      => 1,
@@ -99,11 +93,8 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 			}
 			*/
 		} else {
-			/*
-			* We are retrieving an update page to add to the first, the first displayed the featured post.
-			* This might have more sticky so we can't ignore them, but we need to exclude some of them,
-			* since they might already be shown.
-			*/
+			// We are retrieving an update page to add to the first, the first displayed the featured post.
+			// This might have more sticky so we can't ignore them, but we need to exclude some of them, since they might already be shown.
 			$stickPosts = get_option('sticky_posts');
 			if ( ! empty($stickPosts) ){
 				$query['post__not_in'] = array_slice ($stickPosts , 0, $query['offset']);
@@ -426,16 +417,12 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 	}
 
 	function build($query, $title, $block, $just_return = false, $show_more = false, $display_more_item = true){
-		/**
-		* Use the power of wordpress loop by passing the post component building to a template
-		*/
+		WiziappLog::getInstance()->write('DEBUG', "About to query posts by: " . print_r($query, TRUE), "screens.wiziapp_buildPostListPage");
+
+		// Use the power of wordpress loop by passing the post component building to a template
 		global $wiziapp_block, $cPage, $postsScreen, $wiziappQuery;
 		$cPage = array();
 		$wiziapp_block = $block;
-
-		WiziappLog::getInstance()->write('DEBUG', "About to query posts by: " . print_r($query, TRUE),
-			"screens.wiziapp_buildPostListPage");
-
 		$postsScreen = $this;
 		$wiziappQuery = $query;
 		WiziappTemplateHandler::load(WIZI_DIR_PATH . 'themes/iphone/index.php');
@@ -446,15 +433,17 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 
 		if ($show_more > 0){
 			$offset = 0;
-			if (!is_array($query)){
-				parse_str($query);
-			} else {
+
+			if ( is_array($query) ){
 				$offset = isset($query['offset']) ? $query['offset'] : 0;
 				if ( isset($query['pageOffset']) ){
 					$offset = $query['pageOffset'];
 				}
+			} else {
+				parse_str($query);
 			}
-			if ($offset > 0){
+
+			if ( $offset > 0 ){
 				$page = floor($offset / WiziappConfig::getInstance()->posts_list_limit);
 			} else {
 				$page = 0;

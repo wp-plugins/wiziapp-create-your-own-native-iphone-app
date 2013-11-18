@@ -35,12 +35,11 @@ class WiziappBaseScreen{
 
 	function prepare($page = array(), $title = '', $type = 'Post', $sections = FALSE, $force_grouped = FALSE, $hide_separator = FALSE, $css_class = '', $show_ads = FALSE){
 		$key = $sections ? 'sections' : 'items';
-
 		$grouped = ($sections || $force_grouped) ? TRUE : FALSE;
 		$css_class_name = empty($css_class) ? ( $grouped ? 'screen' : '' ) : $css_class;
 
 		if ($grouped){
-			// Verify that the app supports group, the theme might force everything to be not grouped
+			// Verify that the app supports group, the theme might force everything to be not grouped.
 			if ( ! WiziappConfig::getInstance()->allow_grouped_lists || $title == 'Links' ){
 				$grouped = FALSE;
 			}
@@ -141,7 +140,7 @@ class WiziappBaseScreen{
 				$screen_content['screen']['class'] = "{$screen_content['screen']['class']} {$screen_content['screen']['class']}_empty";
 			}
 
-			if ($back_content !== false && !isset($back_content['text'])){
+			if ( $back_content !== false && ! isset($back_content['text']) ){
 				$back_content['text'] = false;
 			}
 

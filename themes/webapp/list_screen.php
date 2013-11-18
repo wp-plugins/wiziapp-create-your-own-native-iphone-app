@@ -11,6 +11,8 @@ if ( $screen_content['screen']['update'] === TRUE ){
 		$loaded_event_trigger = ' class="comments_loaded_event"';
 	} elseif ( isset($this->type) && $this->type === 'list' && isset($this->name) && $this->name === 'posts' ){
 		$loaded_event_trigger = ' class="recent_loaded_event"';
+	} elseif ( isset($this->type) && $this->type === 'list' && isset($this->name) && $this->name === 'pages' ){
+		$loaded_event_trigger = ' class="pages_loaded_event"';
 	}
 	?>
 

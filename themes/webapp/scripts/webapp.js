@@ -2,8 +2,7 @@
 (function($, $$) {
 	if ($.mobile) {
 		$$($);
-	}
-	else {
+	} else {
 		$(document).bind("mobileinit", function() {
 			$$($);
 		});
@@ -12,262 +11,594 @@
 	$.mobile.touchOverflowEnabled = true;
 });
 
-jQuery(document).delegate(".index:jqmData(role='page')", "pageshow", function() {
-	var a = jQuery("a", this);
+(function($){
 
-	if ( jQuery.mobile.path.parseUrl(window.location.href).search.indexOf("androidapp=1") >= 0 ){
-		a.click();
-	} else {
-		setTimeout(function() {
-			// Add the webapp=1 to mark what is the Android browser request and not the Android native app
-			var href = a.attr("href");
-			var webapp = "?webapp=1";
-			var ind = href.indexOf('?');
-			if ( ind > 0 ){
-				webapp = "";
-				if ( href.indexOf('webapp=1', ind + 1) < 0 ){
-					webapp = '&webapp=1';
+	$(document)
+	.delegate(".index:jqmData(role='page')", "pageshow", function() {
+		var a = $("a", this);
+
+		if ( $.mobile.path.parseUrl(window.location.href).search.indexOf("androidapp=1") >= 0 ){
+			a.click();
+		} else {
+			setTimeout(function() {
+				// Add the webapp=1 to mark what is the Android browser request and not the Android native app
+				var href = a.attr("href");
+				var webapp = "?webapp=1";
+				var ind = href.indexOf('?');
+				if ( ind > 0 ){
+					webapp = "";
+					if ( href.indexOf('webapp=1', ind + 1) < 0 ){
+						webapp = '&webapp=1';
+					}
 				}
-			}
-			href += webapp;
+				href += webapp;
 
-			a
-			.attr("href", href)
-			.click();
-			}, 1000);
-	}
-});
-
-jQuery(document).delegate(":jqmData(role='page')", "pageinit", pageShowEvent);
-jQuery(document).delegate(".edit_favorites", "vclick", function(event){
-	var $btn = jQuery(this);
-	var $page = $btn.closest('.ui-page');
-
-	if ( $page.is('.editing') ){
-		// Leave edit mode
-		$page.removeClass('editing');
-		$btn.text($btn.attr('data-text'));
-	} else {
-		// Enter edit mode
-		$page.addClass('editing');
-		$btn.text($btn.attr('data-alternate-text'));
-	}
-
-	$btn = null;
-});
-
-function pageShowEvent(event){
-	var $page = jQuery(this);
-
-	if ( $page.is('.got_empty_state') ){
-		if ( $page.find('.screen').find('li').length == 0 ){
-			var cssClass = $page.attr('data-class');
-			$page.find('.screen').addClass(cssClass + '_empty');
+				a
+				.attr("href", href)
+				.click();
+				}, 1000);
 		}
-	}
-
-	jQuery.each($page.find('.valign_attribute:not(.processed_page_show)'), function(index, item){
-		var $el = jQuery(item);
-		var height = $el.css('height');
-
-		if ( height != "auto" ){
-			$el.css({
-				'line-height': parseInt($el.css('height')) + 'px'
-			});
-		}
-
-		$el.addClass('processed_page_show');
-		$el = null;
-	});
-
-	jQuery.each($page.find('.imageURL:not(.processed_page_show)'), function(index, item){
-		var $el = jQuery(item);
-		var imageSrc = $el.attr('data-image-src');
-
-		if ( imageSrc ){
-			$el.find('img')
-			.bind('error', function(){
-				// Maybe we will add some logs to this
-			})
-			.bind('load', function(){
-				var className = jQuery(this).attr('data-class');
-				if ( className ){
-					jQuery(this).addClass(className);
-				}
-				jQuery(this).removeClass("hidden");
-			})
-			.attr('src', imageSrc);
-
-		}
-
-		$el.addClass('processed_page_show');
-		$el = null;
-	});
-
-	handleActionURL($page);
-
-	$page
-	.find('.audio_play:not(.processed_page_show)')
-	.bind('click', function(event){
-		var $el = jQuery(this);
-		var audioElId = $el.attr('data-audio-id');
-		var $audioEl = jQuery('#' + audioElId);
-
-		if ( $audioEl.parents('.playing').length > 0 ){
-			$el.removeClass('audio_button_play_selected');
-			$audioEl[0].pause();
-			$audioEl.parents('ul').find('.playing').removeClass('playing').removeClass('audio_selected');
-		} else {
-			$audioEl[0].play();
-			$el.addClass('audio_button_play_selected');
-			$audioEl.parents('ul').find('.playing').removeClass('playing').removeClass('audio_selected');
-			$audioEl.parents('.audioCellItem').addClass('playing').addClass('audio_selected');
-		}
-
-		$el = $audioEl = null;
 	})
-	.addClass('processed_page_show');
-
-	$page
-	.find('.audio_stop:not(.processed_page_show)')
-	.bind('click', function(event){
-		var $el = jQuery(this);
-		var audioElId = $el.attr('data-audio-id');
-		var $audioEl = jQuery('#' + audioElId);
-
-		$audioEl[0].pause();
-		$audioEl[0].currentTime=0;// rewind
-
-		$el.parent().find('.audio_button_play_selected').removeClass('audio_button_play_selected');
-
-		$audioEl.parents('.audioCellItem').removeClass('playing').removeClass('audio_selected');
-
-		$el = $audioEl = null;
+	.delegate(":jqmData(role='page')", "pagebeforecreate", function(){
+		// Override the jQuery Mobile Button widget option initSelector = "button, [type='button'], [type='submit'], [type='reset'], [type='image']"
+		// to avoid breaking native blog buttons by jQuery Mobile.
+		$.mobile.button.prototype.options.initSelector = "button, [type='button'], [type='submit'], [type='reset']";
 	})
-	.addClass('processed_page_show');
+	.delegate(".edit_favorites", "vclick", function(event){
+		var $btn = $(this);
+		var $page = $btn.closest('.ui-page');
 
-	$page
-	.find('.cellItem:not(.ignore_hover):not(.processed_page_show)')
-	.hover(function(){
-		jQuery(this).addClass('default_selected');
-		},
-		function(){
-			jQuery(this).removeClass('default_selected');
+		if ( $page.is('.editing') ){
+			// Leave edit mode
+			$page.removeClass('editing');
+			$btn.text($btn.attr('data-text'));
+		} else {
+			// Enter edit mode
+			$page.addClass('editing');
+			$btn.text($btn.attr('data-alternate-text'));
+		}
+
+		$btn = null;
 	})
-	.addClass('processed_page_show');
+	.on("pageinit", ".recent_loaded_event, .pages_loaded_event", function(event){
+		// Show the Ajax loader to simulate loading by ajax the Posts and the Pages, although its loaded by regular request.
+		$(event.currentTarget)
+		.find("div:jqmData(role='content') ul:jqmData(role='listview') li.postDescriptionCellItem a, div:jqmData(role='content') ul:jqmData(role='listview') li.linkCellItem a")
+		.click(function(){
+			$.mobile.showPageLoadingMsg();
 
-	$page.bind("pagehide", function(){
-		$page.find('.cellItem:not(.ignore_hover).processed_page_show.default_selected').removeClass('default_selected');
-	});
-
-	jQuery.each($page.find('[data-auto-height-calc=true]:not(.processed_page_show)'), function(){
-		var $el = jQuery(this);
-		var $byEl = $el.find($el.attr('data-height-by'));
-		var height = parseInt($byEl.outerHeight());
-		var totalHeight = parseInt($byEl.css('top')) + height;
-
-		$el.css('height', totalHeight + 'px');
-
-		$el.addClass('processed_page_show');
-		$byEl = null;
-		$el = null;
-	});
-
-	// editable
-	$page.find('ul.editable li .ui-btn-inner').each(function(index, item){
-		var $el = jQuery(this);
-		var h = $el.parents('.cellItem:first').height();
-		$el
-		.prepend('<div class="delete delete_icon"></div>')
-		.append('<div class="delete_button" data-delete-method="FavoritesPage.remove" data-delete-param="data-post-id">Delete</div>');
-
-		$el
-		.find('.delete_icon')
-		.css('height', h);
-
-		$el = null;
-	});
-
-	$page.find('.delete_icon').click(function(){
-		var $btn = jQuery(this);
-		var $deleteBtn = $btn.parents('.cellItem:first').find('.delete_button');
-
-		if ( $btn.is(".btn_mode") ){
-			$btn.removeClass('btn_mode');
-			$deleteBtn.animate({
-				'width': '0px'
-				}, 'slow', function(){
-					jQuery(this).hide();
-			});
-		} else {
-			$btn.addClass('btn_mode');
-			$deleteBtn.show().animate({
-				'width': '50px'
-				}, 'slow');
-		}
-
-		$deleteBtn = $btn = null;
-		return false;
-	});
-
-	$page.find('.delete_button').click(function(event){
-		event.preventDefault();
-
-		var $btn = jQuery(this);
-		var $parent = $btn.parents(".cellItem:first");
-		var actionInfo = $btn.attr('data-delete-method').split('.');
-
-		var id = $parent.attr($btn.attr('data-delete-param'));
-		if ( id.indexOf('_') >= 0 ){
-			var tmp = id.split('_');
-			id = parseInt(tmp[tmp.length - 1]);
-		}
-		if ( actionInfo.length > 1 ){
-			var obj = window[actionInfo[0]];
-			obj[actionInfo[1]](id);
-		} else {
-			actionInfo[0](id);
-		}
-
-		$btn = $parent = null;
-		return false;
-	});
-
-	// To avoid collision with "Contact Form 7", "FV Community News", "Formidable Forms" and "Events Manager" plugins
-	$page
-	.find("form.wpcf7-form, form.fvcn-post-form-new-post, #event-form, form[id^='gform'], form.frm-show-form[id^='form_']")
-	.attr("data-ajax", "false");
-
-	// Open X Ad
-	if ( $page.attr("data-url").indexOf('output=html') > 0 && jQuery("#wiziapp_openxad_body div:jqmData(role='content') [id^='beacon_']").length > 0 ){
-		setTimeout(function(){
-			// The proper way "jQuery.mobile.changePage( "#open_x_ad", { role: "dialog" } );"
-			// is not work fine, so need a trick
-			jQuery("#wiziapp_openxad_open").click();
-
-			// set Cookie to show the Ad next after some week.
-			var exp_date = new Date();
-			exp_date.setDate(exp_date.getDate() + 7);
-			document.cookie = "wiziapp_openxad_shown=1; expires=" + exp_date.toUTCString();
+			var post_link = $(this);
 
 			setTimeout(function(){
-				jQuery("#wiziapp_openxad_close").click();
-				}, 6000);
-			}, 2000);
+				$.mobile.hidePageLoadingMsg();
+				window.location = post_link.attr("href");
+				}, 1000);
+
+			return false;
+		});
+	})
+	.on("pagebeforeshow", "#sharing_menu", function(event, data){
+		var sharing_options = {
+			"facebook":	"http://www.facebook.com/share.php?u=",
+			"twitter":	"https://twitter.com/share?url=",
+			"email":	"mailto:?subject=The%20page%20to%20share&body=",
+			"google+":	"https://plus.google.com/share?url="
+		}
+
+		var share_buttons = $(event.currentTarget).find("div:jqmData(role='content') p a");
+		var share_buttons_amount = share_buttons.length;
+		if (share_buttons_amount == 0 ){
+			return;
+		}
+
+		var sharing_url = data.prevPage.attr("data-url");
+		if ( ! $.mobile.path.isAbsoluteUrl(sharing_url) ){
+			sharing_url = window.location.protocol + "//" + window.location.host + sharing_url;
+		}
+		sharing_url = encodeURIComponent( $.mobile.path.parseUrl(sharing_url).hrefNoHash );
+
+		for (var i=0; i<share_buttons_amount; i++){
+			var current_button = $(share_buttons[i]);
+			var sharing_name = current_button.text().toLowerCase();
+
+			if ( typeof sharing_options[sharing_name] === "undefined" ){
+				continue;
+			}
+
+			current_button.attr("href", sharing_options[sharing_name] + sharing_url);
+		}
+	})
+	.delegate(":jqmData(role='page')", "pageinit", function(event){
+		var $page = $(this);
+
+		if ( $page.is('.got_empty_state') ){
+			if ( $page.find('.screen').find('li').length == 0 ){
+				var cssClass = $page.attr('data-class');
+				$page.find('.screen').addClass(cssClass + '_empty');
+			}
+		}
+
+		$.each($page.find('.valign_attribute:not(.processed_page_show)'), function(index, item){
+			var $el = $(item);
+			var height = $el.css('height');
+
+			if ( height != "auto" ){
+				$el.css({
+					'line-height': parseInt($el.css('height')) + 'px'
+				});
+			}
+
+			$el.addClass('processed_page_show');
+			$el = null;
+		});
+
+		$.each($page.find('.imageURL:not(.processed_page_show)'), function(index, item){
+			var element = $(item);
+			var imageSrc = element.attr('data-image-src');
+
+			if ( imageSrc ){
+				element
+				.find('img')
+				.bind('load', function(event){
+					var className = $(this).attr('data-class');
+					if ( className ){
+						$(this).addClass(className);
+					}
+					$(this).removeClass("hidden");
+
+					if ( $(event.currentTarget).parent().hasClass("featured_post_image")){
+						// The Feature Image position calculation
+						calculate_image_position( $(event.currentTarget).parent() );
+					}
+				})
+				.attr('src', imageSrc);
+			}
+
+			element.addClass('processed_page_show');
+			element = null;
+		});
+
+		handleActionURL($page);
+
+		$page
+		.find('.audio_play:not(.processed_page_show)')
+		.bind('click', function(event){
+			var $el = $(this);
+			var audioElId = $el.attr('data-audio-id');
+			var $audioEl = $('#' + audioElId);
+
+			if ( $audioEl.parents('.playing').length > 0 ){
+				$el.removeClass('audio_button_play_selected');
+				$audioEl[0].pause();
+				$audioEl.parents('ul').find('.playing').removeClass('playing').removeClass('audio_selected');
+			} else {
+				$audioEl[0].play();
+				$el.addClass('audio_button_play_selected');
+				$audioEl.parents('ul').find('.playing').removeClass('playing').removeClass('audio_selected');
+				$audioEl.parents('.audioCellItem').addClass('playing').addClass('audio_selected');
+			}
+
+			$el = $audioEl = null;
+		})
+		.addClass('processed_page_show');
+
+		$page
+		.find('.audio_stop:not(.processed_page_show)')
+		.bind('click', function(event){
+			var $el = $(this);
+			var audioElId = $el.attr('data-audio-id');
+			var $audioEl = $('#' + audioElId);
+
+			$audioEl[0].pause();
+			$audioEl[0].currentTime=0;// rewind
+
+			$el.parent().find('.audio_button_play_selected').removeClass('audio_button_play_selected');
+
+			$audioEl.parents('.audioCellItem').removeClass('playing').removeClass('audio_selected');
+
+			$el = $audioEl = null;
+		})
+		.addClass('processed_page_show');
+
+		$page
+		.find('.cellItem:not(.ignore_hover):not(.processed_page_show)')
+		.hover(function(){
+			$(this).addClass('default_selected');
+			},
+			function(){
+				$(this).removeClass('default_selected');
+		})
+		.addClass('processed_page_show');
+
+		$page.bind("pagehide", function(){
+			$page.find('.cellItem:not(.ignore_hover).processed_page_show.default_selected').removeClass('default_selected');
+		});
+
+		$.each($page.find('[data-auto-height-calc=true]:not(.processed_page_show)'), function(){
+			var $el = $(this);
+			var $byEl = $el.find($el.attr('data-height-by'));
+			var height = parseInt($byEl.outerHeight());
+			var totalHeight = parseInt($byEl.css('top')) + height;
+
+			$el.css('height', totalHeight + 'px');
+
+			$el.addClass('processed_page_show');
+			$byEl = null;
+			$el = null;
+		});
+
+		// editable
+		$page.find('ul.editable li .ui-btn-inner').each(function(index, item){
+			var $el = $(this);
+			var h = $el.parents('.cellItem:first').height();
+			$el
+			.prepend('<div class="delete delete_icon"></div>')
+			.append('<div class="delete_button" data-delete-method="FavoritesPage.remove" data-delete-param="data-post-id">Delete</div>');
+
+			$el
+			.find('.delete_icon')
+			.css('height', h);
+
+			$el = null;
+		});
+
+		$page.find('.delete_icon').click(function(){
+			var $btn = $(this);
+			var $deleteBtn = $btn.parents('.cellItem:first').find('.delete_button');
+
+			if ( $btn.is(".btn_mode") ){
+				$btn.removeClass('btn_mode');
+				$deleteBtn.animate({
+					'width': '0px'
+					}, 'slow', function(){
+						$(this).hide();
+				});
+			} else {
+				$btn.addClass('btn_mode');
+				$deleteBtn.show().animate({
+					'width': '50px'
+					}, 'slow');
+			}
+
+			$deleteBtn = $btn = null;
+			return false;
+		});
+
+		$page.find('.delete_button').click(function(event){
+			event.preventDefault();
+
+			var $btn = $(this);
+			var $parent = $btn.parents(".cellItem:first");
+			var actionInfo = $btn.attr('data-delete-method').split('.');
+
+			var id = $parent.attr($btn.attr('data-delete-param'));
+			if ( id.indexOf('_') >= 0 ){
+				var tmp = id.split('_');
+				id = parseInt(tmp[tmp.length - 1]);
+			}
+			if ( actionInfo.length > 1 ){
+				var obj = window[actionInfo[0]];
+				obj[actionInfo[1]](id);
+			} else {
+				actionInfo[0](id);
+			}
+
+			$btn = $parent = null;
+			return false;
+		});
+
+		// To avoid collision with "Contact Form 7", "FV Community News", "Events Manager", "Google Form", "Formidable Forms" plugins.
+		$page
+		.find("form.wpcf7-form, form.fvcn-post-form-new-post, #event-form, form[id^='gform'], form.frm-show-form[id^='form_']")
+		.attr("data-ajax", "false");
+
+		// Open X Ad
+		if ( $page.attr("data-url").indexOf('output=html') > 0 && $("#wiziapp_openxad_body div:jqmData(role='content') [id^='beacon_']").length > 0 ){
+			setTimeout(function(){
+				// The proper way "jQuery.mobile.changePage( "#open_x_ad", { role: "dialog" } );"
+				// is not work fine, so need a trick
+				$("#wiziapp_openxad_open").click();
+
+				// set Cookie to show the Ad next after some week.
+				var exp_date = new Date();
+				exp_date.setDate(exp_date.getDate() + 7);
+				document.cookie = "wiziapp_openxad_shown=1; expires=" + exp_date.toUTCString();
+
+				setTimeout(function(){
+					$("#wiziapp_openxad_close").click();
+					}, 6000);
+				}, 2000);
+		}
+
+		// Bind favorite button
+		// Apply effects
+		applyEffects($page);
+	})
+	.on("pageinit", ".post_loaded_event", function(event){
+		var process_video_behavior = function(event){
+			var iframe_protect_screen = $(event.currentTarget);
+			var not_moved = true;
+
+			iframe_protect_screen
+			.on("mousemove", function(event){
+				not_moved = false;
+			})
+			.mouseup(function(event) {
+				if (not_moved){
+					$.mobile.changePage( iframe_protect_screen.attr("data-video-url") );
+				}
+
+				iframe_protect_screen
+				.off("mouseup")
+				.off("mousemove");
+
+				not_moved = true;
+			});
+		}
+
+		var toggleFontSizePanel = function(event){
+			var element = $(this);
+
+			element
+			.children(".font_panel")
+			.toggle();
+
+			element = null;
+		};
+
+		var changeWebViewFontSize = function(event){
+			event.stopPropagation();
+
+			var element = $(this);
+
+			WIZIAPP.changeFontSize( element.data('fontStep') == -1 );
+
+			element = null;
+		};
+
+		var post_page_wrapper = $(event.currentTarget);
+		var post_tool_bar = post_page_wrapper.find("div:jqmData(role='footer') div:jqmData(role='navbar') ul");
+
+		post_tool_bar
+		.find('li div.post_button_fontsize')
+		.click(toggleFontSizePanel)
+		.find('div.font_panel')
+		.find('div.plus_button')
+		.data('fontStep', 1)
+		.click(changeWebViewFontSize)
+		.end()
+		.find('div.minus_button')
+		.data('fontStep', -1)
+		.click(changeWebViewFontSize);
+
+		var video_iframes = post_page_wrapper.find("div:jqmData(role='content') div.data-wiziapp-iphone-support iframe");
+		var video_iframes_amount = video_iframes.length;
+
+		if ( video_iframes_amount > 0 ){
+			for (var i=0; i<video_iframes_amount; i++){
+				var current_video_iframe = $(video_iframes[i]);
+				var iframe_protect_screen = current_video_iframe.prev("div");
+
+				if ( iframe_protect_screen.lenght == 0 ){
+					continue;
+				}
+
+				iframe_protect_screen
+				.width(current_video_iframe.width())
+				.height(current_video_iframe.height())
+				.mousedown(process_video_behavior);
+			}
+		}
+	})
+	.on("pageinit", "div.comments_loaded_event", function(event){
+		var comments_page_wrapper = $(event.currentTarget);
+
+		comments_page_wrapper.on( "expand", "div:jqmData(role='collapsible')", function(event){
+			event.stopPropagation();
+
+			var collapsible_element = $(event.currentTarget);
+			var inner_comments_url = collapsible_element.attr("data-inner-comments-url");
+
+			if ( inner_comments_url.length == 0 ){
+				return;
+			}
+
+			$.mobile
+			.loadPage(inner_comments_url, {showLoadMsg : true})
+			.done(function(absUrl, options, page, dupCachedPage){
+				var inner_comments_element = page.find("ul:jqmData(role='listview')");
+
+				collapsible_element
+				.attr("data-inner-comments-url", "")
+				.children("div.ui-collapsible-content")
+				.append(inner_comments_element);
+
+				page.remove();
+			});
+		});
+
+		DoComments.init(comments_page_wrapper);
+	});
+
+	var DoComments = function(){
+		var
+		self = this,
+		data_role_content,
+		comment_parent_element,
+		comment_reply_button,
+		webapp_send_comments_button,
+		collapsible_wrapper,
+		comments_form,
+		root_ul_element,
+		title_wrapper,
+		permanent_title = '',
+		temporary_title = 'New comment',
+		comment_parent;
+
+		var init = function(comments_page_wrapper) {
+			data_role_content = comments_page_wrapper.children("div:jqmData(role='content')");
+			title_wrapper = comments_page_wrapper.find("div:jqmData(role='header') h1.ui-title");
+			permanent_title = title_wrapper.text();
+			comment_reply_button = $("#comment_reply_root");
+			webapp_send_comments_button = $("#webapp_send_comments_form");
+
+			comments_page_wrapper
+			.on( "click", "div.comment_replyButton", self.show_form )
+			.on( "click", "#comment_reply_root", 	 self.show_form )
+			.on( "click", 'input[type="button"][name="submit"]', self.send_form )
+			.on( "click", "#webapp_send_comments_form", 		 self.send_form );
+		}
+
+		this.show_form = function(event){
+			event.preventDefault();
+
+			comment_parent_element = $(event.currentTarget).parent("li[data-comment-id]");
+			root_ul_element = data_role_content.find("ul").first();
+			comments_form = root_ul_element.next();
+
+			if ( comment_parent_element.length === 0 ){
+				comment_parent = 0;
+			} else {
+				comment_parent = comment_parent_element.attr("data-comment-id");
+				collapsible_wrapper = comment_parent_element.children("div:jqmData(role='collapsible')");
+			}
+
+			$(document).on("pagebeforechange", function(event, data){
+				event.preventDefault();
+				self.return_from_form();
+			});
+
+			title_wrapper.text(temporary_title);
+			comments_form.show();
+			root_ul_element.hide();
+			webapp_send_comments_button.show();
+			comment_reply_button.hide();
+
+			return false;
+		}
+
+		this.send_form = function(event){
+			event.preventDefault();
+
+			$(event.currentTarget).off("click");
+
+			var form_fields = {
+				"author" : $("#comment_reply_author").val(),
+				"email" : $("#comment_reply_email").val(),
+				"url" : $("#comment_reply_url").val(),
+				"comment" : $("#comment_reply_content").val(),
+				"comment_post_ID" : $("#comment_post_ID").val(),
+				"comment_parent" : comment_parent,
+				"_wp_unfiltered_html_comment" : $("#_wp_unfiltered_html_comment_disabled").val()
+			};
+
+			$.mobile.loadPage($("#comment_form_action").val(), {
+				data : form_fields,
+				showLoadMsg : true,
+				type : "post"
+			})
+			.done(self.prepare_response);
+
+			return false;
+		}
+
+		this.prepare_response = function(absUrl, options, page, dupCachedPage){
+			var parent_comment_ul = $( page.find("div:jqmData(role='content') ul:jqmData(role='listview')")[0] );
+			var new_comment_ul = $( page.find("div:jqmData(role='content') ul:jqmData(role='listview')")[1] );
+			var new_comment_li = new_comment_ul.children("li")
+
+			if ( new_comment_li.attr("data-comment-id") === '0' ){
+				alert( new_comment_li.find("div.comment_body").text() );
+				page.remove();
+				return;
+			}
+
+			if ( comment_parent_element.length === 0 ){
+				root_ul_element
+				.children("li.comment_welcome_main")
+				.remove()
+				.end()
+				.append(new_comment_li);
+			} else {
+				if ( collapsible_wrapper.length === 0 ){
+					var new_collapsible_wrapper = parent_comment_ul.find("div:jqmData(role='collapsible')");
+
+					new_collapsible_wrapper
+					.children("div.ui-collapsible-content")
+					.append(new_comment_ul);
+
+					new_collapsible_wrapper
+					.attr({
+						"data-inner-comments-url" : ""
+					})
+					.appendTo(comment_parent_element)
+					.trigger("expand");
+				} else {
+					collapsible_wrapper
+					.find("ul:jqmData(role='listview')")
+					.append(new_comment_li);
+				}
+			}
+
+			self.return_from_form();
+			page.remove();
+		}
+
+		this.return_from_form = function(){
+			$(document).off("pagebeforechange");
+
+			title_wrapper.text(permanent_title);
+			comments_form.hide();
+			root_ul_element.show();
+			webapp_send_comments_button.hide();
+			comment_reply_button.show();
+		}
+
+		return {
+			init : init
+		};
+	}();
+
+	/**
+	* The Feature Image position calculation
+	*/
+	function calculate_image_position(image_wrapper){
+		var style = {};
+		var image_element = image_wrapper.children("img");
+		var actual_image_width  = image_element.width();
+		var actual_image_height = image_element.height();
+		var parent_width  = image_wrapper.width();
+		var parent_height = image_wrapper.height();
+		var width_ratio = parent_width / actual_image_width;
+
+		if ( ( actual_image_height * width_ratio ) > parent_height ){
+			style.width = "100%";
+			style.top = ( parent_height - ( actual_image_height * width_ratio ) ) / 2;
+		} else {
+			style.height = "100%";
+			style.left = ( parent_width - ( actual_image_width * ( parent_height / actual_image_height ) ) )/ 2;
+		}
+
+		image_element.css(style);
 	}
 
-	// Bind favorite button
-	// Apply effects
-	applyEffects($page);
-}
+	$(window).on("orientationchange", function( event ) {
+		var featured_image_wrapper = $("div.recent_loaded_event ul:jqmData(role='listview'):first-child div.featured_post_image");
+		if ( featured_image_wrapper.length ){
+			calculate_image_position(featured_image_wrapper);
+		}
+	});
+
+})(jQuery);
 
 function handleActionURL(page){
 	WIZIAPP.doLoad(page);
 
 	var elements = {
-		'back_button' : page.find('a.navigation_back_button_wrapper[data-nav-processed!="processed"][href^="nav\\:\\/\\/"]'),
-		'content' : page.find('.ui-content a[data-nav-processed!="processed"]'),
-		'toolbar' : page.find("div.webview_bar ul li div.left_right_buttons_wrapper a[data-nav-processed!=\"processed\"]")
+		'back_button_nav':	page.find('a.navigation_back_button_wrapper[data-nav-processed!="processed"][href^="nav\\:\\/\\/"]'),
+		'back_button_cmd':	page.find('a.navigation_back_button_wrapper[data-nav-processed!="processed"][href^="cmd\\:\\/\\/"]'),
+		'content':			page.find('.ui-content a[data-nav-processed!="processed"]'),
+		'toolbar':			page.find("div.webview_bar ul li div.left_right_buttons_wrapper a[data-nav-processed!=\"processed\"]")
 	};
 
 	for (var key in elements){
@@ -283,6 +614,16 @@ function handleActionURL(page){
 
 function prepareActionURL(elements, doc_href){
 	var is_webapp = typeof doc_href === "string" && doc_href.indexOf('webapp=1') > 0;
+	var search_parameters = "";
+	if ( typeof doc_href === "string" && doc_href.indexOf('search=1') > 0 ){
+		search_parameters = 'search=1&';
+
+		var reg_exp = /keyword=.+?(?=&submit\=)/i;
+		var result_array = reg_exp.exec(doc_href);
+		if ( result_array != null && typeof result_array === "object" && typeof result_array[0] === "string" && result_array[0].length > 9 ){
+			search_parameters += result_array[0] + "&";
+		}
+	}
 
 	elements.filter("[href]").each(function(){
 		var $el = jQuery(this);
@@ -318,9 +659,9 @@ function prepareActionURL(elements, doc_href){
 				}
 			}
 			if (is_webapp){
-				// Pass on an existing GET element "webapp=1"
 				sep += 'webapp=1&';
 			}
+			sep += search_parameters;
 
 			if ( actionType == 'nav' ){
 				screenURL += sep + 'ap=1&wizi_ver=' + window.WiziappPlatformVersion;
@@ -330,32 +671,27 @@ function prepareActionURL(elements, doc_href){
 				}
 
 				$el.attr('href', screenURL);
-			} else {
-				if ( actionType == 'cmd' ){
-					if ( screenType == 'open' ){
-						if ( screenParams[1] == 'favorites' ){
-							// Open the posts favorites since the rest are not active yet.
-							$el.attr('href', '#favorites');
+			} else if ( actionType == 'cmd' ){
+				if ( screenType == 'open' ){
+					if ( screenParams[1] == 'favorites' ){
+						// Open the posts favorites since the rest are not active yet.
+						$el.attr('href', '#favorites');
+					} else if ( screenParams[1] == 'search' ){
+						$el.attr('href', '#search');
+					} else if ( screenParams[1] == 'image' ){
+						var $im = $el.find("img[data-wiziapp-id]");
+						if ($im.length){
+							$im.attr("data-wiziapp-full-image", decodeURIComponent($el.attr('href').substr(17)));
+							$el.attr('href', "#image-" + encodeURIComponent($im.attr("data-wiziapp-id")));
 						}
-						else if ( screenParams[1] == 'image' ){
-							var $im = $el.find("img[data-wiziapp-id]");
-							if ($im.length){
-								$im.attr("data-wiziapp-full-image", decodeURIComponent($el.attr('href').substr(17)));
-								$el.attr('href', "#image-" + encodeURIComponent($im.attr("data-wiziapp-id")));
-							}
-						}
-						else if ( screenParams[1] == 'video' ){
-							$el.attr("href", decodeURIComponent($el.attr('href').substr(17)));
-							$el.attr("rel", "external");
-						}
-
-					}
-				} else {
-					if ( actionType == 'http' || actionType == 'https' ){
+					} else if ( screenParams[1] == 'video' ){
+						$el.attr("href", decodeURIComponent($el.attr('href').substr(17)));
 						$el.attr("rel", "external");
-//						$el.attr('href', "?wiziapp/external/" + encodeURIComponent(encodeURIComponent(href)) + '&output=html&ap=1&wizi_ver=' + window.WiziappPlatformVersion);
 					}
 				}
+			} else if ( actionType == 'http' || actionType == 'https' ){
+				$el.attr("rel", "external");
+				// $el.attr('href', "?wiziapp/external/" + encodeURIComponent(encodeURIComponent(href)) + '&output=html&ap=1&wizi_ver=' + window.WiziappPlatformVersion);
 			}
 		}
 
@@ -473,9 +809,9 @@ function loadMoreInPage(event){
 		.filter('.cellItem:not(.ignore_hover):not(.processed_page_show)')
 		.hover(function(){
 			jQuery(this).addClass('default_selected');
-		},
-		function(){
-			jQuery(this).removeClass('default_selected');
+			},
+			function(){
+				jQuery(this).removeClass('default_selected');
 		})
 		.addClass('processed_page_show');
 
@@ -639,299 +975,6 @@ function applyEffects($wantedContainer){
 			$effect = $el = null;
 		});
 	};
-
-	$(document)
-	.on("pagebeforeshow", "#sharing_menu", function(event, data){
-		var sharing_options = {
-			"facebook":	"http://www.facebook.com/share.php?u=",
-			"twitter":	"https://twitter.com/share?url=",
-			"email":	"mailto:?subject=The%20page%20to%20share&body=",
-			"google+":	"https://plus.google.com/share?url="
-		}
-
-		var share_buttons = $(event.currentTarget).find("div:jqmData(role='content') p a");
-		var share_buttons_amount = share_buttons.length;
-		if (share_buttons_amount == 0 ){
-			return;
-		}
-
-		var sharing_url = data.prevPage.attr("data-url");
-		if ( ! $.mobile.path.isAbsoluteUrl(sharing_url) ){
-			sharing_url = window.location.protocol + "//" + window.location.host + sharing_url;
-		}
-		sharing_url = encodeURIComponent( $.mobile.path.parseUrl(sharing_url).hrefNoHash );
-
-		for (var i=0; i<share_buttons_amount; i++){
-			var current_button = $(share_buttons[i]);
-			var sharing_name = current_button.text().toLowerCase();
-
-			if ( typeof sharing_options[sharing_name] === "undefined" ){
-				continue;
-			}
-
-			current_button.attr("href", sharing_options[sharing_name] + sharing_url);
-		}
-	})
-	.on("pageinit", ".post_loaded_event", function(event){
-		var process_video_behavior = function(event){
-			var iframe_protect_screen = $(event.currentTarget);
-			var not_moved = true;
-
-			iframe_protect_screen
-			.on("mousemove", function(event){
-				not_moved = false;
-			})
-			.mouseup(function(event) {
-				if (not_moved){
-					$.mobile.changePage( iframe_protect_screen.attr("data-video-url") );
-				}
-
-				iframe_protect_screen
-				.off("mouseup")
-				.off("mousemove");
-
-				not_moved = true;
-			});
-		}
-
-		var toggleFontSizePanel = function(event){
-			var element = $(this);
-
-			element
-			.children(".font_panel")
-			.toggle();
-
-			element = null;
-		};
-
-		var changeWebViewFontSize = function(event){
-			event.stopPropagation();
-
-			var element = $(this);
-
-			WIZIAPP.changeFontSize( element.data('fontStep') == -1 );
-
-			element = null;
-		};
-
-		var post_page_wrapper = $(event.currentTarget);
-		var post_tool_bar = post_page_wrapper.find("div:jqmData(role='footer') div:jqmData(role='navbar') ul");
-
-		post_tool_bar
-		.find('li div.post_button_fontsize')
-		.click(toggleFontSizePanel)
-		.find('div.font_panel')
-		.find('div.plus_button')
-		.data('fontStep', 1)
-		.click(changeWebViewFontSize)
-		.end()
-		.find('div.minus_button')
-		.data('fontStep', -1)
-		.click(changeWebViewFontSize);
-
-		var video_iframes = post_page_wrapper.find("div:jqmData(role='content') div.data-wiziapp-iphone-support iframe");
-		var video_iframes_amount = video_iframes.length;
-
-		if ( video_iframes_amount > 0 ){
-			for (var i=0; i<video_iframes_amount; i++){
-				var current_video_iframe = $(video_iframes[i]);
-				var iframe_protect_screen = current_video_iframe.prev("div");
-
-				if ( iframe_protect_screen.lenght == 0 ){
-					continue;
-				}
-
-				iframe_protect_screen
-				.width(current_video_iframe.width())
-				.height(current_video_iframe.height())
-				.mousedown(process_video_behavior);
-			}
-		}
-	})
-	.on("pageinit", "div.comments_loaded_event", function(event){
-		var comments_page_wrapper = $(event.currentTarget);
-
-		comments_page_wrapper.on( "expand", "div:jqmData(role='collapsible')", function(event){
-			event.stopPropagation();
-
-			var collapsible_element = $(event.currentTarget);
-			var inner_comments_url = collapsible_element.attr("data-inner-comments-url");
-
-			if ( inner_comments_url.length == 0 ){
-				return;
-			}
-
-			$.mobile
-			.loadPage(inner_comments_url, {showLoadMsg : true})
-			.done(function(absUrl, options, page, dupCachedPage){
-				var inner_comments_element = page.find("ul:jqmData(role='listview')");
-
-				collapsible_element
-				.attr("data-inner-comments-url", "")
-				.children("div.ui-collapsible-content")
-				.append(inner_comments_element);
-
-				page.remove();
-			});
-		});
-
-		DoComments.init(comments_page_wrapper);
-	})
-	.on("pageinit", ".recent_loaded_event", function(event){
-		$(event.currentTarget)
-		.find("div:jqmData(role='content') ul:jqmData(role='listview') li.postDescriptionCellItem a")
-		.click(function(){
-			$.mobile.showPageLoadingMsg();
-
-			var post_link = $(this);
-
-			setTimeout(function(){
-				$.mobile.hidePageLoadingMsg();
-				window.location = post_link.attr("href");
-				}, 1000);
-
-				return false;
-		});
-	});
-
-	var DoComments = function(){
-		var
-		self = this,
-		data_role_content,
-		comment_parent_element,
-		comment_reply_button,
-		webapp_send_comments_button,
-		collapsible_wrapper,
-		comments_form,
-		root_ul_element,
-		title_wrapper,
-		permanent_title = '',
-		temporary_title = 'New comment',
-		comment_parent;
-
-		var init = function(comments_page_wrapper) {
-			data_role_content = comments_page_wrapper.children("div:jqmData(role='content')");
-			title_wrapper = comments_page_wrapper.find("div:jqmData(role='header') h1.ui-title");
-			permanent_title = title_wrapper.text();
-			comment_reply_button = $("#comment_reply_root");
-			webapp_send_comments_button = $("#webapp_send_comments_form");
-
-			comments_page_wrapper
-			.on( "click", "div.comment_replyButton", self.show_form )
-			.on( "click", "#comment_reply_root", 	 self.show_form )
-			.on( "click", 'input[type="button"][name="submit"]', self.send_form )
-			.on( "click", "#webapp_send_comments_form", 		 self.send_form );
-		}
-
-		this.show_form = function(event){
-			event.preventDefault();
-
-			comment_parent_element = $(event.currentTarget).parent("li[data-comment-id]");
-			root_ul_element = data_role_content.find("ul").first();
-			comments_form = root_ul_element.next();
-
-			if ( comment_parent_element.length === 0 ){
-				comment_parent = 0;
-			} else {
-				comment_parent = comment_parent_element.attr("data-comment-id");
-				collapsible_wrapper = comment_parent_element.children("div:jqmData(role='collapsible')");
-			}
-
-			$(document).on("pagebeforechange", function(event, data){
-				event.preventDefault();
-				self.return_from_form();
-			});
-
-			title_wrapper.text(temporary_title);
-			comments_form.show();
-			root_ul_element.hide();
-			webapp_send_comments_button.show();
-			comment_reply_button.hide();
-
-			return false;
-		}
-
-		this.send_form = function(event){
-			event.preventDefault();
-
-			$(event.currentTarget).off("click");
-
-			var form_fields = {
-				"author" : $("#comment_reply_author").val(),
-				"email" : $("#comment_reply_email").val(),
-				"url" : $("#comment_reply_url").val(),
-				"comment" : $("#comment_reply_content").val(),
-				"comment_post_ID" : $("#comment_post_ID").val(),
-				"comment_parent" : comment_parent,
-				"_wp_unfiltered_html_comment" : $("#_wp_unfiltered_html_comment_disabled").val()
-			};
-
-			$.mobile.loadPage($("#comment_form_action").val(), {
-				data : form_fields,
-				showLoadMsg : true,
-				type : "post"
-			})
-			.done(self.prepare_response);
-
-			return false;
-		}
-
-		this.prepare_response = function(absUrl, options, page, dupCachedPage){
-			var parent_comment_ul = $( page.find("div:jqmData(role='content') ul:jqmData(role='listview')")[0] );
-			var new_comment_ul = $( page.find("div:jqmData(role='content') ul:jqmData(role='listview')")[1] );
-			var new_comment_li = new_comment_ul.children("li")
-
-			if ( new_comment_li.attr("data-comment-id") === '0' ){
-				alert( new_comment_li.find("div.comment_body").text() );
-				page.remove();
-				return;
-			}
-
-			if ( comment_parent_element.length === 0 ){
-				root_ul_element
-				.children("li.comment_welcome_main")
-				.remove()
-				.end()
-				.append(new_comment_li);
-			} else {
-				if ( collapsible_wrapper.length === 0 ){
-					var new_collapsible_wrapper = parent_comment_ul.find("div:jqmData(role='collapsible')");
-
-					new_collapsible_wrapper
-					.children("div.ui-collapsible-content")
-					.append(new_comment_ul);
-
-					new_collapsible_wrapper
-					.attr({
-						"data-inner-comments-url" : ""
-					})
-					.appendTo(comment_parent_element)
-					.trigger("expand");
-				} else {
-					collapsible_wrapper
-					.find("ul:jqmData(role='listview')")
-					.append(new_comment_li);
-				}
-			}
-
-			self.return_from_form();
-			page.remove();
-		}
-
-		this.return_from_form = function(){
-			$(document).off("pagebeforechange");
-
-			title_wrapper.text(permanent_title);
-			comments_form.hide();
-			root_ul_element.show();
-			webapp_send_comments_button.hide();
-			comment_reply_button.show();
-		}
-
-		return {
-			init : init
-		};
-	}();
 
 })(jQuery);
 
@@ -1252,7 +1295,7 @@ function applyEffects($wantedContainer){
 		if ($back.length < 1 || stack.length < 2){
 			var data = $back.data("wiziapp-back-button-original");
 			if (data){
-//				$back.find(".navigation_back_button").text(data.text);
+				// $back.find(".navigation_back_button").text(data.text);
 				$back.attr("href", data.href);
 				$back.css("display", data.display);
 			}
@@ -1265,7 +1308,7 @@ function applyEffects($wantedContainer){
 				display: $back.css("display")
 			});
 		}
-//		$back.find(".navigation_back_button").text(stack[stack.length-2].title);
+		// $back.find(".navigation_back_button").text(stack[stack.length-2].title);
 		$back.attr("href", stack[stack.length-2].url);
 		$back.css("display", "");
 	});

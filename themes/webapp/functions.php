@@ -10,12 +10,12 @@ function wiziapp_back_button($url = false, $text = false){
 	/*if ($text === false)*/{
 		$text = __('Back', 'wiziapp');
 	}
-?>
-<a data-role="button" data-corners="false" data-theme="z" href="<?php echo esc_attr($url); ?>" class="navigation_back_button_wrapper ui-btn-left"<?php echo $style_add; ?> data-transition="slide" data-direction="reverse">
-	<span class="navigation_back_button"><?php echo esc_html($text); ?></span>
-	<span class="navigation_back_button_closer"></span>
-</a>
-<?php
+	?>
+	<a data-role="button" data-corners="false" data-theme="z" href="<?php echo esc_attr($url); ?>" class="navigation_back_button_wrapper ui-btn-left"<?php echo $style_add; ?> data-direction="reverse">
+		<span class="navigation_back_button"><?php echo esc_html($text); ?></span>
+		<span class="navigation_back_button_closer"></span>
+	</a>
+	<?php
 }
 
 function wiziapp_get_webapp_title(){

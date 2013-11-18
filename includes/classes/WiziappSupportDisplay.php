@@ -338,7 +338,7 @@ class WiziappSupportDisplay{
 		<?php
 		if ( ! empty($desc) ){
 		?>
-		<tr class="details ' . $extra_class . '">
+		<tr class="details <?php echo $extra_class; ?>">
 			<td colspan="3"><?php echo $desc; ?></td>
 		</tr>
 		<?php

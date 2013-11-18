@@ -51,7 +51,7 @@ class WiziappLinkCellItem extends WiziappLayoutComponent{
 		ob_start();
 		?>
 		<li class="linkCellItem cellItem default __ATTR_class__">
-			<a class="actionURL link_to_page" href="__ATTR_actionURL__" data-transition="slide">
+			<a class="actionURL link_to_page" href="__ATTR_actionURL__" data-transition="slide" data-ajax="false">
 				<span class="attribute webapp_link_title __ATTR_class___title">__ATTR_title__</span>
 			</a>
 		</li>

@@ -46,6 +46,7 @@ class WiziappPush {
 		}
 
 		$is_set_not =
+		! WiziappSettingMetabox::get_is_send_wiziapp_push( $post_id ) ||
 		( $post->post_type === 'post' && ! ( bool ) WiziappConfig::getInstance()->notify_on_new_post ) ||
 		( $post->post_type === 'page' && ! ( bool ) WiziappConfig::getInstance()->notify_on_new_page );
 		if ( $is_set_not ) {
@@ -59,69 +60,34 @@ class WiziappPush {
 		$excluded_users = array();
 		WiziappLog::getInstance()->write('INFO', "Notifying on new post", 'WiziappPush.publishPost');
 
-		if ( WiziappConfig::getInstance()->aggregate_notifications ) {
-			WiziappLog::getInstance()->write('INFO', "We need to aggregate the messages", 'WiziappPush.publishPost');
-			// We might need to send this later... let's check
-			if ( ! isset(WiziappConfig::getInstance()->counters) ) {
-				WiziappConfig::getInstance()->counters = array('posts' => 0);
+		// We are not aggragating the message
+		$allUdids = self::$endUser->getAllUdids();
+
+		//get post data:
+		self::$post_author_id = $post->post_author;
+		self::$post_categories_ids = wp_get_post_categories($post_id);
+		self::$post_tag_ids = wp_get_post_tags( $post_id, array( 'fields' => 'ids' ) );
+
+		foreach ($allUdids as $udid) {
+			$userPushSettings = self::getPushSettings4udid($udid);
+
+			if ($userPushSettings === false) {
+				$excluded_users[] = $udid;
 			}
+		}
 
-			// Increase the posts count
-			WiziappConfig::getInstance()->counters['posts'] += 1;
+		$sound = WiziappConfig::getInstance()->trigger_sound;
+		$badge = WiziappConfig::getInstance()->show_badge_number;
+		$request = array(
+			'type' => 1,
+			'sound' => $sound,
+			'badge' => $badge,
+			'excluded_users' => $excluded_users,
+		);
 
-			// If the sum is set and not 0 we need to aggragate by posts count
-			if ( WiziappConfig::getInstance()->aggregate_sum ) {
-				// Have we reached or passed our trashhold
-				if ( WiziappConfig::getInstance()->counters['posts'] >= WiziappConfig::getInstance()->aggregate_sum ) {
-					// We need to notify on all the new posts
-					$sound = WiziappConfig::getInstance()->trigger_sound;
-					$badge = (WiziappConfig::getInstance()->show_badge_number) ? WiziappConfig::getInstance()->counters['posts'] : 0;
-					$request = array(
-						'type' => 1,
-						'sound' => $sound,
-						'badge' => $badge,
-						'excluded_users' => $excluded_users,
-					);
-
-					if ( WiziappConfig::getInstance()->show_notification_text ) {
-						$request['content'] = urlencode(stripslashes(WiziappConfig::getInstance()->counters['posts'] . ' new posts published'));
-						$request['params'] = "{\"tab\": \"{$tabId}\"}";
-					}
-
-					// Reset the counter
-					WiziappConfig::getInstance()->counters['posts'] = 0;
-				}
-			}
-		} else {
-			// We are not aggragating the message
-			$allUdids = self::$endUser->getAllUdids();
-
-			//get post data:
-			self::$post_author_id = $post->post_author;
-			self::$post_categories_ids = wp_get_post_categories($post_id);
-			self::$post_tag_ids = wp_get_post_tags( $post_id, array( 'fields' => 'ids' ) );
-
-			foreach ($allUdids as $udid) {
-				$userPushSettings = self::getPushSettings4udid($udid);
-
-				if ($userPushSettings === false) {
-					$excluded_users[] = $udid;
-				}
-			}
-
-			$sound = WiziappConfig::getInstance()->trigger_sound;
-			$badge = WiziappConfig::getInstance()->show_badge_number;
-			$request = array(
-				'type' => 1,
-				'sound' => $sound,
-				'badge' => $badge,
-				'excluded_users' => $excluded_users,
-			);
-
-			if ( WiziappConfig::getInstance()->show_notification_text ) {
-				$request['content'] = urlencode( stripslashes( WiziappSettingMetabox::get_push_message( $post_id ) ) );
-				$request['params'] = "{\"tab\": \"{$tabId}\"}";
-			}
+		if ( WiziappConfig::getInstance()->show_notification_text ) {
+			$request['content'] = urlencode( stripslashes( WiziappSettingMetabox::get_push_message( $post_id ) ) );
+			$request['params'] = "{\"tab\": \"{$tabId}\"}";
 		}
 
 		// Make sure we have a reason to even send this message
