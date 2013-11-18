@@ -10,8 +10,10 @@ class WiziappThumbnailHandler{
 	private $size;
 	private $_thumb_min_size;
 	private $singles = array();
+	private $_is_featured_post_thumb = FALSE;
 
 	public function __construct($post) {
+		$this->_is_featured_post_thumb = ( $_GET['type'] === 'featured_post_thumb' && WiziappContentHandler::getInstance()->isHTML() && ! WiziappContentHandler::getInstance()->isInApp() );
 		$this->post = $post;
 		$this->size = WiziappConfig::getInstance()->getImageSize($_GET['type']);
 		$this->_thumb_min_size = WiziappConfig::getInstance()->thumb_min_size;
@@ -153,7 +155,7 @@ class WiziappThumbnailHandler{
 		$width  = intval($image->getNewWidth());
 		$height = intval($image->getNewHeight());
 
-		$not_passed = $check_size && (
+		$not_passed = $check_size && ! $this->_is_featured_post_thumb && (
 			empty($width) || empty($height) ||
 			( $width  < $this->_thumb_min_size ) ||
 			( $height < $this->_thumb_min_size ) ||
@@ -164,7 +166,7 @@ class WiziappThumbnailHandler{
 		}
 
 		try {
-			$image->wiziapp_getResizedImage( $this->size['width'], $this->size['height'], 'adaptiveResize', true );
+			$image->wiziapp_getResizedImage( $this->size['width'], $this->size['height'], 'adaptiveResize', TRUE, $this->_is_featured_post_thumb );
 		} catch (Exception $e) {
 			WiziappLog::getInstance()->write('ERROR', $e->getMessage(), "WiziappThumbnailHandler._processImageForThumb");
 			return FALSE;

@@ -96,7 +96,7 @@ class WiziappPostDescriptionCellItem extends WiziappLayoutComponent{
 		ob_start();
 		?>
 		<li class="postDescriptionCellItem __ATTR_class__ cellItem default" data-post-id="__ATTR_id__">
-			<a href="__ATTR_actionURL__" class="actionURL __ATTR_class__" data-transition="slide" data-ajax="false">
+			<a href="__ATTR_actionURL__" class="actionURL __ATTR_class__" data-ajax="false">
 				<div class="attribute imageURL __ATTR_classOf-imageURL-webapp__" data-image-src="__ATTR_imageURL__">
 					<img class="hidden ignore_effect" src="<?php echo WiziappHelpers::get_pixelSRC_attr(); ?>" data-class=""/>
 				</div>

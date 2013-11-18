@@ -184,7 +184,7 @@ window.WIZIAPP = (function($){
 			var device_type = "";
 			if ( navigator.userAgent.search(/(iPhone)|(iPod)/i) > -1 ){
 				device_type = "iphone";
-			} else if ( navigator.userAgent.search(/Android/i) > -1 ){
+			} else if ( navigator.userAgent.search(/Android/i) > -1 || navigator.userAgent === wiziapp_name_space.wiziapp_android_app ){
 				device_type = "android";
 
 				if ( navigator.userAgent.search(/gingerbread/i) > -1 ){

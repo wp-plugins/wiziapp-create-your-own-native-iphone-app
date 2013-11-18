@@ -59,11 +59,15 @@ if ( WiziappConfig::getInstance()->usePostsPreloading() ){
 		if ( have_posts() ){
 			the_post();
 
-			/**
-			* In this template we are only doing posts list
-			* for posts list we will to pre-load the post template so get the template
-			* inside a string to pass it to the component building functions
-			*/
+			include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+			if ( is_plugin_active('pull-product.php') ) {
+				// The "Pull Product" plugin at work uses a action "template_redirect".
+				// So, to ensure the plugin operation in our "?wiziapp/content/list/posts/recent' flow, need duplication the action here.
+				do_action( 'template_redirect' );
+			}
+
+			// In this template we are only doing posts list for posts list we will to pre-load the post template,
+			// so get the template inside a string to pass it to the component building functions.
 			WiziappLog::getInstance()->write('INFO', 'Preloading the posts', 'themes.default.index');
 			ob_start();
 			$obLevelStart = ob_get_level();
@@ -75,7 +79,7 @@ if ( WiziappConfig::getInstance()->usePostsPreloading() ){
 			$obLevelEnd = ob_get_level();
 			if ( $obLevelEnd == $obLevelStart ){
 				ob_end_clean();
-			} else if ( $obLevelEnd > $obLevelStart ){
+			} elseif ( $obLevelEnd > $obLevelStart ){
 				// Someone opened a new output buffer cache that might mess up our loop, reset the buffer to what we need
 				while ( $obLevelEnd > $obLevelStart ){
 					ob_end_clean();

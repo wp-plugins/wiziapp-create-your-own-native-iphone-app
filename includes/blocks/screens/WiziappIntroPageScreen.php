@@ -79,7 +79,7 @@ class WiziappIntroPageScreen{
 
 				break;
 			case 'android':
-				if ( $query_string['androidapp'] === '1' ) {
+				if ( $query_string['androidapp'] === '1' && empty(WiziappConfig::getInstance()->playstore_url) ) {
 					$proper_condition =
 					! empty(WiziappConfig::getInstance()->android_app_version) && ! empty($query_string['abv']) &&
 					! ( isset($_SESSION['wiziapp_android_download']) && $_SESSION['wiziapp_android_download'] === 'none' ) &&

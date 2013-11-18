@@ -44,7 +44,7 @@ if ( have_posts() ) {
 										foreach ($subPages as $subPage) {
 										?>
 										<li>
-											<a href="<?php echo WiziappLinks::pageLink($subPage->ID); ?>" data-transition="slide">
+											<a href="<?php echo WiziappLinks::pageLink($subPage->ID); ?>">
 												<div class="album_item wiziapp_pages_item">
 													<p class="attribute text_attribute title wiziapp_pages_title"><?php echo ($subPage->post_title); ?></p>
 													<span class="rowCellIndicator"></span>
@@ -72,7 +72,7 @@ if ( have_posts() ) {
 					<div class="single-post-meta-top">
 						<div id="author_and_date">
 							<span class="postDescriptionCellItem_author">By
-								<a href="<?php echo WiziappLinks::authorLink($post->post_author); ?>" data-transition="slide"><?php the_author(); ?></a>
+								<a href="<?php echo WiziappLinks::authorLink($post->post_author); ?>"><?php the_author(); ?></a>
 							</span>
 							&nbsp;
 							<span class="postDescriptionCellItem_date"><?php echo WiziappTheme::formatDate($post->post_date); ?></span>
@@ -124,9 +124,10 @@ if ( have_posts() ) {
 		if ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['lower_mask'] ) {
 			echo $wiziapp_google_adsense['code'];
 		}
-					?>
+?>
 			</div>
 			<br />
+<?php /*
 			<div id="debug" style="background-color: #c0c0c0;">
 				####AREA 51####
 				<div id="swipeme" style="height: 50px; background-color: #ccc;">
@@ -136,6 +137,7 @@ if ( have_posts() ) {
 				<a id="swipeLeft" href="cmd://event/swipeRight"></a>
 				<a id="swipeRight" href="cmd://event/swipeLeft"></a>
 			</div>
+*/ ?>
 			<!-- The link below is for handing video in the simulator, the application shows the video itself while the simulator only shows an image. -->
 			<a href="cmd://open/video" id="dummy_video_opener"></a>
 

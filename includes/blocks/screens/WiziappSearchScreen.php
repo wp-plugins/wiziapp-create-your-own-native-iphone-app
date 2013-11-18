@@ -4,31 +4,22 @@
 * @subpackage AppWebServices
 * @author comobix.com plugins@comobix.com
 *
-*/
-
-/**
 * Searching can be trigger by the:
 *   Auto Complete service
-*
 *   Search service
-*
-*  both should support the following categories:
+*  Both should support the following categories:
 *   - All
 *   - Author
 *   - Tag
 *   - Post
-*
 */
 
 class WiziappSearchScreen extends WiziappPostsScreen{
 
-	public function run(){
-
-	}
+	public function run(){}
 
 	/**
 	* Run the search itself
-	*
 	* GET /wiziapp/search
 	*
 	* @returns a post list screen for the application
@@ -45,7 +36,7 @@ class WiziappSearchScreen extends WiziappPostsScreen{
 		$query = "offset={$offset}&orderby=modified&posts_per_page={$limitForQuery}";
 
 		// Do not include the same posts, keep track on the posts we collected.
-		// @todo there is no need to keep track of this for now
+		// @todo there is no need to keep track of this for now.
 		$GLOBALS['wp_posts_listed'] = array();
 
 		WiziappLog::getInstance()->write('DEBUG', "Searching for posts for {$category}, and with the chars: {$keyword}", "search.wiziapp_do_search");
@@ -54,7 +45,7 @@ class WiziappSearchScreen extends WiziappPostsScreen{
 			$query = "{$query}&author_name={$keyword}";
 		} elseif ($category == 'posts'){
 			$query = "{$query}&s={$keyword}&post_type=post";
-		} else if ( $category == 'all' ){
+		} elseif ( $category == 'all' ){
 			$query = "{$query}&s={$keyword}&post_type=any";
 		}
 
@@ -62,25 +53,22 @@ class WiziappSearchScreen extends WiziappPostsScreen{
 
 		$resultCount = count($page);
 		$pager = new WiziappPagination($resultCount, $resultLimit);
-		/**
-		 * We are querying the limit * 2 so we can show the next number of items.
-		 * Every query already takes the offset into account, therefore we need to
-		 * set the offset as 0 for the extract page part
-		 */
+
+		// We are querying the limit * 2 so we can show the next number of items.
+		// Every query already takes the offset into account, therefore we need to set the offset as 0 for the extract page part.
 		$pager->setOffset(0);
-		/**
-		 * When returning component lists we must *never* keep the array keys since the
-		 * protocol defined the component must be a non-associative array
-		 */
+
+		// When returning component lists,
+		// we must *never* keep the array keys since the protocol defined the component must be a non-associative array.
 		$page = $pager->extractCurrentPage($page, FALSE);
-		/**
-		 * Leave the check whether we should add the show more component to the pager
-		 */
+
+		// Leave the check whether we should add the show more component to the pager.
 		$pager->addMoreCell(__("Load %s more items", 'wiziapp'), $page);
 
-		// The prepareScreen needs to know where are returning a list screen
+		// The prepareScreen needs to know where are returning a list screen.
+		$back = array( 'url' => 'cmd://open/search', 'text' => $this->getTitle('search'), );
 		$screen = $this->prepare($page, $this->getTitle('search'), 'list');
-		$this->output($screen);
+		$this->output($screen, $back);
 	}
 
 	/**
@@ -132,7 +120,7 @@ class WiziappSearchScreen extends WiziappPostsScreen{
 			* Support cross-domain ajax calls for web clients
 			* @todo Add a check to verify this is a web client
 			*/
-			 $contents = $_GET["callback"] . "({$contents})";
+			$contents = $_GET["callback"] . "({$contents})";
 		} else {
 			WiziappLog::getInstance()->write('WARNING', "The callback GET param is not set", "remote.WiziappRequestHandler._routeContent");
 		}
@@ -192,17 +180,6 @@ class WiziappSearchScreen extends WiziappPostsScreen{
 	private function getAuthors($chars, $return_id = FALSE) {
 		global $wpdb;
 
-	//    $hide_empty = TRUE;
-	//    $html = FALSE;
-	//
-	//
-	//    $defaults = array(
-	//        'optioncount' => false, 'exclude_admin' => true,
-	//        'show_fullname' => false, 'hide_empty' => true,
-	//        'feed' => '', 'feed_image' => '', 'feed_type' => '', 'echo' => true,
-	//        'style' => 'list', 'html' => true
-	//    );
-
 		// @todo Refactor the authors and author_count queries to one, or replace with get_author when such a fucntion will exist
 		$sql = $wpdb->prepare("SELECT ID, display_name from $wpdb->users WHERE display_name LIKE %s ORDER BY display_name", "%{$chars}%");
 		$authors = $wpdb->get_results($sql);
@@ -229,5 +206,4 @@ class WiziappSearchScreen extends WiziappPostsScreen{
 
 		return $returnAuthors;
 	}
-
 }

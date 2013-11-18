@@ -78,7 +78,7 @@ class WiziappImageHandler {
 		return WiziappContentHandler::getInstance()->get_blog_property('url') . "/?wiziapp/getimage/&width={$width}&height={$height}&type={$type}&allow_up={$allow_up}&url={$url}";
 	}
 
-	public function wiziapp_getResizedImage($width, $height, $type = 'adaptiveResize', $allow_up = FALSE){
+	public function wiziapp_getResizedImage($width, $height, $type = 'adaptiveResize', $allow_up = FALSE, $is_featured_post_thumb = FALSE){
 		if ($this->handler == null){
 			WiziappLog::getInstance()->write('error', 'No images handler', 'WiziappImageHandler.wiziapp_getResizedImage');
 			return false;
@@ -114,6 +114,7 @@ class WiziappImageHandler {
 			$this->imageFile = str_replace(' ', '%20', $this->imageFile);
 			WiziappLog::getInstance()->write('info', "Before resizing image: " . $this->imageFile, "image_resizing.getResizedImage");
 			$url = $this->imageFile;
+
 			if (strpos($this->imageFile, WiziappContentHandler::getInstance()->get_blog_property('url')) === 0){
 				WiziappLog::getInstance()->write('info', 'Looks like a local image: '.$this->imageFile, 'WiziappImageHandler.wiziapp_getResizedImage');
 				$url = str_replace(WiziappContentHandler::getInstance()->get_blog_property('url'), WIZI_ABSPATH, $url);
@@ -127,8 +128,13 @@ class WiziappImageHandler {
 					}
 				}
 			}
+
 			WiziappLog::getInstance()->write('INFO', 'Calling handler resize on::'.$url, 'WiziappImageHandler.wiziapp_getResizedImage');
-			$url = $this->handler->resize($url, $cacheFile, $width, $height, $type, $allow_up, $this->checkPath());
+			if ( $is_featured_post_thumb ){
+				$this->handler->load($url);
+			} else {
+				$url = $this->handler->resize($url, $cacheFile, $width, $height, $type, $allow_up, $this->checkPath());
+			}
 			WiziappLog::getInstance()->write('INFO', "After resizing image: " . $this->imageFile.' url:: '.$url, "image_resizing.getResizedImage");
 		}
 

@@ -7,8 +7,6 @@
 * @property integer $notify_on_new_page
 * @property integer $notify_on_new_post
 * @property string  $push_message
-* @property integer $aggregate_notifications
-* @property integer $aggregate_sum
 * @property integer $thumb_size
 * @property boolean $use_post_preloading
 * @property integer $comments_list_limit
@@ -57,7 +55,6 @@
 * @property string  $playstore_url
 * @property string  $apk_file_url
 * @property string  $android_app_version
-* @property boolean $android_app_updated
 * @property boolean $app_live
 * @property boolean $allow_grouped_lists
 * @property boolean $zebra_lists
@@ -103,7 +100,7 @@ class WiziappConfig implements WiziappIInstallable{
 	private $options = array();
 	private $saveAsBulk = FALSE;
 	private $name = 'wiziapp_settings';
-	private $internalVersion =  71;
+	private $internalVersion =  72;
 	private static $_instance = null;
 
 	public $integer_values = array(
@@ -150,9 +147,9 @@ class WiziappConfig implements WiziappIInstallable{
 		// Add here the keys to reset to the default value;
 		$resetOptions = array();
 		// Add here the keys add with the default value, if they don't already exists;
-		$addOptions = array( 'is_paid', );
+		$addOptions = array();
 		// Add here the keys to remove from the options array;
-		$removeOptions = array( 'notify_periods', );
+		$removeOptions = array( 'aggregate_sum', 'aggregate_notifications', 'android_app_updated', );
 
 		$newDefaults = $this->getDefaultConfig();
 		foreach($addOptions as $optionName) {
@@ -248,10 +245,6 @@ class WiziappConfig implements WiziappIInstallable{
 		$option_isset = array_key_exists($option, $this->options) && in_array( $option, array( 'appstore_url', 'playstore_url', 'apk_file_url', 'android_app_version', 'adsense', 'admob', 'analytics', ) );
 		$is_proper_condition = isset($this->options[$option]) || $option_isset;
 		if ( $is_proper_condition ) {
-			if ( $option === 'android_app_version' && version_compare( $value, $this->android_app_version, '>' ) ) {
-				$this->saveUpdate('android_app_updated', TRUE);
-			}
-
 			$this->options[$option] = $value;
 			$this->save();
 			// If the value is the same it will not be updated but thats still ok.
@@ -377,22 +370,20 @@ class WiziappConfig implements WiziappIInstallable{
 			'notify_on_new_post' => 1,
 			'notify_on_new_page' => 0,
 			'push_message' => 'New Post Published',
-			'aggregate_notifications' => 0,
-			'aggregate_sum' => 1,
 
 			// Rendering
 			'main_tab_index' => 't1',
 			'sep_color' => '#bbbbbbff',
 			'full_image_height' => 480,
-			'full_image_width' => 320,
-			'multi_image_height' => 320, // 350-30 pixels for the scroller and surrounding space
-			'multi_image_width' => 298,  // 300-2 pixels for the rounded border
+			'full_image_width'  => 320,
+			'multi_image_height' => 320,  // 350-30 pixels for the scroller and surrounding space
+			'multi_image_width'  => 298,  // 300-2 pixels for the rounded border
 			'images_thumb_height' => 55,
-			'images_thumb_width' => 73,
+			'images_thumb_width'  => 73,
 			'posts_thumb_height' => 55,
-			'posts_thumb_width' => 73,
-			'featured_post_thumb_height' => 55,
-			'featured_post_thumb_width' => 73,
+			'posts_thumb_width'  => 73,
+			'featured_post_thumb_height' => 800,
+			'featured_post_thumb_width'  => 800,
 
 			// Control Panel - Settings
 			'thumb_min_size' => 80,
@@ -465,7 +456,6 @@ class WiziappConfig implements WiziappIInstallable{
 			'playstore_url' => '',
 			'apk_file_url' => '',
 			'android_app_version' => '',
-			'android_app_updated' => FALSE,
 			'email_verified' => FALSE,
 			'verify_email_notice' => TRUE,
 			'install_notice_showed' => FALSE,

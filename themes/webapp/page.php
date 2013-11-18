@@ -58,7 +58,7 @@ if ( have_posts() ) {
 										foreach ($subPages as $subPage) {
 										?>
 										<li>
-											<a href="<?php echo WiziappLinks::pageLink($subPage->ID); ?>" data-transition="slide">
+											<a href="<?php echo WiziappLinks::pageLink($subPage->ID); ?>">
 												<div class="wiziapp_pages_item">
 													<p class="attribute text_attribute title wiziapp_pages_title"><?php echo ($subPage->post_title); ?></p>
 													<span class="rowCellIndicator"></span>

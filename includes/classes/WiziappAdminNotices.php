@@ -21,23 +21,12 @@ class WiziappAdminNotices {
 			'content' => 'The Email address you have registered with the Wiziapp service is not verified yet. We have sent you a verification Email, please go to your Email account and click the verify link.<br />In case you haven\'t got this email please go to <a href="admin.php?page=wiziapp_my_account_display">my account</a> and click "verify email".',
 			'pointer_width' => 900,
 		),
-		'update_playstore' => array(
-			'title' => 'A new version of the Android App is available',
-			'content' => 'A new version of your Android App is now available with new features, bug fixes and performance improvement.<br />In order to upload the updated APK file to the Google play store go to WiziApp plugin - <a href="admin.php?page=wiziapp">My Apps</a> tab and download it.',
-			'pointer_width' => 800,
-		),
 	);
 
 	public static function set_admin_notices() {
 		global $wp_version;
 		$wp_ponters_compatible = version_compare($wp_version, '3.4', '>=');
 		$installer = new WiziappInstaller();
-
-		$condition_android_app =
-		! WiziappConfig::getInstance()->settings_done &&
-		WiziappConfig::getInstance()->webapp_installed && WiziappConfig::getInstance()->webapp_active &&
-		! empty(WiziappConfig::getInstance()->playstore_url) &&
-		WiziappConfig::getInstance()->android_app_updated;
 
 		if ( ! WiziappConfig::getInstance()->install_notice_showed ) {
 			WiziappConfig::getInstance()->install_notice_showed = TRUE;
@@ -56,14 +45,6 @@ class WiziappAdminNotices {
 				self::_set_wp_pointer('finish_upgrade_pointer');
 			} else {
 				add_action('admin_notices', array('WiziappAdminNotices', 'finish_upgrade_regular_notice'));
-			}
-		} elseif ($condition_android_app) {
-			WiziappConfig::getInstance()->android_app_updated = FALSE;
-
-			if ( $wp_ponters_compatible ) {
-				self::_set_wp_pointer('update_playstore_pointer');
-			} else {
-				add_action('admin_notices', array('WiziappAdminNotices', 'update_playstore_regular_notice'));
 			}
 		}
 
@@ -109,14 +90,6 @@ class WiziappAdminNotices {
 
 	public static function verify_email_pointer() {
 		self::_wp_pointer_js('verify_email');
-	}
-
-	public static function update_playstore_regular_notice() {
-		include WIZI_DIR_PATH.'/themes/admin/update_playstore_notice.php';
-	}
-
-	public static function update_playstore_pointer() {
-		self::_wp_pointer_js('update_playstore');
 	}
 
 	public static function styles_javascripts($hook) {

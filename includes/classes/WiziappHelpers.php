@@ -4,6 +4,16 @@ class WiziappHelpers{
 
 	private static $_wiziapp_rule = 'RewriteCond %{QUERY_STRING} !^wiziapp';
 
+	public static function removeShorttags($matches) {
+		$replacement = preg_replace('#\[[^\]]{4,60}\]#', '', $matches);
+
+		if ( is_array($replacement) ) {
+			$replacement = implode(' ', $replacement);
+		}
+
+		return $replacement;
+	}
+
 	public static function makeShortString($str, $len) {
 		if ( strlen($str) <= $len ){
 			return $str;
@@ -92,9 +102,9 @@ class WiziappHelpers{
 		ob_start();
 		?>
 		<style type="text/css">
-		.page_content.wiziapp_google_adsenes ins{
-			margin-<?php echo WiziappConfig::getInstance()->is_rtl() ? 'right' : 'left'; ?> : -7px !important;
-		}
+			.page_content.wiziapp_google_adsenes ins{
+				margin-<?php echo WiziappConfig::getInstance()->is_rtl() ? 'right' : 'left'; ?> : -7px !important;
+			}
 		</style>
 		<?php
 		$result_array['css'] = ob_get_clean();

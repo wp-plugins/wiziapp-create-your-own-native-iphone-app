@@ -3,7 +3,7 @@ Contributors: wiziapp
 Tags: mobile, iphone, android, Mobile app, mobile theme, HTML5 app, web app, webapp, smartphones, wptouch, adsense for mobile
 Requires at least: 3.3
 Tested up to: 3.6
-Stable tag: v2.1.0a
+Stable tag: v2.1.1b
 License: GPLv2
 
 Create your own free HTML5 mobile App for iPhone, Android and WP8 users. Publish your App as a native App to the App Store and Google Play Market!
@@ -25,7 +25,7 @@ The WiziApp plugin integrates seamlessly with WordPress, delivering all of your 
 
 1. Expose your native Android mobile App to more than 350 million Android users through the Android Google Play market.
 2. Expose your native iPhone mobile App to more than 380 million iOS users through the Apple App Store.
-3. Notify your readers directly to their mobile devices about new content in real time using push notification service that runs and maintained by WiziApp.
+3. Notify your readers directly to their mobile devices about new content in real time using push notification service that runs and maintained by WiziApp
 
 = Features list: =
 
@@ -244,6 +244,13 @@ This plugin collects all of your Nextgen's images, Galleries and albums and add 
 [NextGEN to WiziApp - Integrate image galleries & albums to your WiziApp powered iPhone App](http://wordpress.org/plugins/nextgen-to-wiziapp/)
 
 == Changelog ==
+
+= 2.1.1 =
+
+- A search screen was added so your readers can now search the content within your App, please edit the App settings - "Customize your tab bar menu" section in order to add this screen.
+- Push messages sending and texts are now controlled from each single post.
+- Forms and buttons bugs within Wordpress pages resolved.
+- Other theme's shortcodes display bugs fixed.
 
 = 2.1.0 =
 

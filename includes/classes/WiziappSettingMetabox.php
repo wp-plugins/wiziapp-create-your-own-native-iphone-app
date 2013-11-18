@@ -47,26 +47,34 @@ class WiziappSettingMetabox {
 			}
 		}
 
+		$is_send_wiziapp_push = ( isset($_POST['is_send_wiziapp_push']) && $_POST['is_send_wiziapp_push'] === '1' ) ? 'true' : 'false';
+
 		$not_proper_condition =
 		! ( is_object( $post ) && $post->post_type === 'post' ) ||
 		// If the Post is a revision
-		wp_is_post_revision( $post_id ) ||
-		self::get_push_message($post_id) === $push_message;
+		wp_is_post_revision( $post_id );
 		if ( $not_proper_condition ){
 			return;
 		}
 
 		update_post_meta( $post_id, 'wiziapp_push_message', $push_message );
+		update_post_meta( $post_id, 'is_send_wiziapp_push', $is_send_wiziapp_push );
 	}
 
 	public static function get_push_message($post_id) {
 		$wiziapp_push_message = get_post_meta($post_id, 'wiziapp_push_message', TRUE);
 
-		if ( $wiziapp_push_message && $wiziapp_push_message != '' ) {
-			return $wiziapp_push_message;
-		} else {
+		if ( empty($wiziapp_push_message) ) {
 			return WiziappConfig::getInstance()->push_message;
 		}
+
+		return $wiziapp_push_message;
+	}
+
+	public static function get_is_send_wiziapp_push($post_id) {
+		$is_send_wiziapp_push = get_post_meta($post_id, 'is_send_wiziapp_push', TRUE);
+
+		return ( empty($is_send_wiziapp_push) || ( $is_send_wiziapp_push === 'true' && $is_send_wiziapp_push !== 'false' ) );
 	}
 
 	public function styles_javascripts($hook) {
@@ -87,7 +95,8 @@ class WiziappSettingMetabox {
 			return;
 		}
 
-		$push_message = self::get_push_message($post->ID);
+		$push_message 				= self::get_push_message($post->ID);
+		$send_wiziapp_push_checked 	= self::get_is_send_wiziapp_push($post->ID) ? 'checked="checked"' : '';
 
 		$path_to_view = realpath( dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'themes'.DIRECTORY_SEPARATOR.'admin' );
 		require $path_to_view.DIRECTORY_SEPARATOR.'setting_metabox.php';
