@@ -109,7 +109,7 @@ class WiziappTabbarBuilder{
 				$screenURL = $tab->rootScreenURL;
 				// Add the webapp needed qs params
 				$screenURL .= urlencode(WiziappLinks::getAppend());
-				if ( $tab->type === 'favorites') {
+				if ( in_array( $tab->type, array( 'search', 'favorites', ) ) ){
 					$screenURL = '#'.$tab->type;
 				}
 
