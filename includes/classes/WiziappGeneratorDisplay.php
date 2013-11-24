@@ -8,6 +8,7 @@
 class WiziappGeneratorDisplay{
 
 	private static $_slugs = array(
+		'interstitial-app-wall-ads-for-a-better-mobile-monetization',
 		'exclude-or-include-pages-tags-posts-categories-integrate-with-wiziapp',
 		'nextgen-to-wiziapp',
 	);
@@ -230,17 +231,22 @@ class WiziappGeneratorDisplay{
 
 	public static function wiziapp_plugins_page(){
 		include( ABSPATH . 'wp-admin/includes/plugin-install.php' );
-		$api = plugins_api( 'query_plugins', array( 'author' => 'mayerz', ) );
-		$items = array_filter( $api->plugins, array( 'WiziappGeneratorDisplay', '_filter_by_slug') );
+		$api = plugins_api( 'query_plugins', array( 'search' => 'wiziapp', ) );
+		array_walk( self::$_slugs, array( 'WiziappGeneratorDisplay', '_filter_by_slug'), $api->plugins );
 
 		$wp_list_table = _get_list_table('WP_Plugin_Install_List_Table', array( 'screen' => 'plugin-install', ) );
-		$wp_list_table->items = $items;
+		$wp_list_table->items = self::$_slugs;
 		$wp_list_table->display();
 
 		wp_die();
 	}
 
-	private static function _filter_by_slug($item) {
-		return in_array( $item->slug, self::$_slugs );
+	private static function _filter_by_slug( & $item, $key, $api_plugins) {
+		foreach ( $api_plugins as $api_plugin ) {
+			if ( ! empty($api_plugin->slug) && $item === $api_plugin->slug ) {
+				$item = $api_plugin;
+				return;
+			}
+		}
 	}
 }
