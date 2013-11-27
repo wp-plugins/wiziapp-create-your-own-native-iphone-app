@@ -38,7 +38,7 @@ class WiziappIntroPageScreen{
 
 		$is_show_desktop =
 		WiziappConfig::getInstance()->webapp_installed &&
-		( WiziappConfig::getInstance()->webapp_active || ( isset($_GET['androidapp']) && $_GET['androidapp'] === '1' ) );
+		( WiziappConfig::getInstance()->webapp_active || ( isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT'] === WIZIAPP_ANDROID_APP ) );
 
 		$wiziapp_plugin_url = plugins_url( dirname( WP_WIZIAPP_BASE ) );
 		$app_icon = WiziappContentHandler::getInstance()->get_blog_property('data_files_url').'/resources/icons/'.basename(WiziappConfig::getInstance()->getAppIcon());
@@ -79,20 +79,25 @@ class WiziappIntroPageScreen{
 
 				break;
 			case 'android':
-				if ( $query_string['androidapp'] === '1' && empty(WiziappConfig::getInstance()->playstore_url) ) {
+				if ( isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT'] === WIZIAPP_ANDROID_APP ) {
+					// This is the native Android App
 					$proper_condition =
+					empty(WiziappConfig::getInstance()->playstore_url) &&
 					! empty(WiziappConfig::getInstance()->android_app_version) && ! empty($query_string['abv']) &&
 					! ( isset($_SESSION['wiziapp_android_download']) && $_SESSION['wiziapp_android_download'] === 'none' ) &&
 					version_compare( WiziappConfig::getInstance()->android_app_version, $query_string['abv'], '>' );
+
 					if ( $proper_condition ) {
 						$_SESSION['wiziapp_android_download'] = 'none';
 						$response =  $retun_string.'1';
 					}
 				} else {
+					// This is the Webapp
 					$proper_condition =
 					( ! empty(WiziappConfig::getInstance()->playstore_url) || ! empty(WiziappConfig::getInstance()->apk_file_url) ) &&
 					intval(WiziappConfig::getInstance()->endorse_download_android_app) === 1 &&
 					$_POST['wizi_show_store_url'] != '1';
+
 					if ( $proper_condition ) {
 						$response = $retun_string.'0';
 					}
