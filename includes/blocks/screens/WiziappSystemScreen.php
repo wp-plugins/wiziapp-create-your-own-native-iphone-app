@@ -7,33 +7,8 @@
 */
 
 class WiziappSystemScreen extends WiziappBaseScreen{
-	protected $name = '';
-	protected $type = 'system';
 
 	public function run(){}
-
-	public function runByAbout(){
-		$this->name = 'about';
-		$app_name = WiziappConfig::getInstance()->app_name;
-		if (strlen($app_name) > 20) {
-			$app_name = WiziappHelpers::makeShortString($app_name, 20);
-		}
-
-		$page = array(
-			'title' => $app_name,
-			// 'version' =>  __('version') . ' ' . WiziappConfig::getInstance()->version,
-			'version' =>  '',
-			'imageURL' => WiziappConfig::getInstance()->getAppIcon(),
-			'aboutTitle' => __('About', 'wiziapp') . ' ' . $app_name,
-			'aboutContent' => WiziappConfig::getInstance()->getAppDescription(),
-			// 'actions' => $actions
-			'actions' => array()
-		);
-
-		$screen = $this->prepare($page, $this->getTitle(), 'about');
-		$screen['screen']['class'] = 'about_screen';
-		$this->output($screen);
-	}
 
 	function runByRegister($message=''){
 		$uah = new WiziappCmsUserAccountHandler();
@@ -41,6 +16,7 @@ class WiziappSystemScreen extends WiziappBaseScreen{
 		WiziappTemplateHandler::load(WIZI_DIR_PATH.'themes/iphone/register.php');
 		exit();
 	}
+
 	function runByForgotPassword(){
 		$uah = new WiziappCmsUserAccountHandler();
 		$_SESSION['wiziapp_message'] = $uah->forgotPassword();

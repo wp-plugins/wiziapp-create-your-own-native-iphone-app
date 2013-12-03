@@ -180,7 +180,7 @@ class WiziappGeneratorDisplay{
 						<a href="#" data-request-params="settings_tab_li">Settings</a>
 					</li>
 					<li class="wiziapp active">
-						<a href="#" data-request-params="">Plugins</a>
+						<a href="#" data-request-params="">Add-ons</a>
 					</li>
 				</ul>
 			</div>

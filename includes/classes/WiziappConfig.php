@@ -35,7 +35,6 @@
 * @property boolean $configured
 * @property integer $app_id
 * @property string  $plugin_token
-* @property string  $app_description
 * @property string  $app_name
 * @property string  $app_icon
 * @property string  $version
@@ -100,7 +99,7 @@ class WiziappConfig implements WiziappIInstallable{
 	private $options = array();
 	private $saveAsBulk = FALSE;
 	private $name = 'wiziapp_settings';
-	private $internalVersion =  72;
+	private $internalVersion =  73;
 	private static $_instance = null;
 
 	public $integer_values = array(
@@ -149,7 +148,7 @@ class WiziappConfig implements WiziappIInstallable{
 		// Add here the keys add with the default value, if they don't already exists;
 		$addOptions = array();
 		// Add here the keys to remove from the options array;
-		$removeOptions = array( 'aggregate_sum', 'aggregate_notifications', 'android_app_updated', );
+		$removeOptions = array();
 
 		$newDefaults = $this->getDefaultConfig();
 		foreach($addOptions as $optionName) {
@@ -352,10 +351,12 @@ class WiziappConfig implements WiziappIInstallable{
 		return $url;
 	}
 
-	public function getAppDescription() {
-		$patterns = array("/(<br>|<br \/>|<br\/>)\s*/i","/(\r\n|\r|\n)/");
-		$replacements = array(PHP_EOL, PHP_EOL);
-		return preg_replace($patterns, $replacements, stripslashes($this->options['app_description']));
+	public function getWiziappBranding() {
+		?>
+		<div style="text-align: center; font-family: Helvetica, Arial; font-size: 14px; margin-bottom: 20px;">
+			WordPress mobile theme by <a href="http://www.wiziapp.com/" target="_blank">WiziApp</a>
+		</div>
+		<?php
 	}
 
 	function getDefaultConfig() {
@@ -421,10 +422,9 @@ class WiziappConfig implements WiziappIInstallable{
 			'zebra_lists' => TRUE,
 			'wiziapp_theme_name' => 'default',
 
-			// app
+			// App
 			'plugin_token' => '',
 			'app_id' => 0,
-			'app_description' => 'Here you will see the description about your app. You will be able to provide the description in the app store information form (step 3).',
 			'app_name' => get_bloginfo('name'),
 			'app_icon' => '',
 			'version' => '',

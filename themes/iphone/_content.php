@@ -118,9 +118,10 @@ $wiziapp_google_adsense = WiziappHelpers::get_adsense();
 		if ( $wiziapp_google_adsense['show_in_post'] & $wiziapp_google_adsense['lower_mask'] ) {
 			echo $wiziapp_google_adsense['code'];
 		}
-					?>
+?>
 			</div>
 			<br />
+<?php /*
 			<div id="debug" style="background-color: #c0c0c0;">
 				####AREA 51####
 				<div id="swipeme" style="height: 50px; background-color: #ccc;">
@@ -130,14 +131,13 @@ $wiziapp_google_adsense = WiziappHelpers::get_adsense();
 				<a id="swipeLeft" href="cmd://event/swipeRight"></a>
 				<a id="swipeRight" href="cmd://event/swipeLeft"></a>
 			</div>
+*/ ?>
 			<!-- The link below is for handing video in the simulator, the application shows the video itself while the simulator only shows an image. -->
 			<a href="cmd://open/video" id="dummy_video_opener"></a>
 
 <?php
 		if ( WiziappConfig::getInstance()->is_paid !== '1' ){
-?>
-			<div style="text-align: center; font-size: 12px;">WordPress mobile theme by WiziApp</div>
-<?php
+			echo WiziappConfig::getInstance()->getWiziappBranding();
 		}
 ?>
 		</div><!-- page_content -->
