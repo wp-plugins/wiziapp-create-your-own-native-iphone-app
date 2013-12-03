@@ -143,9 +143,7 @@ if ( have_posts() ) {
 
 <?php
 		if ( WiziappConfig::getInstance()->is_paid !== '1' ){
-?>
-			<div style="text-align: center; font-size: 12px;">WordPress mobile theme by WiziApp</div>
-<?php
+			echo WiziappConfig::getInstance()->getWiziappBranding();
 		}
 ?>
 		</div><!-- page_content -->

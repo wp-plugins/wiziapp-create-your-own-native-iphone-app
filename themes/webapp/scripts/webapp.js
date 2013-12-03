@@ -85,6 +85,7 @@
 			"google+":	"https://plus.google.com/share?url="
 		}
 
+		var share_text = "";
 		var share_buttons = $(event.currentTarget).find("div:jqmData(role='content') p a");
 		var share_buttons_amount = share_buttons.length;
 		if (share_buttons_amount == 0 ){
@@ -103,9 +104,16 @@
 
 			if ( typeof sharing_options[sharing_name] === "undefined" ){
 				continue;
+			} else if ( sharing_name === "twitter" ){
+				share_text = current_button.data("post-title");
+				if ( share_text !== undefined && share_text.length > 0 ){
+					share_text = "&text=" + share_text;
+				} else {
+					share_text = "";
+				}
 			}
 
-			current_button.attr("href", sharing_options[sharing_name] + sharing_url);
+			current_button.attr( "href", sharing_options[sharing_name] + sharing_url + share_text );
 		}
 	})
 	.delegate(":jqmData(role='page')", "pageinit", function(event){

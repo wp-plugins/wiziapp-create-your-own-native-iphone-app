@@ -82,7 +82,7 @@ $tabBar->getBackButton('favorites');
 			<a href="" data-role="button" target="_blank">Facebook</a>
 		</p>
 		<p>
-			<a href="" data-role="button" target="_blank">Twitter</a>
+			<a href="" data-role="button" data-post-title="<?php echo empty($post->post_title) ? '' : urlencode($post->post_title.PHP_EOL.PHP_EOL); ?>" target="_blank">Twitter</a>
 		</p>
 		<p>
 			<a href="" data-role="button">Email</a>

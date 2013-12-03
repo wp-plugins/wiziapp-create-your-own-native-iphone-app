@@ -17,6 +17,7 @@ if ( have_posts() ) {
 
 	get_header();
 ?>
+
 <div data-role="page" data-theme="z">
 	<div data-role="header" data-id="header" data-position="fixed">
 <?php
@@ -117,15 +118,10 @@ if ( have_posts() ) {
 					<div class="clear"></div>
 			<?php
 		}
-
-				if ( WiziappConfig::getInstance()->is_paid !== '1' ){
-				?>
-					<div style="text-align: center; font-size: 12px;">WordPress mobile theme by WiziApp</div>
-				<?php
-					}
-				?>
+?>
 			</div>
 			<br />
+<?php /*
 			<div id="debug" style="background-color: #c0c0c0;">
 				####AREA 51####
 				<div id="swipeme" style="height: 50px; background-color: #ccc;">
@@ -135,8 +131,15 @@ if ( have_posts() ) {
 				<a id="swipeLeft" href="cmd://event/swipeRight"></a>
 				<a id="swipeRight" href="cmd://event/swipeLeft"></a>
 			</div>
+*/ ?>
 			<!-- The link below is for handing video in the simulator, the application shows the video itself while the simulator only shows an image. -->
 			<a href="cmd://open/video" id="dummy_video_opener"></a>
+
+<?php
+		if ( WiziappConfig::getInstance()->is_paid !== '1' ){
+			echo WiziappConfig::getInstance()->getWiziappBranding();
+		}
+?>
 		</div><!-- page_content -->
 
 		<script type="text/javascript">

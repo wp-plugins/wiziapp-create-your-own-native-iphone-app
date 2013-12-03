@@ -1,6 +1,5 @@
 <?php
 
-
 function wiziapp_get_header( $name = null ) {
 	do_action( 'get_header', $name );
 

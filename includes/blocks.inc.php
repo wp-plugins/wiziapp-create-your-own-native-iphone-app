@@ -10,7 +10,7 @@
 class WiziappLoader{
 
 	private $versions = array();
-	private $defaultVersion = '1.2.0';
+	private $defaultVersion = '2.0.6';
 	private $version = WIZIAPP_P_VERSION;
 	private $prefix = 'wiziapp';
 
@@ -103,15 +103,8 @@ class WiziappLoader{
 	private function _getFromVersionConfig($type, $name){
 		$version = $this->getVersion();
 
-		if ( isset($this->versions[$version]) ) {
-			if ( isset($this->versions[$version][$type]) ) {
-				if ( isset($this->versions[$version][$type][$name]) ){
-					$name = $this->versions[$version][$type][$name];
-					/**
-					* @todo ticket #979 should be here for type = 'core'
-					*/
-				}
-			}
+		if ( isset($this->versions[$version]) && isset($this->versions[$version][$type]) && isset($this->versions[$version][$type][$name]) ){
+			$name = $this->versions[$version][$type][$name];
 		}
 
 		return $name;

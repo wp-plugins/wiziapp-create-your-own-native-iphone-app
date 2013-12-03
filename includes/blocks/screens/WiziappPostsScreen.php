@@ -79,7 +79,6 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 			$featuredPostSection['section']['items'] = $this->build($firstQuery, '', $screen_conf['header'], true);
 
 			$query['post__not_in'] = $GLOBALS['wp_posts_listed'];
-			$query['post_type'] = WiziappComponentsConfiguration::getInstance()->get_post_types();
 
 			$stickPosts = get_option('sticky_posts');
 			$stickPostsCount = count($stickPosts);
@@ -87,11 +86,6 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 				$postsIncludedAnyway = $stickPostsCount - 1 + intval( $wiziapp_featured_post !== '' );
 				$query['posts_per_page'] = $query['posts_per_page'] - $postsIncludedAnyway;
 			}
-			/*
-			if ( $stickPostsCount > 1 ){
-			$query['offset'] -=
-			}
-			*/
 		} else {
 			// We are retrieving an update page to add to the first, the first displayed the featured post.
 			// This might have more sticky so we can't ignore them, but we need to exclude some of them, since they might already be shown.
@@ -104,6 +98,7 @@ class WiziappPostsScreen extends WiziappBaseScreen{
 
 			$featuredPostSection = array();
 		}
+		$query['post_type'] = WiziappComponentsConfiguration::getInstance()->get_post_types();
 
 		$recentSection = array(
 			'section' => array(

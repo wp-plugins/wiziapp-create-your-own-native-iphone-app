@@ -81,6 +81,8 @@ class WiziappIntroPageScreen{
 			case 'android':
 				if ( isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT'] === WIZIAPP_ANDROID_APP ) {
 					// This is the native Android App
+
+					/*
 					$proper_condition =
 					empty(WiziappConfig::getInstance()->playstore_url) &&
 					! empty(WiziappConfig::getInstance()->android_app_version) && ! empty($query_string['abv']) &&
@@ -88,9 +90,10 @@ class WiziappIntroPageScreen{
 					version_compare( WiziappConfig::getInstance()->android_app_version, $query_string['abv'], '>' );
 
 					if ( $proper_condition ) {
-						$_SESSION['wiziapp_android_download'] = 'none';
-						$response =  $retun_string.'1';
+					$_SESSION['wiziapp_android_download'] = 'none';
+					$response =  $retun_string.'1';
 					}
+					*/
 				} else {
 					// This is the Webapp
 					$proper_condition =

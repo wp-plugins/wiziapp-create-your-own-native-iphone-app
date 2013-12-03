@@ -267,8 +267,6 @@ class WiziappRequestHandler {
 		} else {
 			if ($type == "scripts"){
 				$this->runService('ContentScripts', 'get');
-			} elseif ($type == 'about'){
-				$this->runScreenBy('System', 'About', null);
 			} elseif ( $type == 'video' ){
 				$this->runScreenBy('Video', 'Id', $req[3]);
 			} elseif ($type == "list"){
