@@ -61,6 +61,13 @@ class WiziappComponentsConfiguration{
 		$post_types = array_values( get_post_types( $args ) );
 		$post_types[] = 'post';
 
+		$key = array_search('wiziapp', $post_types);
+		if ($key !== false) {
+			// This is just trick.
+			// Remove CPT 'wiziapp' to avoid collision with the "Wiziapp Mobile" plugin
+			unset($post_types[$key]);
+		}
+
 		$this->_post_types = array(
 			'is_prepared' => TRUE,
 			'types' => $post_types,
