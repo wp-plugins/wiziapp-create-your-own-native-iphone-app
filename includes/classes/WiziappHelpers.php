@@ -15,16 +15,19 @@ class WiziappHelpers{
 	}
 
 	public static function makeShortString($str, $len) {
-		if ( strlen($str) <= $len ){
+		if ( function_exists('mb_strlen') && function_exists('mb_substr') ) {
+			if ( mb_strlen($str) <= $len ){
+				return $str;
+			}
+			$str = mb_substr($str, 0, $len) . '...';
+
 			return $str;
 		}
 
-		$str = wordwrap($str, $len, "\n", TRUE);
-		$str = substr($str, 0, strpos($str, "\n"));
-		if ( $str[strlen($str) - 1] == ',' ) {
-			$str = substr($str, 0, strlen($str) - 1);
+		if ( strlen($str) <= $len ){
+			return $str;
 		}
-		$str = $str . '...';
+		$str = substr($str, 0, $len).'...';
 
 		return $str;
 	}
