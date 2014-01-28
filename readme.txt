@@ -2,7 +2,7 @@
 Contributors: wiziapp
 Tags: mobile, iphone, android, Mobile app, mobile theme, HTML5 app, web app, webapp, smartphones, wptouch, adsense for mobile
 Requires at least: 3.3
-Tested up to: 3.6
+Tested up to: 3.8
 Stable tag: v2.1.2a
 License: GPLv2
 
