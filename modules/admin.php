@@ -241,7 +241,7 @@
 				<div class="wiziapp-plugin-admin-upgraded-description">
 					<p><?php _e('Welcome to the new WiziApp plugin version, which includes a major upgrade with new features and mobile themes directory to choose from. You can always customize your App’s settings and your mobile theme from the WiziApp plugin control panel.', 'wiziapp-plugin') ?></p>
 					<p><?php _e('<strong>Users that have already purchased a premium license in the past</strong>, please contact <a href="mailto:support@wiziapp.com">support@wiziapp.com</a> in order to activate the Android App and the new “Pro” theme, free of charge.', 'wiziapp-plugin') ?></p>
-					<p><?php _e('Users that have already purchased a native iPhone App, please download and activate the "Wiziapp iOS" plugin in order to keep your iPhone App activated.', 'wiziapp-plugin') ?></p>
+					<p><?php echo str_replace('{}', esc_attr(wiziapp_plugin_hook()->plugins_url('/wiziapp-ios-app.zip')), __('Users that have already purchased a native iPhone App, please download and activate the "<a href="{}">Wiziapp iOS</a>" plugin in order to keep your iPhone App activated.', 'wiziapp-plugin')); ?></p>
 					<p><?php _e('Please don’t hesitate to contact us for any further information.', 'wiziapp-plugin') ?></p>
 				</div>
 				<a href="#" class="wiziapp-plugin-admin-upgraded-donelink"><?php _e('Done', 'wiziapp-plugin'); ?></a>
