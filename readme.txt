@@ -1,4 +1,4 @@
-=== WiziApp - Mobile Adaptive Themes, Native Android & iPhone Apps (WooCommerce & BuddyPress compatible) ===
+=== WiziApp - Mobile Adaptive Themes, Android & iPhone Apps (WooCommerce & BuddyPress compatible) ===
 Contributors: wiziapp
 Tags: mobile theme, Android, HTML5, iphone, mobile, mobile app, smartphones, web app, webapp, wptouch, mobile themes, woocommerce mobile, buddypress mobile, android app, iphone app, adaptive theme, responsive theme
 Requires at least: 3.3
