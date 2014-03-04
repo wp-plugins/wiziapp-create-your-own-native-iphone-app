@@ -208,7 +208,7 @@ Apple may reject your native mobile App if it believes the App doesn't meet thei
 Google doesn't implement any pre review process and the Apps are confirmed automatically, however your native mobile App may be rejected after it was uploaded if google believes the App doesn't meet their guidelines, like for example if it has an offensive, violent or sexual content.
 
 = What is WiziApp's privacy policy? =
-You can check it out [here](http://website.apptelecom.kvet/policy).
+You can check it out [here](http://www.wiziapp.com/policy).
 
 = What are WiziApp's terms and conditions? =
 Read all about it [here](http://www.wiziapp.com/terms).
