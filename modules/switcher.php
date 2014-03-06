@@ -9,6 +9,7 @@
 		var $hooks_get_theme = array();
 		var $hooks_theme_customization = array();
 		var $hooked_root = false;
+		var $extra_links = array();
 
 		function init()
 		{
@@ -64,6 +65,10 @@
 				{
 					add_action('wp_head', $theme['head']);
 				}
+				if (isset($theme['extra_links']))
+				{
+					$this->extra_links = $theme['extra_links'];
+				}
 				$this->stylesheet = $theme['theme'];
 				$this->template = $parent;
 				add_filter('theme_root_uri', array(&$this, 'theme_root_uri'), 99);
@@ -112,6 +117,11 @@
 				add_filter('stylesheet', array(&$this, 'stylesheet'), 99);
 				$this->themeSwitched();
 			}
+		}
+
+		function getExtraLinks()
+		{
+			return $this->extra_links;
 		}
 
 		function theme_root()

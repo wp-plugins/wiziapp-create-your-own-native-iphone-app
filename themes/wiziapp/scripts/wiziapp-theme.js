@@ -74,6 +74,12 @@
 	$(d).bind("pageshow", function(e) {
 		// In the Android 4.1 position absolute right is not work, so, set position by "left".
 		$("div.wiziapp-header a.ui-btn-right").css("left", ($(d).width() - 30) + "px");
+
+		try{
+			if (window.FB && FB.XFBML) {
+				FB.XFBML.parse();
+			}
+		} catch(err){}
 	});
 
 	$(d).bind("pagecreate", function(e) {

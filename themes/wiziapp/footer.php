@@ -40,11 +40,14 @@
 <?php
 		if (wiziapp_theme_is_in_plugin())
 		{
+			foreach (wiziapp_plugin_module_switcher()->getExtraLinks() as $title => $link)
+			{
 ?>
 					<p>
-						<a href="<?php echo add_query_arg('desktop-site-mode', '1'); ?>" data-ajax="false">Desktop site</a>
+						<a href="<?php echo $link; ?>" data-ajax="false"><?php echo $title; ?></a>
 					</p>
 <?php
+			}
 		}
 ?>
 				</div>
