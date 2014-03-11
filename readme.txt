@@ -1,4 +1,4 @@
-=== WiziApp - Mobile Adaptive Themes, Android & iPhone Apps (WooCommerce & BuddyPress compatible) ===
+=== WiziApp - Adaptive Mobile Themes, Android & iPhone Apps (WooCommerce & BuddyPress compatible) ===
 Contributors: wiziapp
 Tags: mobile theme, Android, HTML5, iphone, mobile, mobile app, smartphones, web app, webapp, wptouch, mobile themes, woocommerce mobile, buddypress mobile, android app, iphone app, adaptive theme, responsive theme
 Requires at least: 3.3
@@ -10,18 +10,18 @@ Choose your dedicated mobile Theme, Create your own Native Android and iPhone Ap
 
 == Description ==
 
-= Move to a mobile Adaptive Theme =
+= Move to a adaptive mobile Theme =
 
-Don't settle for a responsive theme, get a real mobile theme for your Wordpress site with the most advanced mobile user experience. You can choose your mobile Adaptive theme from our new themes directory and keep your desktop theme intact.
+Don't settle for a responsive theme, get a real mobile theme for your Wordpress site with the most advanced mobile user experience. You can choose your adaptive mobile theme from our new themes directory and keep your desktop theme intact.
 
 = Create Native iPhone & Android mobile Apps =
 You can create your own Native Android & iPhone App & publish it to the Google Play Store and to the Apple Appstore. Notify your readers about new content by sending push notifications directly to their mobile devices.
 
-= Why mobile adaptive theme is the right choice? =
+= Why adaptive mobile theme is the right choice? =
 
-- Mobile adaptive theme enables you to deliver the best possible user experience to the widest possible audience. This means that functionalities can be catered for in the most user friendly way, depending on the particular device being used to access your website.
-- Mobile adaptive themes are designed to respond and adapt to different screen sizes using responsive techniques, and to adapt to different User requirements based on different device capabilities.
-- With mobile adaptive delivery, the server hosting the website detects the devices making requests to it, and uses this information to deliver different batches of HTML and CSS code based on the characteristics of the device that have been detected.
+- Adaptive mobile theme enables you to deliver the best possible user experience to the widest possible audience. This means that functionalities can be catered for in the most user friendly way, depending on the particular device being used to access your website.
+- Adaptive mobile themes are designed to respond and adapt to different screen sizes using responsive techniques, and to adapt to different User requirements based on different device capabilities.
+- With adaptive mobile delivery, the server hosting the website detects the devices making requests to it, and uses this information to deliver different batches of HTML and CSS code based on the characteristics of the device that have been detected.
 - Keep your desktop theme intact
 
 = Why responsive theme is not enough? =
@@ -32,7 +32,7 @@ You can create your own Native Android & iPhone App & publish it to the Google P
 - Due to its nature, responsive web design inevitably puts the focus on achieving a layout and design that "fits" rather than on what content needs to be there and how it will be used.
 - You have to use the same theme both on mobile and desktop.
 
-= Mobile Adaptive Themes - main features: =
+= Adaptive Mobile Themes - main features: =
 
 - Enable your mobile users to access your mobile site from their mobile device's browser and enjoy an advanced mobile App user experience.
 - Your users can easily read and post new comments directly from your mobile Apps.
@@ -63,7 +63,7 @@ Installing the "WiziApp" Plugin from your WordPress admin panel:
 
 1. Go to the "Plugins" / "Add new" on the left main menu.
 2. Type WiziApp within the search box and click "Search Plugins".
-3. Choose the "WiziApp - Mobile Adaptive Themes, Native Android & iPhone Apps (WooCommerce & BuddyPress compatible)"
+3. Choose the "WiziApp - Adaptive Mobile Themes, Native Android & iPhone Apps (WooCommerce & BuddyPress compatible)"
 4. Click "Install Now".
 5. Click "Activate Plugin".
 6. Click the WiziApp button on the left main menu to start creating your own mobile App.
@@ -73,18 +73,18 @@ Download and Install the "WiziApp" Plugin from wordpress plugin directory or fro
 1. Click the "Download" button.
 2. Go to your WordPress admin panel, open the Plugins menu on the left main menu and click "Add New".
 3. Click upload on the top page menu.
-4. Choose the "WiziApp - Mobile Adaptive Themes, Native Android & iPhone Apps (WooCommerce & BuddyPress compatible)" plugin and click "Install Now".
+4. Choose the "WiziApp - Adaptive Mobile Themes, Native Android & iPhone Apps (WooCommerce & BuddyPress compatible)" plugin and click "Install Now".
 5. Click "Activate Plugin".
 6. Click the WiziApp button on the left main menu to start creating your own mobile App.
 
 == Frequently Asked Questions ==
 
 = What is the WiziApp plugin? =
-- Wiziapp is a plugin which enables you to get a real mobile theme for your Wordpress site with the most advanced mobile user experience. You can choose your mobile Adaptive theme from our new themes directory and keep your desktop theme intact.
+- Wiziapp is a plugin which enables you to get a real mobile theme for your Wordpress site with the most advanced mobile user experience. You can choose your adaptive mobile theme from our new themes directory and keep your desktop theme intact.
 - You can choose your mobile theme from our new themes directory and keep your desktop theme intact.
 - You can create your own Native Android & iPhone App, publish it to the Google Play Store & the Apple Appstore and notify your Android App's users about new content by sending push notifications directly to their mobile devices.
 
-= What is a mobile adaptive web design? =
+= What is a adaptive mobile web design? =
 - Adaptive websites are designed to respond and adapt to different screen sizes using responsive techniques, and to adapt to different User requirements based on different device capabilities.
 - With adaptive delivery, the server hosting the website detects the devices making requests to it, and uses this information to deliver different batches of HTML and CSS code based on the characteristics of the device that have been detected.
 - Adaptive web design, enables you to deliver the best possible User experience to the widest possible audience. This means that functionalities can be catered for in the most User friendly way, depending on the particular device being used to access your website.
@@ -504,7 +504,7 @@ BuddyPress Pages
 = 3.0.0 =
 
 - New webapp modern technology for faster and smoother mobile user experience.
-- New mobile adaptive themes directory.
+- New adaptive mobile themes directory.
 - Mobile App's Header Customization.
 - Mobile App's Colors Customization.
 - Mobile App's CSS edit.
@@ -601,7 +601,7 @@ BuddyPress Pages
 == Upgrade Notice ==
 
 - New webapp modern technology for faster and smoother mobile user experience.
-- New mobile adaptive themes directory.
+- New adaptive mobile themes directory.
 - Mobile App's Header Customization.
 - Mobile App's Colors Customization.
 - Mobile App's CSS edit.
