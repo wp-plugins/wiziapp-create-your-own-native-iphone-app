@@ -22,11 +22,9 @@
 			}
 			if (!wiziapp_plugin_settings()->setAndroidPushService($_GET['wiziapp_plugin_token'], $_GET['wiziapp_plugin_service']))
 			{
-				echo '{"error":"invalid_token"}';
-				exit;
+				wiziapp_plugin_hook()->json_output(array('error' => 'invalid_token'));
 			}
-			echo json_encode(array('android_api' => wiziapp_plugin_settings()->getAndroidPushApiKey()));
-			exit;
+			wiziapp_plugin_hook()->json_output(array('android_api' => wiziapp_plugin_settings()->getAndroidPushApiKey()));
 		}
 
 		function loadAdmin()

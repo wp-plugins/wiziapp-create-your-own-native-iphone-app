@@ -68,18 +68,31 @@
 	});
 
 	$(w).bind("orientationchange", function(){
-		// Disable "set position by left" hoot in change orientation case.
-		$("div.wiziapp-header a.ui-btn-right").css("left", "auto");
+		if (($("body").css("direction") !== "rtl")) {
+			// Disable "set position by left" hoot in change orientation case.
+			$("div.wiziapp-header a.ui-btn-right").css("left", "auto");
+		}
 	});
 	$(d).bind("pageshow", function(e) {
-		// In the Android 4.1 position absolute right is not work, so, set position by "left".
-		$("div.wiziapp-header a.ui-btn-right").css("left", ($(d).width() - 30) + "px");
+		if (($("body").css("direction") !== "rtl")) {
+			// In the Android 4.1 position absolute right is not work, so, set position by "left".
+			$("div.wiziapp-header a.ui-btn-right").css("left", ($(d).width() - 30) + "px");
+		}
 
 		try{
-			if (window.FB && FB.XFBML) {
+			if (w.FB && FB.XFBML) {
 				FB.XFBML.parse();
 			}
 		} catch(err){}
+
+		$(".wiziapp-content-list li").bind("vclick", function(){
+			var cell = $(this);
+
+			cell.addClass("wiziapp-cell-selected");
+			setTimeout(function() {
+				cell.removeClass("wiziapp-cell-selected");
+				}, 2000);
+		});
 	});
 
 	$(d).bind("pagecreate", function(e) {
@@ -88,6 +101,10 @@
 		$(".gallery br:not(:last)", e.target).remove();
 
 		$("iframe", e.target).addClass("wiziapp-video").wrap("<div class=\"wiziapp-video-wrapper\">");
+
+		$.mobile.loading({
+			html: '<span class="ui-icon ui-icon-loading"></span><div class="wiziapp-menu-links"><p>Wordpress mobile theme by <a class="ui-link" data-rel="external" target="_blank" href="http://www.wiziapp.com/">WiziApp</a></p></div>',
+		});
 	});
 
 	$(d).bind("pageload", function(e, data) {

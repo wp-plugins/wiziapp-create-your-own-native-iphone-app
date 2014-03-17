@@ -122,7 +122,9 @@
 				(function($, d, c) {
 					c.bind("change", function() {
 						var reload = false;
-						$(d.body).unbind("click.preview submit.preview");
+						if ($.mobile.ajaxEnabled) {
+							$(d.body).unbind("click.preview submit.preview");
+						}
 						c.each(function(value, key) {
 							if (value.get() != c.settings.values[key])
 							{
@@ -139,19 +141,21 @@
 							});
 						}
 					});
-					$(d).bind("pagebeforeload", function(e, data) {
-						data.options.type = "post";
-						data.options.data = $.extend(data.options.data || {},
-							{
-								wp_customize: "on",
-								theme: <?php echo json_encode(get_stylesheet()); ?>,
-								customized: JSON.stringify(c.settings.values),
-								customize_messenger_channel: c.settings.channel,
-								nonce: <?php echo json_encode(wp_create_nonce('preview-customize_'.get_stylesheet())); ?>
+					if ($.mobile.ajaxEnabled) {
+						$(d).bind("pagebeforeload", function(e, data) {
+							data.options.type = "post";
+							data.options.data = $.extend(data.options.data || {},
+								{
+									wp_customize: "on",
+									theme: <?php echo json_encode(get_stylesheet()); ?>,
+									customized: JSON.stringify(c.settings.values),
+									customize_messenger_channel: c.settings.channel,
+									nonce: <?php echo json_encode(wp_create_nonce('preview-customize_'.get_stylesheet())); ?>
 
-							}
-						);
-					});
+								}
+							);
+						});
+					}
 				})(jQuery, document, wp.customize);
 			});
 		</script>
@@ -252,6 +256,12 @@
 					'capability' => 'edit_theme_options',
 					'transport' => 'postMessage'
 				));
+
+				// Some plugins think that querying posts means there must be a current admin screen. Let's just require the necessary files, just in case
+				if (file_exists(ABSPATH . 'wp-admin/includes/screen.php'))
+				{
+					require_once( ABSPATH . 'wp-admin/includes/screen.php' );
+				}
 
 				$cats = array();
 

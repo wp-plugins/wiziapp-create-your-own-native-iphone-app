@@ -24,13 +24,11 @@
 			}
 			if (!isset($_GET['wiziapp_plugin_token']) || $_GET['wiziapp_plugin_token'] !== wiziapp_plugin_settings()->getAndroidBuildToken())
 			{
-				echo '{"error":"invalid_token"}';
-				exit;
+				wiziapp_plugin_hook()->json_output(array('error' => 'invalid_token'));
 			}
 			if (!isset($_GET['wiziapp_plugin_package']) || !is_string($_GET['wiziapp_plugin_package']))
 			{
-				echo '{"error":"missing_package"}';
-				exit;
+				wiziapp_plugin_hook()->json_output(array('error' => 'missing_package'));
 			}
 			if ( ! function_exists( 'wp_handle_upload' ) ) require_once( ABSPATH . 'wp-admin/includes/file.php' );
 			add_filter('upload_mimes', array(&$this, 'upload_mimes'));
@@ -39,13 +37,12 @@
 			$uploaded_file = wp_handle_upload($_FILES['result'], $upload_overrides);
 			if(!isset($uploaded_file['file']))
 			{
-				echo '{"error":"upload_failed"}';
+				wiziapp_plugin_hook()->json_output(array('error' => 'upload_failed'));
 				exit;
 			}
 			wiziapp_plugin_settings()->setAndroidDownload($uploaded_file['file'], $_GET['wiziapp_plugin_package']);
 			wiziapp_plugin_settings()->setAndroidBuildToken(false);
-			echo '{"success":true}';
-			exit;
+			wiziapp_plugin_hook()->json_output(array('success' => true));
 		}
 
 		function _android_licensed()
@@ -118,13 +115,9 @@
 			$ret = $this->build();
 			if ($ret === true)
 			{
-				echo '{"success":true}';
+				wiziapp_plugin_hook()->json_output(array('success' => true));
 			}
-			else
-			{
-				echo json_encode(array('error' => $ret));
-			}
-			exit;
+			wiziapp_plugin_hook()->json_output(array('error' => $ret));
 		}
 
 		function wp_head()

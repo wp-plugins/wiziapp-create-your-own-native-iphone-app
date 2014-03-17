@@ -21,6 +21,8 @@
 	{
 		// They are not loaded in the admin display
 		add_action('wp_enqueue_scripts', 'wiziapp_styles_scripts');
+		add_action('wp_head', 'wiziapp_theme_check_compatibility_head', 15);
+		add_action('get_header', 'wiziapp_theme_check_compatibility_header');
 	}
 	if (!wiziapp_theme_is_in_plugin())
 	{
@@ -567,21 +569,11 @@
 			// This is an example of how to include a plugin pre-packaged with a theme.
 			array(
 				// The plugin name
-				'name'     				=> 'WP Mobile Theme Switcher',
+				'name'     				=> 'Wiziapp',
 				// The plugin slug (typically the folder name)
-				'slug'     				=> 'wp-mobile-theme-switcher',
-				// The plugin source
-				'source'   				=> dirname(__FILE__).'/wa-includes/tgm-plugin-activation/wp-mobile-theme-switcher.v1.0.1.zip',
+				'slug'     				=> 'wiziapp-create-your-own-native-iphone-app',
 				// If false, the plugin is only 'recommended' instead of required
 				'required' 				=> false,
-				// E.g. 1.0.0. If set, the active plugin must be this version or higher, otherwise a notice is presented
-				'version' 				=> '',
-				// If true, plugin is activated upon theme activation and cannot be deactivated until theme switch
-				'force_activation' 		=> false,
-				// If true, plugin is deactivated upon theme switch, useful for theme-specific plugins
-				'force_deactivation' 	=> false,
-				// If set, overrides default API URL and points to an external URL
-				'external_url' 			=> '',
 			),
 
 			/*
@@ -663,4 +655,58 @@
 			$items .= PHP_EOL.wiziapp_theme_get_menu_item(wiziapp_theme_settings()->getLoginMenuKey()).PHP_EOL;
 		}
 		return $items;
+	}
+
+	function wiziapp_theme_check_compatibility_head()
+	{
+		$support_ajax = true;
+		$stylesheets = array();
+		if (wiziapp_theme_detect_woocommerce())
+		{
+			$stylesheets[] = get_stylesheet_directory_uri().'/woocommerce.css';
+			$support_ajax = false;
+		}
+		if (wiziapp_theme_detect_buddypress())
+		{
+			$stylesheets[] = get_stylesheet_directory_uri().'/buddypress.css';
+			$support_ajax = false;
+		}
+		foreach ($stylesheets as $stylesheet)
+		{
+			echo '<link rel="stylesheet" href="' . $stylesheet . '" type="text/css" media="screen" />'.PHP_EOL;
+		}
+		if ($support_ajax)
+		{
+			return;
+		}
+?>
+<script type="text/javascript">
+	jQuery.mobile.ajaxEnabled = false;
+</script>
+<?php
+	}
+
+	function wiziapp_theme_check_compatibility_header($name)
+	{
+		if (wiziapp_theme_detect_woocommerce() && $name === 'shop')
+		{
+			if (is_archive())
+			{
+				wiziapp_theme_settings()->fromPageList();
+			}
+			else
+			{
+				wiziapp_theme_settings()->back_url = get_permalink((int) woocommerce_get_page_id('shop'));
+			}
+		}
+	}
+
+	function wiziapp_theme_detect_woocommerce()
+	{
+		return function_exists('woocommerce_get_page_id');
+	}
+
+	function wiziapp_theme_detect_buddypress()
+	{
+		return function_exists('buddypress');
 	}

@@ -69,6 +69,18 @@
 			}
 			return trailingslashit(get_bloginfo('wpurl')).'wp-content/plugins/'.dirname(plugin_basename(dirname(__FILE__))).$path;
 		}
+
+		function json_output($output)
+		{
+			echo json_encode($output);
+			ob_start(array(&$this, '_clean'));
+			exit;
+		}
+
+		function _clean()
+		{
+			return '';
+		}
 	}
 
 	function &wiziapp_plugin_hook()

@@ -17,6 +17,41 @@
 			tb_show("", "#TB_inline?width=600&height=80&inlineId=wiziapp-plugin-admin-settings-box-change-note");
 		});
 
+		var trackPage = (function() {
+			var analytics_url = $(".wiziapp-plugin-admin-container").attr("data-wiziapp-plugin-analytics-url");
+			var queue = [];
+			var inprogress = false;
+			function queue_process() {
+				if (!queue.length) {
+					inprogress = false;
+					return;
+				}
+				queue.shift()(queue_process);
+			}
+			function queue_async(func) {
+				queue.push(func);
+				if (inprogress) {
+					return;
+				}
+				inprogress = true;
+				queue_process();
+			}
+			return function(page, done) {
+				queue_async(function(cb) {
+					var f = $("<iframe style=\"position:absolute; top: -100px; height: 1px;\" height=\"1\">");
+					w.wiziapp_analytics_complete = function() {
+						f.remove();
+						if (done) {
+							done();
+						}
+						return cb();
+					};
+					f.attr("src", analytics_url+encodeURIComponent(page));
+					$("body").append(f);
+				});
+			};
+		})();
+
 		var post_ajax = (function() {
 			var ajax_queue = [];
 			var ajax_inprogress = false;
@@ -146,12 +181,19 @@
 		var theme_change = (function() {
 			var ud = [updaterForName("webapp_theme"), updaterForName("android_theme")];
 			var themes = [false, false];
+			var updates = [false, false];
 			var i;
 			var _handlers = [];
 			for (i = 0; i < ud.length; i++)
 				(function(i) {
+					ud[i].bind("updating", function() {
+						updates[i] = true;
+						$(".wiziapp-plugin-admin-overlay").show();
+					});
 					ud[i].bind("updated", function(newval) {
 						themes[i] = newval;
+						updates[i] = false;
+						var updating = false;
 						var j;
 						for (j = 0; j < themes.length; j++) {
 							if (themes[j] === false) {
@@ -160,15 +202,16 @@
 							if (themes[j] !== newval) {
 								newval = false;
 							}
+							updating |= updates[j];
+						}
+						if (updating) {
+							return;
 						}
 						var handlers = _handlers.slice(0);
 						for (j = 0; j < handlers.length; j++) {
 							handlers[j].call(this, newval);
 						}
-						if (newval !== false)
-						{
-							$(".wiziapp-plugin-admin-overlay").hide();
-						}
+						$(".wiziapp-plugin-admin-overlay").hide();
 					});
 				})(i);
 			return function(cb) {
@@ -183,7 +226,6 @@
 				for (i = 0; i < ud.length; i++) {
 					ud[i].update(newval);
 				}
-				$(".wiziapp-plugin-admin-overlay").show();
 			};
 		})();
 
@@ -309,6 +351,54 @@
 			return false;
 		});
 
+		$(".wiziapp-plugin-admin-settings-box-themes-controls").each(function() {
+			var inp = $(this).find("select"),
+				unsel = inp.find("option[value=\"\"]"),
+				img = $(this).find("img"),
+				admin_url = $(this).closest(".wiziapp-plugin-admin-container").attr("data-wiziapp-plugin-admin-url");
+
+			inp.bind("keydown keyup keypressed mousedown mouseup change input textinput propertychange", function() {
+				var val = inp.val();
+				if (val) {
+					theme_set(val);
+				}
+			});
+			theme_change(function(newname) {
+				if (newname === false) {
+					img.hide();
+					unsel.show();
+					newname = "";
+				}
+				else {
+					unsel.hide();
+					var newsrc = $("#wiziapp-plugin-admin-tab-themes .available-theme[data-wiziapp-plugin-admin-theme="+newname.replace(/([^0-9A-Za-z])/g, "\\$1")+"] .screenshot img");
+					if (newsrc.length > 0 && newsrc.attr("src")) {
+						img.attr("src", newsrc.attr("src"));
+						img.show();
+					}
+					else {
+						img.hide();
+					}
+				}
+				inp.val(newname);
+			});
+			$(".wiziapp-plugin-admin-settings-box-themes-customize").click(function(event) {
+				event.preventDefault();
+
+				var theme = inp.val();
+				if (theme) {
+					var prepared_url = admin_url+"customize.php?wiziapp_plugin=customize&theme="+encodeURIComponent(theme)+"&return="+encodeURIComponent(admin_url+"admin.php?page=wiziapp-plugin-settings");
+					w.location.href = add_menu_number(prepared_url);
+				}
+			});
+		});
+
+		$(".wiziapp-plugin-admin-settings-box-themes-browse").click(function(event) {
+			event.preventDefault();
+
+			$("#wiziapp-plugin-admin-tab-header-themes").click();
+		});
+
 		updaterForName("android_app").bind("extra", function(val) {
 			$("#wiziapp-plugin-admin-settings-box-option-android_app-state-download a").attr("href", val);
 		});
@@ -320,8 +410,10 @@
 			});
 		});
 
-		$("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-build-android-billing-buy a").click(function(event) {
+		$("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-state-buy-billing-buy a").click(function(event) {
 			event.preventDefault();
+
+			trackPage("/android");
 
 			var o;
 			var title = $(this).attr("title");
@@ -337,14 +429,14 @@
 			box.find(".wiziapp-plugin-admin-billing-type-details-license").hide();
 
 			var typebox = box.find(".wiziapp-plugin-admin-billing-type-selection-title, .wiziapp-plugin-admin-billing-type-selection");
-			typebox.hide();
+			typebox.show();
 
 			o = box.find(".wiziapp-plugin-admin-billing-type-details-price");
 			o.contents().filter(function() {return !$(this).is(".wiziapp-plugin-admin-billing-type-details-label");}).remove();
-			o.append(d.createTextNode($("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-build-android-billing-price-amount").text()));
+			o.append(d.createTextNode($("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-state-buy-billing-price-amount").text()));
 
 			o = box.find(".wiziapp-plugin-admin-billing-type-details-terms input");
-			o.each(function(){ this.checked = false; });
+			o.each(function(){ this.checked = true; });
 			o.unbind().change(function() {
 				if ($(this).is(":checked")) {
 					typebox.show();
@@ -365,19 +457,22 @@
 						package: "1year",
 						type: type
 					}, function(data) {
-						loader.hide();
 						if (!data.url) {
+							loader.hide();
 							return;
 						}
-						if (data.supports_frame) {
-							tb_remove();
-							$("#TB_window").stop(true, true);
-							tb_show(title, data.url+"&TB_iframe=true&width=800&height=600");
-						}
-						else {
-							loader.show();
-							w.location.href = data.url;
-						}
+						trackPage("/android/"+type, function() {
+							loader.hide();
+							if (data.supports_frame) {
+								tb_remove();
+								$("#TB_window").stop(true, true);
+								tb_show(title, data.url+"&TB_iframe=true&width=800&height=600");
+							}
+							else {
+								loader.show();
+								w.location.href = data.url;
+							}
+						});
 					});
 				});
 			});
@@ -386,7 +481,7 @@
 			$("#TB_window").stop(true, true);
 			tb_show(title, "#TB_inline?width=800&height=600&inlineId=wiziapp-plugin-admin-billing-type");
 		});
-		$("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-build-android-billing-license a").click(function(event) {
+		$("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-state-buy-billing-license a").click(function(event) {
 			event.preventDefault();
 
 			tb_remove();
@@ -438,6 +533,131 @@
 			});
 		}
 
+		$("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-buy a").click(function(event) {
+			event.preventDefault();
+
+			trackPage("/monetization");
+
+			var o;
+			var title = $(this).attr("title");
+			var box = $("#wiziapp-plugin-admin-billing-type");
+
+			var loader = box.find(".wiziapp-plugin-ajax-loader");
+			loader.hide();
+
+			o = box.find(".wiziapp-plugin-admin-billing-type-details-product");
+			o.contents().filter(function() {return !$(this).is(".wiziapp-plugin-admin-billing-type-details-label");}).remove();
+			o.append(d.createTextNode(title));
+
+			box.find(".wiziapp-plugin-admin-billing-type-details-license").hide();
+
+			var typebox = box.find(".wiziapp-plugin-admin-billing-type-selection-title, .wiziapp-plugin-admin-billing-type-selection");
+			typebox.show();
+
+			o = box.find(".wiziapp-plugin-admin-billing-type-details-price");
+			o.contents().filter(function() {return !$(this).is(".wiziapp-plugin-admin-billing-type-details-label");}).remove();
+			o.append(d.createTextNode($("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-price-amount").text()));
+
+			o = box.find(".wiziapp-plugin-admin-billing-type-details-terms input");
+			o.each(function(){ this.checked = true; });
+			o.unbind().change(function() {
+				if ($(this).is(":checked")) {
+					typebox.show();
+				}
+				else {
+					typebox.hide();
+				}
+			});
+
+			$.each("cardcom paypal".split(" "), function(i, type) {
+				var o = box.find(".wiziapp-plugin-admin-billing-type-"+type);
+				o.unbind().click(function(event) {
+					event.preventDefault();
+
+					loader.show();
+					post_ajax({
+						action: "wiziapp_plugin_ads_buy",
+						package: "1year",
+						type: type
+					}, function(data) {
+						if (!data.url) {
+							loader.hide();
+							return;
+						}
+						trackPage("/monetization/"+type, function() {
+							loader.hide();
+							if (data.supports_frame) {
+								tb_remove();
+								$("#TB_window").stop(true, true);
+								tb_show(title, data.url+"&TB_iframe=true&width=800&height=600");
+							}
+							else {
+								loader.show();
+								w.location.href = data.url;
+							}
+						});
+					});
+				});
+			});
+
+			tb_remove();
+			$("#TB_window").stop(true, true);
+			tb_show(title, "#TB_inline?width=800&height=600&inlineId=wiziapp-plugin-admin-billing-type");
+		});
+		$("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-license a").click(function(event) {
+			event.preventDefault();
+
+			tb_remove();
+			$("#TB_window").stop(true, true);
+
+			var title = $(this).attr("title");
+			var box = $("#wiziapp-plugin-admin-license");
+
+			var loader = box.find(".wiziapp-plugin-ajax-loader");
+			loader.hide();
+
+			var k = box.find(".wiziapp-plugin-admin-license-key");
+			var e = box.find(".error");
+			box.find(".wiziapp-plugin-admin-license-activate").unbind().click(function(event) {
+				event.preventDefault();
+
+				loader.show();
+				post_ajax({
+					action: "wiziapp_plugin_ads_license",
+					license: k.val()
+				}, function(data) {
+					loader.hide();
+					if (!data.url) {
+						e.show();
+						return;
+					}
+					tb_remove();
+					$("#TB_window").stop(true, true);
+					tb_show(title, data.url+"&TB_iframe=true&width=800&height=600");
+				});
+			});
+			e.hide();
+
+			tb_show($(this).attr("title"), "#TB_inline?width=800&height=600&inlineId=wiziapp-plugin-admin-license");
+		});
+
+		if ($("#wiziapp-plugin-admin-settings-box-monetization-body-loading").is(".wiziapp-plugin-admin-settings-box-body-active"))
+		{
+			post_ajax({
+				action: "wiziapp_plugin_ads_license_balance"
+			}, function(data) {
+				$("#wiziapp-plugin-admin-settings-box-monetization-body-loading").removeClass("wiziapp-plugin-admin-settings-box-body-active");
+				if (data && data.count && data.count > 0) {
+					$("#wiziapp-plugin-admin-settings-box-monetization-body").addClass("wiziapp-plugin-admin-settings-box-body-active");
+				}
+				else {
+					$("#wiziapp-plugin-admin-settings-box-monetization-body-buy").addClass("wiziapp-plugin-admin-settings-box-body-active");
+				}
+			});
+		}
+
+		trackPage("/settings");
+
 		$("#wiziapp-plugin-admin-tab-themes .available-theme").each(function() {
 			var theme = $(this),
 				name = theme.attr("data-wiziapp-plugin-admin-theme"),
@@ -484,12 +704,13 @@
 		});
 
 		$("#wiziapp-plugin-admin-tab-themes").one("wiziapp-plugin-admin-tab-shown", function() {
+			trackPage("/themes");
 			var tmpl = $(".wiziapp-plugin-admin-themes-template");
 			post_ajax({
 				action: "wiziapp_plugin_theme_list"
 			}, function(data) {
 				$("#wiziapp-plugin-admin-tab-themes .available-theme.wiziapp-plugin-ajax-loader-container").remove();
-				var i, o;
+				var i;
 				for (i = 0; i < data.length; i++)
 					(function(data) {
 						var i, o, a, s;
@@ -510,6 +731,10 @@
 						if (data.installed)
 						{
 							theme.addClass("wiziapp-plugin-theme-installed");
+						}
+						if (data.license)
+						{
+							theme.addClass("wiziapp-plugin-theme-licensed");
 						}
 						if (data.need_update)
 						{
@@ -548,7 +773,13 @@
 						else {
 							o.remove();
 						}
-						theme.find(data.license?".wiziapp-plugin-theme-pricing":".wiziapp-plugin-theme-install").hide();
+						o = theme.find(".wiziapp-plugin-theme-price");
+						if (data.packages && data.packages.length > 0) {
+							o.text("$"+data.packages[0].price);
+						}
+						else {
+							o.remove();
+						}
 						o = theme.find(".wiziapp-plugin-theme-demo");
 						if (data.demo_link) {
 							o.find("a").href(data.demo_link);
@@ -606,11 +837,13 @@
 
 						theme.find(".screenshot").click(function (event) {
 							event.preventDefault();
-							theme.find(".wiziapp-plugin-theme-pricing a, .wiziapp-plugin-theme-install a, a.hide-if-customize, a.hide-if-no-customize, a.activatelink").filter(":visible").first().click();
+							theme.find("a.wiziapp-plugin-theme-pricing, .wiziapp-plugin-theme-install a, a.hide-if-customize, a.hide-if-no-customize, a.activatelink").filter(":visible").first().click();
 						});
 
-						theme.find(".wiziapp-plugin-theme-pricing a").click(function(event) {
+						theme.find("a.wiziapp-plugin-theme-pricing").click(function(event) {
 							event.preventDefault();
+
+							trackPage("/themes/"+data.name);
 
 							tb_remove();
 							$("#TB_window").stop(true, true);
@@ -625,12 +858,14 @@
 
 							o = box.find(".wiziapp-plugin-admin-themes-billing-packages");
 							o.html("");
-							for (i = 0; i < data["packages"].length; i++)
+							for (i = 0; i < data.packages.length; i++)
 								(function(package) {
 									var li = $("<li><a href=\"#\"><span class=\"wiziapp-plugin-admin-themes-billing-packages-description\"></span><span class=\"wiziapp-plugin-admin-themes-billing-packages-arrow\"></span></a></li>");
 									li.find(".wiziapp-plugin-admin-themes-billing-packages-description").text(package.description);
 									li.find("a").click(function(event) {
 										event.preventDefault();
+
+										trackPage("/themes/"+data.name+"/"+package.name);
 
 										var o;
 										var box = $("#wiziapp-plugin-admin-billing-type");
@@ -648,14 +883,14 @@
 										o.show();
 
 										var typebox = box.find(".wiziapp-plugin-admin-billing-type-selection-title, .wiziapp-plugin-admin-billing-type-selection");
-										typebox.hide();
+										typebox.show();
 
 										o = box.find(".wiziapp-plugin-admin-billing-type-details-price");
 										o.contents().filter(function() {return !$(this).is(".wiziapp-plugin-admin-billing-type-details-label");}).remove();
 										o.append(d.createTextNode("$"+package.price));
 
 										o = box.find(".wiziapp-plugin-admin-billing-type-details-terms input");
-										o.each(function(){ this.checked = false; });
+										o.each(function(){ this.checked = true; });
 										o.unbind().change(function() {
 											if ($(this).is(":checked")) {
 												typebox.show();
@@ -677,19 +912,22 @@
 													theme: data.name,
 													package: package.name
 												}, function(data) {
-													loader.hide();
 													if (!data.url) {
+														loader.hide();
 														return;
 													}
-													if (data.supports_frame) {
-														tb_remove();
-														$("#TB_window").stop(true, true);
-														tb_show(title, data.url+"&TB_iframe=true&width=800&height=600");
-													}
-													else {
-														loader.show();
-														w.location.href = data.url;
-													}
+													trackPage("/themes/"+data.name+"/"+package.name+"/"+type, function() {
+														loader.hide();
+														if (data.supports_frame) {
+															tb_remove();
+															$("#TB_window").stop(true, true);
+															tb_show(title, data.url+"&TB_iframe=true&width=800&height=600");
+														}
+														else {
+															loader.show();
+															w.location.href = data.url;
+														}
+													});
 												});
 											});
 										});
@@ -699,7 +937,7 @@
 										tb_show(title, "#TB_inline?width=800&height=600&inlineId=wiziapp-plugin-admin-billing-type");
 									});
 									o.append(li);
-								})(data["packages"][i]);
+								})(data.packages[i]);
 
 							o = box.find(".wiziapp-plugin-admin-themes-billing-license a");
 							o.unbind().click(function(event) {

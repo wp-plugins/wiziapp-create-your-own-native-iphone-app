@@ -85,7 +85,7 @@
 					<a href="#" class="donelink" title="<?php echo esc_attr__('Themes page'); ?>"><?php _e('Done', 'wiziapp-plugin'); ?></a>
 					<script type="text/javascript">
 						if (window.parent && window.parent.jQuery) {
-							window.parent.jQuery(<?php echo json_encode('.available-theme[data-wiziapp-plugin-admin-theme='.preg_replace('/([^0-9A-Za-z])/', '\\\\\\1', $params['theme']).']'); ?>).addClass("wiziapp-plugin-theme-installed").removeClass("wiziapp-plugin-theme-need-update");
+							window.parent.jQuery(<?php echo json_encode('.available-theme[data-wiziapp-plugin-admin-theme='.preg_replace('/([^0-9A-Za-z])/', '\\\\\\1', $params['theme']).']'); ?>).addClass("wiziapp-plugin-theme-installed").addClass("wiziapp-plugin-theme-licensed").removeClass("wiziapp-plugin-theme-need-update");
 							jQuery(".activatelink").click(function() {
 								if (window.parent.tb_remove) {
 									window.parent.tb_remove();
@@ -95,7 +95,7 @@
 						}
 
 						window.parent
-						.jQuery(".wiziapp-plugin-admin-settings-box-option[data-wiziapp-plugin-admin-option-id$=_theme] .wiziapp-plugin-admin-settings-box-value select")
+						.jQuery(".wiziapp-plugin-admin-settings-box-option[data-wiziapp-plugin-admin-option-id$=_theme] .wiziapp-plugin-admin-settings-box-value select, .wiziapp-plugin-admin-settings-box-themes-controls select")
 						.not(<?php echo json_encode(':has(option[value='.preg_replace('/([^0-9A-Za-z])/', '\\\\\\1', $params['theme']).'])'); ?>)
 						.append('<option value="<?php echo esc_attr($params['theme']); ?>"><?php echo esc_html($theme); ?></option>');
 
@@ -106,6 +106,8 @@
 						});
 					</script>
 <?php
+				wp_ob_end_flush_all();
+				flush();
 			}
 		}
 
@@ -121,14 +123,12 @@
 			$response = wp_remote_get($wiziapp_plugin_config['build_host'].'/theme/list?url='.$siteurl);
 			if (is_wp_error($response))
 			{
-				echo '[]';
-				exit;
+				wiziapp_plugin_hook()->json_output(array());
 			}
 			$res = json_decode($response['body'], true);
 			if (!is_array($res) || empty($res))
 			{
-				echo '[]';
-				exit;
+				wiziapp_plugin_hook()->json_output(array());
 			}
 			$themes = wiziapp_plugin_module_switcher()->get_themes(false);
 			$name_map = array();
@@ -205,8 +205,7 @@
 				}
 				$res[$key] = $theme;
 			}
-			echo json_encode(array_values($res));
-			exit;
+			wiziapp_plugin_hook()->json_output(array_values($res));
 		}
 	}
 

@@ -136,8 +136,7 @@
 			{
 				if (!isset($_POST[$key]) || !is_string($_POST[$key]))
 				{
-					echo '{"success":false}';
-					exit;
+					wiziapp_plugin_hook()->json_output(array('success' => false));
 				}
 				$params[$key] = $_POST[$key];
 			}
@@ -150,17 +149,14 @@
 			));
 			if (is_wp_error($response))
 			{
-				echo '{"success":false}';
-				exit;
+				wiziapp_plugin_hook()->json_output(array('success' => false));
 			}
 			$res = json_decode($response['body'], true);
 			if (!is_array($res) || empty($res['success']) || !isset($res['url']))
 			{
-				echo '{"success":false}';
-				exit;
+				wiziapp_plugin_hook()->json_output(array('success' => false));
 			}
-			echo json_encode(array('success' => true, 'url' => $res['url'], 'supports_frame' => !isset($res['supports_frame']) || $res['supports_frame']));
-			exit;
+			wiziapp_plugin_hook()->json_output(array('success' => true, 'url' => $res['url'], 'supports_frame' => !isset($res['supports_frame']) || $res['supports_frame']));
 		}
 
 		function license()
@@ -171,8 +167,7 @@
 			{
 				if (!isset($_POST[$key]) || !is_string($_POST[$key]))
 				{
-					echo '{"success":false}';
-					exit;
+					wiziapp_plugin_hook()->json_output(array('success' => false));
 				}
 				$params[$key] = $_POST[$key];
 			}
@@ -185,14 +180,12 @@
 			));
 			if (is_wp_error($response))
 			{
-				echo '{"success":false}';
-				exit;
+				wiziapp_plugin_hook()->json_output(array('success' => false));
 			}
 			$res = json_decode($response['body'], true);
 			if (!is_array($res) || empty($res['success']))
 			{
-				echo '{"success":false}';
-				exit;
+				wiziapp_plugin_hook()->json_output(array('success' => false));
 			}
 			$params_str = '';
 			foreach ($keys as $key)
@@ -206,8 +199,7 @@
 					$params_str .= '&wiziapp_plugin_'.$key.'='.urlencode($res[$key]);
 				}
 			}
-			echo json_encode(array('success' => true, 'url' => $siteurl.'wp-admin/admin.php?wiziapp_plugin='.$this->type.'_license'.$params_str));
-			exit;
+			wiziapp_plugin_hook()->json_output(array('success' => true, 'url' => $siteurl.'wp-admin/admin.php?wiziapp_plugin='.$this->type.'_license'.$params_str));
 		}
 
 		function license_balance()
@@ -218,8 +210,7 @@
 			{
 				if (!isset($_POST[$key]) || !is_string($_POST[$key]))
 				{
-					echo json_encode($balance);
-					exit;
+					wiziapp_plugin_hook()->json_output($balance);
 				}
 				$params .= '&'.$key.'='.urlencode($_POST[$key]);
 			}
@@ -234,8 +225,7 @@
 					$balance = $res;
 				}
 			}
-			echo json_encode($balance);
-			exit;
+			wiziapp_plugin_hook()->json_output($balance);
 		}
 
 		function install()
@@ -250,8 +240,7 @@
 				$params .= '&wiziapp_plugin_'.$key.'='.urlencode($_POST[$key]);
 			}
 			$siteurl = trailingslashit(get_bloginfo('wpurl'));
-			echo json_encode(array('success' => true, 'url' => $siteurl.'wp-admin/admin.php?wiziapp_plugin='.$this->type.'_license'.$params));
-			exit;
+			wiziapp_plugin_hook()->json_output(array('success' => true, 'url' => $siteurl.'wp-admin/admin.php?wiziapp_plugin='.$this->type.'_license'.$params));
 		}
 
 		function hash_to_url()
@@ -262,7 +251,7 @@
 			}
 			$get = array();
 			parse_str($_POST['hash'], $get);
-			if ($this->install_title_callback === false || !isset($get['wiziapp_plugin']) || ($get['wiziapp_plugin'] !== $this->type.'_license' && $get['wiziapp_plugin'] !== $this->type.'_license_error'))
+			if (!isset($get['wiziapp_plugin']) || (($this->install_title_callback === false || $get['wiziapp_plugin'] !== $this->type.'_license') && $get['wiziapp_plugin'] !== $this->type.'_license_error'))
 			{
 				return;
 			}
@@ -287,11 +276,10 @@
 					$params_str .= '&wiziapp_plugin_'.$key.'='.urlencode($get['wiziapp_plugin_'.$key]);
 				}
 			}
-			echo json_encode(array(
-				'title' => call_user_func($this->install_title_callback, $params),
+			wiziapp_plugin_hook()->json_output(array(
+				'title' => ($get['wiziapp_plugin'] !== $this->type.'_license')?__('Billing error', 'wiziapp-plugin'):call_user_func($this->install_title_callback, $params),
 				'url' => (function_exists('admin_url')?admin_url('admin.php'):(trailingslashit(get_bloginfo('wpurl')).'wp-admin/admin.php')).'?wiziapp_plugin='.$this->type.'_license'.$params_str.'&TB_iframe=true&width=800&height=600'
 			));
-			exit;
 		}
 
 		function _wp_admin_bar_class()

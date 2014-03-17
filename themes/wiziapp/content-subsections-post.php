@@ -8,7 +8,7 @@
 		{
 			$added_query_string = array('wiziapp_display' => 'comments',);
 			wiziapp_theme_settings()->prepare_added_query($added_query_string);
-			$subsections[str_replace('%', $count, __('Comments(%)' ,'wiziapp-smooth-touch'))] = add_query_arg($added_query_string, get_permalink());
+			$subsections[str_replace('%', $count, __(apply_filters('wiziapp_theme_comments_title', 'Comments(%)'), 'wiziapp-smooth-touch'))] = add_query_arg($added_query_string, get_permalink());
 		}
 	}
 	if (wiziapp_theme_settings()->getPostDisplayCategories())
@@ -16,7 +16,7 @@
 		$count = count(wp_get_post_terms(get_the_ID(), 'category', array('fields' => 'ids')));
 		if ($count > 0)
 		{
-			$subsections[str_replace('%', $count, __('Categories(%)', 'wiziapp-smooth-touch'))] = add_query_arg('wiziapp_display', 'categories', get_permalink());
+			$subsections[str_replace('%', $count, __(apply_filters('wiziapp_theme_categories_title', 'Categories(%)'), 'wiziapp-smooth-touch'))] = add_query_arg('wiziapp_display', 'categories', get_permalink());
 		}
 	}
 	if (wiziapp_theme_settings()->getPostDisplayTags())
@@ -24,7 +24,7 @@
 		$count = count(wp_get_post_terms(get_the_ID(), 'post_tag', array('fields' => 'ids')));
 		if ($count > 0)
 		{
-			$subsections[str_replace('%', $count, __('Tags(%)' , 'wiziapp-smooth-touch'))] = add_query_arg('wiziapp_display', 'tags', get_permalink());
+			$subsections[str_replace('%', $count, __(apply_filters('wiziapp_theme_tags_title', 'Tags(%)'), 'wiziapp-smooth-touch'))] = add_query_arg('wiziapp_display', 'tags', get_permalink());
 		}
 	}
 	if (!empty($subsections))

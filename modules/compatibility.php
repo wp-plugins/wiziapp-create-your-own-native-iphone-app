@@ -5,28 +5,28 @@
 	{
 		function init()
 		{
-			add_filter('supercacherewriteconditions', array(&$this, 'supercacherewriteconditions'));
+			add_filter('cached_mobile_browsers', array(&$this, 'cached_mobile_browsers'));
 			wiziapp_plugin_hook()->hookInstall(array(&$this, 'checkW3TotalCache'));
 			wiziapp_plugin_hook()->hookInstall(array(&$this, 'checkQuickCache'));
 		}
 
-		function supercacherewriteconditions($condition_rules)
+		function cached_mobile_browsers($mobile_browsers)
 		{
-			if (!is_array($condition_rules))
+			if (!is_array($mobile_browsers))
 			{
-				return $condition_rules;
+				return $mobile_browsers;
 			}
 
 			// Avoid Wiziapp interference
-			$condition_rules[] = 'RewriteCond %{HTTP_USER_AGENT} !iPhone [NC]';
-			$condition_rules[] = 'RewriteCond %{HTTP_USER_AGENT} !iPod [NC]';
-			$condition_rules[] = 'RewriteCond %{HTTP_USER_AGENT} !Android [NC]';
-			$condition_rules[] = 'RewriteCond %{HTTP_USER_AGENT} !IEMobile [NC]';
-			$condition_rules[] = 'RewriteCond %{HTTP_USER_AGENT} !iPad [NC]';
-			$condition_rules[] = 'RewriteCond %{HTTP_USER_AGENT} !wiziapp_user_agent=ipad_app [NC]';
-			$condition_rules[] = 'RewriteCond %{HTTP_USER_AGENT} !72dcc186a8d3d7b3d8554a14256389a4 [NC]';
+			$mobile_browsers[] = 'iPhone';
+			$mobile_browsers[] = 'iPod';
+			$mobile_browsers[] = 'Android';
+			$mobile_browsers[] = 'IEMobile';
+			$mobile_browsers[] = 'iPad';
+			$mobile_browsers[] = 'wiziapp_user_agent=ipad_app';
+			$mobile_browsers[] = '72dcc186a8d3d7b3d8554a14256389a4';
 
-			return $condition_rules;
+			return $mobile_browsers;
 		}
 
 		function checkW3TotalCache() {

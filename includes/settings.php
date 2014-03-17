@@ -486,7 +486,7 @@
 				{
 					$menu_id = wp_update_nav_menu_object(0, array(
 						'menu-name' => 'wiziapp_custom',
-						'description' => __('Wiziapp Default Menu', 'wiziapp-plugin')
+						'description' => __('WiziApp Default Menu', 'wiziapp-plugin')
 					));
 					if ($menu_id && !is_wp_error($menu_id))
 					{

@@ -168,6 +168,36 @@
 			return $ret;
 		}
 
+		function get_theme($theme)
+		{
+			$hook = !$this->hooked_root;
+			if ($hook)
+			{
+				$this->_hook_root();
+			}
+			if (function_exists('wp_get_theme'))
+			{
+				$theme_data = wp_get_theme($theme);
+				if (!$theme_data->exists())
+				{
+					$theme_data = array();
+				}
+			}
+			else
+			{
+				$theme_data = get_theme_data($theme);
+				if (!$theme_data)
+				{
+					$theme_data = array();
+				}
+			}
+			if ($hook)
+			{
+				$this->_unhook_root();
+			}
+			return $theme_data;
+		}
+
 		function get_theme_title($theme)
 		{
 			$hook = !$this->hooked_root;

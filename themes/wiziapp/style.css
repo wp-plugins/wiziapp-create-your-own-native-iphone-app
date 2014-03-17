@@ -1,12 +1,12 @@
 /*
 Theme Name: WiziApp - Smooth Touch
-Description: Get the ultimate mobile WebApp experience for your mobile visitors. The "WiziApp - Smooth Touch" is using JQuery Mobile, HTML5 & CSS3 in order to create the most advanced mobile user experience. The webapp is compatible with iPhone, Android, Windows Phone & tablets browser's.
+Description: Move to a mobile Adaptive Theme. Don't settle for a responsive theme, get a real mobile theme for your WordPress site with the most advanced mobile user experience. The "WiziApp - Smooth Touch" mobile adaptive theme is using JQuery Mobile, HTML5 & CSS3 in order to create the most advanced mobile user experience. Unlike a responsive theme, the "WiziApp - Smooth Touch" is a an exclusive theme for mobile display which enables you to enjoy an advanced mobile WebApp experience while keeping your current desktop theme. In order to activate this theme for mobile display only, or for creating your own iPhone & Android native Apps, please install the "Wiziapp" plugin (http://wordpress.org/plugins/wiziapp-create-your-own-native-iphone-app/), which is also compatible with Woocommerce and Buddypress.
 Author: Wiziapp Solutions Ltd.
 Author URI: http://www.wiziapp.com
-Version: 1.0.5
+Version: 1.0.6
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Tags: custom-menu, flexible-header, full-width-template, microformats, post-formats, theme-options, threaded-comments, black, white
+Tags: black, custom-menu, flexible-header, full-width-template, microformats, post-formats, theme-options, threaded-comments, white, buddyPress, custom-background, custom-colors, custom-header, custom-menu
 Text Domain: wiziapp-theme
 
 WiziApp - Smooth Touch WordPress theme, Copyright (C) Wiziapp Solutions Ltd.
@@ -31,7 +31,7 @@ WiziApp - Smooth Touch WordPress theme is licensed under the GPL.
 
 }
 .alignright {
-
+	float: right;
 }
 .alignleft {
 
@@ -191,6 +191,17 @@ div.wiziapp-header-has-back a.wiziapp-back-button {
 	text-align: center;
 }
 
+div.ui-loader-default.ui-loader div.wiziapp-menu-links {
+	position: absolute;
+	top: 70%;
+	width: 100%;
+	text-align: center;
+}
+
+ul.wiziapp-content-list.wiziapp-content-comment-list div.wiziapp-menu-links {
+	text-align: center;
+}
+
 /*
 .wiziapp-panel .wiziapp-panel-icon {
 float: left;
@@ -230,13 +241,13 @@ background-image: url(images/panel-icons-hover.png);
 	background-image:         linear-gradient(#ffffff, #f1f1f1);
 }
 
-.wiziapp-content-list li:hover {
-	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0.36, #3589f0), color-stop(0.86, #54b0f7));
-	background-image: -webkit-linear-gradient(#3589f0 36%, #54b0f7 86%);
-	background-image:    -moz-linear-gradient(#3589f0 36%, #54b0f7 86%);
-	background-image:     -ms-linear-gradient(#3589f0 36%, #54b0f7 86%);
-	background-image:      -o-linear-gradient(#3589f0 36%, #54b0f7 86%);
-	background-image:         linear-gradient(#3589f0 36%, #54b0f7 86%);
+.wiziapp-cell-selected {
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0.36, #3589f0), color-stop(0.86, #54b0f7)) !important;
+	background-image: -webkit-linear-gradient(#3589f0 36%, #54b0f7 86%) !important;
+	background-image:    -moz-linear-gradient(#3589f0 36%, #54b0f7 86%) !important;
+	background-image:     -ms-linear-gradient(#3589f0 36%, #54b0f7 86%) !important;
+	background-image:      -o-linear-gradient(#3589f0 36%, #54b0f7 86%) !important;
+	background-image:         linear-gradient(#3589f0 36%, #54b0f7 86%) !important;
 }
 
 .wiziapp-content-list a.wiziapp-content-list-item {
@@ -853,7 +864,7 @@ img.size-auto, img.size-full, img.size-large, img.size-medium, .attachment img, 
 
 /*
 .wiziapp-form-search .wiziapp-search-submit {
-	width: 60%;
+width: 60%;
 }
 
 .wiziapp-panel-icon-search {
@@ -1033,7 +1044,7 @@ background-position: -2150px 0px;
 }
 */
 
-@media screen and (min-width: 700px) {
+@media screen and (min-width: 720px) {
 	.wiziapp-content-post-list .wiziapp-post-thumbnail {
 		float: left !important;
 		width: 210px !important;

@@ -22,11 +22,11 @@
 </div>
 <?php
 	}
-	if ($query->haveComments())
-	{
 ?>
 <ul data-role="listview" class="wiziapp-content-list wiziapp-content-comment-list">
 <?php
+	if ($query->haveComments())
+	{
 		wp_list_comments($wiziapp_comments_args, $query->comments);
 
 		if ($query->haveMore())
@@ -52,15 +52,22 @@
 	</li>
 <?php
 		}
-?>
-</ul>
-
-<?php
 	}
 	else
 	{
 		// TODO - Display if no comments are available
 	}
+?>
+	<li>
+		<div class="wiziapp-menu-links">
+			<p>
+				Wordpress mobile theme by <a class="ui-link" data-rel="external" target="_blank" href="http://www.wiziapp.com/">WiziApp</a>
+			</p>
+		</div>
+	</li>
+</ul>
+
+<?php
 	get_footer();
 
 	function wiziapp_comments_view($the_comment, $args, $depth)
