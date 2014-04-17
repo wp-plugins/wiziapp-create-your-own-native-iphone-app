@@ -87,7 +87,7 @@
 			if (wiziapp_theme_settings()->getPostListDisplayDate())
 			{
 ?>
-				<div class="wiziapp-post-date"><?php echo apply_filters('wiziapp_theme_post_details', __('Posted', 'wiziapp-smooth-touch').' '); ?><?php the_time('M j, y'); ?>&nbsp;</div>
+				<div class="wiziapp-post-date"><?php echo apply_filters('wiziapp_theme_post_details', __('Posted', 'wiziapp-smooth-touch').' '); ?><?php the_date(); ?>&nbsp;</div>
 <?php
 			}
 			if (wiziapp_theme_settings()->getPostListDisplayAuthor())

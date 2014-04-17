@@ -6,15 +6,17 @@
 		private $type;
 		private $api_root;
 		private $success_callback;
+		private $success_analytics_callback;
 		private $install_title_callback;
 		private $extra_params;
 		private $extra_details;
 
-		function hook($type, $api_root, $success_callback, $install_title_callback = false, $extra_params = array(), $extra_details = array())
+		function hook($type, $api_root, $success_callback, $success_analytics_callback, $install_title_callback = false, $extra_params = array(), $extra_details = array())
 		{
 			$this->type = $type;
 			$this->api_root = $api_root;
 			$this->success_callback = $success_callback;
+			$this->success_analytics_callback = $success_analytics_callback;
 			$this->install_title_callback = $install_title_callback;
 			$this->extra_params = $extra_params;
 			$this->extra_details = $extra_details;
@@ -94,6 +96,17 @@
 				}
 				if ($params !== false)
 				{
+					$analytics = call_user_func($this->success_analytics_callback, $params);
+					if (!empty($analytics))
+					{
+?>
+					<script type="text/javascript">
+						if (window.parent && window.parent.jQuery) {
+							window.parent.jQuery(".wiziapp-plugin-admin-container").trigger("track-page", <?php echo json_encode($analytics); ?>);
+						}
+					</script>
+<?php
+					}
 					$details = array();
 					foreach ($this->extra_details as $key)
 					{
@@ -121,10 +134,10 @@
 			add_action('wp_ajax_wiziapp_plugin_'.$this->type.'_buy', array(&$this, 'buy'));
 			add_action('wp_ajax_wiziapp_plugin_'.$this->type.'_license', array(&$this, 'license'));
 			add_action('wp_ajax_wiziapp_plugin_'.$this->type.'_license_balance', array(&$this, 'license_balance'));
+			add_action('wp_ajax_wiziapp_plugin_hash_to_url', array(&$this, 'hash_to_url'));
 			if ($this->install_title_callback !== false)
 			{
 				add_action('wp_ajax_wiziapp_plugin_'.$this->type.'_install', array(&$this, 'install'));
-				add_action('wp_ajax_wiziapp_plugin_hash_to_url', array(&$this, 'hash_to_url'));
 			}
 		}
 
@@ -251,7 +264,7 @@
 			}
 			$get = array();
 			parse_str($_POST['hash'], $get);
-			if (!isset($get['wiziapp_plugin']) || (($this->install_title_callback === false || $get['wiziapp_plugin'] !== $this->type.'_license') && $get['wiziapp_plugin'] !== $this->type.'_license_error'))
+			if (!isset($get['wiziapp_plugin']) || ($get['wiziapp_plugin'] !== $this->type.'_license' && $get['wiziapp_plugin'] !== $this->type.'_license_error'))
 			{
 				return;
 			}
@@ -276,10 +289,23 @@
 					$params_str .= '&wiziapp_plugin_'.$key.'='.urlencode($get['wiziapp_plugin_'.$key]);
 				}
 			}
+			$analytics_add = array();
+			if ($get['wiziapp_plugin'] === $this->type.'_license')
+			{
+				$analytics = call_user_func($this->success_analytics_callback, $params);
+				if (!empty($analytics))
+				{
+					$analytics_add['track_page'] = $analytics;
+				}
+			}
+			if ($this->install_title_callback === false)
+			{
+				wiziapp_plugin_hook()->json_output($analytics_add);
+			}
 			wiziapp_plugin_hook()->json_output(array(
 				'title' => ($get['wiziapp_plugin'] !== $this->type.'_license')?__('Billing error', 'wiziapp-plugin'):call_user_func($this->install_title_callback, $params),
 				'url' => (function_exists('admin_url')?admin_url('admin.php'):(trailingslashit(get_bloginfo('wpurl')).'wp-admin/admin.php')).'?wiziapp_plugin='.$this->type.'_license'.$params_str.'&TB_iframe=true&width=800&height=600'
-			));
+			)+$analytics_add);
 		}
 
 		function _wp_admin_bar_class()

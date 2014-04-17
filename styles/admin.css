@@ -24,7 +24,7 @@
 }
 
 .wiziapp-plugin-admin-container {
-	background: #f9f9f9;
+	background: none;
 	color: #000;
 	font-size: 10pt;
 	font-family: sans-serif;
@@ -47,6 +47,14 @@
 	cursor: pointer;
 }
 
+.wiziapp-plugin-admin-header-tab a {
+	display: block;
+	width: 100%;
+	height: 100%;
+	text-decoration: none;
+	color: #000;
+}
+
 .wiziapp-plugin-admin-header-tab-active {
 	height: 75px;
 	border-bottom: 5px solid #22a0f5;
@@ -54,7 +62,6 @@
 
 .wiziapp-plugin-admin-tab {
 	display: none;
-	border: 1px solid #f9f9f9;
 	border-top: 1px solid #e8e8e8;
 }
 
@@ -62,43 +69,7 @@
 	display: block;
 }
 
-.wiziapp-plugin-admin-header-links {
-	float: right;
-	padding: 15px 10px;
-}
-
-.wiziapp-plugin-admin-header-links a {
-	display: block;
-	float: left;
-	width: 50px;
-	height: 50px;
-	background: top left no-repeat;
-}
-
-#wiziapp-plugin-admin-header-links-rate {
-	width: 120px;
-	height: 50px;
-	background: url("../images/link-rate.png") center center no-repeat;
-}
-
-#wiziapp-plugin-admin-header-links-fb {
-	background: url("../images/link-fb.png") center center no-repeat;
-}
-
-#wiziapp-plugin-admin-header-links-twitter {
-	background: url("../images/link-twitter.png") center center no-repeat;
-}
-
-#wiziapp-plugin-admin-header-links-gplus {
-	background: url("../images/link-gplus.png") center center no-repeat;
-}
-
-#wiziapp-plugin-admin-header-links-rss {
-	background: url("../images/link-rss.png") center center no-repeat;
-}
-
 .wiziapp-plugin-admin-settings-box {
-	outline: 5px solid #fff;
 	border: 1px solid #ddd;
 	margin: 20px;
 	border-radius: 4px;
@@ -108,6 +79,7 @@
 	border-bottom: 1px solid #ddd;
 	padding: 5px 20px;
 	font-size: 9pt;
+	font-weight: bold;
 	background-image: -webkit-gradient(linear, left top, left bottom, from(#f9f9f9), to(#ececec));
 	background-image: -webkit-linear-gradient(#f9f9f9, #ececec);
 	background-image:    -moz-linear-gradient(#f9f9f9, #ececec);
@@ -150,12 +122,7 @@
 .wiziapp-plugin-admin-settings-box-body {
 	padding: 20px;
 	border-top: 1px solid #fff;
-	background-image: -webkit-gradient(linear, left top, left bottom, from(#f9f9f9), to(#f5f5f5));
-	background-image: -webkit-linear-gradient(#f9f9f9, #f5f5f5);
-	background-image:    -moz-linear-gradient(#f9f9f9, #f5f5f5);
-	background-image:     -ms-linear-gradient(#f9f9f9, #f5f5f5);
-	background-image:      -o-linear-gradient(#f9f9f9, #f5f5f5);
-	background-image:         linear-gradient(#f9f9f9, #f5f5f5);
+	background: #fff;
 }
 
 .wiziapp-plugin-admin-settings-box-has-states .wiziapp-plugin-admin-settings-box-body {
@@ -166,7 +133,7 @@
 	display: block;
 }
 
-#wiziapp-plugin-admin-settings-box-android-body-loading, #wiziapp-plugin-admin-settings-box-monetization-body-loading {
+#wiziapp-plugin-admin-settings-box-android-body-loading, #wiziapp-plugin-admin-settings-box-ios-body-loading, #wiziapp-plugin-admin-settings-box-monetization-body-loading {
 	height: 150px;
 	position: relative;
 }
@@ -178,14 +145,18 @@ ul.wiziapp-plugin-admin-features {
 
 ul.wiziapp-plugin-admin-features li {
 	background: url(../images/vicon.png) center left no-repeat;
-	font-size: 19px;
+	font-size: 18px;
 	margin-bottom: 1em;
-	padding: 5px 0 5px 40px;
+	padding: 5px 0 5px 30px;
 }
 
 .wiziapp-plugin-admin-state-buy-description {
 	float: left;
 	width: 530px;
+}
+
+.wiziapp-plugin-admin-state-buy-description-tour {
+	font-size: 18px;
 }
 
 .wiziapp-plugin-admin-state-buy-billing {
@@ -241,6 +212,20 @@ ul.wiziapp-plugin-admin-features li {
 	margin-top: 0.5em;
 }
 
+.wiziapp-plugin-admin-state-available-description {
+	font-size: 16px;
+	line-height: normal;
+	margin-bottom: 10px;
+}
+
+.wiziapp-plugin-admin-state-available-license {
+	font-size: 14px;
+}
+
+.wiziapp-plugin-admin-state-available-license .wiziapp-plugin-admin-state-available-license-label {
+	font-size: 18px;
+}
+
 .wiziapp-plugin-admin-ios-download-description, .wiziapp-plugin-admin-upgraded-description {
 	font-size: 20px;
 	margin: 20px 0;
@@ -260,28 +245,34 @@ ul.wiziapp-plugin-admin-features li {
 	background-color: #fff;
 	border: 1px solid #ccc;
 	display: block;
-	height: 225px;
+	height: 188px;
 	margin-right: 10px;
 	overflow: hidden;
-	width: 300px;
-	float: left;
+	width: 250px;
 }
 
 .wiziapp-plugin-admin-settings-box-themes-controls-screenshot img {
-	width: 300px;
+	width: 250px;
 }
 
 .wiziapp-plugin-admin-settings-box-themes-controls {
 	float: left;
-	width: 530px;
-	border-right: 2px solid #aaa;
+	width: 280px;
+	border-right: 2px solid #e5e5e5;
 }
 
 .wiziapp-plugin-admin-settings-box-themes-controls-selection-label {
 	font-weight: bold;
 	padding-top: 10px;
-	padding-bottom: 10px;
 	line-height: 30px;
+}
+
+.wiziapp-plugin-admin-settings-box-themes-controls-selection div.action-links {
+	margin: 0;
+}
+
+.wiziapp-plugin-admin-settings-box-themes-controls-selection .action-links ul {
+	margin: 0;
 }
 
 .wiziapp-plugin-admin-settings-box-themes-controls-selection select {
@@ -289,10 +280,20 @@ ul.wiziapp-plugin-admin-features li {
 }
 
 .wiziapp-plugin-admin-settings-box-themes-description {
-	border-left: 2px solid #aaa;
-	margin-left: 530px;
-	width: 225px;
-	padding-left: 10px;
+	border-left: 2px solid #e5e5e5;
+	margin-left: 280px;
+	padding-left: 30px;
+}
+
+.wiziapp-plugin-admin-settings-box-themes-description h3 {
+	font-size: 24px;
+	font-weight: normal;
+	margin: 0 0 1em;
+}
+
+.wiziapp-plugin-admin-settings-box-themes-description .wiziapp-plugin-admin-settings-button {
+	width: 200px;
+	margin-left: 40px;
 }
 
 .wiziapp-plugin-admin-settings-box-option {
@@ -306,7 +307,7 @@ ul.wiziapp-plugin-admin-features li {
 	padding-top: 10px;
 	padding-bottom: 10px;
 	line-height: 30px;
-	border-right: 2px solid #aaa;
+	border-right: 2px solid #e5e5e5;
 }
 
 .wiziapp-plugin-admin-settings-box-label-description {
@@ -317,7 +318,7 @@ ul.wiziapp-plugin-admin-features li {
 
 .wiziapp-plugin-admin-settings-box-value {
 	margin-left: 250px;
-	border-left: 2px solid #aaa;
+	border-left: 2px solid #e5e5e5;
 	padding-left: 20px;
 	padding-top: 10px;
 	padding-bottom: 10px;
@@ -342,6 +343,14 @@ ul.wiziapp-plugin-admin-features li {
 .wiziapp-plugin-admin-settings-box-option-number input {
 	width: 50px;
 	text-align: center;
+}
+
+.wiziapp-plugin-admin-settings-box-value-radio {
+	float: left;
+}
+
+.wiziapp-plugin-admin-settings-box-value-radio label {
+	display: block;
 }
 
 .wiziapp-plugin-admin-settings-box-option-number .wiziapp-plugin-admin-settings-box-value-unit {
@@ -426,6 +435,31 @@ div.wiziapp-plugin-admin-settings-box-value-state-active {
 .wiziapp-plugin-admin-settings-box-value-has-error .wiziapp-plugin-admin-settings-box-value-image-error
 {
 	display: block;
+}
+
+#wiziapp-plugin-admin-rate-box {
+	margin: 50px auto 0;
+	width: 340px;
+	text-align: center;
+	line-height: normal;
+	background: url("../images/rate-arrow.png") 15px 30px no-repeat;
+}
+
+#wiziapp-plugin-admin-rate-box h3 {
+	margin: 0;
+	font-weight: bold;
+}
+
+#wiziapp-plugin-admin-rate-box div {
+	color: #888;
+}
+
+#wiziapp-plugin-admin-rate-box a {
+	display: block;
+	background: url("../images/rate-btn.png") center center no-repeat;
+	margin: 10px auto;
+	height: 65px;
+	width: 241px;
 }
 
 #wiziapp-plugin-admin-settings-box-option-android_app-state-need-build input, #wiziapp-plugin-admin-settings-box-option-android_app-state-download a {
@@ -525,6 +559,65 @@ div.wiziapp-plugin-admin-settings-box-value-state-active {
 	clear: left;
 }
 
+#wiziapp-plugin-admin-themes-box-complete {
+	height: 170px;
+	margin: 1em 30px 1em 0;
+	background: #fff;
+}
+
+#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-price-box {
+	float: left;
+	width: 200px;
+	height: 100%;
+	background: #DDD;
+}
+
+#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-price {
+	padding-top: 30px;
+	text-align: center;
+}
+
+#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-buy.wiziapp-plugin-admin-settings-button {
+	margin: 0 20px;
+}
+
+#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-price-duration {
+	color: #888888;
+	display: block;
+	margin-bottom: 1em;
+}
+
+#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-price-amount {
+	font-size: 40px;
+}
+
+#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-description-box {
+	margin-left: 220px;
+	position: relative;
+	height: 100%;
+}
+
+#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-description-box h3 {
+	font-size: 24px;
+	margin: 0;
+	padding-top: 1em;
+}
+
+#wiziapp-plugin-admin-themes-box-complete ul.wiziapp-plugin-admin-features {
+	float: left;
+	margin: 1em 20px 1em 0;
+}
+
+#wiziapp-plugin-admin-themes-box-complete ul.wiziapp-plugin-admin-features li {
+	margin-bottom: 5px;
+}
+
+#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-license {
+	position: absolute;
+	bottom: 5px;
+	right: 30px;
+}
+
 .wiziapp-plugin-admin-container .action-links {
 	margin-top: 10px;
 	overflow: hidden;
@@ -591,28 +684,28 @@ div.wiziapp-plugin-admin-settings-box-value-state-active {
 	display: block;
 }
 
+.wiziapp-plugin-theme-details-license {
+	display: none;
+}
+
 .wiziapp-plugin-admin-themes-billing-sidebar {
 	float: right;
-	margin-top: 30px;
-	width: 200px;
+	margin-top: 60px;
+	width: 320px;
+}
+
+.wiziapp-plugin-admin-themes-billing-sidebar .wiziapp-plugin-admin-settings-button {
+	width: 250px;
 }
 
 .wiziapp-plugin-admin-themes-billing-main {
-	margin-right: 210px;
+	margin-right: 350px;
 	overflow: hidden;
 }
 
-.wiziapp-plugin-admin-themes-billing-packages a {
-	background: #0AF;
-	border-radius: 10px;
-	color: #FFF !important;
-	display: block;
-	font-size: 18px;
-	font-weight: bold;
-	padding: 15px 25px 15px 15px;
-	position: relative;
-	text-align: center;
-	text-decoration: none;
+.wiziapp-plugin-admin-themes-billing-packages {
+	font-size: 16px;
+	margin: 0;
 }
 
 .wiziapp-plugin-admin-themes-billing-packages li {
@@ -629,11 +722,36 @@ div.wiziapp-plugin-admin-settings-box-value-state-active {
 
 .wiziapp-plugin-admin-themes-billing-license {
 	font-size: 10px;
+	margin: 10px 5px;
 }
 
 .wiziapp-plugin-admin-themes-billing-license a {
 	color: #00F !important;
 	text-decoration: none;
+}
+
+.wiziapp-plugin-admin-themes-billing-demo {
+	background: none repeat scroll 0 0 #CCC;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#CCC), to(#BBB));
+	background-image: -webkit-linear-gradient(#CCC, #BBB);
+	background-image:    -moz-linear-gradient(#CCC, #BBB);
+	background-image:     -ms-linear-gradient(#CCC, #BBB);
+	background-image:      -o-linear-gradient(#CCC, #BBB);
+	background-image:         linear-gradient(#CCC, #BBB);
+	border-radius: 10px;
+	box-shadow: 0 1px #AAA;
+	position: relative;
+}
+
+.wiziapp-plugin-admin-themes-billing-demo a {
+	color: #000 !important;
+	display: block;
+	font-size: 18px;
+	height: 100%;
+	padding: 15px 0;
+	text-decoration: none;
+	width: 100%;
+	text-align: center;
 }
 
 .wiziapp-plugin-admin-themes-billing-main h3 {
@@ -642,6 +760,7 @@ div.wiziapp-plugin-admin-settings-box-value-state-active {
 
 .wiziapp-plugin-admin-themes-billing-screenshot {
 	position: relative;
+	margin-top: 20px;
 }
 
 .wiziapp-plugin-admin-themes-billing-screenshot img {
@@ -658,7 +777,7 @@ div.wiziapp-plugin-admin-settings-box-value-state-active {
 	display: block;
 	position: absolute;
 	top: -20px;
-	background: #0AF;
+	background: center center no-repeat #0AF;
 	border-radius: 20px;
 	width: 40px;
 	height: 40px;
@@ -672,11 +791,18 @@ div.wiziapp-plugin-admin-settings-box-value-state-active {
 }
 
 .wiziapp-plugin-admin-themes-billing-screenshot-nav .wiziapp-plugin-admin-themes-billing-screenshot-prev {
-	left: 10px
+	left: 10px;
+	background-image: url(images/arrow_prev.png);
 }
 
 .wiziapp-plugin-admin-themes-billing-screenshot-nav .wiziapp-plugin-admin-themes-billing-screenshot-next {
-	right: 10px
+	right: 10px;
+	background-image: url(images/arrow.png);
+}
+
+.wiziapp-plugin-admin-themes-billing-description {
+	font-size: 13px;
+	margin-top: 15px;
 }
 
 .wiziapp-plugin-admin-themes-billing-end {

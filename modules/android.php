@@ -9,7 +9,7 @@
 		function init()
 		{
 			$hook = new WiziappPluginPurchaseHook();
-			$hook->hook('build_android', '/build/android', array(&$this, '_android_licensed'));
+			$hook->hook('build_android', '/build/android', array(&$this, '_licensed'), array(&$this, '_analytics'));
 			wiziapp_plugin_module_switcher()->hookGetTheme(array($this, 'getTheme'));
 			wiziapp_plugin_hook()->hookLoad(array(&$this, 'load'));
 			wiziapp_plugin_hook()->hookLoadAdmin(array(&$this, 'loadAdmin'));
@@ -45,7 +45,7 @@
 			wiziapp_plugin_hook()->json_output(array('success' => true));
 		}
 
-		function _android_licensed()
+		function _licensed()
 		{
 ?>
 					<script type="text/javascript">
@@ -61,6 +61,11 @@
 <?php
 		}
 
+		function _analytics()
+		{
+			return '/android/purchased';
+		}
+
 		function loadAdmin()
 		{
 			add_action('wp_ajax_wiziapp_plugin_android_build', array(&$this, 'build_ajax'));
@@ -72,7 +77,7 @@
 			{
 				return false;
 			}
-			if (!isset($_SERVER['HTTP_USER_AGENT']) || $_SERVER['HTTP_USER_AGENT'] !== '72dcc186a8d3d7b3d8554a14256389a4')
+			if (!isset($_SERVER['HTTP_USER_AGENT']) || ($_SERVER['HTTP_USER_AGENT'] !== '72dcc186a8d3d7b3d8554a14256389a4' && stripos($_SERVER['HTTP_USER_AGENT'], 'wiziapp_user_agent=android_app') === false))
 			{
 				if (wiziapp_plugin_settings()->getAndroidIntroScreen() && wiziapp_plugin_settings()->getAndroidDownload())
 				{
@@ -93,8 +98,9 @@
 					'icon' => wiziapp_plugin_settings()->getAndroidIcon(),
 					'splash' => wiziapp_plugin_settings()->getAndroidSplash(),
 					'sender_id' => wiziapp_plugin_settings()->getAndroidPushSenderId(),
+					'user_agent' => 'Mozilla/5.0 (Linux; U; Android 4.0.2; en-us; Galaxy Nexus Build/ICL53F) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30 wiziapp_user_agent=android_app',
 					'admob_id' => wiziapp_plugin_settings()->getAndroidAdmobId()
-				)
+				), 'timeout' => 90
 			));
 			if (is_wp_error($response))
 			{

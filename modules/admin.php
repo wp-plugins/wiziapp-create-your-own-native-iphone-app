@@ -57,8 +57,13 @@
 			wp_enqueue_style('wiziapp-plugin-admin-icon');
 			if ($page !== 'toplevel_page_wiziapp-plugin-settings')
 			{
+				if (!wiziapp_plugin_settings()->isConfigured())
+				{
+					add_action('admin_notices', array(&$this, '_configure_notice'));
+				}
 				return;
 			}
+			wiziapp_plugin_settings()->setConfigured();
 			wp_enqueue_media();
 			add_thickbox();
 			wp_register_style('wiziapp-plugin-admin', wiziapp_plugin_hook()->plugins_url('/styles/admin.css'), array());
@@ -85,11 +90,26 @@
 				case 'analytics':
 					wiziapp_plugin_settings()->setAnalytics($_POST['value']);
 					break;
-				case 'webapp_active':
-					wiziapp_plugin_settings()->setWebappActive($_POST['value'] === 'true');
-					break;
-				case 'webapp_tablet_active':
-					wiziapp_plugin_settings()->setWebappTabletActive($_POST['value'] === 'true');
+				case 'webapp_mode':
+					switch ($_POST['value'])
+					{
+						case 'all':
+							wiziapp_plugin_settings()->setWebappActive(true);
+							wiziapp_plugin_settings()->setWebappTabletActive(true);
+							break;
+						case 'mobile':
+							wiziapp_plugin_settings()->setWebappActive(true);
+							wiziapp_plugin_settings()->setWebappTabletActive(false);
+							break;
+						case 'tablet':
+							wiziapp_plugin_settings()->setWebappActive(false);
+							wiziapp_plugin_settings()->setWebappTabletActive(true);
+							break;
+						case 'none':
+							wiziapp_plugin_settings()->setWebappActive(false);
+							wiziapp_plugin_settings()->setWebappTabletActive(false);
+							break;
+					}
 					break;
 				case 'webapp_theme':
 					wiziapp_plugin_settings()->setWebappTheme($_POST['value']);
@@ -206,27 +226,24 @@
 		function admin_menu_page()
 		{
 			require(dirname(dirname(__FILE__)).'/config.php');
+			$admin_base = function_exists('admin_url')?admin_url():(trailingslashit(get_bloginfo('wpurl')).'wp-admin/');
 ?>
-<div class="wiziapp-plugin-admin-container" data-wiziapp-plugin-admin-url="<?php echo esc_attr(function_exists('admin_url')?admin_url():(trailingslashit(get_bloginfo('wpurl')).'wp-admin/')); ?>" data-wiziapp-plugin-analytics-url="<?php echo esc_attr($wiziapp_plugin_config['build_host'].'/analytics?url='.urlencode(trailingslashit(get_bloginfo('wpurl'))).'&page='); ?>">
+<div class="wiziapp-plugin-admin-container" data-wiziapp-plugin-admin-url="<?php echo esc_attr($admin_base); ?>" data-wiziapp-plugin-analytics-url="<?php echo esc_attr($wiziapp_plugin_config['build_host'].'/analytics?url='.urlencode(trailingslashit(get_bloginfo('wpurl'))).'&page='); ?>">
 	<div class="wiziapp-plugin-admin-header">
 		<div class="wiziapp-plugin-admin-header-tab wiziapp-plugin-admin-header-tab-active" id="wiziapp-plugin-admin-tab-header-settings">
-				<?php _e('Settings', 'wiziapp-plugin'); ?>
+			<?php _e('Settings', 'wiziapp-plugin'); ?>
 
 		</div>
 		<div class="wiziapp-plugin-admin-header-tab" id="wiziapp-plugin-admin-tab-header-themes">
-				<?php _e('Themes', 'wiziapp-plugin'); ?>
+			<?php _e('Themes', 'wiziapp-plugin'); ?>
 
 		</div>
 		<div class="wiziapp-plugin-admin-header-tab" id="wiziapp-plugin-admin-tab-header-plugins">
-				<?php _e('Plugins', 'wiziapp-plugin'); ?>
+			<?php _e('Plugins', 'wiziapp-plugin'); ?>
 
 		</div>
-		<div class="wiziapp-plugin-admin-header-links">
-			<a href="http://wordpress.org/support/view/plugin-reviews/wiziapp-create-your-own-native-iphone-app?filter=5" id="wiziapp-plugin-admin-header-links-rate"></a>
-			<a href="https://www.facebook.com/pages/Wiziapp/642159355802851" id="wiziapp-plugin-admin-header-links-fb"></a>
-			<a href="http://twitter.com/WiziApp" id="wiziapp-plugin-admin-header-links-twitter"></a>
-			<a href="https://plus.google.com/u/1/b/100834172826355967488/100834172826355967488/posts" id="wiziapp-plugin-admin-header-links-gplus"></a>
-			<a href="http://www.wiziapp.com/blog/feed/" id="wiziapp-plugin-admin-header-links-rss"></a>
+		<div class="wiziapp-plugin-admin-header-tab">
+			<a href="http://www.wiziapp.com/support" target="_blank"><?php _e('Support', 'wiziapp-plugin'); ?></a>
 		</div>
 	</div>
 	<div class="wiziapp-plugin-admin-tab wiziapp-plugin-admin-tab-active" id="wiziapp-plugin-admin-tab-settings">
@@ -253,7 +270,7 @@
 				<div class="wiziapp-plugin-admin-upgraded-description">
 					<p><?php _e('Welcome to the new WiziApp plugin version, which includes a major upgrade with new features and mobile themes directory to choose from. You can always customize your App’s settings and your mobile theme from the WiziApp plugin control panel.', 'wiziapp-plugin') ?></p>
 					<p><?php _e('<strong>Users that have already purchased a premium license in the past</strong>, please contact <a href="mailto:support@wiziapp.com">support@wiziapp.com</a> in order to activate the Android App and the new “Pro” theme, free of charge.', 'wiziapp-plugin') ?></p>
-					<p><?php echo str_replace('{}', esc_attr(wiziapp_plugin_hook()->plugins_url('/wiziapp-ios-app.zip')), __('Users that have already purchased a native iPhone App, please download and activate the "<a href="{}">WiziApp iOS</a>" plugin in order to keep your iPhone App activated.', 'wiziapp-plugin')); ?></p>
+					<p><?php echo str_replace('{}', esc_attr($admin_base.'admin.php?wiziapp_plugin=install_ios&TB_iframe=true&width=800&height=600'), __('Users that have already purchased a native iPhone App, please download and activate the "<a href="{}" class="thickbox" title="Install WiziApp iOS plugin">WiziApp iOS</a>" plugin in order to keep your iPhone App activated.', 'wiziapp-plugin')); ?></p>
 					<p><?php _e('Please don’t hesitate to contact us for any further information.', 'wiziapp-plugin') ?></p>
 				</div>
 				<a href="#" class="wiziapp-plugin-admin-upgraded-donelink"><?php _e('Done', 'wiziapp-plugin'); ?></a>
@@ -273,6 +290,7 @@
 		function _renderTabSettings()
 		{
 			wiziapp_plugin_settings()->setAutocommit(false);
+			$admin_base = function_exists('admin_url')?admin_url():(trailingslashit(get_bloginfo('wpurl')).'wp-admin/');
 			$themes = wiziapp_plugin_module_switcher()->get_themes();
 			// Double check existence of configured themes
 			if (isset($themes['wiziapp']))	// This should always be true. But better safe than sorry
@@ -309,41 +327,20 @@
 				}*/
 			}
 			wiziapp_plugin_settings()->setAutocommit(true);
-			$active_theme = wiziapp_plugin_settings()->getWebappTheme();
-			if ($active_theme !== wiziapp_plugin_settings()->getAndroidTheme() || $active_theme !== wiziapp_plugin_settings()->getIPadTheme())
-			{
-				$active_theme = false;
-			}
-			$this->_renderOptionsBox(array(
-				'id' => 'general',
-				'title' => __('General Settings', 'wiziapp-plugin'),
-				'items' => array(
-					array(
-						'id' => 'analytics',
-						'type' => 'text',
-						'label' => __('Google Analytics', 'wiziapp-plugin'),
-						'description' => __(' Enter the full code: &#34;UA-..&#34;', 'wiziapp-plugin'),
-						'value' => wiziapp_plugin_settings()->getAnalytics(),
-						'extra' => array(
-							'type' => 'description',
-							'description' => __('Google Analytics ID', 'wiziapp-plugin')
-						)
-					)
-				)
-			));
 			ob_start();
 ?>
 <div class="wiziapp-plugin-admin-settings-box-themes-controls">
 	<div class="wiziapp-plugin-admin-settings-box-themes-controls-screenshot">
 		<img src="<?php
 		$screenshot = false;
-		if ($active_theme !== false && isset($themes[$active_theme]))
+		$webapp_theme = wiziapp_plugin_settings()->getWebappTheme();
+		if ($webapp_theme !== false && isset($themes[$webapp_theme]))
 		{
-			$theme = wiziapp_plugin_module_switcher()->get_theme($active_theme);
+			$theme = wiziapp_plugin_module_switcher()->get_theme($webapp_theme);
 			$screenshot = $theme['Screenshot'];
 			if ($screenshot)
 			{
-				$screenshot = esc_attr(wiziapp_plugin_module_switcher()->theme_root_uri().'/'.$active_theme.'/'.$screenshot);
+				$screenshot = esc_attr(wiziapp_plugin_module_switcher()->theme_root_uri().'/'.$webapp_theme.'/'.$screenshot);
 			}
 		}
 		if ($screenshot !== false)
@@ -362,24 +359,25 @@
 			$this->_renderOptionsValueSelect(array(
 				'unselected' => __('Varies', 'wiziapp-plugin'),
 				'options' => $themes,
-				'value' => $active_theme
+				'value' => $webapp_theme
 			));
 ?>
 		<div class="action-links">
 			<ul>
-				<li class="wiziapp-plugin-admin-settings-box-themes-customize"><a href="#" class="theme-detail"><?php _e('Customize theme', 'wiziapp-plugin') ?></a></li>
+				<li class="wiziapp-plugin-admin-settings-box-themes-customize"><a href="<?php echo esc_attr($admin_base.'customize.php?wiziapp_plugin=customize&theme='.urlencode($webapp_theme).'&return='.urlencode($admin_base.'admin.php?page=wiziapp-plugin-settings')); ?>" class="theme-detail"><?php _e('Customize theme', 'wiziapp-plugin') ?></a></li>
 				<li class="wiziapp-plugin-admin-settings-box-themes-browse"><a href="#" class="theme-detail"><?php _e('Browse themes', 'wiziapp-plugin') ?></a></li>
 			</ul>
 		</div>
 	</div>
 </div>
 <div class="wiziapp-plugin-admin-settings-box-themes-description">
-	<h3><?php _e('Premium themes', 'wiziapp-plugin') ?></h3>
+	<h3><?php _e('Mobile Adaptive Themes Directory', 'wiziapp-plugin') ?></h3>
 	<ul class="wiziapp-plugin-admin-features">
-		<li><?php _e('Branding free', 'wiziapp-plugin') ?></li>
-		<li><?php _e('Header customization', 'wiziapp-plugin') ?></li>
-		<li><?php _e('Color customization', 'wiziapp-plugin') ?></li>
-		<li><?php _e('Editable CSS', 'wiziapp-plugin') ?></li>
+		<li><?php _e('7 stunning mobile dedicated themes', 'wiziapp-plugin') ?></li>
+		<li><?php _e('Advanced customization options', 'wiziapp-plugin') ?></li>
+		<li><?php _e('Powerful branding control tools', 'wiziapp-plugin') ?></li>
+		<li><?php _e('Keep your desktop theme separate', 'wiziapp-plugin') ?></li>
+		<li><?php _e('New themes added regularly', 'wiziapp-plugin') ?></li>
 	</ul>
 	<div class="wiziapp-plugin-admin-settings-box-themes-browse wiziapp-plugin-admin-settings-button">
 		<a href="#" title="<?php _e('Browse themes', 'wiziapp-plugin') ?>"><?php _e('Browse themes', 'wiziapp-plugin') ?><span></span></a>
@@ -389,7 +387,7 @@
 			$theme_box = ob_get_clean();
 			$this->_renderOptionsBox(array(
 				'id' => 'themes',
-				'title' => __('Theme Settings', 'wiziapp-plugin'),
+				'title' => __('Mobile Theme', 'wiziapp-plugin'),
 				'state' => 'themes',
 				'states' => array(
 					'themes' => $theme_box
@@ -397,32 +395,20 @@
 				'items' => array()
 			));
 			$this->_renderOptionsBox(array(
-				'id' => 'html5',
-				'title' => __('HTML5 WebApp Settings', 'wiziapp-plugin'),
+				'id' => 'general',
+				'title' => __('General Settings', 'wiziapp-plugin'),
 				'items' => array(
 					array(
-						'id' => 'webapp_active',
-						'type' => 'switch',
-						'label' => __('Activate WebApp', 'wiziapp-plugin'),
-						'description' => __('Activate the HTML5 WebApp for users that access your website from their smartphone&#39;s browsers', 'wiziapp-plugin'),
-						'value' => wiziapp_plugin_settings()->getWebappActive()
-					),
-					array(
-						'id' => 'webapp_tablet_active',
-						'type' => 'switch',
-						'label' => __('Activate WebApp for Tablets', 'wiziapp-plugin'),
-						'description' => __('Activate the HTML5 WebApp for users that access your website from their tablet&#39;s browsers', 'wiziapp-plugin'),
-						'value' => wiziapp_plugin_settings()->getWebappTabletActive()
-					),
-					array(
-						'id' => 'webapp_theme',
-						'type' => 'select',
-						'label' => __('Theme', 'wiziapp-plugin'),
-						'value' => wiziapp_plugin_settings()->getWebAppTheme(),
-						'options' => $themes,
-						'extra' => array(
-							'type' => 'button',
-							'label' => __('Customize theme', 'wiziapp-plugin')
+						'id' => 'webapp_mode',
+						'type' => 'radio',
+						'label' => __('Display Mode', 'wiziapp-plugin'),
+						'description' => __('Activate the mobile theme for users that access your website from their mobile device&#39;s browsers', 'wiziapp-plugin'),
+						'value' => wiziapp_plugin_settings()->getWebappActive()?(wiziapp_plugin_settings()->getWebappTabletActive()?'all':'mobile'):(wiziapp_plugin_settings()->getWebappTabletActive()?'tablet':'none'),
+						'options' => array(
+							'all' => __('Normal (Active for all mobile visitors)', 'wiziapp-plugin'),
+							'mobile' => __('Active for mobile smartphone visitors only', 'wiziapp-plugin'),
+							'tablet' => __('Active for tablet visitors only', 'wiziapp-plugin'),
+							'none' => __('Disabled (Mobile theme will never show)', 'wiziapp-plugin')
 						)
 					),
 					array(
@@ -452,6 +438,17 @@
 							'type' => 'button',
 							'label' => __('Edit menu', 'wiziapp-plugin')
 						)
+					),
+					array(
+						'id' => 'analytics',
+						'type' => 'text',
+						'label' => __('Google Analytics', 'wiziapp-plugin'),
+						'description' => __(' Enter the full code: &#34;UA-..&#34;', 'wiziapp-plugin'),
+						'value' => wiziapp_plugin_settings()->getAnalytics(),
+						'extra' => array(
+							'type' => 'description',
+							'description' => __('Google Analytics ID', 'wiziapp-plugin')
+						)
 					)
 				)
 			));
@@ -462,11 +459,12 @@
 		<li><?php _e('Create your own Native Android App', 'wiziapp-plugin') ?></li>
 		<li><?php _e('Publish your App to Google play Store', 'wiziapp-plugin') ?></li>
 		<li><?php _e('Unlimited push notification', 'wiziapp-plugin') ?></li>
+		<li><?php _e('Display Google Admob Ads', 'wiziapp-plugin') ?></li>
 	</ul>
 </div>
 <div class="wiziapp-plugin-admin-state-buy-billing">
 	<div class="wiziapp-plugin-admin-state-buy-billing-price">
-		<span class="wiziapp-plugin-admin-state-buy-billing-price-amount"><?php _e('$79', 'wiziapp-plugin') ?></span><span class="wiziapp-plugin-admin-state-buy-billing-price-duration"><?php _e('/Year', 'wiziapp-plugin') ?></span>
+		<span class="wiziapp-plugin-admin-state-buy-billing-price-amount"></span><span class="wiziapp-plugin-admin-state-buy-billing-price-duration"><?php _e('/Year', 'wiziapp-plugin') ?></span>
 		<div class="wiziapp-plugin-admin-state-buy-billing-price-comment"><?php _e('Not Auto Renewable', 'wiziapp-plugin') ?></div>
 	</div>
 	<div class="wiziapp-plugin-admin-state-buy-billing-buy wiziapp-plugin-admin-settings-button">
@@ -635,25 +633,40 @@
 		<li><?php _e('Publish your App to Apple AppStore', 'wiziapp-plugin') ?></li>
 		<li><?php _e('Unlimited push notification', 'wiziapp-plugin') ?></li>
 	</ul>
+	<div class="wiziapp-plugin-admin-state-buy-description-tour"><?php _e('Tour the native iPhone App look & feel <a href="http://wiziapp.com/tour" target="_blank">here</a>'); ?></div>
 </div>
 <div class="wiziapp-plugin-admin-state-buy-billing">
 	<div class="wiziapp-plugin-admin-state-buy-billing-price">
-		<div class="wiziapp-plugin-admin-state-buy-billing-price-comment"><?php _e('Starting from', 'wiziapp-plugin') ?></div>
-		<span class="wiziapp-plugin-admin-state-buy-billing-price-amount"><?php _e('$199', 'wiziapp-plugin') ?></span><span class="wiziapp-plugin-admin-state-buy-billing-price-duration"><?php _e('/Year', 'wiziapp-plugin') ?></span>
+		<span class="wiziapp-plugin-admin-state-buy-billing-price-amount"></span><span class="wiziapp-plugin-admin-state-buy-billing-price-duration"><?php _e('/Year', 'wiziapp-plugin') ?></span>
 		<div class="wiziapp-plugin-admin-state-buy-billing-price-comment"><?php _e('Not Auto Renewable', 'wiziapp-plugin') ?></div>
 	</div>
 	<div class="wiziapp-plugin-admin-state-buy-billing-buy wiziapp-plugin-admin-settings-button">
-		<a href="#TB_inline?width=800&height=600&inlineId=wiziapp-plugin-admin-ios-download" class="thickbox" title="<?php _e('Create now', 'wiziapp-plugin') ?>"><?php _e('Create Now', 'wiziapp-plugin') ?><span></span></a>
+		<a href="#" title="<?php _e('Native iOS App', 'wiziapp-plugin') ?>"><?php _e('Create Now', 'wiziapp-plugin') ?><span></span></a>
+	</div>
+	<div class="wiziapp-plugin-admin-state-buy-billing-license">
+		<?php _e('Already have a license key?', 'wiziapp-plugin') ?> <a href="#" title="<?php _e('License', 'wiziapp-plugin') ?>"><?php _e('Activate now', 'wiziapp-plugin') ?></a>
 	</div>
 </div>
 <?php
 			$buy_box = ob_get_clean();
+			ob_start();
+?>
+<div class="wiziapp-plugin-admin-state-available-description">
+	<?php _e('In order to upload the iPhone App, please forward the license key which can be found below, to <a href="mailto:support@wiziapp.com">support@wiziapp.com</a> and we will reply back within one business day with the required resources for completing the App publishing process.', 'wiziapp-plugin') ?>
+</div>
+<div class="wiziapp-plugin-admin-state-available-license">
+	<span class="wiziapp-plugin-admin-state-available-license-label"><?php _e('License: ', 'wiziapp-plugin') ?></span>
+</div>
+<?php
+			$available_box = ob_get_clean();
 			$this->_renderOptionsBox(array(
 				'id' => 'ios',
 				'title' => __('Native iOS App', 'wiziapp-plugin'),
-				'state' => 'buy',
+				'state' => 'loading',
 				'states' => array(
-					'buy' => $buy_box
+					'loading' => '<div class="wiziapp-plugin-ajax-loader"></div>',
+					'buy' => $buy_box,
+					'available' => $available_box
 				),
 				'items' => array()
 			));
@@ -697,7 +710,7 @@
 					)
 				)
 			));*/
-			ob_start();
+/*			ob_start();
 ?>
 <div class="wiziapp-plugin-admin-state-buy-description">
 	<ul class="wiziapp-plugin-admin-features">
@@ -707,7 +720,7 @@
 </div>
 <div class="wiziapp-plugin-admin-state-buy-billing">
 	<div class="wiziapp-plugin-admin-state-buy-billing-price">
-		<span class="wiziapp-plugin-admin-state-buy-billing-price-amount"><?php _e('$29', 'wiziapp-plugin') ?></span><span class="wiziapp-plugin-admin-state-buy-billing-price-duration"><?php _e('/Year', 'wiziapp-plugin') ?></span>
+		<span class="wiziapp-plugin-admin-state-buy-billing-price-amount"></span><span class="wiziapp-plugin-admin-state-buy-billing-price-duration"><?php _e('/Year', 'wiziapp-plugin') ?></span>
 		<div class="wiziapp-plugin-admin-state-buy-billing-price-comment"><?php _e('Not Auto Renewable', 'wiziapp-plugin') ?></div>
 	</div>
 	<div class="wiziapp-plugin-admin-state-buy-billing-buy wiziapp-plugin-admin-settings-button">
@@ -718,15 +731,15 @@
 	</div>
 </div>
 <?php
-			$buy_box = ob_get_clean();
+			$buy_box = ob_get_clean();*/
 			$this->_renderOptionsBox(array(
 				'id' => 'monetization',
-				'title' => __('Add an Ad space', 'wiziapp-plugin'),
-				'state' => 'loading',
+				'title' => __('Ad space', 'wiziapp-plugin'),
+/*				'state' => 'loading',
 				'states' => array(
 					'loading' => '<div class="wiziapp-plugin-ajax-loader"></div>',
 					'buy' => $buy_box
-				),
+				),*/
 				'items' => array(
 					array(
 						'id' => 'adsense_client',
@@ -765,12 +778,11 @@
 				)
 			));
 ?>
-		<div id="wiziapp-plugin-admin-ios-download" class="hidden">
-			<div class="wiziapp-plugin-ajax-loader-container">
-				<div class="wiziapp-plugin-admin-ios-download-description"><?php _e('In order to create your own Native iOS App please download and install the "WiziApp iOS App" plugin', 'wiziapp-plugin') ?></div>
-				<div class="wiziapp-plugin-admin-ios-download-button wiziapp-plugin-admin-settings-button"><a href="<?php echo esc_attr(wiziapp_plugin_hook()->plugins_url('/wiziapp-ios-app.zip'));?>"><?php _e('Download Now', 'wiziapp-plugin') ?></a></div>
-				<div class="wiziapp-plugin-ajax-loader hidden"></div>
-			</div>
+		<div id="wiziapp-plugin-admin-rate-box">
+			<h3><?php _e('Enjoying our free theme?', 'wiziapp-plugin'); ?></h3>
+			<div><?php _e('Please help us become a 5 star plugin', 'wiziapp-plugin'); ?></div>
+			<div><?php _e('Thank you!', 'wiziapp-plugin'); ?></div>
+			<a href="http://wordpress.org/support/view/plugin-reviews/wiziapp-create-your-own-native-iphone-app?filter=5" target="_blank"></a>
 		</div>
 
 		<div id="wiziapp-plugin-admin-settings-box-change-note" class="hidden">
@@ -892,6 +904,9 @@
 				case 'select':
 					$this->_renderOptionsValueSelect($item);
 					break;
+				case 'radio':
+					$this->_renderOptionsValueRadio($item);
+					break;
 				case 'switch':
 					$this->_renderOptionsValueSwitch($item);
 					break;
@@ -921,6 +936,7 @@
 				}
 			}
 ?>
+						<div class="clear"></div>
 					</div>
 				</div>
 <?php
@@ -975,6 +991,32 @@
 			}
 ?>
 						</select>
+<?php
+		}
+
+		function _renderOptionsValueRadio($item)
+		{
+?>
+						<div class="wiziapp-plugin-admin-settings-box-value-radio">
+<?php
+			foreach ($item['options'] as $key => $value)
+			{
+?>
+							<label for="wiziapp-plugin-admin-settings-box-value-radio-<?php echo esc_attr($item['id']); ?>-<?php echo esc_attr($key); ?>">
+								<input type="radio" id="wiziapp-plugin-admin-settings-box-value-radio-<?php echo esc_attr($item['id']); ?>-<?php echo esc_attr($key); ?>" name="<?php echo esc_attr($item['id']); ?>" value="<?php echo esc_attr($key); ?>"<?php
+				if ($item['value'] === (string)$key)
+				{
+?>
+ checked="checked"<?php
+				}
+?> />
+								<?php echo esc_html($value); ?>
+
+							</label>
+<?php
+			}
+?>
+						</div>
 <?php
 		}
 
@@ -1123,6 +1165,34 @@
 
 		function _renderTabThemes()
 		{
+?>
+		<div id="wiziapp-plugin-admin-themes-box-complete" style="display: none">
+			<div class="wiziapp-plugin-admin-themes-box-complete-price-box">
+				<div class="wiziapp-plugin-admin-themes-box-complete-price">
+					<span class="wiziapp-plugin-admin-themes-box-complete-price-amount">$69</span>
+					<span class="wiziapp-plugin-admin-themes-box-complete-price-duration"><?php _e('USD per year', 'wiziapp-plugin') ?></span>
+				</div>
+				<div class="wiziapp-plugin-admin-themes-box-complete-buy wiziapp-plugin-admin-settings-button">
+					<a href="#" title="<?php _e('Complete Access', 'wiziapp-plugin') ?>"><?php _e('Buy Now', 'wiziapp-plugin') ?><span></span></a>
+				</div>
+			</div>
+			<div class="wiziapp-plugin-admin-themes-box-complete-description-box">
+				<h3><?php _e('Complete Access', 'wiziapp-plugin') ?></h3>
+				<ul class="wiziapp-plugin-admin-features">
+					<li><?php _e('Complete Access to all premium themes', 'wiziapp-plugin') ?></li>
+					<li><?php _e('Branding free', 'wiziapp-plugin') ?></li>
+					<li><?php _e('New themes added regularly', 'wiziapp-plugin') ?></li>
+				</ul>
+				<ul class="wiziapp-plugin-admin-features">
+					<li><?php _e('Perpetual theme updates', 'wiziapp-plugin') ?></li>
+					<li><?php _e('Premium technical support', 'wiziapp-plugin') ?></li>
+				</ul>
+				<div class="wiziapp-plugin-admin-themes-box-complete-license">
+					<?php _e('Already have a license key?', 'wiziapp-plugin') ?> <a href="#" title="<?php _e('License', 'wiziapp-plugin') ?>"><?php _e('Activate now', 'wiziapp-plugin') ?></a>
+				</div>
+			</div>
+		</div>
+<?php
 			$themes = wiziapp_plugin_module_switcher()->get_themes(false);
 			$active_theme = wiziapp_plugin_settings()->getWebappTheme();
 			if ($active_theme !== wiziapp_plugin_settings()->getAndroidTheme() || $active_theme !== wiziapp_plugin_settings()->getIPadTheme())
@@ -1160,7 +1230,7 @@
 				$preview_link = esc_attr(add_query_arg(
 					array('preview' => 1, 'template' => urlencode($template), 'stylesheet' => urlencode($stylesheet), 'preview_iframe' => true, 'TB_iframe' => 'true'),
 					get_bloginfo('url')));
-				$customize_link = esc_attr($admin_base.'customize.php?wiziapp_plugin=customize&theme='.urlencode($stylesheet).'&return='.urlencode($admin_base+'admin.php?page=wiziapp-plugin-settings'));
+				$customize_link = esc_attr($admin_base.'customize.php?wiziapp_plugin=customize&theme='.urlencode($stylesheet).'&return='.urlencode($admin_base.'admin.php?page=wiziapp-plugin-settings'));
 
 				$actions = array();
 				$actions['activate'] = '<span class="hide-if-not-active-theme">'.__('Current Theme', 'wiziapp-plugin').'</span>';
@@ -1224,15 +1294,7 @@
 
 				<div class="themedetaildiv hide-if-js">
 					<p><strong><?php _e('Version: '); ?></strong><?php echo $version; ?></p>
-					<p><?php echo $description; ?></p>
-<?php
-				if ($parent !== false)
-				{
-?>
-					<p class="howto"><?php printf( __( 'This <a href="%1$s">child theme</a> requires its parent theme, %2$s.' ) . '</p>', __( 'http://codex.wordpress.org/Child_Themes' ), $parent ); ?></p>
-<?php
-				}
-?>
+					<p class="wiziapp-plugin-theme-details-license"><strong><?php _e('License: '); ?></strong></p>
 				</div>
 		</div>
 <?php
@@ -1240,7 +1302,7 @@
 			$preview_link = esc_attr(add_query_arg(
 				array('preview' => 1, 'template' => '{p}', 'stylesheet' => '{}', 'preview_iframe' => true, 'TB_iframe' => 'true'),
 				get_bloginfo('url')));
-			$customize_link = esc_attr($admin_base.'customize.php?wiziapp_plugin=customize&theme={}&return='.urlencode($admin_base+'admin.php?page=wiziapp-plugin-settings'));
+			$customize_link = esc_attr($admin_base.'customize.php?wiziapp_plugin=customize&theme={}&return='.urlencode($admin_base.'admin.php?page=wiziapp-plugin-settings'));
 ?>
 		<div class="available-theme wiziapp-plugin-ajax-loader-container">
 			<div class="screenshot"></div>
@@ -1284,8 +1346,7 @@
 
 				<div class="themedetaildiv hide-if-js">
 					<p><strong><?php _e('Version: '); ?></strong></p>
-					<p></p>
-					<p class="howto"><?php printf( __( 'This <a href="%1$s">child theme</a> requires its parent theme, %2$s.' ) . '</p>', __( 'http://codex.wordpress.org/Child_Themes' ), '{}' ); ?></p>
+					<p class="wiziapp-plugin-theme-details-license"><strong><?php _e('License: '); ?></strong></p>
 				</div>
 			</div>
 		</div>
@@ -1294,6 +1355,9 @@
 				<div class="wiziapp-plugin-admin-themes-billing-sidebar">
 					<ul class="wiziapp-plugin-admin-themes-billing-packages">
 					</ul>
+					<div class="wiziapp-plugin-admin-themes-billing-buy wiziapp-plugin-admin-settings-button">
+						<a href="#"><?php _e('Buy Now', 'wiziapp-plugin') ?><span></span></a>
+					</div>
 					<div class="wiziapp-plugin-admin-themes-billing-license">
 						<?php _e('Already have a license key?', 'wiziapp-plugin') ?> <a href="#" title="<?php _e('License', 'wiziapp-plugin') ?>"><?php _e('Activate now', 'wiziapp-plugin') ?></a>
 					</div>
@@ -1303,8 +1367,8 @@
 					<h3></h3>
 					<div class="wiziapp-plugin-admin-themes-billing-screenshot">
 						<div class="wiziapp-plugin-admin-themes-billing-screenshot-nav">
-							<a href="#" class="wiziapp-plugin-admin-themes-billing-screenshot-prev">&lt;</a>
-							<a href="#" class="wiziapp-plugin-admin-themes-billing-screenshot-next">&gt;</a>
+							<a href="#" class="wiziapp-plugin-admin-themes-billing-screenshot-prev"></a>
+							<a href="#" class="wiziapp-plugin-admin-themes-billing-screenshot-next"></a>
 						</div>
 					</div>
 					<div class="wiziapp-plugin-admin-themes-billing-description"></div>
@@ -1356,9 +1420,27 @@
 			{
 				return;
 			}
+?>
+		<div class="wrap">
+<?php
 			$wp_list_table = _get_list_table('WP_Plugin_Install_List_Table', array( 'screen' => 'plugin-install') );
 			$wp_list_table->items = $res->plugins;
 			$wp_list_table->display();
+?>
+		</div>
+<?php
+		}
+
+		function _configure_notice()
+		{
+			$admin_base = function_exists('admin_url')?admin_url():(trailingslashit(get_bloginfo('wpurl')).'wp-admin/');
+?>
+		<div class="error fade">
+			<p style="line-height: 150%">
+				<?php echo str_replace('{}', esc_attr($admin_base.'admin.php?page=wiziapp-plugin-settings'), __('In order to configure your mobile themes and Apps, go to the “WiziApp” admin page on the WordPress admin sidebar, or <a href="{}">click here</a>.')); ?>
+			</p>
+		</div>
+<?php
 		}
 	}
 

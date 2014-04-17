@@ -1,4 +1,5 @@
 <?php
+	require_once(dirname(__FILE__).'/hook.php');
 	require_once(dirname(dirname(__FILE__)).'/modules/pages.php');
 
 	class WiziappPluginSettings
@@ -40,6 +41,22 @@
 				{
 					$this->_save();
 				}
+			}
+		}
+
+		function isConfigured()
+		{
+			$this->_load();
+			return $this->options['configured'];
+		}
+
+		function setConfigured()
+		{
+			$this->_load();
+			if (!$this->options['configured'])
+			{
+				$this->options['configured'] = true;
+				$this->_save();
 			}
 		}
 
@@ -549,6 +566,7 @@
 				 */
 				$this->options = $this->_deep_merge(get_option('wiziapp_plugin_settings', array()),
 					array(
+						'configured' => false,
 						'general' => array(
 							'analytics' => ''
 						),
@@ -680,6 +698,16 @@
 			}
 			return $post->guid;
 		}
+
+		function _install()
+		{
+			$this->_load();
+			if ($this->options['configured'])
+			{
+				$this->options['configured'] = false;
+				$this->_save();
+			}
+		}
 	}
 
 	function &wiziapp_plugin_settings()
@@ -691,3 +719,5 @@
 		}
 		return $inst;
 	}
+
+	wiziapp_plugin_hook()->hookInstall(array(wiziapp_plugin_settings(), '_install'));

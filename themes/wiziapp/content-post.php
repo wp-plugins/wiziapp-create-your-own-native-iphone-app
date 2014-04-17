@@ -22,7 +22,7 @@
 	if (wiziapp_theme_settings()->getPostDisplayDate())
 	{
 ?>
-	<div class="wiziapp-post-date"><?php the_time('l, M j, y'); ?></div>
+	<div class="wiziapp-post-date"><?php the_date(); ?></div>
 <?php
 	}
 ?>

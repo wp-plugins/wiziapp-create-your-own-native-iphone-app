@@ -124,6 +124,11 @@
 			return $this->extra_links;
 		}
 
+		function wiziapp_theme_settings_name($name)
+		{
+			return 'wiziapp_plugin_'.$name;
+		}
+
 		function theme_root()
 		{
 			return dirname(dirname(__FILE__)).'/themes';
@@ -294,6 +299,7 @@
 			{
 				$this->hooked_root['wp_theme_directories'] = $wp_theme_directories;
 			}
+			add_filter('wiziapp_theme_settings_name', array(&$this, 'wiziapp_theme_settings_name'), 99);
 			add_filter('theme_root', array(&$this, 'theme_root'), 99);
 			// Ugly hack: We set the theme root twice, so that it doesn't assume the single available root is the default root
 			$wp_theme_directories = array($this->theme_root(), $this->theme_root());
@@ -318,6 +324,7 @@
 			{
 				unset($wp_theme_directories);
 			}
+			remove_filter('wiziapp_theme_settings_name', array(&$this, 'wiziapp_theme_settings_name'), 99);
 			remove_filter('theme_root', array(&$this, 'theme_root'), 99);
 			$this->hooked_root = false;
 			if (function_exists('search_theme_directories'))

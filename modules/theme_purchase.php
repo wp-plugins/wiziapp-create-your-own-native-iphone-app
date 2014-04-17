@@ -8,7 +8,7 @@
 		function init()
 		{
 			$hook = new WiziappPluginPurchaseHook();
-			$hook->hook('theme', '/theme', array(&$this, '_install_theme'), array(&$this, '_install_title'), array('theme'), array('theme_title'));
+			$hook->hook('theme', '/theme', array(&$this, '_install_theme'), array(&$this, '_analytics'), array(&$this, '_install_title'), array('theme'), array('theme_title', 'theme_global'));
 			wiziapp_plugin_hook()->hookLoadAdmin(array(&$this, 'loadAdmin'));
 		}
 
@@ -19,6 +19,29 @@
 
 		function _install_theme($params, $license, $details)
 		{
+			if ((isset($params['theme_global']) && $params['theme_global'] === 'true') || $params['theme'] === 'global')
+			{
+?>
+					<script type="text/javascript">
+						if (window.parent && window.parent.jQuery) {
+							window.parent.jQuery(".available-theme[data-wiziapp-plugin-admin-theme]").addClass("wiziapp-plugin-theme-licensed");
+							window.parent.jQuery("#wiziapp-plugin-admin-themes-box-complete").hide();
+						}
+					</script>
+<?php
+			}
+			if ($params['theme'] === 'global')
+			{
+?>
+					<script type="text/javascript">
+						if (window.parent && window.parent.tb_remove) {
+							window.parent.tb_remove();
+						}
+					</script>
+<?php
+				return;
+			}
+
 			// FIXME: Check if this is even needed
 			wiziapp_plugin_module_switcher()->_hook_root();
 
@@ -111,6 +134,11 @@
 			}
 		}
 
+		function _analytics($params)
+		{
+			return '/themes/'.((isset($params['theme_global']) && $params['theme_global'] === 'true')?'global':$params['theme']).'/purchased';
+		}
+
 		function loadAdmin()
 		{
 			add_action('wp_ajax_wiziapp_plugin_theme_list', array(&$this, 'theme_list'));
@@ -172,10 +200,6 @@
 				{
 					$theme['parent'] = array('name' => $theme['parent'], 'title' => isset($name_map[$theme['parent']])?$name_map[$theme['parent']]:'', 'installed' => isset($themes[$theme['parent']]));
 				}
-				foreach ($theme['packages'] as $k => $p)
-				{
-					$theme['packages'][$k]['description'] = ($p['count'] > 1)?sprintf(__('%1$d licenses $%2$d', 'wiziapp-plugin'), $p['count'], $p['price']):sprintf(__('Single license $%2$d', 'wiziapp-plugin'), $p['count'], $p['price']);
-				}
 				if (isset($theme['title']))
 				{
 					static $header_tags = array(
@@ -203,6 +227,24 @@
 					);
 					$theme['description'] = wptexturize(wp_kses($theme['description'], $header_tags_with_a));
 				}
+				$packages = array();
+				foreach ($theme['packages'] as $p)
+				{
+					$p['description'] = ($p['count'] > 1)?sprintf(__('%1$d licenses $%2$d', 'wiziapp-plugin'), $p['count'], $p['price']):sprintf(__('This Theme Only $%2$d/One Time', 'wiziapp-plugin'), $p['count'], $p['price']);
+					$p['theme'] = $theme['name'];
+					$p['theme_title'] = $theme['title'];
+					$packages[] = $p;
+					break;
+				}
+				if (isset($theme['global_packages']))
+				{
+					$p = $theme['global_packages'][0];
+					$p['theme_title'] = $p['description'];
+					$p['description'] = sprintf(__('%1$s (All Themes) $%2$d/Year', 'wiziapp-plugin'), $p['description'], $p['price']);
+					$p['theme'] = 'global.'.$theme['name'];
+					$packages[] = $p;
+				}
+				$theme['packages'] = $packages;
 				$res[$key] = $theme;
 			}
 			wiziapp_plugin_hook()->json_output(array_values($res));

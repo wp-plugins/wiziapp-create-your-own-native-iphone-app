@@ -59,7 +59,7 @@
 		{
 			if (null === $this->options)
 			{
-				$this->option = wiziapp_theme_is_in_plugin()?'wiziapp_plugin_wiziapp_theme_settings':'wiziapp_theme_settings';
+				$this->option = apply_filters('wiziapp_theme_settings_name', 'wiziapp_theme_settings');
 			}
 			delete_option($this->option);
 		}
@@ -606,7 +606,7 @@
 			}
 			if (null === $this->options)
 			{
-				$this->option = wiziapp_theme_is_in_plugin()?'wiziapp_plugin_wiziapp_theme_settings':'wiziapp_theme_settings';
+				$this->option = apply_filters('wiziapp_theme_settings_name', 'wiziapp_theme_settings');
 				/*
 				 * We merge with the defaults, rather than specifying them,
 				 * so we add missing defaults, even if we have partial settings
@@ -653,14 +653,14 @@
 						)
 					)+
 					get_option($this->option, array())+
-					array(
+					apply_filters('wiziapp_theme_default_settings', array(
 						'menu_type' => 'popup',
 						'post_list_display_author' => true,
 						'post_list_display_date' => true,
 						'post_list_display_comments' => true,
 						'post_list_display_thumbnail' => true,
 						'post_list_display_featured' => true,
-						'post_list_display_thumbnail_overlay' => true,
+						'post_list_display_thumbnail_overlay' => false,
 						'post_display_author' => true,
 						'post_display_date' => true,
 						'post_display_comments' => true,
@@ -673,7 +673,7 @@
 						'app_icon' => false,
 						'front_page' => '',
 						'items_per_page' => 25,
-					);
+					));
 			}
 		}
 

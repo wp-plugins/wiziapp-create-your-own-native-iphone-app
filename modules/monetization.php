@@ -8,7 +8,7 @@
 		function init()
 		{
 			$hook = new WiziappPluginPurchaseHook();
-			$hook->hook('ads', '/ads', array(&$this, '_licensed'));
+			$hook->hook('ads', '/ads', array(&$this, '_licensed'), array(&$this, '_analytics'));
 		}
 
 		function _licensed()
@@ -24,6 +24,11 @@
 						}
 					</script>
 <?php
+		}
+
+		function _analytics()
+		{
+			return '/ads/purchased';
 		}
 	}
 

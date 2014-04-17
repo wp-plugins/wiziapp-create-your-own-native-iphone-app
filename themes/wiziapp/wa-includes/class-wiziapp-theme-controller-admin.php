@@ -2,19 +2,21 @@
 	class WiziappThemeControllerAdminSettingCallback
 	{
 		var $wp_customize;
+		var $settings;
 		var $setting;
 		var $method;
 		var $type;
 
-		function init($wp_customize, $setting, $method, $type = '')
+		function init($wp_customize, $settings, $setting, $method, $type = '')
 		{
 			$this->wp_customize = $wp_customize;
+			$this->settings = $settings;
 			$this->setting = $setting;
 			$this->method = $method;
 			$this->type = $type;
 			add_action('customize_preview_'.$setting, array($this, 'preview'));
 			add_action('customize_update_'.$setting, array($this, 'update'));
-			add_action('customize_value_'.$setting, array($this, 'value'));
+			add_filter('customize_value_'.$setting, array($this, 'value'));
 		}
 
 		function update($value)
@@ -23,21 +25,21 @@
 				$value = !empty($value);
 			}
 			$method = 'set'.$this->method;
-			wiziapp_theme_settings()->$method($value);
+			$this->settings->$method($value);
 		}
 
 		function preview()
 		{
 			$value = $this->wp_customize->get_setting($this->setting)->post_value();
 			$method = 'set'.$this->method;
-			wiziapp_theme_settings()->setPreview();
-			wiziapp_theme_settings()->$method($value);
+			$this->settings->setPreview();
+			$this->settings->$method($value);
 		}
 
 		function value()
 		{
 			$method = 'get'.$this->method;
-			return wiziapp_theme_settings()->$method();
+			return $this->settings->$method();
 		}
 	}
 
@@ -180,7 +182,7 @@
 					'name' => 'post_list',
 					'settings_prefix' => 'PostListDisplay',
 					'title' => 'Latest Posts Screen Settings',
-					'items' => array('author' => 'Author', 'date' => 'Date', 'comments' => 'CommentsCount', 'thumbnail' => 'Thumbnail',)
+					'items' => array('author' => 'Author', 'date' => 'Date', 'comments' => 'CommentsCount', 'thumbnail' => 'Thumbnail', 'featured' => 'Featured', 'thumbnail_overlay' => 'ThumbnailOverlay')
 				),
 				array(
 					'name' => 'post',
@@ -212,13 +214,13 @@
 						'transport' => 'postMessage'
 					));
 					$wp_customize->add_control('wiziapp_'.$sections_details[$i]['name'].'_'.$item, array(
-						'label' => 'Show '.ucfirst($item),
+						'label' => 'Show '.implode(' ', array_map('ucfirst', explode('_', $item))),
 						'section' => 'wiziapp_'.$sections_details[$i]['name'].'_meta',
 						'settings' => $id,
 						'type' => 'checkbox',
 					));
 					$callback = new WiziappThemeControllerAdminSettingCallback();
-					$callback->init($wp_customize, $id, $sections_details[$i]['settings_prefix'].$settings_suffix, 'boolean');
+					$callback->init($wp_customize, wiziapp_theme_settings(), $id, $sections_details[$i]['settings_prefix'].$settings_suffix, 'boolean');
 				}
 			}
 			if (!wiziapp_theme_is_in_plugin())
@@ -240,13 +242,13 @@
 				));
 				$wp_customize->add_control($icon_select);
 				$callback = new WiziappThemeControllerAdminSettingCallback();
-				$callback->init($wp_customize, 'wiziapp_theme_settings_app_icon', 'AppIcon');
+				$callback->init($wp_customize, wiziapp_theme_settings(), 'wiziapp_theme_settings_app_icon', 'AppIcon');
 			}
 			else
 			{
 				$wp_customize->remove_section('static_front_page');
 				$wp_customize->add_section('wiziapp_front_page', array(
-					'title'          => __( 'Static Front Page' ),
+					'title'          => __( 'Front Page' ),
 					'priority' => $section_priority++,
 					'capability' => 'edit_theme_options',
 				));
@@ -264,6 +266,19 @@
 				}
 
 				$cats = array();
+
+				foreach (apply_filters('wiziapp_theme_special_frontpage_list', array()) as $id => $special)
+				{
+					if (is_string($special))
+					{
+						$special = array('name' => $special, 'items' => array());
+					}
+					else if (!isset($special['items']))
+					{
+						$special['items'] = array();
+					}
+					$cats['added::'.$id] = $special;
+				}
 
 				// Add post types
 				$get_posts = new WP_Query;
@@ -397,7 +412,7 @@
 					'choices'    => $items
 				));
 				$callback = new WiziappThemeControllerAdminSettingCallback();
-				$callback->init($wp_customize, 'wiziapp_theme_settings_front_page', 'FrontPage');
+				$callback->init($wp_customize, wiziapp_theme_settings(), 'wiziapp_theme_settings_front_page', 'FrontPage');
 			}
 		}
 

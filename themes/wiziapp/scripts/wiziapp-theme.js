@@ -6,6 +6,47 @@
  */
 
 (function($, w, d, undef) {
+	(function() {
+		// Patch jQuery's .parent to skip the .ui-btn, so that enhanced buttons get their pre-enhanced parents
+		var parent = $.fn.parent;
+		function skipMap($workingSet) {
+			if (!$workingSet.is(".ui-btn-hidden") && !$workingSet.is("select")) {
+				return $workingSet;
+			}
+			return $workingSet.map(function() {
+				var $this = $(this);
+				var $parent;
+				if ($this.is(".ui-btn-hidden")) {
+					$parent = parent.call($this, ".ui-btn");
+					if ($parent.length === 1) {
+						return $parent.get(0);
+					}
+				}
+				if ($this.is("select")) {
+					$parent = parent.call($this, ".ui-btn");
+					if ($parent.length === 1) {
+						$parent = parent.call($parent, ".ui-select");
+						if ($parent.length === 1) {
+							return $parent.get(0);
+						}
+					}
+				}
+				return this;
+			});
+		}
+		$.fn.parent = function() {
+			return parent.apply(skipMap(this), arguments);
+		};
+		var after = $.fn.after;
+		$.fn.after = function() {
+			return after.apply(skipMap(this), arguments);
+		};
+		var before = $.fn.before;
+		$.fn.before = function() {
+			return before.apply(skipMap(this), arguments);
+		};
+	})();
+
 	$(d).delegate(".wiziapp-show-more-link a[href]", "click", function(e) {
 		var me = $(this);
 		e.preventDefault();

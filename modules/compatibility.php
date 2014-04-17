@@ -23,6 +23,7 @@
 			$mobile_browsers[] = 'Android';
 			$mobile_browsers[] = 'IEMobile';
 			$mobile_browsers[] = 'iPad';
+			$mobile_browsers[] = 'wiziapp_user_agent=android_app';
 			$mobile_browsers[] = 'wiziapp_user_agent=ipad_app';
 			$mobile_browsers[] = '72dcc186a8d3d7b3d8554a14256389a4';
 
@@ -47,6 +48,7 @@
 					'Phone.*IEMobile.*Windows',
 				),
 				'wiziapp_android' => array(
+					'wiziapp_user_agent=android_app',
 					'72dcc186a8d3d7b3d8554a14256389a4'
 				),
 				'wiziapp_ipad' => array(
@@ -96,7 +98,7 @@
 			}
 			$prev_agents = preg_split ("/[\r\n\t]+/", $GLOBALS['WS_PLUGIN__']['qcache']['o']['dont_cache_these_agents']);
 			$agents = $prev_agents;
-			foreach (array('iPhone', 'iPod', 'Android', 'IEMobile', 'wiziapp_user_agent=ipad_app', '72dcc186a8d3d7b3d8554a14256389a4') as $agent) {
+			foreach (array('iPhone', 'iPod', 'Android', 'IEMobile', 'wiziapp_user_agent=ipad_app', 'wiziapp_user_agent=android_app', '72dcc186a8d3d7b3d8554a14256389a4') as $agent) {
 				if (!in_array($agent, $agents)) {
 					$agents[] = $agent;
 				}

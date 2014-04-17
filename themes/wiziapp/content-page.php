@@ -21,7 +21,7 @@
 	if (wiziapp_theme_settings()->getPageDisplayDate())
 	{
 ?>
-	<div class="wiziapp-page-date"><?php the_time('l, M j, y'); ?></div>
+	<div class="wiziapp-page-date"><?php the_date(); ?></div>
 <?php
 	}
 ?>

@@ -229,6 +229,14 @@
 					{
 						break;
 					}
+					if ($fp[0] === 'added')
+					{
+						if ($paged_set)
+						{
+							$query_vars['paged'] = $paged;
+						}
+						return apply_filters('wiziapp_theme_special_frontpage_request', $fp[1], $query_vars);
+					}
 					if ($fp[0] === 'tax')
 					{
 						if (count($fp) < 3)
@@ -633,15 +641,11 @@
 
 	function wiziapp_theme_get_menu_item($i)
 	{
-		if (!$i)
-		{
-			return '';
-		}
 		ob_start();
 ?>
-		<li data-icon="false">
+		<li>
 			<a href="<?php echo esc_attr(wiziapp_theme_settings()->getMenuItemActionURL($i)); ?>" data-transition="slide" <?php echo wiziapp_theme_settings()->getMenuItemAttributes($i); ?>>
-				<?php echo esc_html(wiziapp_theme_settings()->getMenuItemTitle($i)); ?>
+				<span><?php echo esc_html(wiziapp_theme_settings()->getMenuItemTitle($i)); ?></span>
 			</a>
 		</li>
 <?php
@@ -657,18 +661,88 @@
 		return $items;
 	}
 
+	function wiziapp_theme_parent_styles()
+	{
+		global $wp_locale;
+
+		// Loads parent stylesheet.
+		$stylesheets = array();
+		$stylesheets[] = get_template_directory_uri().'/style.css';
+
+		// Load localized stylesheet
+		$stylesheet_dir_uri = get_template_directory_uri();
+		$dir = get_template_directory();
+		$locale = get_locale();
+		if (file_exists("$dir/$locale.css"))
+		{
+			$stylesheet_uri = "$stylesheet_dir_uri/$locale.css";
+		}
+		elseif (!empty($wp_locale->text_direction) && file_exists("$dir/{$wp_locale->text_direction}.css"))
+		{
+			$stylesheet_uri = "$stylesheet_dir_uri/{$wp_locale->text_direction}.css";
+		}
+		else
+		{
+			$stylesheet_uri = '';
+		}
+		$stylesheets[] = apply_filters('locale_stylesheet_uri', $stylesheet_uri, $stylesheet_dir_uri);
+		foreach ($stylesheets as $stylesheet)
+		{
+			if ($stylesheet)
+			{
+				echo '<link rel="stylesheet" href="' . $stylesheet . '" type="text/css" media="screen" />'.PHP_EOL;
+			}
+		}
+	}
+
+	function wiziapp_theme_locate_parent_template($template_names, $load = false, $require_once = true ) {
+		$located = '';
+		foreach ((array) $template_names as $template_name)
+		{
+			if ($template_name && file_exists(TEMPLATEPATH.'/'.$template_name))
+			{
+				$located = TEMPLATEPATH . '/' . $template_name;
+				break;
+			}
+		}
+
+		if ( $load && '' != $located )
+		{
+			load_template( $located, $require_once );
+		}
+
+		return $located;
+	}
+
+	function wiziapp_theme_get_parent_template_part( $slug, $name = null ) {
+		do_action( "wiziapp_theme_get_parent_template_part_{$slug}", $slug, $name );
+
+		$templates = array();
+		$name = (string) $name;
+		if ( '' !== $name )
+			$templates[] = "{$slug}-{$name}.php";
+
+		$templates[] = "{$slug}.php";
+
+		wiziapp_theme_locate_parent_template($templates, true, false);
+	}
+
 	function wiziapp_theme_check_compatibility_head()
 	{
 		$support_ajax = true;
 		$stylesheets = array();
 		if (wiziapp_theme_detect_woocommerce())
 		{
-			$stylesheets[] = get_stylesheet_directory_uri().'/woocommerce.css';
+			$stylesheets[] = get_template_directory_uri().'/woocommerce.css';
 			$support_ajax = false;
 		}
 		if (wiziapp_theme_detect_buddypress())
 		{
-			$stylesheets[] = get_stylesheet_directory_uri().'/buddypress.css';
+			$stylesheets[] = get_template_directory_uri().'/buddypress.css';
+			$support_ajax = false;
+		}
+		if (defined('wpsxp_PLUGINS_URL'))
+		{
 			$support_ajax = false;
 		}
 		foreach ($stylesheets as $stylesheet)

@@ -61,8 +61,8 @@
 		<script type="text/javascript">
 			(function($, d) {
 				var html = <?php
-					echo json_encode('<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="'.
-						esc_attr(wiziapp_plugin_settings()->getAdsenseClient()).'" data-ad-slot="'.esc_attr(wiziapp_plugin_settings()->getAdsenseSlot()).'"></ins>');
+					echo json_encode('<div style="margin:0 -15px"><ins class="adsbygoogle" style="display:block;width:320px;height:50px;margin:0 auto" data-ad-client="'.
+						esc_attr(wiziapp_plugin_settings()->getAdsenseClient()).'" data-ad-slot="'.esc_attr(wiziapp_plugin_settings()->getAdsenseSlot()).'"></ins></div>');
 				?>;
 				$(d).bind("pagebeforechange", function(e, data) {
 					if (!data.toPage || !data.toPage.is || !data.toPage.is("[data-role=page]")) {
@@ -79,8 +79,8 @@
 					var con = page.find(".wiziapp-content-post .wiziapp-post-content");
 					if (con.length) {
 						con.prepend(add.eq(0)).append(add.eq(1));
-						(adsbygoogle = window.adsbygoogle || []).push({element: add.get(0)});
-						(adsbygoogle = window.adsbygoogle || []).push({element: add.get(1)});
+						(adsbygoogle = window.adsbygoogle || []).push({element: add.eq(0).find("ins").get(0)});
+						(adsbygoogle = window.adsbygoogle || []).push({element: add.eq(1).find("ins").get(0)});
 					}
 					con = null;
 
@@ -120,6 +120,7 @@
 		$wiziapp_theme_back_url = wiziapp_theme_settings()->getBackUrl();
 		$wiziapp_theme_header_class .= ' wiziapp-header-has-back';
 	}
+	do_action_ref_array('wiziapp_theme_back_button', array(&$wiziapp_theme_header_class, &$wiziapp_theme_back_url))
 ?>
 			<div data-role="header" data-id="header" data-position="fixed" data-tap-toggle="false" class="<?php echo apply_filters('wiziapp_theme_header_class', $wiziapp_theme_header_class); ?>">
 <?php
