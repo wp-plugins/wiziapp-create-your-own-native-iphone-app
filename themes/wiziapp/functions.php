@@ -21,6 +21,7 @@
 	{
 		// They are not loaded in the admin display
 		add_action('wp_enqueue_scripts', 'wiziapp_styles_scripts');
+		add_action('wp_enqueue_scripts', 'wiziapp_theme_check_compatibility_scripts');
 		add_action('wp_head', 'wiziapp_theme_check_compatibility_head', 15);
 		add_action('get_header', 'wiziapp_theme_check_compatibility_header');
 	}
@@ -372,12 +373,30 @@
 					return $query_vars;
 			}
 		}
-		if ($temp_query->is_category() && $display == 'categories')
+		if ($temp_query->is_category() || $temp_query->is_tag())
 		{
 			$new_query = new WiziappThemeTaxonomyQuery();
-			$new_query->query(array('parent' => $temp_query->get_queried_object_id(), 'terms_per_page' => wiziapp_theme_settings()->getItemsPerPage(), 'page' => $paged));
-			$more_link = get_pagenum_link($paged+1);
-			return array('wiziapp_theme_terms' => $new_query, 'wiziapp_theme_more_link' => $more_link);
+			if ($temp_query->is_tag())
+			{
+				$term_disp = 'tags';
+				$new_query->query(array('parent' => $temp_query->get_queried_object_id(), 'terms_per_page' => wiziapp_theme_settings()->getItemsPerPage(), 'page' => $paged, 'type' => 'post_tag'));
+			}
+			else
+			{
+				$term_disp = 'categories';
+				$new_query->query(array('parent' => $temp_query->get_queried_object_id(), 'terms_per_page' => wiziapp_theme_settings()->getItemsPerPage(), 'page' => $paged));
+			}
+			$more_link = add_query_arg('wiziapp_display', $term_disp, get_pagenum_link($paged+1), '');
+			if ($display == $term_disp || !$temp_query->have_posts())
+			{
+				return array('wiziapp_theme_terms' => $new_query, 'wiziapp_theme_more_link' => $more_link);
+			}
+			else
+			{
+				$query_vars['wiziapp_theme_sub_terms'] = $new_query;
+				$query_vars['wiziapp_theme_more_link'] = $more_link;
+				return $query_vars;
+			}
 		}
 		if ($temp_query->is_year() && $display == 'archive_months')
 		{
@@ -727,6 +746,11 @@
 		wiziapp_theme_locate_parent_template($templates, true, false);
 	}
 
+	function wiziapp_theme_check_compatibility_scripts()
+	{
+		wiziapp_theme_detect_gravityforms();
+	}
+
 	function wiziapp_theme_check_compatibility_head()
 	{
 		$support_ajax = true;
@@ -784,3 +808,28 @@
 	{
 		return function_exists('buddypress');
 	}
+
+	function wiziapp_theme_detect_gravityforms()
+	{
+		if (!class_exists('GFCommon'))
+		{
+			return;
+		}
+		if (!class_exists('GFFormDisplay'))
+		{
+			require_once(GFCommon::get_base_path() . "/form_display.php");
+		}
+		$forms = array();
+		foreach (GFFormsModel::get_forms(1) as $form)
+		{
+			$forms[] = RGFormsModel::get_form_meta($form->id);
+		}
+		foreach($forms as $form)
+		{
+			if(isset($form["id"]))
+			{
+				GFFormDisplay::enqueue_form_scripts($form, true);
+			}
+		}
+	}
+

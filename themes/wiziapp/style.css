@@ -70,7 +70,7 @@ input.ui-btn-hidden {
 	background-size: 46px 46px;
 }
 
-.wiziapp-header, .wiziapp-footer {
+.wiziapp-header {
 	border: 1px solid #333;
 	background: #111111;
 	color: #ffffff;
@@ -267,7 +267,7 @@ background-image: url(images/panel-icons-hover.png);
 	text-decoration: none;
 }
 
-.wiziapp-content-category-list a, .wiziapp-content-tag-list a {
+.wiziapp-content-list .wiziapp-category a, .wiziapp-content-list .wiziapp-tag a {
 	padding-right: 116px !important;
 }
 
@@ -473,7 +473,7 @@ div.wiziapp-tabs-content-tab {
 	background: url(images/thumbnail-overlay.png) left top no-repeat;
 }
 
-.wiziapp-content-category-list .wiziapp-category-post-count, .wiziapp-content-tag-list .wiziapp-tag-post-count {
+.wiziapp-content-list .wiziapp-category-post-count, .wiziapp-content-list .wiziapp-tag-post-count {
 	font-size: 12px;
 	position: absolute;
 	width: 60px;
@@ -638,6 +638,10 @@ li.wiziapp-bookmark-category, li.wiziapp-bookmark-category:hover {
 	font-size: 14px;
 	line-height: 18px;
 	white-space: nowrap;
+}
+
+.wiziapp-content-post .wiziapp-post-content .wiziapp-post-content-end, .wiziapp-content-page .wiziapp-page-content .wiziapp-page-content-end {
+	clear: both;
 }
 
 .wiziapp-content-post .wiziapp-post-content, .wiziapp-content-page .wiziapp-page-content {
@@ -1080,10 +1084,13 @@ background-position: -2150px 0px;
 	}
 
 	.wiziapp-content-post-list .wiziapp-post-featured .wiziapp-post-pre-description {
-		display: none;
+		float: none;
+		height: auto;
+		margin: 0;
 	}
 
 	.wiziapp-content-post-list .wiziapp-post-featured .wiziapp-post-description {
-		display: none;
+		position: static;
+		width: auto;
 	}
 }

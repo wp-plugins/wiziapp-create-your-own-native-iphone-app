@@ -34,7 +34,7 @@
 						break;
 				}
 			}
-			return array('theme' => $theme, 'head' => array($this, 'wp_head'), 'menu' => wiziapp_plugin_settings()->getWebappMenu(), 'extra_links' => array('Desktop site' => add_query_arg('desktop-site-mode', '1')));
+			return array('theme' => $theme, 'head' => array($this, 'wp_head'), 'menu' => wiziapp_plugin_settings()->getWebappMenu(), 'extras' => array('links' => array('Desktop site' => add_query_arg('desktop-site-mode', '1'))));
 		}
 
 		function wp_head()

@@ -421,9 +421,9 @@
 				var h = a.attr("href");
 				if (/&wiziapp_theme_menu=/.test(h))
 				{
-					h = h.replace(/&wiziapp_theme_menu=[^&]*/, "&wiziapp_theme_menu="+encodeURIComponent(val));
+					h = h.replace(/&wiziapp_theme_menu=[^&]*/, val?"&wiziapp_theme_menu="+encodeURIComponent(val):"");
 				}
-				else
+				else if (val)
 				{
 					h += "&wiziapp_theme_menu="+encodeURIComponent(val);
 				}
@@ -445,6 +445,34 @@
 				action: "wiziapp_plugin_android_build"
 			}, function() {
 				updaterForName("android_app").update("");
+			});
+		});
+
+		$("#wiziapp-plugin-admin-settings-box-android-body-buy").each(function() {
+			var a = $(this).find(".wiziapp-plugin-admin-state-buy-billing-simulate a");
+			updaterForName("android_theme").bind("updated", function(newname) {
+				var h = a.attr("href");
+				if (/&theme=/.test(h))
+				{
+					h = h.replace(/&theme=[^&]*/, "&theme="+encodeURIComponent(newname));
+				}
+				else
+				{
+					h += "&theme="+encodeURIComponent(newname);
+				}
+				a.attr("href", h);
+			});
+			updaterForName("android_navigation").bind("updated", function(val) {
+				var h = a.attr("href");
+				if (/&wiziapp_theme_menu=/.test(h))
+				{
+					h = h.replace(/&wiziapp_theme_menu=[^&]*/, val?"&wiziapp_theme_menu="+encodeURIComponent(val):"");
+				}
+				else if (val)
+				{
+					h += "&wiziapp_theme_menu="+encodeURIComponent(val);
+				}
+				a.attr("href", h);
 			});
 		});
 
@@ -666,37 +694,28 @@
 			});
 		});
 
-		if ($("#wiziapp-plugin-admin-settings-box-monetization-body-loading").is(".wiziapp-plugin-admin-settings-box-body-active"))
-		{
-			post_ajax({
-				action: "wiziapp_plugin_ads_license_balance"
-			}, function(data) {
-				$("#wiziapp-plugin-admin-settings-box-monetization-body-loading").removeClass("wiziapp-plugin-admin-settings-box-body-active");
-				if (data && data.count && data.count > 0) {
-					$("#wiziapp-plugin-admin-settings-box-monetization-body").addClass("wiziapp-plugin-admin-settings-box-body-active");
-				}
-				else if (data.packages && data.packages[0] && data.packages[0].price) {
-					$("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-price-amount").text("$"+data.packages[0].price);
-					$("#wiziapp-plugin-admin-settings-box-monetization-body-buy").addClass("wiziapp-plugin-admin-settings-box-body-active");
-				}
-			});
-		}
+		post_ajax({
+			action: "wiziapp_plugin_ads_license_balance"
+		}, function(data) {
+			if (data && data.count && data.count > 0) {
+				$("#wiziapp-plugin-admin-settings-box-monetization").show();
+			}
+			else if (data.packages && data.packages[0] && data.packages[0].price) {
+				$("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-price-amount").text("$"+data.packages[0].price);
+				$("#wiziapp-plugin-admin-settings-box-monetization-body-buy").show();
+			}
+		});
 
 		trackPage("/settings");
 
-		$("#wiziapp-plugin-admin-tab-themes .available-theme").each(function() {
-			var theme = $(this),
-				name = theme.attr("data-wiziapp-plugin-admin-theme"),
-				details = theme.find(".themedetaildiv");
-			if (!details.length) {
-				details = theme.find(".install-theme-info .theme-details");
-				details = details.clone().addClass("themedetaildiv").appendTo(theme).hide();
-			}
-			theme.find(".theme-detail").click(function (event) {
+		function theme_bind(theme, name)
+		{
+			var details = theme.find(".themedetaildiv");
+			theme.find(".theme-detail").click(function(event) {
 				details.toggle();
 				event.preventDefault();
 			});
-			theme.find(".activatelink").click(function (event) {
+			theme.find(".activatelink").click(function(event) {
 				event.preventDefault();
 				theme_set(name);
 			});
@@ -717,6 +736,21 @@
 					tb_show(title, data.url+"&TB_iframe=true&width=800&height=600");
 				});
 			});
+			theme.find(".action-links a[href!=\#]").each(function() {
+				var a = $(this);
+				updaterForName("webapp_navigation").bind("updated", function(val) {
+					var h = a.attr("href");
+					if (/&wiziapp_theme_menu=/.test(h))
+					{
+						h = h.replace(/&wiziapp_theme_menu=[^&]*/, val?"&wiziapp_theme_menu="+encodeURIComponent(val):"");
+					}
+					else if (val)
+					{
+						h += "&wiziapp_theme_menu="+encodeURIComponent(val);
+					}
+					a.attr("href", h);
+				});
+			});
 			theme_change(function(newname) {
 				if (newname === name) {
 					theme.addClass("is-active-theme");
@@ -727,6 +761,12 @@
 					theme.addClass("is-not-active-theme");
 				}
 			});
+		}
+
+		$("#wiziapp-plugin-admin-tab-themes .available-theme").each(function() {
+			var theme = $(this),
+				name = theme.attr("data-wiziapp-plugin-admin-theme");
+			theme_bind(theme, name);
 		});
 
 		$("#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-buy a").click(function(event) {
@@ -769,9 +809,9 @@
 				var h = a.attr("href");
 				if (/&wiziapp_theme_menu=/.test(h))
 				{
-					h = h.replace(/&wiziapp_theme_menu=[^&]*/, "&wiziapp_theme_menu="+encodeURIComponent(val));
+					h = h.replace(/&wiziapp_theme_menu=[^&]*/, val?"&wiziapp_theme_menu="+encodeURIComponent(val):"");
 				}
-				else
+				else if (val)
 				{
 					h += "&wiziapp_theme_menu="+encodeURIComponent(val);
 				}
@@ -790,75 +830,92 @@
 				for (i = 0; i < data.length; i++)
 					(function(data) {
 						var i, o, a, s;
-						if (data.installed)
-						{
-							var prev_theme = $("#wiziapp-plugin-admin-tab-themes .available-theme[data-wiziapp-plugin-admin-theme="+data.name.replace(/([^0-9A-Za-z])/g, "\\$1")+"]");
-							if (prev_theme.length)
-							{
-								if (data.license)
-								{
-									prev_theme.find(".wiziapp-plugin-theme-details-license").append(d.createTextNode(data.license)).show();
-								}
-								if (data.need_update)
-								{
-									prev_theme.addClass("wiziapp-plugin-theme-need-update");
-								}
-								return;
+						var theme = $("#wiziapp-plugin-admin-tab-themes .available-theme[data-wiziapp-plugin-admin-theme="+data.name.replace(/([^0-9A-Za-z])/g, "\\$1")+"]");
+						if (!theme.length) {
+							theme = tmpl.children().clone();
+							theme.attr("data-wiziapp-plugin-admin-theme", data.name);
+							tmpl.before(theme);
+
+							o = theme.find(".screenshot img");
+							if (data.screenshots.length > 0) {
+								o.attr("src", data.screenshots[0]);
 							}
-						}
-						var theme = tmpl.children().clone();
-						theme.attr("data-wiziapp-plugin-admin-theme", data.name);
-						if (data.installed)
-						{
-							theme.addClass("wiziapp-plugin-theme-installed");
-						}
-						if (data.license)
-						{
-							theme.find(".wiziapp-plugin-theme-details-license").append(d.createTextNode(data.license)).show();
-							theme.addClass("wiziapp-plugin-theme-licensed");
-						}
-						else if (!hasUnlicensed && data.global_packages && data.global_packages[0] && data.global_packages[0].price)
-						{
-							hasUnlicensed = true;
-							$("#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-price-amount").text("$"+data.global_packages[0].price);
-							$("#wiziapp-plugin-admin-themes-box-complete").show();
-						}
-						if (data.need_update)
-						{
-							theme.addClass("wiziapp-plugin-theme-need-update");
-						}
-						o = theme.find(".screenshot img");
-						if (data.screenshots.length > 0) {
-							o.attr("src", data.screenshots[0]);
-						}
-						else {
-							o.remove();
-						}
-						theme.find("h3").html(data.title);
-						o = theme.find(".theme-author");
-						if (data.author) {
-							if (data.author_uri) {
-								a = $("<a>");
-								a.attr("href", data.author_uri);
-								a.text(data.author);
-								s = o.text().split("{}");
-								o.text("");
-								for (i = 0; i < s.length-1; i++) {
-									if (s[i]) {
-										o.append(d.createTextNode(s[i]));
+							else {
+								o.remove();
+							}
+							theme.find("h3").html(data.title);
+							o = theme.find(".theme-author");
+							if (data.author) {
+								if (data.author_uri) {
+									a = $("<a>");
+									a.attr("href", data.author_uri);
+									a.text(data.author);
+									s = o.text().split("{}");
+									o.text("");
+									for (i = 0; i < s.length-1; i++) {
+										if (s[i]) {
+											o.append(d.createTextNode(s[i]));
+										}
+										o.append(a.clone());
 									}
-									o.append(a.clone());
+									if (s.length && s[s.length-1]) {
+										o.append(d.createTextNode(s[s.length-1]));
+									}
 								}
-								if (s.length && s[s.length-1]) {
-									o.append(d.createTextNode(s[s.length-1]));
+								else {
+									o.text(o.text().replace(/\{\}/, data.author));
 								}
 							}
 							else {
-								o.text(o.text().replace(/\{\}/, data.author));
+								o.remove();
 							}
+
+							o = theme.find(".themedetaildiv p:eq(0)");
+							if (data.version) {
+								o.append(d.createTextNode(data.version));
+							}
+							else {
+								o.remove();
+							}
+
+							theme.find(".action-links a[href!=\#]").each(function() {
+								$(this).attr("href", $(this).attr("href").replace(/\{\}/g, data.name).replace(/\{p\}/g, data.parent?data.parent.name:data.name));
+							});
+							theme.find(".action-links a[title]").each(function() {
+								$(this).attr("title", $(this).attr("title").replace(/\{\}/g, data.title));
+							});
+
+							theme_bind(theme, data.name);
+						}
+						else if (data.license) {
+							$(".wiziapp-plugin-admin-settings-box-option[data-wiziapp-plugin-admin-option-id$=_theme] .wiziapp-plugin-admin-settings-box-value select, .wiziapp-plugin-admin-settings-box-themes-controls select")
+							.not(":has(option[value="+data.name.replace(/([^0-9A-Za-z])/g, "\\$1")+"])")
+							.append("<option value="+data.name.replace(/([^0-9A-Za-z])/g, function(x) {return "&#"+x.charCodeAt(0)+";";})+">"+data.title.replace(/([^0-9A-Za-z])/g, function(x) {return "&#"+x.charCodeAt(0)+";";})+"</option>");
+						}
+
+						if (data.installed) {
+							theme.removeClass("wiziapp-plugin-theme-is-not-installed").addClass("wiziapp-plugin-theme-is-installed");
 						}
 						else {
-							o.remove();
+							theme.removeClass("wiziapp-plugin-theme-is-installed").addClass("wiziapp-plugin-theme-is-not-installed");
+						}
+						if (data.license) {
+							theme.find(".wiziapp-plugin-theme-details-license").append(d.createTextNode(data.license)).show();
+							theme.removeClass("wiziapp-plugin-theme-is-not-licensed").addClass("wiziapp-plugin-theme-is-licensed");
+						}
+						else {
+							theme.removeClass("wiziapp-plugin-theme-is-licensed").addClass("wiziapp-plugin-theme-is-not-licensed");
+							if (!hasUnlicensed && data.global_packages && data.global_packages[0] && data.global_packages[0].price) {
+								hasUnlicensed = true;
+								$("#wiziapp-plugin-admin-themes-box-complete .wiziapp-plugin-admin-themes-box-complete-price-amount").text("$"+data.global_packages[0].price);
+								$("#wiziapp-plugin-admin-themes-box-complete").show();
+							}
+						}
+						if (data.need_update) {
+							theme.removeClass("wiziapp-plugin-theme-is-not-need-update").addClass("wiziapp-plugin-theme-is-need-update");
+						}
+						else {
+							theme.removeClass("wiziapp-plugin-theme-is-need-update").addClass("wiziapp-plugin-theme-is-not-need-update");
 						}
 						o = theme.find(".wiziapp-plugin-theme-price");
 						if (data.packages && data.packages.length > 0) {
@@ -867,61 +924,29 @@
 						else {
 							o.remove();
 						}
-						o = theme.find(".wiziapp-plugin-theme-demo");
-						if (data.demo_link) {
-							o.find("a").href(data.demo_link);
-						}
-						else {
-							o.remove();
-						}
+						theme.removeClass("wiziapp-plugin-theme-is-price-unknown").removeClass("wiziapp-plugin-theme-is-not-price-unknown");
 
-						o = theme.find(".themedetaildiv p:eq(0)");
-						if (data.version) {
-							o.append(d.createTextNode(data.version));
-						}
-						else {
-							o.remove();
-						}
+						theme.find(".wiziapp-plugin-theme-demo").click(function(event) {
+							if (theme.is(".wiziapp-plugin-theme-is-not-installed") || theme.is(".wiziapp-plugin-theme-is-need-update")) {
+								event.preventDefault();
 
-						theme.find(".action-links .wiziapp-plugin-theme-hide-if-not-installed a").each(function() {
-							var a = $(this);
-							a.attr("href", a.attr("href").replace(/\{\}/g, data.name).replace(/\{p\}/g, data.parent?data.parent.name:data.name));
-							a.attr("title", a.attr("href").replace(/\{\}/g, data.title));
-							updaterForName("webapp_navigation").bind("updated", function(val) {
-								var h = a.attr("href");
-								if (/&wiziapp_theme_menu=/.test(h))
-								{
-									h = h.replace(/&wiziapp_theme_menu=[^&]*/, "&wiziapp_theme_menu="+encodeURIComponent(val));
-								}
-								else
-								{
-									h += "&wiziapp_theme_menu="+encodeURIComponent(val);
-								}
-								a.attr("href", h);
-							});
-						});
+								var title = $(this).attr("title");
 
-						var details = theme.find(".themedetaildiv");
-						theme.find(".theme-detail").click(function (event) {
-							details.toggle();
-							event.preventDefault();
-						});
-						theme.find(".activatelink").click(function (event) {
-							event.preventDefault();
-							theme_set(data.name);
-						});
-						theme_change(function(newname) {
-							if (newname === data.name) {
-								theme.addClass("is-active-theme");
-								theme.removeClass("is-not-active-theme");
-							}
-							else {
-								theme.removeClass("is-active-theme");
-								theme.addClass("is-not-active-theme");
+								post_ajax({
+									action: "wiziapp_plugin_theme_install",
+									theme: data.name
+								}, function(data) {
+									if (!data.url) {
+										return;
+									}
+									tb_remove();
+									$("#TB_window").stop(true, true);
+									tb_show(title, data.url+"&TB_iframe=true&width=800&height=600");
+								});
 							}
 						});
 
-						theme.find(".screenshot").click(function (event) {
+						theme.find(".screenshot").click(function(event) {
 							event.preventDefault();
 							theme.find("a.wiziapp-plugin-theme-pricing, .wiziapp-plugin-theme-install a, a.hide-if-customize, a.hide-if-no-customize, a.activatelink").filter(":visible").first().click();
 						});
@@ -968,7 +993,7 @@
 								}
 
 								popup_billing({
-									trackPage: "/themes/"+package.theme+"/"+package.name,
+									trackPage: "/themes/"+((package.theme.substr(0, 7) === "global.")?package.theme.substr(7):package.theme)+"/"+package.name,
 									title: title,
 									product: package.theme_title,
 									license: package.description,
@@ -1039,26 +1064,6 @@
 
 							tb_show(title, "#TB_inline?width=800&height=600&inlineId=wiziapp-plugin-admin-themes-billing");
 						});
-
-						theme.find(".wiziapp-plugin-theme-install a").click(function(event) {
-							event.preventDefault();
-
-							var title = $(this).attr("title");
-
-							post_ajax({
-								action: "wiziapp_plugin_theme_install",
-								theme: data.name
-							}, function(data) {
-								if (!data.url) {
-									return;
-								}
-								tb_remove();
-								$("#TB_window").stop(true, true);
-								tb_show(title, data.url+"&TB_iframe=true&width=800&height=600");
-							});
-						});
-
-						tmpl.before(theme);
 					})(data[i]);
 			});
 		});

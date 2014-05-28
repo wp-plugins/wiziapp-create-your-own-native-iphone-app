@@ -9,7 +9,7 @@
 		var $hooks_get_theme = array();
 		var $hooks_theme_customization = array();
 		var $hooked_root = false;
-		var $extra_links = array();
+		var $extras = array();
 
 		function init()
 		{
@@ -53,7 +53,7 @@
 					continue;
 				}
 				$this->_hook_root();
-				if (!($parent = $this->_theme_get_parent($theme['theme'])))
+				if (!($parent = $this->_theme_get_parent($theme['theme'])) || !wiziapp_plugin_theme_licenses()->hasThemeLicense($theme['theme']))
 				{
 					continue;
 				}
@@ -65,10 +65,7 @@
 				{
 					add_action('wp_head', $theme['head']);
 				}
-				if (isset($theme['extra_links']))
-				{
-					$this->extra_links = $theme['extra_links'];
-				}
+				$this->extras = isset($theme['extras'])?$theme['extras']:array();
 				$this->stylesheet = $theme['theme'];
 				$this->template = $parent;
 				add_filter('theme_root_uri', array(&$this, 'theme_root_uri'), 99);
@@ -119,9 +116,9 @@
 			}
 		}
 
-		function getExtraLinks()
+		function getExtra($key, $default = false)
 		{
-			return $this->extra_links;
+			return isset($this->extras[$key])?$this->extras[$key]:$default;
 		}
 
 		function wiziapp_theme_settings_name($name)
@@ -361,8 +358,7 @@
 			$final = '';
 			if (wiziapp_plugin_settings()->getAdIFrameUrl())
 			{
-				$iframe = '<ins class="wiziapp-plugin-iframe-ad" data-src="'.esc_attr(wiziapp_plugin_settings()->getAdIFrameUrl()).'" data-width="'.esc_attr(wiziapp_plugin_settings()->getAdIFrameWidth()).'" data-height="'.esc_attr(wiziapp_plugin_settings()->getAdIFrameHeight()).'"></ins>';
-				$final = '<script type="text/javascript">setTimeout(function(){jQuery("ins.wiziapp-plugin-iframe-ad").each(function(){var $this = jQuery(this);$this.removeClass("wiziapp-plugin-iframe-ad");var f = jQuery("<iframe style=\"border:none\">");f.attr("src", $this.attr("data-src"));f.attr("width", $this.attr("data-width"));f.attr("height", $this.attr("data-height"));$this.append(f);});}, 100);</script>';
+				$iframe = '<iframe class="wiziapp-no-wrap" style=\"border:none\" src="'.esc_attr(wiziapp_plugin_settings()->getAdIFrameUrl()).'" width="'.esc_attr(wiziapp_plugin_settings()->getAdIFrameWidth()).'" height="'.esc_attr(wiziapp_plugin_settings()->getAdIFrameHeight()).'"></iframe>';
 			}
 			return $iframe.$content.$iframe.$final;
 		}

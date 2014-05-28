@@ -1,6 +1,7 @@
 <?php
 	require_once(dirname(dirname(__FILE__)).'/includes/hook.php');
 	require_once(dirname(dirname(__FILE__)).'/includes/purchase_hook.php');
+	require_once(dirname(dirname(__FILE__)).'/includes/theme_licenses.php');
 	require_once(dirname(__FILE__).'/switcher.php');
 
 	class WiziappPluginModuleThemePurchase
@@ -58,6 +59,10 @@
 					{
 						$balance = $res;
 					}
+					if (!empty($balance['count']))
+					{
+						wiziapp_plugin_theme_licenses()->setThemeLicense($params['theme'], $license);
+					}
 				}
 ?>
 					<div class="wrap license">
@@ -79,19 +84,22 @@
 			$dladdress = $wiziapp_plugin_config['build_host'].'/theme/download/'.urlencode($params['theme']).'?url='.urlencode($siteurl).'&nonce='.urlencode($nonce);
 
 			include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-			$upgrader = new Theme_Upgrader(new WP_Upgrader_Skin(array(
+			$skin = new WP_Upgrader_Skin(array(
 				'title' => sprintf( __('Installing Theme: %s'), $params['theme'] ),
 				'url' => $siteurl.'wp-admin/admin.php?wiziapp_plugin=theme_license&wiziapp_plugin_theme='.urlencode($params['theme']).($license !== false?'&wiziapp_plugin_license='.urlencode($license):'').(isset($details['theme_title'])?'&wiziapp_plugin_theme_title='.urlencode($details['theme_title']):''),
 				'nonce' => 'install-theme_' . $params['theme']
-			)));
+			));
+			$upgrader = new Theme_Upgrader($skin);
 
 			$upgrader->init();
 			$upgrader->upgrade_strings();
 			$upgrader->install_strings();
 
+			$skin->header();
 			$upgrader->run(array(
 				'package' => $dladdress,
 				'destination' => dirname(dirname(__FILE__)).'/themes/' . $params['theme'],
+				'is_multi' => true,
 				'clear_destination' => true,
 				'clear_working' => true
 			));
@@ -101,42 +109,79 @@
 				{
 					wp_clean_themes_cache();
 				}
-				do_action( 'upgrader_process_complete', $upgrader, array( 'action' => 'install', 'type' => 'theme' ), $dladdress );
 
+				$has_license = wiziapp_plugin_theme_licenses()->getThemeLicense($params['theme']);
 				$theme = wiziapp_plugin_module_switcher()->get_theme_title($params['theme']);
+				if ($has_license)
+				{
 ?>
 					<a href="#" class="donelink" title="<?php echo esc_attr__('Themes page'); ?>"><?php _e('Done', 'wiziapp-plugin'); ?></a>
+<?php
+				}
+				else
+				{
+					$admin_base = function_exists('admin_url')?admin_url():(trailingslashit(get_bloginfo('wpurl')).'wp-admin/');
+					$customize_link = esc_attr($admin_base.'customize.php?wiziapp_plugin=customize&theme='.urlencode($params['theme']).'&return='.urlencode($admin_base.'admin.php?page=wiziapp-plugin-settings'));
+?>
+					<a href="<?php echo esc_attr($customize_link); ?>" class="donelink" title="<?php echo esc_attr__('Themes page'); ?>"><?php _e('Live Preview', 'wiziapp-plugin'); ?></a>
+<?php
+				}
+?>
 					<script type="text/javascript">
 						if (window.parent && window.parent.jQuery) {
-							window.parent.jQuery(<?php echo json_encode('.available-theme[data-wiziapp-plugin-admin-theme='.preg_replace('/([^0-9A-Za-z])/', '\\\\\\1', $params['theme']).']'); ?>).addClass("wiziapp-plugin-theme-installed").addClass("wiziapp-plugin-theme-licensed").removeClass("wiziapp-plugin-theme-need-update");
-							jQuery(".activatelink").click(function() {
-								if (window.parent.tb_remove) {
-									window.parent.tb_remove();
-								}
-								window.parent.jQuery(<?php echo json_encode('.available-theme[data-wiziapp-plugin-admin-theme='.preg_replace('/([^0-9A-Za-z])/', '\\\\\\1', $params['theme']).'] .activatelink'); ?>).click();
-							});
+							window.parent.jQuery(<?php echo json_encode('.available-theme[data-wiziapp-plugin-admin-theme='.preg_replace('/([^0-9A-Za-z])/', '\\\\\\1', $params['theme']).']'); ?>).removeClass("wiziapp-plugin-theme-is-not-installed").addClass("wiziapp-plugin-theme-is-installed").removeClass("wiziapp-plugin-theme-is-need-update").addClass("wiziapp-plugin-theme-is-not-need-update")<?php
+				if ($has_license)
+				{
+?>.removeClass("wiziapp-plugin-theme-is-not-licensed").addClass("wiziapp-plugin-theme-is-licensed")<?php
+				}
+				else
+				{
+?>.removeClass("wiziapp-plugin-theme-is-licensed").addClass("wiziapp-plugin-theme-is-not-licensed")<?php
+				}
+?>;
 						}
 
+<?php
+				if ($has_license)
+				{
+?>
 						window.parent
 						.jQuery(".wiziapp-plugin-admin-settings-box-option[data-wiziapp-plugin-admin-option-id$=_theme] .wiziapp-plugin-admin-settings-box-value select, .wiziapp-plugin-admin-settings-box-themes-controls select")
 						.not(<?php echo json_encode(':has(option[value='.preg_replace('/([^0-9A-Za-z])/', '\\\\\\1', $params['theme']).'])'); ?>)
-						.append('<option value="<?php echo esc_attr($params['theme']); ?>"><?php echo esc_html($theme); ?></option>');
+						.append("<option value=\"<?php echo esc_attr($params['theme']); ?>\"><?php echo esc_html($theme); ?></option>");
 
 						jQuery(".donelink").click(function() {
 							if (window.parent && window.parent.tb_remove) {
 								window.parent.tb_remove();
 							}
 						});
+<?php
+				}
+				else
+				{
+?>
+						jQuery(".donelink").click(function(e) {
+							if (window.parent) {
+								e.preventDefault();
+								window.parent.location.href = jQuery(this).attr("href");
+							}
+						});
+<?php
+				}
+?>
 					</script>
 <?php
 				wp_ob_end_flush_all();
 				flush();
+
+				do_action( 'upgrader_process_complete', $upgrader, array( 'action' => 'install', 'type' => 'theme' ), $dladdress );
 			}
+			$skin->footer();
 		}
 
 		function _analytics($params)
 		{
-			return '/themes/'.((isset($params['theme_global']) && $params['theme_global'] === 'true')?'global':$params['theme']).'/purchased';
+			return '/themes/'.(((isset($params['theme_global']) && $params['theme_global'] === 'true') || $params['theme'] === 'global')?(($params['theme'] !== 'global')?$params['theme'].'/':'').'global':$params['theme']).'/purchased';
 		}
 
 		function loadAdmin()
@@ -247,6 +292,15 @@
 				$theme['packages'] = $packages;
 				$res[$key] = $theme;
 			}
+			$licenses = array();
+			foreach ($res as $theme)
+			{
+				if (isset($theme['name']) && isset($theme['license']))
+				{
+					$licenses[$theme['name']] = $theme['license'];
+				}
+			}
+			wiziapp_plugin_theme_licenses()->setThemeLicenses($licenses);
 			wiziapp_plugin_hook()->json_output(array_values($res));
 		}
 	}

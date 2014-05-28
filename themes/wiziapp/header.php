@@ -55,7 +55,7 @@
 		</script>
 <?php
 	}
-	if (wiziapp_theme_is_in_plugin() && wiziapp_plugin_settings()->getAdsenseClient() && wiziapp_plugin_settings()->getAdsenseSlot())
+	if (wiziapp_theme_is_in_plugin() && wiziapp_plugin_settings()->getAdsenseClient() && wiziapp_plugin_settings()->getAdsenseSlot() && !wiziapp_plugin_module_switcher()->getExtra('no_ads'))
 	{
 ?>
 		<script type="text/javascript">
@@ -83,6 +83,47 @@
 						(adsbygoogle = window.adsbygoogle || []).push({element: add.eq(1).find("ins").get(0)});
 					}
 					con = null;
+
+					page.one("pagehide", function() {
+						add.remove();
+					});
+				});
+			})(jQuery, document);
+
+			(function() {
+				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+				ga.src = document.location.protocol+'//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+			})();
+		</script>
+<?php
+	}
+	if (wiziapp_theme_is_in_plugin() && wiziapp_plugin_settings()->getAdFooter() && !wiziapp_plugin_module_switcher()->getExtra('no_ads'))
+	{
+?>
+		<script type="text/javascript">
+			(function($, d) {
+				var html = <?php
+					echo json_encode('<div><iframe src="'.esc_attr(wiziapp_plugin_settings()->getAdFooter()).'" width="320" height="50" style="display:block;width:320px;height:50px;margin:0 auto;border:none"></iframe></div>');
+				?>;
+				$(d).bind("pagebeforechange", function(e, data) {
+					if (!data.toPage || !data.toPage.is || !data.toPage.is("[data-role=page]")) {
+						return;
+					}
+					var page = data.toPage;
+					var add = $(html);
+					var footer = page.find("[data-role=footer]");
+					if (footer.length) {
+						footer.append(add);
+					}
+					else {
+						footer = $("<div data-role=\"footer\" data-id=\"footer\" data-position=\"fixed\" data-tap-toggle=\"false\" class=\"wiziapp-footer\"><\/div>")
+						page.append(footer);
+						footer.fixedtoolbar({tapToggle: false});
+						footer.append(add);
+						add = footer;
+					}
+					footer = null;
 
 					page.one("pagehide", function() {
 						add.remove();

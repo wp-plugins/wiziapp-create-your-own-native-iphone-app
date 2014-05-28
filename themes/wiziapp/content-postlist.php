@@ -5,6 +5,19 @@
 ?>
 <ul data-role="listview" class="wiziapp-content-list wiziapp-content-post-list">
 <?php
+		$terms_query = get_query_var('wiziapp_theme_sub_terms');
+		if (is_object($terms_query) && $terms_query->haveTerms())
+		{
+			switch ($terms_query->getType())
+			{
+				case 'category':
+					get_template_part('list', 'categorylist');
+					break;
+				default:
+					get_template_part('list', 'taglist');
+					break;
+			}
+		}
 		$featured = (wiziapp_theme_settings()->getPostListDisplayFeatured() && is_home() && !is_paged())?'wiziapp-post-featured':'wiziapp-post-not-featured';
 		$back_data = wiziapp_theme_settings()->getWiziappBack();
 		while (have_posts())

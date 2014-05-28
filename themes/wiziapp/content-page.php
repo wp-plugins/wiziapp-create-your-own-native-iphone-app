@@ -30,4 +30,5 @@
 	the_content();
 	wp_link_pages( array( 'before' => '<div>' . __('Pages:', 'wiziapp-smooth-touch'), 'after' => '</div>' ) );
 ?>
+		<div class="wiziapp-page-content-end"></div>
 	</div>

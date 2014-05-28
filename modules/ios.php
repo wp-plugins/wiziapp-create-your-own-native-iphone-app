@@ -61,7 +61,30 @@
 			$nonce = 'install-plugin_wiziapp-ios-app';
 			$siteurl = trailingslashit(get_bloginfo('wpurl'));
 			$upgrader = new Plugin_Upgrader($skin = new Plugin_Installer_Skin(array('type' => 'web', 'title' => __('Installing WiziApp iOS plugin', 'wiziapp-plugin'), 'url' => $siteurl.'wp-admin/admin.php?wiziapp_plugin=install_ios', 'nonce' => $nonce, 'plugin' => array('name' => 'WiziApp iOS', 'slug' => 'wiziapp-ios-app', 'source' => $api->download_link), 'api' => $api)));
-			$upgrader->install($api->download_link);
+
+			$upgrader->init();
+			$upgrader->install_strings();
+
+			add_filter('upgrader_source_selection', array($upgrader, 'check_package') );
+
+			$upgrader->run( array(
+				'package' => $api->download_link,
+				'destination' => WP_PLUGIN_DIR,
+				'clear_destination' => true,
+				'clear_working' => true,
+				'hook_extra' => array(
+					'type' => 'plugin',
+					'action' => 'install',
+				)
+			) );
+
+			remove_filter('upgrader_source_selection', array($upgrader, 'check_package') );
+
+			if ( $upgrader->result && !is_wp_error($upgrader->result) )
+			{
+				// Force refresh of plugin update information
+				wp_clean_plugins_cache(true);
+			}
 			wp_cache_flush();
 ?>
 			</div>

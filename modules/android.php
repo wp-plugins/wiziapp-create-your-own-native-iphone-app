@@ -85,7 +85,7 @@
 				}
 				return false;
 			}
-			return array('theme' => wiziapp_plugin_settings()->getAndroidTheme(), 'menu' => wiziapp_plugin_settings()->getAndroidMenu());
+			return array('theme' => wiziapp_plugin_settings()->getAndroidTheme(), 'menu' => wiziapp_plugin_settings()->getAndroidMenu(), 'extras' => array('no_ads' => true));
 		}
 
 		function build()

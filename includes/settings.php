@@ -430,9 +430,43 @@
 			$this->_save();
 		}
 
-		function getAdsenseClient()
+		function setAdAccess($allowed)
 		{
 			$this->_load();
+			$this->options['ads']['access'] = $allowed;
+			$this->_save();
+		}
+
+		function getAdFooter($ignore_access = false)
+		{
+			$this->_load();
+			if ($ignore_access || $this->options['ads']['access'])
+			{
+				return $this->options['ads']['footer_url'];
+			}
+			if (get_stylesheet() !== 'wiziapp')
+			{
+				return '';
+			}
+			require(dirname(dirname(__FILE__)).'/config.php');
+			$siteurl = trailingslashit(get_bloginfo('wpurl'));
+			return $wiziapp_plugin_config['build_host'].'/ads/display?url='.urlencode($siteurl);
+		}
+
+		function setAdFooter($url)
+		{
+			$this->_load();
+			$this->options['ads']['footer_url'] = $url;
+			$this->_save();
+		}
+
+		function getAdsenseClient($ignore_access = false)
+		{
+			$this->_load();
+			if (!$ignore_access && !$this->options['ads']['access'])
+			{
+				return '';
+			}
 			return $this->options['adsense']['client'];
 		}
 
@@ -443,9 +477,13 @@
 			$this->_save();
 		}
 
-		function getAdsenseSlot()
+		function getAdsenseSlot($ignore_access = false)
 		{
 			$this->_load();
+			if (!$ignore_access && !$this->options['ads']['access'])
+			{
+				return '';
+			}
 			return $this->options['adsense']['slot'];
 		}
 
@@ -456,9 +494,13 @@
 			$this->_save();
 		}
 
-		function getAdIFrameUrl()
+		function getAdIFrameUrl($ignore_access = false)
 		{
 			$this->_load();
+			if (!$ignore_access && !$this->options['ads']['access'])
+			{
+				return '';
+			}
 			return $this->options['ad_iframe']['url'];
 		}
 
@@ -603,6 +645,10 @@
 							'active' => true,
 							'theme' => 'wiziapp',
 							'menu' => $menu_id
+						),
+						'ads' => array(
+							'access' => false,
+							'footer_url' => ''
 						),
 						'adsense' => array(
 							'client' => '',

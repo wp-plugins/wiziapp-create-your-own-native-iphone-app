@@ -141,7 +141,7 @@
 
 		$(".gallery br:not(:last)", e.target).remove();
 
-		$("iframe", e.target).addClass("wiziapp-video").wrap("<div class=\"wiziapp-video-wrapper\">");
+		$(".wiziapp-post-content iframe:not(.wiziapp-no-wrap), .wiziapp-page-content iframe:not(.wiziapp-no-wrap)", e.target).addClass("wiziapp-video").wrap("<div class=\"wiziapp-video-wrapper\">");
 
 		$.mobile.loading({
 			html: '<span class="ui-icon ui-icon-loading"></span><div class="wiziapp-menu-links"><p>Wordpress mobile theme by <a class="ui-link" data-rel="external" target="_blank" href="http://www.wiziapp.com/">WiziApp</a></p></div>',

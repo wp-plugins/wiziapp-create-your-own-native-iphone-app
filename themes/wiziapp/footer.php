@@ -40,7 +40,7 @@
 <?php
 		if (wiziapp_theme_is_in_plugin())
 		{
-			foreach (wiziapp_plugin_module_switcher()->getExtraLinks() as $title => $link)
+			foreach (wiziapp_plugin_module_switcher()->getExtra('links', array()) as $title => $link)
 			{
 ?>
 					<p>

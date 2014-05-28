@@ -16,6 +16,7 @@
 
 		function load()
 		{
+			add_action('transition_post_status', array(&$this, 'transition_post_status'), 10, 3);
 			if (!isset($_GET['wiziapp_plugin']) || $_GET['wiziapp_plugin'] !== 'setup_push' || !isset($_GET['wiziapp_plugin_token']) || !isset($_GET['wiziapp_plugin_service']))
 			{
 				return;
@@ -60,30 +61,24 @@
 
 		public function save_push_message($post_id, $post)
 		{
-			if (wp_is_post_revision($post_id))
+			if (!isset($_POST['wiziapp_plugin_push_message']) || wp_is_post_revision($post_id))
 			{
 				// The Post is a revision
 				return;
 			}
 
-			$push_message = isset($_POST['wiziapp_plugin_push_message']) ? $_POST['wiziapp_plugin_push_message'] : '';
-			if ( function_exists('mb_strlen') )
+			$push_message = $_POST['wiziapp_plugin_push_message'];
+			$len = function_exists('mb_strlen')?mb_strlen($push_message):strlen($push_message);
+			if ($len > $this->max_length)
 			{
-				if (mb_strlen($push_message) < $this->min_length || mb_strlen($push_message) > $this->max_length)
-				{
-					return;
-				}
+				return;
 			}
-			else
+			if ($len < $this->min_length)
 			{
-				if (strlen($push_message) < $this->min_length || strlen($push_message) > $this->max_length)
-				{
-					return;
-				}
+				$push_message = '';
 			}
 
 			$is_send_wiziapp_plugin_push = (isset($_POST['is_send_wiziapp_plugin_push']) && $_POST['is_send_wiziapp_plugin_push'] === '1') ? 'true' : 'false';
-
 
 			update_post_meta( $post_id, 'wiziapp_plugin_push_message', $push_message );
 			update_post_meta( $post_id, 'is_send_wiziapp_plugin_push', $is_send_wiziapp_plugin_push );

@@ -10,6 +10,7 @@
 		private $install_title_callback;
 		private $extra_params;
 		private $extra_details;
+		private $balance_callback;
 
 		function hook($type, $api_root, $success_callback, $success_analytics_callback, $install_title_callback = false, $extra_params = array(), $extra_details = array())
 		{
@@ -20,6 +21,7 @@
 			$this->install_title_callback = $install_title_callback;
 			$this->extra_params = $extra_params;
 			$this->extra_details = $extra_details;
+			$this->balance_callback = false;
 			add_action('load-admin.php', array(&$this, 'load'));
 			wiziapp_plugin_hook()->hookLoadAdmin(array(&$this, 'loadAdmin'));
 			if ($GLOBALS['pagenow'] != 'admin.php' || isset($_GET['page']) || !isset($_GET['wiziapp_plugin']) || !in_array($_GET['wiziapp_plugin'], array($this->type.'_license', $this->type.'_license_cancelled', $this->type.'_license_error')))
@@ -27,6 +29,11 @@
 				return;
 			}
 			add_filter('wp_admin_bar_class', array(&$this, '_wp_admin_bar_class'));
+		}
+
+		function hookBalance($balance_callback)
+		{
+			$this->balance_callback = $balance_callback;
 		}
 
 		function load()
@@ -237,6 +244,10 @@
 				{
 					$balance = $res;
 				}
+			}
+			if ($this->balance_callback !== false)
+			{
+				call_user_func($this->balance_callback, $balance);
 			}
 			wiziapp_plugin_hook()->json_output($balance);
 		}
