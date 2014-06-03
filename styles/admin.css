@@ -488,29 +488,51 @@ div.wiziapp-plugin-admin-settings-box-value-state-active {
 	display: none;
 }
 
+#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-settings-box-body {
+	background: url("../images/icon-ads-buy.png") 20px center no-repeat #FFF;
+}
+
 #wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-description {
-	background: url("../images/icon-ads-buy.png") left center no-repeat;
-	padding-left: 40px;
+	padding: 1em 0;
+	margin-left: 50px;
 	float: left;
-	font-size: 18px;
-	line-height: 60px;
+	font-size: 16px;
+	width: 440px;
 }
 
 #wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-price {
-	float: left;
-	margin: 0;
+	margin: 15px 0 0 500px;
 	text-align: center;
-	width: 150px;
-	line-height: 60px;
+	width: 250px;
+	line-height: 30px;
 }
 
 #wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing {
-	float: left;
+	margin-left: 500px;
 	width: 250px;
+}
+
+#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-settings-button {
+	background: none;
+	box-shadow: none;
+}
+
+#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-settings-button a {
+	padding: 0 20px 10px 0;
+	width: auto;
+	font-size: 16px;
+	color: #00F !important;
+}
+
+#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-settings-button span {
+	background-image: url("../images/arrow-blue.png");
+	top: 0px;
+	right: 80px;
 }
 
 #wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-license {
 	margin-left: 0;
+	clear: none;
 }
 
 #wiziapp-plugin-admin-rate-box {

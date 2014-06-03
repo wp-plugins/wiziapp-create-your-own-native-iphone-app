@@ -348,7 +348,7 @@
 <div id="wiziapp-plugin-admin-settings-box-monetization-body-buy" class="wiziapp-plugin-admin-settings-box">
 	<div class="wiziapp-plugin-admin-settings-box-body">
 		<div class="wiziapp-plugin-admin-state-buy-billing-description">
-			<?php _e('Remove ads / Take over the ad space', 'wiziapp-plugin') ?>
+			<?php _e('We sometimes display advertisements on your WiziApp powered mobile site to help pay the bills. This keeps free features free! To eliminate ads entirely / Take over the Ad Space, you can puchase this item', 'wiziapp-plugin') ?>
 		</div>
 		<div class="wiziapp-plugin-admin-state-buy-billing-price">
 			<span class="wiziapp-plugin-admin-state-buy-billing-price-amount"></span><span class="wiziapp-plugin-admin-state-buy-billing-price-duration"><?php _e('/Year', 'wiziapp-plugin') ?></span>

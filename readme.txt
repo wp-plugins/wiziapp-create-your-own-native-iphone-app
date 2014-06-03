@@ -3,36 +3,25 @@ Contributors: wiziapp
 Tags: mobile theme, Android, HTML5, iphone, mobile, mobile app, smartphones, web app, webapp, wptouch, mobile themes, woocommerce mobile, buddypress mobile, android app, iphone app, adaptive theme, responsive theme
 Requires at least: 3.3
 Tested up to: 3.8.1
-Stable tag: 3.1.1
+Stable tag: 3.1.2
 License: GPLv2
 
 Choose your dedicated mobile Theme, Create your own Native Android and iPhone Apps (Woocommerce & BuddyPress compatible)
 
 == Description ==
 
-= Move to a adaptive mobile Theme =
+= Mobile dedicate Theme =
 
-Don't settle for a responsive theme, get a real mobile theme for your Wordpress site with the most advanced mobile user experience. You can choose your adaptive mobile theme from our new themes directory and keep your desktop theme intact.
+Don't settle for a responsive theme, get a real mobile theme for your WordPress site with the most advanced mobile user experience. You can choose your adaptive mobile theme from our new themes directory and keep your desktop theme intact.
 
-= Create Native iPhone & Android mobile Apps =
-You can create your own Native Android & iPhone App & publish it to the Google Play Store and to the Apple Appstore. Notify your readers about new content by sending push notifications directly to their mobile devices.
+= Create your own Native iPhone & Android Apps =
+You can create your own Native Android & iPhone Apps & publish it to the Google Play Store and to the Apple Appstore.
 
-= Why adaptive mobile theme is the right choice? =
+- Notify your readers about new content by sending push notifications directly to their mobile devices.
+- Use Admob ads for mobile to monetize your Native Apps.
+- Publish your Apps to Google Play Store & Apple App Store.
 
-- Adaptive mobile theme enables you to deliver the best possible user experience to the widest possible audience. This means that functionalities can be catered for in the most user friendly way, depending on the particular device being used to access your website.
-- Adaptive mobile themes are designed to respond and adapt to different screen sizes using responsive techniques, and to adapt to different User requirements based on different device capabilities.
-- With adaptive mobile delivery, the server hosting the website detects the devices making requests to it, and uses this information to deliver different batches of HTML and CSS code based on the characteristics of the device that have been detected.
-- Keep your desktop theme intact
-
-= Why responsive theme is not enough? =
-
-- Apart from screen size it doesn't consider other device characteristics (e.g. device functionality).
-- Responsive web design is focuses just with helping visitors to read a website in a more comfortable way on a smartphone or tablet.
-- Responsive is a solution to get your website to look fine on different screen sizes.
-- Due to its nature, responsive web design inevitably puts the focus on achieving a layout and design that "fits" rather than on what content needs to be there and how it will be used.
-- You have to use the same theme both on mobile and desktop.
-
-= Adaptive Mobile Themes - main features: =
+= Mobile dedicate Themes - main features: =
 
 - Enable your mobile users to access your mobile site from their mobile device's browser and enjoy an advanced mobile App user experience.
 - Your users can easily read and post new comments directly from your mobile Apps.
@@ -51,11 +40,20 @@ You can create your own Native Android & iPhone App & publish it to the Google P
 - Compatible with Woocommerce powered shop.
 - Compatible with BuddyPress
 
-= Native Apps - features: =
+= Why adaptive mobile theme is the right choice? =
 
-- Notify your readers about new content by sending push notifications directly to their mobile devices.
-- Use Admob ads for mobile to monetize your Native Apps.
-- Publish your Apps to Google Play Store & Apple App Store.
+- Adaptive mobile theme enables you to deliver the best possible user experience to the widest possible audience. This means that functionalities can be catered for in the most user friendly way, depending on the particular device being used to access your website.
+- Adaptive mobile themes are designed to respond and adapt to different screen sizes using responsive techniques, and to adapt to different User requirements based on different device capabilities.
+- With adaptive mobile delivery, the server hosting the website detects the devices making requests to it, and uses this information to deliver different batches of HTML and CSS code based on the characteristics of the device that have been detected.
+- Keep your desktop theme intact
+
+= Why responsive theme is not enough? =
+
+- Apart from screen size it doesn't consider other device characteristics (e.g. device functionality).
+- Responsive web design is focuses just with helping visitors to read a website in a more comfortable way on a smartphone or tablet.
+- Responsive is a solution to get your website to look fine on different screen sizes.
+- Due to its nature, responsive web design inevitably puts the focus on achieving a layout and design that "fits" rather than on what content needs to be there and how it will be used.
+- You have to use the same theme both on mobile and desktop.
 
 == Installation ==
 
@@ -496,6 +494,13 @@ BuddyPress Pages
 - BuddyPress Delete account Wordpress page
 
 == Changelog ==
+
+= 3.1.2 =
+
+- Subcategories supports
+- Support for scheduled posts push notifications
+- Android App icons resolution updated
+- WP supercached extended support
 
 = 3.1.1 =
 

@@ -68,6 +68,9 @@
 					if (!data.toPage || !data.toPage.is || !data.toPage.is("[data-role=page]")) {
 						return;
 					}
+					if (data.options && data.options.fromPage && data.options.fromPage.is && data.options.fromPage.is(data.toPage)) {
+						return;
+					}
 					var page = data.toPage;
 					var add = $(html).add(html);
 					$("google_persistent_state google_persistent_state_async".split(" ")).each(function() {
@@ -108,6 +111,9 @@
 				?>;
 				$(d).bind("pagebeforechange", function(e, data) {
 					if (!data.toPage || !data.toPage.is || !data.toPage.is("[data-role=page]")) {
+						return;
+					}
+					if (data.options && data.options.fromPage && data.options.fromPage.is && data.options.fromPage.is(data.toPage)) {
 						return;
 					}
 					var page = data.toPage;

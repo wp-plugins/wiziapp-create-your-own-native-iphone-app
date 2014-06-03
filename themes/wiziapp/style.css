@@ -70,6 +70,10 @@ input.ui-btn-hidden {
 	background-size: 46px 46px;
 }
 
+.wiziapp-footer {
+	background: #fff;
+}
+
 .wiziapp-header {
 	border: 1px solid #333;
 	background: #111111;

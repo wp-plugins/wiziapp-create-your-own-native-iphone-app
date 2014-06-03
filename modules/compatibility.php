@@ -6,6 +6,7 @@
 		function init()
 		{
 			add_filter('cached_mobile_browsers', array(&$this, 'cached_mobile_browsers'));
+			wiziapp_plugin_hook()->hookInstall(array(&$this, 'checkWPSuperCache'));
 			wiziapp_plugin_hook()->hookInstall(array(&$this, 'checkW3TotalCache'));
 			wiziapp_plugin_hook()->hookInstall(array(&$this, 'checkQuickCache'));
 		}
@@ -28,6 +29,15 @@
 			$mobile_browsers[] = '72dcc186a8d3d7b3d8554a14256389a4';
 
 			return $mobile_browsers;
+		}
+
+		function checkWPSuperCache() {
+			if (!function_exists('wp_cache_replace_line')) {
+				return;
+			}
+			global $wp_cache_config_file, $wp_cache_mobile_enabled;
+			$wp_cache_mobile_enabled = 1;
+			wp_cache_replace_line('^ *\$wp_cache_mobile_enabled', "\$wp_cache_mobile_enabled = 1;", $wp_cache_config_file);
 		}
 
 		function checkW3TotalCache() {
