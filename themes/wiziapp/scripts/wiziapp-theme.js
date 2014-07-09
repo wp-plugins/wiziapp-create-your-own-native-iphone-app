@@ -187,7 +187,9 @@
 		if (url === $page.attr("id")) {
 			url = "#" + url;
 		}
-		stack.push({url: url, type: type});
+		if (stack.length < 1 || url !== stack[stack.length-1].url) {
+			stack.push({url: url, type: type});
+		}
 		if ($back.length < 1 || stack.length < 2){
 			var data = $back.data("wiziapp-back-button-original");
 			if (data){

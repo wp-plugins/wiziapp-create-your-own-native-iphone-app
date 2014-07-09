@@ -122,13 +122,48 @@
 		<script type="text/javascript">
 			jQuery(function() {
 				(function($, d, c) {
+					function deep_compare(a, b) {
+						if (a === b) {
+							return true;
+						}
+						if (typeof a !== typeof b) {
+							return false;
+						}
+						if (typeof a === typeof []) {
+							if (a.length !== b.length) {
+								return false;
+							}
+							for (var i = a.length; i > 0; ) {
+								i--;
+								if (!deep_compare(a[i], b[i])) {
+									return false;
+								}
+							}
+							return true;
+						}
+						if (typeof a === typeof {}) {
+							var i;
+							for (i in a) {
+								if (!deep_compare(a[i], b[i])) {
+									return false;
+								}
+							}
+							for (i in b) {
+								if (!(i in a)) {
+									return false;
+								}
+							}
+							return true;
+						}
+						return false;
+					}
 					c.bind("change", function() {
 						var reload = false;
 						if ($.mobile.ajaxEnabled) {
 							$(d.body).unbind("click.preview submit.preview");
 						}
 						c.each(function(value, key) {
-							if (value.get() != c.settings.values[key])
+							if (!deep_compare(value.get(), c.settings.values[key]))
 							{
 								c.settings.values[key] = value.get();
 								reload = true;
@@ -143,21 +178,19 @@
 							});
 						}
 					});
-					if ($.mobile.ajaxEnabled) {
-						$(d).bind("pagebeforeload", function(e, data) {
-							data.options.type = "post";
-							data.options.data = $.extend(data.options.data || {},
-								{
-									wp_customize: "on",
-									theme: <?php echo json_encode(get_stylesheet()); ?>,
-									customized: JSON.stringify(c.settings.values),
-									customize_messenger_channel: c.settings.channel,
-									nonce: <?php echo json_encode(wp_create_nonce('preview-customize_'.get_stylesheet())); ?>
+					$(d).bind("pagebeforeload", function(e, data) {
+						data.options.type = "post";
+						data.options.data = $.extend(data.options.data || {},
+							{
+								wp_customize: "on",
+								theme: <?php echo json_encode(get_stylesheet()); ?>,
+								customized: JSON.stringify(c.settings.values),
+								customize_messenger_channel: c.settings.channel,
+								nonce: <?php echo json_encode(wp_create_nonce('preview-customize_'.get_stylesheet())); ?>
 
-								}
-							);
-						});
-					}
+							}
+						);
+					});
 				})(jQuery, document, wp.customize);
 			});
 		</script>

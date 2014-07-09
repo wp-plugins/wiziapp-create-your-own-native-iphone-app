@@ -676,7 +676,6 @@
 			<li class="wiziapp-plugin-admin-state-buy-feature-create"><?php _e('Create your own Native iPhone &amp; iPad Apps', 'wiziapp-plugin') ?></li>
 			<li class="wiziapp-plugin-admin-state-buy-feature-appstore"><?php _e('Publish your App to Apple AppStore', 'wiziapp-plugin') ?></li>
 			<li class="wiziapp-plugin-admin-state-buy-feature-push"><?php _e('Unlimited push notification', 'wiziapp-plugin') ?></li>
-			<li class="wiziapp-plugin-admin-state-buy-feature-themes"><?php _e('7 stunning premium themes', 'wiziapp-plugin') ?></li>
 		</ul>
 	</div>
 	<div class="wiziapp-plugin-admin-state-buy-billing">

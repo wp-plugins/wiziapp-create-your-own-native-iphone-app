@@ -1,5 +1,15 @@
 			</div>
 <?php
+	if (wiziapp_theme_is_in_plugin() && wiziapp_plugin_settings()->getAdFooter() && !wiziapp_plugin_module_switcher()->getExtra('no_ads'))
+	{
+?>
+			<div data-role="footer" data-id="footer" data-position="fixed" data-tap-toggle="false" class="wiziapp-footer">
+				<div>
+					<iframe src="<?php echo esc_attr(wiziapp_plugin_settings()->getAdFooter()); ?>" width="320" height="50" style="display:block;width:320px;height:50px;margin:0 auto;border:none"></iframe>
+				</div>
+			</div>
+<?php
+	}
 	switch (wiziapp_theme_settings()->getMenuType())
 	{
 		case 'popup':

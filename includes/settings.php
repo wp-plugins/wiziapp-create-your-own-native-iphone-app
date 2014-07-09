@@ -450,7 +450,22 @@
 			}
 			require(dirname(dirname(__FILE__)).'/config.php');
 			$siteurl = trailingslashit(get_bloginfo('wpurl'));
-			return $wiziapp_plugin_config['build_host'].'/ads/display?url='.urlencode($siteurl);
+			$post_url = '';
+			if (is_single())
+			{
+				$post = get_queried_object_id();
+				$tags = array();
+				$posttags = get_the_tags($post);
+				if ($posttags)
+				{
+					foreach($posttags as $tag)
+					{
+						$tags[] = $tag->name;
+					}
+				}
+				$post_url = '&post_url='.urlencode(get_permalink($post)).'&post_tags='.urlencode(implode(',', $tags));
+			}
+			return $wiziapp_plugin_config['build_host'].'/ads/display?url='.urlencode($siteurl).$post_url;
 		}
 
 		function setAdFooter($url)
