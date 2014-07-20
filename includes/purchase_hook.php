@@ -225,18 +225,20 @@
 		function license_balance()
 		{
 			$balance = array('count' => 0, 'remaining' => 0);
-			$params = '';
+			$params = array();
+			$params_str = '';
 			foreach ($this->extra_params as $key)
 			{
 				if (!isset($_POST[$key]) || !is_string($_POST[$key]))
 				{
 					wiziapp_plugin_hook()->json_output($balance);
 				}
-				$params .= '&'.$key.'='.urlencode($_POST[$key]);
+				$params[$key] = $_POST[$key];
+				$params_str .= '&'.$key.'='.urlencode($_POST[$key]);
 			}
 			require(dirname(dirname(__FILE__)).'/config.php');
 			$siteurl = trailingslashit(get_bloginfo('wpurl'));
-			$response = wp_remote_get($wiziapp_plugin_config['build_host'].$this->api_root.'/license/balance?url='.urlencode($siteurl).$params);
+			$response = wp_remote_get($wiziapp_plugin_config['build_host'].$this->api_root.'/license/balance?url='.urlencode($siteurl).$params_str);
 			if (!is_wp_error($response))
 			{
 				$res = json_decode($response['body'], true);
@@ -247,7 +249,7 @@
 			}
 			if ($this->balance_callback !== false)
 			{
-				call_user_func($this->balance_callback, $balance);
+				call_user_func($this->balance_callback, $balance, $params);
 			}
 			wiziapp_plugin_hook()->json_output($balance);
 		}

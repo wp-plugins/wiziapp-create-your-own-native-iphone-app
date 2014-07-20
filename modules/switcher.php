@@ -53,7 +53,7 @@
 					continue;
 				}
 				$this->_hook_root();
-				if (!($parent = $this->_theme_get_parent($theme['theme'])) || !wiziapp_plugin_theme_licenses()->hasThemeLicense($theme['theme']))
+				if (!($parent = $this->_theme_get_parent($theme['theme'])))
 				{
 					continue;
 				}

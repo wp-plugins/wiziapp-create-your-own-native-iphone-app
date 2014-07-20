@@ -113,10 +113,7 @@
 					}
 					break;
 				case 'webapp_theme':
-					if (wiziapp_plugin_theme_licenses()->hasThemeLicense($_POST['value']))
-					{
-						wiziapp_plugin_settings()->setWebappTheme($_POST['value']);
-					}
+					wiziapp_plugin_settings()->setWebappTheme($_POST['value']);
 					break;
 				case 'webapp_icon':
 					$succ = wiziapp_plugin_settings()->setWebappIcon($_POST['value']);
@@ -131,10 +128,7 @@
 					wiziapp_plugin_settings()->setAndroidActive($_POST['value'] === 'true');
 					break;
 				case 'android_theme':
-					if (wiziapp_plugin_theme_licenses()->hasThemeLicense($_POST['value']))
-					{
-						wiziapp_plugin_settings()->setAndroidTheme($_POST['value']);
-					}
+					wiziapp_plugin_settings()->setAndroidTheme($_POST['value']);
 					break;
 				case 'android_icon':
 					wiziapp_plugin_settings()->setAndroidNeedBuild(true);
@@ -302,13 +296,6 @@
 			wiziapp_plugin_settings()->setAutocommit(false);
 			$admin_base = function_exists('admin_url')?admin_url():(trailingslashit(get_bloginfo('wpurl')).'wp-admin/');
 			$themes = wiziapp_plugin_module_switcher()->get_themes();
-			foreach ($themes as $key => $theme)
-			{
-				if (!wiziapp_plugin_theme_licenses()->hasThemeLicense($key))
-				{
-					unset($themes[$key]);
-				}
-			}
 			// Double check existence of configured themes
 			if (isset($themes['wiziapp']))	// This should always be true. But better safe than sorry
 			{
@@ -348,7 +335,7 @@
 <div id="wiziapp-plugin-admin-settings-box-monetization-body-buy" class="wiziapp-plugin-admin-settings-box">
 	<div class="wiziapp-plugin-admin-settings-box-body">
 		<div class="wiziapp-plugin-admin-state-buy-billing-description">
-			<?php _e('We sometimes display advertisements on your WiziApp powered mobile site to help pay the bills. This keeps free features free! To eliminate ads entirely / Take over the Ad Space, you can puchase this item', 'wiziapp-plugin') ?>
+			<?php _e('We sometimes display advertisements on your WiziApp powered mobile site to help pay the bills. This keeps free features free! To eliminate ads entirely / Take over the Ad Space, you can purchase this item', 'wiziapp-plugin') ?>
 		</div>
 		<div class="wiziapp-plugin-admin-state-buy-billing-price">
 			<span class="wiziapp-plugin-admin-state-buy-billing-price-amount"></span><span class="wiziapp-plugin-admin-state-buy-billing-price-duration"><?php _e('/Year', 'wiziapp-plugin') ?></span>
@@ -409,7 +396,7 @@
 	</div>
 </div>
 <div class="wiziapp-plugin-admin-settings-box-themes-description">
-	<h3><?php _e('Mobile Adaptive Themes Directory', 'wiziapp-plugin') ?></h3>
+	<h3><?php _e('Free Mobile Themes Directory', 'wiziapp-plugin') ?></h3>
 	<ul class="wiziapp-plugin-admin-features">
 		<li><?php _e('7 stunning mobile dedicated themes', 'wiziapp-plugin') ?></li>
 		<li><?php _e('Advanced customization options', 'wiziapp-plugin') ?></li>
@@ -1229,7 +1216,7 @@
 			foreach ( $themes as $key => $theme )
 			{
 ?>
-						<div class="available-theme <?php echo ($key === $active_theme)?'is-active-theme':'is-not-active-theme'; ?> wiziapp-plugin-theme-is-installed <?php echo wiziapp_plugin_theme_licenses()->hasThemeLicense($key)?'wiziapp-plugin-theme-is-licensed':'wiziapp-plugin-theme-is-not-licensed'; ?> wiziapp-plugin-theme-is-not-need-update wiziapp-plugin-theme-is-price-unknown" data-wiziapp-plugin-admin-theme="<?php echo esc_attr($key); ?>">
+						<div class="available-theme <?php echo ($key === $active_theme)?'is-active-theme':'is-not-active-theme'; ?> wiziapp-plugin-theme-is-installed wiziapp-plugin-theme-is-licensed wiziapp-plugin-theme-is-not-need-update wiziapp-plugin-theme-is-price-unknown" data-wiziapp-plugin-admin-theme="<?php echo esc_attr($key); ?>">
 <?php
 				$template    = $theme['Template'];
 				$stylesheet  = $theme['Stylesheet'];

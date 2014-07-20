@@ -4,7 +4,7 @@
 	* Plugin Name: Wiziapp
 	* Description: Create your own free HTML5 mobile App for iPhone, Android and WP8 users. Publish your App as a native App to the App Store and Google Play Market!
 	* Author: WiziApp Solutions Ltd.
-	* Version: 3.1.3
+	* Version: 3.2.0
 	* Author URI: http://www.wiziapp.com/
 	*/
 

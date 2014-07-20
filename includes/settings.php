@@ -1,5 +1,6 @@
 <?php
 	require_once(dirname(__FILE__).'/hook.php');
+	require_once(dirname(__FILE__).'/theme_licenses.php');
 	require_once(dirname(dirname(__FILE__)).'/modules/pages.php');
 
 	class WiziappPluginSettings
@@ -440,13 +441,9 @@
 		function getAdFooter($ignore_access = false)
 		{
 			$this->_load();
-			if ($ignore_access || $this->options['ads']['access'])
+			if ($ignore_access || $this->_hasAdAccess())
 			{
 				return $this->options['ads']['footer_url'];
-			}
-			if (get_stylesheet() !== 'wiziapp')
-			{
-				return '';
 			}
 			require(dirname(dirname(__FILE__)).'/config.php');
 			$siteurl = trailingslashit(get_bloginfo('wpurl'));
@@ -478,7 +475,7 @@
 		function getAdsenseClient($ignore_access = false)
 		{
 			$this->_load();
-			if (!$ignore_access && !$this->options['ads']['access'])
+			if (!$ignore_access && !$this->_hasAdAccess())
 			{
 				return '';
 			}
@@ -495,7 +492,7 @@
 		function getAdsenseSlot($ignore_access = false)
 		{
 			$this->_load();
-			if (!$ignore_access && !$this->options['ads']['access'])
+			if (!$ignore_access && !$this->_hasAdAccess())
 			{
 				return '';
 			}
@@ -512,7 +509,7 @@
 		function getAdIFrameUrl($ignore_access = false)
 		{
 			$this->_load();
-			if (!$ignore_access && !$this->options['ads']['access'])
+			if (!$ignore_access && !$this->_hasAdAccess())
 			{
 				return '';
 			}
@@ -550,6 +547,12 @@
 			$this->_load();
 			$this->options['ad_iframe']['height'] = $value;
 			$this->_save();
+		}
+
+		function _hasAdAccess()
+		{
+			$stylesheet = get_stylesheet();
+			return $this->options['ads']['access'] || ($stylesheet !== 'wiziapp' && wiziapp_plugin_theme_licenses()->hasThemeLicense($stylesheet));
 		}
 
 		function _load()

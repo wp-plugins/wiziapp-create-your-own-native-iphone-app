@@ -3,7 +3,7 @@ Contributors: wiziapp
 Tags: mobile theme, Android, HTML5, iphone, mobile, mobile app, smartphones, web app, webapp, wptouch, mobile themes, woocommerce mobile, buddypress mobile, android app, iphone app, adaptive theme, responsive theme
 Requires at least: 3.3
 Tested up to: 3.8.1
-Stable tag: 3.1.3
+Stable tag: 3.2.0
 License: GPLv2
 
 Choose your dedicated mobile Theme, Create your own Native Android and iPhone Apps (Woocommerce & BuddyPress compatible)
@@ -15,30 +15,31 @@ Choose your dedicated mobile Theme, Create your own Native Android and iPhone Ap
 Don't settle for a responsive theme, get a real mobile theme for your WordPress site with the most advanced mobile user experience. You can choose your adaptive mobile theme from our new themes directory and keep your desktop theme intact.
 
 = Create your own Native iPhone & Android Apps =
+
 You can create your own Native Android & iPhone Apps & publish it to the Google Play Store and to the Apple Appstore.
 
 - Notify your readers about new content by sending push notifications directly to their mobile devices.
 - Use Admob ads for mobile to monetize your Native Apps.
 - Publish your Apps to Google Play Store & Apple App Store.
 
-= Mobile dedicate Themes - main features: =
+= Main features: =
 
 - Enable your mobile users to access your mobile site from their mobile device's browser and enjoy an advanced mobile App user experience.
 - Your users can easily read and post new comments directly from your mobile Apps.
 - Display your images and galleries in a mobile native App style.
 - Playing video and audio using mobile players.
-- Your readers can easily Search your content directly from your mobile iPhone App.
+- Your readers can easily search your content directly from your mobile iPhone App.
 - Support multiple languages.
 - Use Adsense ads for mobile to monetize your Apps.
-
-= Premium Theme's - features: =
-
-- Branding Free.
 - App's Header Customization.
 - Colors Customization.
 - Edit CSS.
 - Compatible with Woocommerce powered shop.
 - Compatible with BuddyPress
+
+= Ads removal module =
+
+We sometimes display advertisements on your WiziApp powered mobile site to help pay the bills. This keeps all features & themes free! To eliminate ads entirely / Take over the Ad Space, you can purchase the Ads removal module.
 
 = Why adaptive mobile theme is the right choice? =
 
@@ -494,6 +495,18 @@ BuddyPress Pages
 - BuddyPress Delete account Wordpress page
 
 == Changelog ==
+
+= 3.2.0 =
+
+- 7 stunning free mobile themes
+- App's Header Customization
+- Colors Customization
+- Edit CSS
+- Click to call button
+- Get direction button
+- Image slider
+- Call to action button
+- Bug fixes & performance improvement
 
 = 3.1.3 =
 

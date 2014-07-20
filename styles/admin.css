@@ -484,7 +484,7 @@ div.wiziapp-plugin-admin-settings-box-value-state-active {
 	display: block;
 }
 
-#wiziapp-plugin-admin-settings-box-monetization, #wiziapp-plugin-admin-settings-box-monetization-body-buy {
+#wiziapp-plugin-admin-settings-box-monetization-body-buy {
 	display: none;
 }
 
