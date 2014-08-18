@@ -3,7 +3,7 @@ Contributors: wiziapp
 Tags: mobile theme, Android, HTML5, iphone, mobile, mobile app, smartphones, web app, webapp, wptouch, mobile themes, woocommerce mobile, buddypress mobile, android app, iphone app, adaptive theme, responsive theme, uppsite
 Requires at least: 3.3
 Tested up to: 3.8.1
-Stable tag: 3.2.0
+Stable tag: 3.2.1
 License: GPLv2
 
 Choose your dedicated mobile Theme, Create your own Native Android and iPhone Apps (Woocommerce & BuddyPress compatible)
@@ -138,22 +138,23 @@ In most cases, the App will be available in the Appstore within 1 to 2 weeks, de
 How long does it take for my mobile native Android App to become available on the Google Play Android market?
 The Android App should be available on the Google Play Android Market within 1-2 business days.
 
-= What are the main features of WiziApp free webapp? =
+= What are the main features of the WiziApp plugin? =
 - Enable your mobile users to access your mobile site from their mobile device's browser and enjoy an advanced mobile App user experience.
 - Your users can easily read and post new comments directly from your mobile Apps.
 - Display your images and galleries in a mobile native App style.
 - Playing video and audio using mobile players.
-- Your readers can easily Search your content directly from your mobile iPhone App.
+- Your readers can easily search your content directly from your mobile iPhone App.
 - Support multiple languages.
 - Use Adsense ads for mobile to monetize your Apps.
-
-= What are the Premium Theme's Features? =
-- Branding Free.
 - App's Header Customization.
 - Colors Customization.
 - Edit CSS.
 - Compatible with Woocommerce powered shop.
 - Compatible with BuddyPress
+
+= Do you display ads on the mobile webapp free version? =
+
+We sometimes display advertisements on your WiziApp powered mobile site to help pay the bills. This keeps all features & themes free! To eliminate ads entirely / Take over the Ad Space, you can purchase the Ads removal module.
 
 = What are the native mobile Apps Features? =
 - Notify your readers about new content by sending push notifications directly to their mobile devices.
@@ -495,6 +496,11 @@ BuddyPress Pages
 - BuddyPress Delete account Wordpress page
 
 == Changelog ==
+
+= 3.2.1 =
+
+- MetroTouch customized icons are now supported.
+- Bug fixes and performance improvement.
 
 = 3.2.0 =
 

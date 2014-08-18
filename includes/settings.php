@@ -153,6 +153,19 @@
 			$this->_save();
 		}
 
+		function getAndroidExpiration()
+		{
+			$this->_load();
+			return $this->options['android']['expiration'];
+		}
+
+		function setAndroidExpiration($expiration)
+		{
+			$this->_load();
+			$this->options['android']['expiration'] = $expiration;
+			$this->_save();
+		}
+
 		function getAndroidActive()
 		{
 			$this->_load();
@@ -431,10 +444,16 @@
 			$this->_save();
 		}
 
-		function setAdAccess($allowed)
+		function getAdExpiration()
 		{
 			$this->_load();
-			$this->options['ads']['access'] = $allowed;
+			return $this->options['ads']['access'];
+		}
+
+		function setAdExpiration($expiration)
+		{
+			$this->_load();
+			$this->options['ads']['access'] = $expiration;
 			$this->_save();
 		}
 
@@ -552,7 +571,7 @@
 		function _hasAdAccess()
 		{
 			$stylesheet = get_stylesheet();
-			return $this->options['ads']['access'] || ($stylesheet !== 'wiziapp' && wiziapp_plugin_theme_licenses()->hasThemeLicense($stylesheet));
+			return ($this->options['ads']['access'] !== false && $this->options['ads']['access'] > date('Y-m-d\\TH:i:s')) || ($stylesheet !== 'wiziapp' && wiziapp_plugin_theme_licenses()->hasThemeLicense($stylesheet));
 		}
 
 		function _load()
@@ -639,6 +658,7 @@
 							'menu' => $menu_id
 						),
 						'android' => array(
+							'expiration' => true,
 							'active' => true,
 							'theme' => 'wiziapp',
 							'icon' => false,

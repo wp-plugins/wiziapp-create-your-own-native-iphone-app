@@ -72,6 +72,7 @@
 
 		function json_output($output)
 		{
+			header('Content-Type: text/json');
 			echo json_encode($output);
 			ob_start(array(&$this, '_clean'));
 			exit;

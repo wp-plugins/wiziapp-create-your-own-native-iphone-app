@@ -11,6 +11,7 @@
 		private $extra_params;
 		private $extra_details;
 		private $balance_callback;
+		private $expiration_callback;
 
 		function hook($type, $api_root, $success_callback, $success_analytics_callback, $install_title_callback = false, $extra_params = array(), $extra_details = array())
 		{
@@ -22,6 +23,7 @@
 			$this->extra_params = $extra_params;
 			$this->extra_details = $extra_details;
 			$this->balance_callback = false;
+			$this->expiration_callback = false;
 			add_action('load-admin.php', array(&$this, 'load'));
 			wiziapp_plugin_hook()->hookLoadAdmin(array(&$this, 'loadAdmin'));
 			if ($GLOBALS['pagenow'] != 'admin.php' || isset($_GET['page']) || !isset($_GET['wiziapp_plugin']) || !in_array($_GET['wiziapp_plugin'], array($this->type.'_license', $this->type.'_license_cancelled', $this->type.'_license_error')))
@@ -34,6 +36,11 @@
 		function hookBalance($balance_callback)
 		{
 			$this->balance_callback = $balance_callback;
+		}
+
+		function hookExpiration($expiration_callback)
+		{
+			$this->expiration_callback = $expiration_callback;
 		}
 
 		function load()
@@ -141,6 +148,7 @@
 			add_action('wp_ajax_wiziapp_plugin_'.$this->type.'_buy', array(&$this, 'buy'));
 			add_action('wp_ajax_wiziapp_plugin_'.$this->type.'_license', array(&$this, 'license'));
 			add_action('wp_ajax_wiziapp_plugin_'.$this->type.'_license_balance', array(&$this, 'license_balance'));
+			add_action('wp_ajax_wiziapp_plugin_'.$this->type.'_license_expiration', array(&$this, 'license_expiration'));
 			add_action('wp_ajax_wiziapp_plugin_hash_to_url', array(&$this, 'hash_to_url'));
 			if ($this->install_title_callback !== false)
 			{
@@ -249,9 +257,41 @@
 			}
 			if ($this->balance_callback !== false)
 			{
-				call_user_func($this->balance_callback, $balance, $params);
+				$balance = call_user_func($this->balance_callback, $balance, $params);
 			}
 			wiziapp_plugin_hook()->json_output($balance);
+		}
+
+		function license_expiration()
+		{
+			$expiration = array('expiration' => false);
+			$params = array();
+			$params_str = '';
+			foreach ($this->extra_params as $key)
+			{
+				if (!isset($_POST[$key]) || !is_string($_POST[$key]))
+				{
+					wiziapp_plugin_hook()->json_output($expiration);
+				}
+				$params[$key] = $_POST[$key];
+				$params_str .= '&'.$key.'='.urlencode($_POST[$key]);
+			}
+			require(dirname(dirname(__FILE__)).'/config.php');
+			$siteurl = trailingslashit(get_bloginfo('wpurl'));
+			$response = wp_remote_get($wiziapp_plugin_config['build_host'].$this->api_root.'/license/expiration?url='.urlencode($siteurl).$params_str);
+			if (!is_wp_error($response))
+			{
+				$res = json_decode($response['body'], true);
+				if (is_array($res) && isset($res['expiration']))
+				{
+					$expiration = $res;
+				}
+			}
+			if ($this->expiration_callback !== false)
+			{
+				$expiration = call_user_func($this->expiration_callback, $expiration, $params);
+			}
+			wiziapp_plugin_hook()->json_output($expiration);
 		}
 
 		function install()

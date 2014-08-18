@@ -516,6 +516,21 @@
 				),
 				'items' => array(
 					array(
+						'id' => 'android_license',
+						'type' => 'state',
+						'label' => __('License Valid Until', 'wiziapp-plugin'),
+						'value' => 'licensed',
+						'states' => array(
+							'licensed' => array(
+								'content' => ''
+							)
+						),
+						'extra' => array(
+							'type' => 'button',
+							'label' => __('Extend', 'wiziapp-plugin')
+						)
+					),
+					array(
 						'id' => 'android_active',
 						'type' => 'switch',
 						'label' => __('Activate Android App', 'wiziapp-plugin'),
@@ -748,6 +763,21 @@
 				'id' => 'monetization',
 				'title' => __('Ad space', 'wiziapp-plugin'),
 				'items' => array(
+					array(
+						'id' => 'monetization_license',
+						'type' => 'state',
+						'label' => __('License Valid Until', 'wiziapp-plugin'),
+						'value' => 'licensed',
+						'states' => array(
+							'licensed' => array(
+								'content' => ''
+							)
+						),
+						'extra' => array(
+							'type' => 'button',
+							'label' => __('Extend', 'wiziapp-plugin')
+						)
+					),
 					array(
 						'id' => 'ad_footer_url',
 						'type' => 'text',
@@ -1447,7 +1477,7 @@
 ?>
 		<div class="error fade">
 			<p style="line-height: 150%">
-				<?php echo str_replace('{}', esc_attr($admin_base.'admin.php?page=wiziapp-plugin-settings'), __('In order to configure your mobile themes and Apps, go to the “WiziApp” admin page on the WordPress admin sidebar, or <a href="{}">click here</a>.')); ?>
+				<?php echo str_replace('{}', esc_attr($admin_base.'admin.php?page=wiziapp-plugin-settings'), __('In order to configure your mobile themes and Apps, go to the “WiziApp” admin page on the WordPress admin sidebar, or <a href="{}">click here</a>.', 'wiziapp-plugin')); ?>
 			</p>
 		</div>
 <?php

@@ -560,6 +560,11 @@ div.wiziapp-plugin-admin-settings-box-value-state-active {
 	width: 241px;
 }
 
+#wiziapp-plugin-admin-settings-box-option-android_license-state-licensed, #wiziapp-plugin-admin-settings-box-option-monetization_license-state-licensed {
+	float: left;
+	margin-right: 10px;
+}
+
 #wiziapp-plugin-admin-settings-box-option-android_app-state-need-build input, #wiziapp-plugin-admin-settings-box-option-android_app-state-download a {
 	float: left;
 	text-decoration: none;

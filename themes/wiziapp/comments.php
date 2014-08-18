@@ -58,13 +58,6 @@
 		// TODO - Display if no comments are available
 	}
 ?>
-	<li>
-		<div class="wiziapp-menu-links">
-			<p>
-				Wordpress mobile theme by <a class="ui-link" data-rel="external" target="_blank" href="http://www.wiziapp.com/">WiziApp</a>
-			</p>
-		</div>
-	</li>
 </ul>
 
 <?php

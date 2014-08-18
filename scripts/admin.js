@@ -586,13 +586,15 @@
 			tb_show(args.title, "#TB_inline?width=800&height=600&inlineId=wiziapp-plugin-admin-license");
 		}
 
-		$("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-state-buy-billing-buy a").click(function(event) {
+		$("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-state-buy-billing-buy a, .wiziapp-plugin-admin-settings-box-option[data-wiziapp-plugin-admin-option-id=android_license] .wiziapp-plugin-admin-settings-box-value-button input").click(function(event) {
 			event.preventDefault();
+
+			var title = $("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-state-buy-billing-buy a").attr("title");
 
 			popup_billing({
 				trackPage: "/android",
-				title: $(this).attr("title"),
-				product: $(this).attr("title"),
+				title: title,
+				product: title,
 				price: $("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-state-buy-billing-price-amount").text()+"/year",
 				actionParams: {
 					action: "wiziapp_plugin_build_android_buy",
@@ -614,14 +616,17 @@
 		if ($("#wiziapp-plugin-admin-settings-box-android-body-loading").is(".wiziapp-plugin-admin-settings-box-body-active"))
 		{
 			post_ajax({
-				action: "wiziapp_plugin_build_android_license_balance"
+				action: "wiziapp_plugin_build_android_license_expiration"
 			}, function(data) {
 				$("#wiziapp-plugin-admin-settings-box-android-body-loading").removeClass("wiziapp-plugin-admin-settings-box-body-active");
-				if (data && data.count && data.count > 0) {
+				if (data && data.packages && data.packages[0] && data.packages[0].price) {
+					$("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-state-buy-billing-price-amount").text("$"+data.packages[0].price);
+				}
+				if (data && data.expiration !== false && new Date(data.expiration)-new Date() > 0) {
+					$("#wiziapp-plugin-admin-settings-box-option-android_license-state-licensed").text(new Date(data.expiration).toString());
 					$("#wiziapp-plugin-admin-settings-box-android-body").addClass("wiziapp-plugin-admin-settings-box-body-active");
 				}
-				else if (data.packages && data.packages[0] && data.packages[0].price) {
-					$("#wiziapp-plugin-admin-settings-box-android-body-buy .wiziapp-plugin-admin-state-buy-billing-price-amount").text("$"+data.packages[0].price);
+				else {
 					$("#wiziapp-plugin-admin-settings-box-android-body-buy").addClass("wiziapp-plugin-admin-settings-box-body-active");
 				}
 			});
@@ -669,13 +674,15 @@
 			});
 		}
 
-		$("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-buy a").click(function(event) {
+		$("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-buy a, .wiziapp-plugin-admin-settings-box-option[data-wiziapp-plugin-admin-option-id=monetization_license] .wiziapp-plugin-admin-settings-box-value-button input").click(function(event) {
 			event.preventDefault();
+
+			var title = $("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-buy a").attr("title");
 
 			popup_billing({
 				trackPage: "/monetization",
-				title: $(this).attr("title"),
-				product: $(this).attr("title"),
+				title: title,
+				product: title,
 				price: $("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-price-amount").text()+"/year",
 				actionParams: {
 					action: "wiziapp_plugin_ads_buy",
@@ -694,25 +701,19 @@
 			});
 		});
 
+		$("#wiziapp-plugin-admin-settings-box-monetization .wiziapp-plugin-admin-settings-box-option[data-wiziapp-plugin-admin-option-id=monetization_license]").hide();
 		post_ajax({
-			action: "wiziapp_plugin_ads_license_balance"
+			action: "wiziapp_plugin_ads_license_expiration"
 		}, function(data) {
-			if (data && data.count && data.count > 0) {
-				$("#wiziapp-plugin-admin-settings-box-monetization").show();
+			if (data && data.packages && data.packages[0] && data.packages[0].price) {
+				$("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-price-amount").text("$"+data.packages[0].price);
+			}
+			if (data && data.expiration !== false && new Date(data.expiration)-new Date() > 0) {
+				$("#wiziapp-plugin-admin-settings-box-option-monetization_license-state-licensed").text(new Date(data.expiration).toString());
+				$("#wiziapp-plugin-admin-settings-box-monetization .wiziapp-plugin-admin-settings-box-option[data-wiziapp-plugin-admin-option-id=monetization_license]").show();
 			}
 			else {
-				post_ajax({
-					action: "wiziapp_plugin_theme_license_balance",
-					theme: "global"
-				}, function(gdata) {
-					if (gdata && gdata.count && gdata.count > 0) {
-						$("#wiziapp-plugin-admin-settings-box-monetization").show();
-					}
-					else if (data && data.packages && data.packages[0] && data.packages[0].price) {
-						$("#wiziapp-plugin-admin-settings-box-monetization-body-buy .wiziapp-plugin-admin-state-buy-billing-price-amount").text("$"+data.packages[0].price);
-						$("#wiziapp-plugin-admin-settings-box-monetization-body-buy").show();
-					}
-				});
+				$("#wiziapp-plugin-admin-settings-box-monetization-body-buy").show();
 			}
 		});
 

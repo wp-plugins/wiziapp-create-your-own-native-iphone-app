@@ -10,6 +10,7 @@
 		{
 			$hook = new WiziappPluginPurchaseHook();
 			$hook->hook('build_android', '/build/android', array(&$this, '_licensed'), array(&$this, '_analytics'));
+			$hook->hookExpiration(array(&$this, '_expiration'));
 			wiziapp_plugin_module_switcher()->hookGetTheme(array($this, 'getTheme'));
 			wiziapp_plugin_hook()->hookLoad(array(&$this, 'load'));
 			wiziapp_plugin_hook()->hookLoadAdmin(array(&$this, 'loadAdmin'));
@@ -47,11 +48,22 @@
 
 		function _licensed()
 		{
+			require(dirname(dirname(__FILE__)).'/config.php');
+			$siteurl = trailingslashit(get_bloginfo('wpurl'));
+			$response = wp_remote_get($wiziapp_plugin_config['build_host'].'/build/android/license/expiration?url='.urlencode($siteurl));
+			if (!is_wp_error($response))
+			{
+				$res = json_decode($response['body'], true);
+				if (is_array($res) && isset($res['expiration']))
+				{
+					wiziapp_plugin_settings()->setAndroidExpiration($res['expiration']);
+?>
 ?>
 					<script type="text/javascript">
 						if (window.parent && window.parent.jQuery) {
 							window.parent.jQuery("#wiziapp-plugin-admin-settings-box-android-body-buy").removeClass("wiziapp-plugin-admin-settings-box-body-active");
 							window.parent.jQuery("#wiziapp-plugin-admin-settings-box-android-body").addClass("wiziapp-plugin-admin-settings-box-body-active");
+							window.parent.jQuery("#wiziapp-plugin-admin-settings-box-option-android_license-state-licensed").text(new Date(<?php echo json_encode($res['expiration']); ?>).toString());
 							window.parent.jQuery("#wiziapp-plugin-admin-settings-box-option-android_app-state-need-build.wiziapp-plugin-admin-settings-box-value-state-active input").click();
 						}
 						if (window.parent && window.parent.tb_remove) {
@@ -59,6 +71,14 @@
 						}
 					</script>
 <?php
+				}
+			}
+		}
+
+		function _expiration($expiration)
+		{
+			wiziapp_plugin_settings()->setAndroidExpiration($expiration['expiration']);
+			return $expiration;
 		}
 
 		function _analytics()
@@ -69,6 +89,26 @@
 		function loadAdmin()
 		{
 			add_action('wp_ajax_wiziapp_plugin_android_build', array(&$this, 'build_ajax'));
+			$expire = wiziapp_plugin_settings()->getAndroidExpiration();
+			if ($expire !== false)
+			{
+				$expire = strtotime($expire)-time();
+				if ($expire > 0 && $expire < 2592000)
+				{
+					add_action('admin_notices', array(&$this, '_expire_notice'));
+				}
+			}
+		}
+
+		function _expire_notice()
+		{
+?>
+		<div class="error fade">
+			<p style="line-height: 150%">
+				<?php _e('The WiziApp Android App license will expire in less than a month. To extend it for additional one year, please click the "Extend" button on the Wiziapp plugin - "Settings" - "Android App".', 'wiziapp-plugin'); ?>
+			</p>
+		</div>
+<?php
 		}
 
 		function getTheme()

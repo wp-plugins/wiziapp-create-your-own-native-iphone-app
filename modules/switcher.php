@@ -45,6 +45,12 @@
 					return;
 				}
 			}
+			if (isset($_GET['wiziapp_display']) && $_GET['wiziapp_display'] === 'none')
+			{
+				// Make sure the parameter survives implicit redirects
+				add_filter('query_vars', array(&$this, '_query_vars'));
+				return;
+			}
 			foreach ($this->hooks_get_theme as $cb)
 			{
 				$theme = call_user_func($cb);
@@ -361,6 +367,12 @@
 				$iframe = '<iframe class="wiziapp-no-wrap" style=\"border:none\" src="'.esc_attr(wiziapp_plugin_settings()->getAdIFrameUrl()).'" width="'.esc_attr(wiziapp_plugin_settings()->getAdIFrameWidth()).'" height="'.esc_attr(wiziapp_plugin_settings()->getAdIFrameHeight()).'"></iframe>';
 			}
 			return $iframe.$content.$iframe.$final;
+		}
+
+		function _query_vars($qvars)
+		{
+			$qvars[] = 'wiziapp_display';
+			return $qvars;
 		}
 	}
 

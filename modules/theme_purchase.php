@@ -10,7 +10,6 @@
 		{
 			$hook = new WiziappPluginPurchaseHook();
 			$hook->hook('theme', '/theme', array(&$this, '_install_theme'), array(&$this, '_analytics'), array(&$this, '_install_title'), array('theme'), array('theme_title', 'theme_global'));
-			$hook->hookBalance(array(&$this, '_balance'));
 			wiziapp_plugin_hook()->hookLoadAdmin(array(&$this, 'loadAdmin'));
 		}
 
@@ -178,14 +177,6 @@
 				do_action( 'upgrader_process_complete', $upgrader, array( 'action' => 'install', 'type' => 'theme' ), $dladdress );
 			}
 			$skin->footer();
-		}
-
-		function _balance($balance, $params)
-		{
-			if ($params['theme'] === 'global' && $balance['count'] > 0)
-			{
-				wiziapp_plugin_settings()->setAdAccess(true);
-			}
 		}
 
 		function _analytics($params)
