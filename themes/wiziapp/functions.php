@@ -51,7 +51,7 @@
 	{
 		load_theme_textdomain('wiziapp-smooth-touch', get_template_directory() . '/languages');
 
-		if (!wiziapp_theme_is_in_plugin())
+		if (!wiziapp_theme_is_in_plugin() || !isset($GLOBALS['pagenow']) || $GLOBALS['pagenow'] !== 'customize.php')
 		{
 			register_nav_menu('wiziapp_custom', 'The Wiziapp Menu');
 		}
