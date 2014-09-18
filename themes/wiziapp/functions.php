@@ -166,35 +166,32 @@
 					$more_link = get_pagenum_link($paged+1);
 					return array('wiziapp_theme_bookmarks' => $new_query, 'wiziapp_theme_more_link' => $more_link, 'wiziapp_theme_mainpage' => true);
 				case 'latest':
-					$order = isset($query_vars['order'])?$query_vars['order']:false;
-					$orderby = isset($query_vars['orderby'])?$query_vars['orderby']:false;
+					$order = isset($query_vars['order'])?array('order' => $query_vars['order']):array();
+					$orderby = isset($query_vars['orderby'])?array('orderby' => $query_vars['orderby']):array();
 					return array(
 						'post_type' => 'post',
 						'paged' => $paged,
-						'order' => $order,
-						'orderby' => $orderby,
 						'wiziapp_theme_mainpage' => true
-					);
+					)+$order+$orderby;
 				case 'pages':
-					$order = isset($query_vars['order'])?$query_vars['order']:false;
+					$order = isset($query_vars['order'])?array('order' => $query_vars['order']):array();
 					$orderby = isset($query_vars['orderby'])?$query_vars['orderby']:false;
 					if (!$orderby)
 					{
 						$orderby = 'name';
-						if (empty($order) || ((strtoupper($order) != 'ASC') && (strtoupper($order) != 'DESC')))
+						if (empty($order) || ((strtoupper($order['order']) != 'ASC') && (strtoupper($order['order']) != 'DESC')))
 						{
-							$order = 'ASC';
+							$order = array('order' => 'ASC');
 						}
 					}
 					return array(
 						'post_type' => 'page',
 						'post_parent' => 0,
 						'paged' => $paged,
-						'order' => $order,
 						'orderby' => $orderby,
 						'posts_per_page' => wiziapp_theme_settings()->getItemsPerPage(),
 						'wiziapp_theme_mainpage' => true
-					);
+					)+$order;
 				case 'categories':
 					$new_query = new WiziappThemeTaxonomyQuery();
 					$new_query->query(array('parent' => 0, 'terms_per_page' => wiziapp_theme_settings()->getItemsPerPage(), 'page' => $paged));
