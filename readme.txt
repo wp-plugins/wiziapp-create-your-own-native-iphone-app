@@ -497,6 +497,11 @@ BuddyPress Pages
 
 == Changelog ==
 
+= 3.2.5 =
+
+- Bug fixes
+- Wordpress 4.1 compatibility
+
 = 3.2.4 =
 
 - Bug fixes
