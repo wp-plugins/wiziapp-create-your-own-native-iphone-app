@@ -82,7 +82,7 @@
 
 		function update_settings()
 		{
-			if (!isset($_POST['name']) || !isset($_POST['value']))
+			if (!isset($_POST['name']) || !isset($_POST['value']) || !is_admin())
 			{
 				return;
 			}
@@ -211,6 +211,10 @@
 
 		function upgrade_dismiss()
 		{
+			if (!is_admin())
+			{
+				return;
+			}
 			/* Remove as many of the old plugin's settings as we can properly detect
 			 * Not done here:
 			 * Deleting the wp-uploads/wiziapp_data_files folder
