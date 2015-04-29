@@ -1,7 +1,8 @@
-#customize-preview {
+#customize-preview, #customize-preview.wp-full-overlay-main.iframe-ready {
 	background: url("../images/iphone.png") no-repeat scroll left top / 100% auto transparent;
 	margin: 0 auto;
 	width: 500px;
+	right: 0;
 	padding: 95px 0 0;
 	height: auto;
 }

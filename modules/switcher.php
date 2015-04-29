@@ -29,7 +29,7 @@
 
 		function load()
 		{
-			if (isset($GLOBALS['wp_customize']) && $GLOBALS['wp_customize']->doing_ajax())
+			if (isset($GLOBALS['wp_customize']))
 			{
 				$setting = new WP_Customize_Setting($GLOBALS['wp_customize'], 'wiziapp_plugin', array('default' => 'customize', 'type' => 'constant'));
 				if ($setting->post_value() === 'customize')

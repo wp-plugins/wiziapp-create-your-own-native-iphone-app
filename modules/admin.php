@@ -541,8 +541,8 @@
 					array(
 						'id' => 'android_active',
 						'type' => 'switch',
-						'label' => __('Activate Android App', 'wiziapp-plugin'),
-						// 'description' => __('Activate the Android App for users that access your website from smartphone&#39;s and Tablets/iPad browsers ', 'wiziapp-plugin'),
+						'label' => __('Activate Wiziapp Powered Theme', 'wiziapp-plugin'),
+						'description' => __('Deactivate to display your theme', 'wiziapp-plugin'),
 						'value' => wiziapp_plugin_settings()->getAndroidActive()
 					),
 					array(
